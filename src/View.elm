@@ -80,6 +80,8 @@ sideMenu : Model -> Html Msg
 sideMenu model =
     div [ class "side" ]
         [ panelMenu model
+        , panel model
+        , secondaryPanel model
         ]
 
 
@@ -121,6 +123,27 @@ tab title item model =
 build : Model -> Html Msg
 build model =
     p [ class "build-info" ] [ text model.build ]
+
+
+panel : Model -> Html Msg
+panel model =
+    case model of
+        _ ->
+            elementsPanel model
+
+
+elementsPanel : Model -> Html Msg
+elementsPanel model =
+    div
+        [ class "panel"
+        , class "elements-panel"
+        ]
+        [ h2 [] [ text "Elements" ] ]
+
+
+secondaryPanel : Model -> Html Msg
+secondaryPanel model =
+    div [ class "panel__secondary" ] []
 
 
 
