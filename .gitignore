@@ -1,0 +1,23 @@
+index.html
+shipBuilder/index-not-optimized.html
+0.19.0/package/versions.dat
+# elm-package generated files
+elm-stuff
+generated-code
+shipBuilder/js/elm.js
+shipBuilder/js/elm.min.js
+shipBuilder/*.json
+shipBuilder/index.template.json.html
+*.babel.js
+shipBuilder/index.html
+build-artifacts
+.elm-analyse
+elm-stuff/**/documentation.json
+# Artifacts
+*.zip
+# elm-verify-examples
+tests/Doc
+# Vim files
+*.swp
+# Disable elm remote package check
+.elm/0.18.0/package/last-updated

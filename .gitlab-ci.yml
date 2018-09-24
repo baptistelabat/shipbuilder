@@ -1,0 +1,90 @@
+stages:
+    - build
+    - babel
+    - inliner
+    - selenium
+    - deploy
+
+build-elm:
+    stage: build
+    script:
+     - make
+    artifacts:
+      paths:
+        - shipBuilder/index.html
+        - shipBuilder/css
+        - shipBuilder/assets
+        - shipBuilder/js
+
+build-babel:
+    stage: build
+    script:
+    - cd babel && make
+
+build-json:
+    stage: build
+    script:
+    - cd buildHull && make
+    artifacts:
+      paths:
+        - buildHull/anthineas.json
+        - buildHull/OPV.json
+        - buildHull/KCS.json
+        - buildHull/DTMB_5415.json
+
+build-js:
+    stage: build
+    script:
+    - cd rebuildHull && make
+    artifacts:
+      paths:
+        - rebuildHull/js/hull.js
+
+babel:
+    stage: babel
+    dependencies:
+    - build-elm
+    - build-json
+    script:
+    - make babel
+    artifacts:
+      paths:
+        - shipBuilder/index.html
+        - shipBuilder/css
+        - shipBuilder/assets
+        - shipBuilder/js
+
+pages:
+  stage: deploy
+  dependencies:
+     - selenium
+  script:
+       - mv shipBuilder/ public/
+  artifacts:
+        when: on_success
+        paths:
+        - public
+  only:
+      - master
+
+inliner:
+  stage: inlienr
+  dependencies:
+     - babel
+  script:
+       - make inline
+  artifacts:
+        when: on_success
+        paths:
+        - shipBuilder/index.html
+
+selenium:
+  stage: selenium
+  dependencies:
+     - inliner
+  script:
+       - make selenium
+  artifacts:
+        when: on_success
+        paths:
+        - shipBuilder/index.html

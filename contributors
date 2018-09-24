@@ -1,0 +1,12 @@
+Using:
+
+    git shortlog -s -n
+
+we can get the list of contributors to this project.
+
+Charles-Edouard CADY
+Bryan COLLE
+Alan GUEGAN 
+Guillaume JACQUENOT
+Michel PICARD 
+Quentin RATHIER
