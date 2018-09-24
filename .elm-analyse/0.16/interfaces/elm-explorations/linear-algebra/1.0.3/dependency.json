@@ -1,0 +1,422 @@
+{
+  "name": "elm-explorations/linear-algebra",
+  "version": "1.0.3",
+  "interfaces": [
+    {
+      "key": [
+        "Math",
+        "Matrix4"
+      ],
+      "value": [
+        {
+          "type": "type_",
+          "value": {
+            "name": "Mat4",
+            "constructors": []
+          }
+        },
+        {
+          "type": "function",
+          "value": "fromRecord"
+        },
+        {
+          "type": "function",
+          "value": "identity"
+        },
+        {
+          "type": "function",
+          "value": "inverse"
+        },
+        {
+          "type": "function",
+          "value": "inverseOrthonormal"
+        },
+        {
+          "type": "function",
+          "value": "makeBasis"
+        },
+        {
+          "type": "function",
+          "value": "makeFrustum"
+        },
+        {
+          "type": "function",
+          "value": "makeLookAt"
+        },
+        {
+          "type": "function",
+          "value": "makeOrtho"
+        },
+        {
+          "type": "function",
+          "value": "makeOrtho2D"
+        },
+        {
+          "type": "function",
+          "value": "makePerspective"
+        },
+        {
+          "type": "function",
+          "value": "makeRotate"
+        },
+        {
+          "type": "function",
+          "value": "makeScale"
+        },
+        {
+          "type": "function",
+          "value": "makeScale3"
+        },
+        {
+          "type": "function",
+          "value": "makeTranslate"
+        },
+        {
+          "type": "function",
+          "value": "makeTranslate3"
+        },
+        {
+          "type": "function",
+          "value": "mul"
+        },
+        {
+          "type": "function",
+          "value": "mulAffine"
+        },
+        {
+          "type": "function",
+          "value": "rotate"
+        },
+        {
+          "type": "function",
+          "value": "scale"
+        },
+        {
+          "type": "function",
+          "value": "scale3"
+        },
+        {
+          "type": "function",
+          "value": "toRecord"
+        },
+        {
+          "type": "function",
+          "value": "transform"
+        },
+        {
+          "type": "function",
+          "value": "translate"
+        },
+        {
+          "type": "function",
+          "value": "translate3"
+        },
+        {
+          "type": "function",
+          "value": "transpose"
+        }
+      ]
+    },
+    {
+      "key": [
+        "Math",
+        "Vector2"
+      ],
+      "value": [
+        {
+          "type": "type_",
+          "value": {
+            "name": "Vec2",
+            "constructors": []
+          }
+        },
+        {
+          "type": "function",
+          "value": "add"
+        },
+        {
+          "type": "function",
+          "value": "direction"
+        },
+        {
+          "type": "function",
+          "value": "distance"
+        },
+        {
+          "type": "function",
+          "value": "distanceSquared"
+        },
+        {
+          "type": "function",
+          "value": "dot"
+        },
+        {
+          "type": "function",
+          "value": "fromRecord"
+        },
+        {
+          "type": "function",
+          "value": "getX"
+        },
+        {
+          "type": "function",
+          "value": "getY"
+        },
+        {
+          "type": "function",
+          "value": "length"
+        },
+        {
+          "type": "function",
+          "value": "lengthSquared"
+        },
+        {
+          "type": "function",
+          "value": "negate"
+        },
+        {
+          "type": "function",
+          "value": "normalize"
+        },
+        {
+          "type": "function",
+          "value": "scale"
+        },
+        {
+          "type": "function",
+          "value": "setX"
+        },
+        {
+          "type": "function",
+          "value": "setY"
+        },
+        {
+          "type": "function",
+          "value": "sub"
+        },
+        {
+          "type": "function",
+          "value": "toRecord"
+        },
+        {
+          "type": "function",
+          "value": "vec2"
+        }
+      ]
+    },
+    {
+      "key": [
+        "Math",
+        "Vector3"
+      ],
+      "value": [
+        {
+          "type": "type_",
+          "value": {
+            "name": "Vec3",
+            "constructors": []
+          }
+        },
+        {
+          "type": "function",
+          "value": "add"
+        },
+        {
+          "type": "function",
+          "value": "cross"
+        },
+        {
+          "type": "function",
+          "value": "direction"
+        },
+        {
+          "type": "function",
+          "value": "distance"
+        },
+        {
+          "type": "function",
+          "value": "distanceSquared"
+        },
+        {
+          "type": "function",
+          "value": "dot"
+        },
+        {
+          "type": "function",
+          "value": "fromRecord"
+        },
+        {
+          "type": "function",
+          "value": "getX"
+        },
+        {
+          "type": "function",
+          "value": "getY"
+        },
+        {
+          "type": "function",
+          "value": "getZ"
+        },
+        {
+          "type": "function",
+          "value": "i"
+        },
+        {
+          "type": "function",
+          "value": "j"
+        },
+        {
+          "type": "function",
+          "value": "k"
+        },
+        {
+          "type": "function",
+          "value": "length"
+        },
+        {
+          "type": "function",
+          "value": "lengthSquared"
+        },
+        {
+          "type": "function",
+          "value": "negate"
+        },
+        {
+          "type": "function",
+          "value": "normalize"
+        },
+        {
+          "type": "function",
+          "value": "scale"
+        },
+        {
+          "type": "function",
+          "value": "setX"
+        },
+        {
+          "type": "function",
+          "value": "setY"
+        },
+        {
+          "type": "function",
+          "value": "setZ"
+        },
+        {
+          "type": "function",
+          "value": "sub"
+        },
+        {
+          "type": "function",
+          "value": "toRecord"
+        },
+        {
+          "type": "function",
+          "value": "vec3"
+        }
+      ]
+    },
+    {
+      "key": [
+        "Math",
+        "Vector4"
+      ],
+      "value": [
+        {
+          "type": "type_",
+          "value": {
+            "name": "Vec4",
+            "constructors": []
+          }
+        },
+        {
+          "type": "function",
+          "value": "add"
+        },
+        {
+          "type": "function",
+          "value": "direction"
+        },
+        {
+          "type": "function",
+          "value": "distance"
+        },
+        {
+          "type": "function",
+          "value": "distanceSquared"
+        },
+        {
+          "type": "function",
+          "value": "dot"
+        },
+        {
+          "type": "function",
+          "value": "fromRecord"
+        },
+        {
+          "type": "function",
+          "value": "getW"
+        },
+        {
+          "type": "function",
+          "value": "getX"
+        },
+        {
+          "type": "function",
+          "value": "getY"
+        },
+        {
+          "type": "function",
+          "value": "getZ"
+        },
+        {
+          "type": "function",
+          "value": "length"
+        },
+        {
+          "type": "function",
+          "value": "lengthSquared"
+        },
+        {
+          "type": "function",
+          "value": "negate"
+        },
+        {
+          "type": "function",
+          "value": "normalize"
+        },
+        {
+          "type": "function",
+          "value": "scale"
+        },
+        {
+          "type": "function",
+          "value": "setW"
+        },
+        {
+          "type": "function",
+          "value": "setX"
+        },
+        {
+          "type": "function",
+          "value": "setY"
+        },
+        {
+          "type": "function",
+          "value": "setZ"
+        },
+        {
+          "type": "function",
+          "value": "sub"
+        },
+        {
+          "type": "function",
+          "value": "toRecord"
+        },
+        {
+          "type": "function",
+          "value": "vec4"
+        }
+      ]
+    }
+  ]
+}

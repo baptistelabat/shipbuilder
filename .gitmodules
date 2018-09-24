@@ -1,0 +1,6 @@
+[submodule "inliner"]
+	path = inliner
+	url = ../../sirehna/inliner
+[submodule "selenium"]
+	path = selenium
+	url = ../../sirehna/selenium

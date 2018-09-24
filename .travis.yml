@@ -1,0 +1,40 @@
+sudo: required
+env:
+  global:
+    secure: eBqiHShY2QDAbd5dTCyzE2JYsIuDLGAwM6I/EckdtfcKaEDV/UQ86pIS+o/u0y3t/SWDZAzSgebBUURvQUYSweovaCP5WbUH9vRJZ05c3ow783m83QmS9pup/2GZygGiIHMXTEjA80h0q3vAEjSxQwmfX0nrInCuccaZEas+DYfWBLyUIZ5Ukpf94PxDh6qfiPoRGJGix1Rnn8w6Gbb65L4sRTzYes+zNLFq+K0jXheCXLk7xJS69T9oW26tHn2sDZjyannpsQFuskEvpuSGMHrqQJU8j8pikpTeT7sAEbUKlm0qmJEevXkaHxAXqAh30XpNBtsf9yVUd/h1LR51pv2YOUgDtj3wU92wX/sSSHoZ0OBQsKDcXG3Ui6SseL1Kj91Uv2QTsKeVZWpIhxCSFL9DhB++bFsgZ1d0SIQCa4UOlLY1f+1k77hn+YLWYZuN7VjIAoUwtREP8WrZZWZgyw9zcyl6SAfhAY3kVaZY+78KESh4BLZFr3P0qVa6v9pJWfSIn/gEf8SudebWT3Vh1GvvnYvvn+5GxathTTKvtEw6kWL66YsdKaIrD5Ac8VNjk336B5y6QdZMEXHup9z2zsSAL5xHzCZVTkKP+xBfvz84T9OqfX/rI/YyLYOr9ND8hJyG/z2//sdPW2rm6sdkG40g1P06NXjoWeLBzlKVP6I=
+services:
+- docker
+before_script:
+- git submodule sync --recursive
+- git submodule update --init --recursive
+script:
+- make
+- cd babel && make && cd ..
+- cd buildHull && make && cd ..
+- cd rebuildHull && make && cd ..
+- make babel
+- make inline
+- make selenium
+after_success:
+- |
+  echo "SUCCESS!"
+  echo "TRAVIS_BRANCH  $TRAVIS_BRANCH"
+  echo "TRAVIS_TAG     $TRAVIS_TAG"
+notifications: 
+email: true
+deploy:
+- provider: pages
+  skip-cleanup: true
+  local-dir: shipBuilder
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  on:
+    branch: master
+- provider: releases
+  api_key:
+    secure: a45wU3j4m0vHfF3x2Pq2S66y2upQQNB+eBZT2uvfic+yt3YcdMT3wN9WuA94JSJ684SJwJqg9023PimW117hI3lL8DVvpVIthU8v1n/594GpJBjWDoFoYE9xfn4rLNRMMlu2iv4uXak6fHJBOiFFlJVJY2jcJfokLU2tzwjfpzxVU3ULLGEr5KVDeo6azFsjE9KucaMbjjTmdmUo3WOvS89NEGSRkFCFq0VWYGSfJndx8DRN7kNanOAilwssrFpjOJDQQgHLTvWdZaiHoYcLY6d6phfQ9I80VZTh0wwC59X4Y06MrFW5+xb9qkc1bfKl56wY8qQJg+PeQUHdaOf98pQPtp9HJLJKEKBSA5JJ1jyQaRAoKw7m4byPsWXFBwqwZjbt5079P4sIlsKyrbwz3xnvA+bIsQ9tbjOZc7q3yfTlyWor2j1w7M3gnI8n85XlK2FRbVzHHVGKBVn5uoQHmU1eIfdnsYS+z/4Zdayv0A6y1tW8C6r2aZuoPGrR53PWcL8PzMOGffVG2BRFhW574EnTIVMmDqFsy/4+LoW6p9tcdT43km3a8WC77IlMbztb2GNAzMJdOoStUwLyUyZDleYM2AnZTvf61/zIB3ocAyB8N/RXH80jpn8qKPeX+px++o1YtP7eSZKQdX53LigP47cXq5X1DijnS7dWI9EgU9I=
+  file: shipBuilder/index.html
+  skip_cleanup: true
+  on:
+    repo: sirehna/shipbuilder
+    branch: master
