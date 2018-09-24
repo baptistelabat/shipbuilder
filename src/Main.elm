@@ -4,6 +4,7 @@ import Html exposing (beginnerProgram)
 import Message exposing (Msg)
 import Model exposing (init, Model)
 import View exposing (view)
+import Update exposing (update)
 
 
 main : Program Never Model Msg
@@ -13,10 +14,3 @@ main =
         , view = view
         , update = update
         }
-
-
-update : Msg -> Model -> Model
-update msg model =
-    case msg of
-        _ ->
-            model

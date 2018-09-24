@@ -1,4 +1,4 @@
-module Message exposing (..)
+module Message exposing (Msg(..))
 
 import Model exposing (Panel)
 

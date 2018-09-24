@@ -1,11 +1,12 @@
 module View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Message exposing (Msg)
-import Model exposing (Model)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Message exposing (Msg(..))
+import Model exposing (Model, Panel(..))
 
 
 type alias MenuItem =
@@ -78,11 +79,20 @@ headerMenuItem itemTitle item =
 
 sideMenu : Model -> Html Msg
 sideMenu model =
-    div [ class "side" ]
-        [ panelMenu model
-        , panel model
-        , secondaryPanel model
-        ]
+    div [ class "side" ] <|
+        List.concat [ [ panelMenu model ], getPanels model ]
+
+
+getPanels : Model -> List (Html Msg)
+getPanels model =
+    case model.panel of
+        ElementsPanel ->
+            [ elementsPanel model
+            , secondaryPanel model
+            ]
+
+        _ ->
+            [ defaultPanel model ]
 
 
 panelMenu : Model -> Html Msg
@@ -96,28 +106,56 @@ panelMenu model =
 tabs : Model -> Html Msg
 tabs model =
     let
-        getTab : MenuItem -> Html Msg
-        getTab ( title, item ) =
-            tab title item model
+        getTab : Tab -> Html Msg
+        getTab tabItem =
+            tab tabItem.title tabItem.item tabItem.target model
     in
         div [ class "tabs" ] <|
             List.map getTab tabItems
 
 
-tabItems : MenuItems
+type alias Tab =
+    { title : String
+    , item : Html Msg
+    , target : Panel
+    }
+
+
+type alias Tabs =
+    List Tab
+
+
+tabItems : Tabs
 tabItems =
-    [ ( "Eléments", FARegular.clone )
-    , ( "Images", FARegular.images )
-    , ( "Trame", FARegular.chart_bar )
+    [ { title = "Eléments", item = FARegular.clone, target = ElementsPanel }
+    , { title = "Images", item = FARegular.images, target = ImagesPanel }
+    , { title = "Trale", item = FARegular.chart_bar, target = GridPanel }
     ]
 
 
-tab : String -> Html Msg -> Model -> Html Msg
-tab title item model =
-    div [ class "tab-item" ]
-        [ item
-        , p [] [ text title ]
-        ]
+tab : String -> Html Msg -> Panel -> Model -> Html Msg
+tab title item panel model =
+    let
+        -- Check if active
+        active : Bool
+        active =
+            panel == model.panel
+
+        classes =
+            if active then
+                [ "tab-item", "active" ]
+            else
+                [ "tab-item" ]
+    in
+        div
+            (List.concat
+                [ (List.map class classes)
+                , [ onClick (SelectPanel panel) ]
+                ]
+            )
+            [ item
+            , p [] [ text title ]
+            ]
 
 
 build : Model -> Html Msg
@@ -127,9 +165,12 @@ build model =
 
 panel : Model -> Html Msg
 panel model =
-    case model of
-        _ ->
+    case model.panel of
+        ElementsPanel ->
             elementsPanel model
+
+        _ ->
+            defaultPanel model
 
 
 elementsPanel : Model -> Html Msg
@@ -139,6 +180,13 @@ elementsPanel model =
         , class "elements-panel"
         ]
         [ h2 [] [ text "Elements" ] ]
+
+
+defaultPanel : Model -> Html Msg
+defaultPanel model =
+    div
+        [ class "panel" ]
+        []
 
 
 secondaryPanel : Model -> Html Msg

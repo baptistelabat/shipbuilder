@@ -107,7 +107,7 @@ header .header-menu-item+.header-menu-item {
     height: 24px;
 }
 
-.tab-item:hover {
+.tab-item:hover, .tab-item.active {
     background-color: rgb(14, 107, 168);
 }
 
