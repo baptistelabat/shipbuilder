@@ -1,10 +1,9 @@
 module Main exposing (..)
 
-import Html exposing (..)
-
-
-type Msg
-    = NoOp
+import Html exposing (beginnerProgram)
+import Message exposing (Msg)
+import Model exposing (init, Model)
+import View exposing (view)
 
 
 main : Program Never Model Msg
@@ -16,24 +15,8 @@ main =
         }
 
 
-type alias Model =
-    { title : String
-    }
-
-
-init : Model
-init =
-    { title = "Projet 1"
-    }
-
-
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         _ ->
             model
-
-
-view : Model -> Html msg
-view model =
-    h1 [] [ text model.title ]
