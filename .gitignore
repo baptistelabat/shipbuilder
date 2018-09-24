@@ -1,0 +1,12 @@
+# elm-package generated files
+generated-code
+shipBuilder/js/elm.js
+build-artifacts
+# Artifacts
+*.zip
+# elm-verify-examples
+tests/Doc
+# Vim files
+*.swp
+# Disable elm remote package check
+.elm/0.18.0/package/last-updated

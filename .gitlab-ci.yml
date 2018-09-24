@@ -1,0 +1,29 @@
+stages:
+    - build
+    - deploy
+
+build:
+    stage: build
+    script:
+     - make
+    artifacts:
+      paths:
+        - shipBuilder/shipBuilder.html
+        - shipBuilder/css
+        - shipBuilder/img
+        - shipBuilder/js
+
+pages:
+  stage: deploy
+  dependencies:
+     - build
+  script:
+       - mv shipBuilder/ public/
+       - mv public/shipBuilder.html public/index.html
+       - rm -rf public/shipBuilder.html
+  artifacts:
+        when: on_success
+        paths:
+        - public
+  only:
+      - master
