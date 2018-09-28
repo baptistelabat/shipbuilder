@@ -1,3 +1,5 @@
+'use strict';
+
 let div = document.getElementById('elm-app');
 let app = Elm.Main.embed(div);
 
@@ -10,13 +12,34 @@ let renderer = null;
 let scene = null;
 
 app.ports.send.subscribe(function (message) {
+    const data = message.data;
     switch (message.tag) {
         case "init-viewports":
-            initThree(message.data);
+            initThree(data);
             break;
+        case "add-cube":
+            addCube()
         default:
     }
 })
+
+let addCube = function (width = 50, height = 50, depth = 50, x = 0, y = 0, z = 0, color = 0x5078ff) {
+    var cube = makeCube(width, height, depth, x, y, z, color);
+    scene.add(cube);
+}
+let makeCube = function (width, height, depth, x, y, z, color) {
+    var geometry = new THREE.BoxGeometry(width, height, depth);
+    geometry.translate(width / 2, height / 2, depth / 2);
+
+    var material = new THREE.MeshBasicMaterial({ color: color /*, opacity: 0.7*/ });
+    //material.transparent = true;
+
+    var cube = new THREE.Mesh(geometry, material);
+    cube.position.fromArray([x, y, z]);
+    cube.baseColor = color;
+    cube.geometryType = "cube";
+    return cube;
+}
 
 let initThree = function (viewsData) {
     window.addEventListener('resize', (window, event) => onResize(), false);
@@ -391,19 +414,7 @@ function initScene() {
     //scene.add(axesHelper);
 }
 
-function makeCube(width, height, depth, x, y, z, color) {
-    var geometry = new THREE.BoxGeometry(width, height, depth);
-    geometry.translate(width / 2, height / 2, depth / 2);
 
-    var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.7 });
-    material.transparent = true;
-
-    var cube = new THREE.Mesh(geometry, material);
-    cube.position.fromArray([x, y, z]);
-    cube.baseColor = color;
-    cube.geometryType = "cube";
-    return cube;
-}
 function addCube(width, height, depth, x = 0, y = 0, z = 0, color = 0x5078ff) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     meshes.push(cube);

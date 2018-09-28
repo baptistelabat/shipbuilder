@@ -214,6 +214,7 @@ bottomRightCornerViewport background viewport =
 type Msg
     = NoOp
     | SelectPanel Panel
+    | AddCube
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -221,6 +222,9 @@ update msg model =
     case msg of
         NoOp ->
             model ! []
+
+        AddCube ->
+            model ! [ sendToJs "add-cube" Encode.null ]
 
         SelectPanel panel ->
             { model | panel = panel } ! []
@@ -402,7 +406,9 @@ elementsPanel model =
         [ class "panel"
         , class "elements-panel"
         ]
-        [ h2 [] [ text "Elements" ] ]
+        [ h2 [] [ text "Elements" ]
+        , button [ onClick AddCube ] [ text "Add Cube" ]
+        ]
 
 
 defaultPanel : Model -> Html Msg
