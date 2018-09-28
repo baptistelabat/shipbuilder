@@ -32,10 +32,27 @@ let initThree = function (viewsData) {
     initRenderer();
     initScene();
     initCameras();
-    var gridHelper = new THREE.GridHelper(1000, 100);
+    initLabels();
+
+    var gridHelper = new THREE.GridHelper(100, 10);
     scene.add(gridHelper);
     animate();
 };
+
+let initLabels = function () {
+    var labels = document.getElementsByClassName("viewport-label");
+    for (var i = labels.length - 1; i >= 0; --i) {
+        labels[i].remove();
+    }
+
+    views.forEach(view => {
+        var label = document.createElement('div');
+        label.innerText = view.label;
+        label.classList.add("viewport-label");
+        label.style.top = 20 + view.top * wrapper.clientHeight + "px";
+        wrapper.appendChild(label);
+    });
+}
 
 let animate = function () {
     updateCameras(views, scene);
@@ -136,14 +153,12 @@ let fitRenderer = function (canvas) {
     }
 }
 
-
 let fitCanvas = function () {
     if (canvas) {
         canvas.width = wrapper.clientWidth;
         canvas.height = wrapper.clientHeight;
     }
 }
-
 
 let computeViewportSize = function (view, canvas) {
     view.clientWidth = Math.round(view.width * canvas.width);

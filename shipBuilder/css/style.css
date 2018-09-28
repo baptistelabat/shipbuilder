@@ -159,6 +159,16 @@ header .header-menu-item+.header-menu-item {
     flex: 1 1 auto;
 }
 
+.viewport-label {
+    position: absolute;
+    left: 20px;
+    font-size: 0.9em;
+    padding: 8px 12px;
+    color: hsl(210, 20%, 20%);
+    background-color: hsl(210, 20%, 80%);
+    border-radius: 8px;
+}
+
 #three-wrapper {
     /* Position relative because the canvas needs to be absolutely positionned to allow the wrapper to resize */
     position: relative;
