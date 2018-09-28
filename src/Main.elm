@@ -249,8 +249,11 @@ view model =
 header : Html Msg
 header =
     Html.header []
-        [ img [ src "img/SIREHNA_R.png" ] []
-        , h1 [] [ text "ShipBuilder" ]
+        [ div [ class "header-left" ]
+            -- groups img and title together for flexbox
+            [ img [ src "img/SIREHNA_R.png" ] []
+            , h1 [] [ text "ShipBuilder" ]
+            ]
         , headerMenu
         ]
 
