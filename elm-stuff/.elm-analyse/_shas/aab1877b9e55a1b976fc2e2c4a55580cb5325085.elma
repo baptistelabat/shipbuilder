@@ -1,6 +1,6 @@
-port module Main exposing (main, Viewports, Viewport, encodeViewport, encodeViewports)
+module Main exposing (main, Viewports)
 
-import Color exposing (Color, hsl)
+import Color exposing (Color)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
 import Html exposing (..)
@@ -8,23 +8,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Encode as Encode
 import Math.Vector3 exposing (Vec3, vec3, toRecord)
-
-
-port send : JsCommand -> Cmd msg
-
-
-type alias JsCommand =
-    { tag : String
-    , data : Encode.Value
-    }
-
-
-sendToJs : String -> Encode.Value -> Cmd msg
-sendToJs tag data =
-    send
-        { tag = tag
-        , data = data
-        }
 
 
 main : Program Never Model Msg
@@ -56,20 +39,19 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     let
-        viewports : Viewports
-        viewports =
-            [ topHalfViewport (hsl (degrees 210) 0.7 0.98) viewportSide
-            , bottomHalfViewport (hsl (degrees 210) 0.7 0.98) viewportTop
+    viewports: Viewports
+        viewports = [ topHalfViewport Color.lightYellow viewportSide
+            , bottomHalfViewport Color.lightBlue viewportTop
             ]
     in
-        ( { build = "0.0.1"
-          , panel = ElementsPanel
-          , viewports = viewports
-          }
-        , Cmd.batch
-            [ encodeViewports viewports |> sendToJs "init-viewports"
-            ]
-        )
+    
+    ( { build = "0.0.1"
+      , panel = ElementsPanel
+      , viewports =
+            
+      }
+    , sendViewports
+    )
 
 
 type Panel
@@ -249,8 +231,7 @@ view model =
 header : Html Msg
 header =
     Html.header []
-        [ img [ src "img/SIREHNA_R.png" ] []
-        , h1 [] [ text "ShipBuilder" ]
+        [ h1 [] [ text "ShipBuilder" ]
         , headerMenu
         ]
 
@@ -350,6 +331,8 @@ type alias Tabs =
 tabItems : Tabs
 tabItems =
     [ { title = "Eléments", item = FARegular.clone, target = ElementsPanel }
+    , { title = "Images", item = FARegular.images, target = GenericPanel }
+    , { title = "Trale", item = FARegular.chart_bar, target = GenericPanel }
     ]
 
 
@@ -411,7 +394,7 @@ defaultPanel model =
 
 secondaryPanel : Model -> Html Msg
 secondaryPanel model =
-    div [ class "panel panel__secondary" ] []
+    div [ class "panel__secondary" ] []
 
 
 
@@ -420,6 +403,4 @@ secondaryPanel model =
 
 workspace : Model -> Html Msg
 workspace model =
-    div [ class "workspace" ]
-        [ div [ id "three-wrapper" ] []
-        ]
+    div [ class "workspace" ] []

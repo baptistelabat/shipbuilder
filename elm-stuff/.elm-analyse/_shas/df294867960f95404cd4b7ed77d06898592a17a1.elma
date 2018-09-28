@@ -1,30 +1,13 @@
-port module Main exposing (main, Viewports, Viewport, encodeViewport, encodeViewports)
+module Main exposing (main, Viewports)
 
-import Color exposing (Color, hsl)
+import Color exposing (Color)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Json.Encode as Encode
-import Math.Vector3 exposing (Vec3, vec3, toRecord)
-
-
-port send : JsCommand -> Cmd msg
-
-
-type alias JsCommand =
-    { tag : String
-    , data : Encode.Value
-    }
-
-
-sendToJs : String -> Encode.Value -> Cmd msg
-sendToJs tag data =
-    send
-        { tag = tag
-        , data = data
-        }
+import Json.Encode
+import Math.Vector3 exposing (Vec3, vec3)
 
 
 main : Program Never Model Msg
@@ -55,21 +38,15 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        viewports : Viewports
-        viewports =
-            [ topHalfViewport (hsl (degrees 210) 0.7 0.98) viewportSide
-            , bottomHalfViewport (hsl (degrees 210) 0.7 0.98) viewportTop
+    ( { build = "0.0.1"
+      , panel = ElementsPanel
+      , viewports =
+            [ topHalfViewport Color.lightYellow viewportSide
+            , bottomHalfViewport Color.lightBlue viewportTop
             ]
-    in
-        ( { build = "0.0.1"
-          , panel = ElementsPanel
-          , viewports = viewports
-          }
-        , Cmd.batch
-            [ encodeViewports viewports |> sendToJs "init-viewports"
-            ]
-        )
+      }
+    , Cmd.none
+    )
 
 
 type Panel
@@ -96,75 +73,30 @@ type alias Viewport =
         -- between 0 and 1, ratio of the height between the viewport and the canvas
         Float
     , background : Color
-    , eye : Vec3
-    , canControl : { x : Bool, y : Bool, z : Bool }
+    , cameraPosition : Vec3
+    , canControl : ( Bool, Bool, Bool )
     }
 
 
-encodeViewports : Viewports -> Encode.Value
-encodeViewports viewports =
-    Encode.list <| List.map encodeViewport viewports
-
-
-encodeViewport : Viewport -> Encode.Value
+encodeViewport : Viewport -> Json.Encode.Value
 encodeViewport viewport =
-    Encode.object
-        [ ( "label", Encode.string viewport.label )
-        , ( "left", Encode.float viewport.left )
-        , ( "top", Encode.float viewport.top )
-        , ( "width", Encode.float viewport.width )
-        , ( "height", Encode.float viewport.height )
-        , ( "background", encodeColor viewport.background )
-        , ( "eye", encodeVector3 viewport.eye )
-        , ( "canControl", encodeCanControl viewport.canControl )
-        ]
+    Json.Encode.object
+        [ ( "label", Json.Encode.string viewport.label ) ]
 
 
-encodeColor : Color -> Encode.Value
-encodeColor color =
-    let
-        rgb : { red : Int, green : Int, blue : Int, alpha : Float }
-        rgb =
-            Color.toRgb color
-    in
-        Encode.object
-            [ ( "red", Encode.int rgb.red )
-            , ( "green", Encode.int rgb.green )
-            , ( "blue", Encode.int rgb.blue )
-            , ( "alpha", Encode.float rgb.alpha )
-            ]
-
-
-encodeVector3 : Vec3 -> Encode.Value
-encodeVector3 vector =
-    let
-        record =
-            toRecord vector
-    in
-        Encode.object
-            [ ( "x", Encode.float record.x )
-            , ( "y", Encode.float record.y )
-            , ( "z", Encode.float record.z )
-            ]
-
-
-encodeCanControl : { x : Bool, y : Bool, z : Bool } -> Encode.Value
-encodeCanControl canControl =
-    Encode.object
-        [ ( "x", Encode.bool canControl.x )
-        , ( "y", Encode.bool canControl.y )
-        , ( "z", Encode.bool canControl.z )
-        ]
+encodeViewports : Viewports -> Json.Encode.Value
+encodeViewports viewports =
+    Json.Encode.list <| List.map encodeViewport viewports
 
 
 viewportSide : Float -> Float -> Float -> Float -> Color -> Viewport
 viewportSide left top width height background =
-    Viewport "Side" left top width height background (vec3 0 0 1000) { x = True, y = True, z = False }
+    Viewport "Side" left top width height background (vec3 0 0 1000) ( True, True, False )
 
 
 viewportTop : Float -> Float -> Float -> Float -> Color -> Viewport
 viewportTop left top width height background =
-    Viewport "Top" left top width height background (vec3 0 1000 0) { x = True, y = False, z = True }
+    Viewport "Top" left top width height background (vec3 0 1000 0) ( True, False, True )
 
 
 topHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
@@ -249,8 +181,7 @@ view model =
 header : Html Msg
 header =
     Html.header []
-        [ img [ src "img/SIREHNA_R.png" ] []
-        , h1 [] [ text "ShipBuilder" ]
+        [ h1 [] [ text "ShipBuilder" ]
         , headerMenu
         ]
 
@@ -350,6 +281,8 @@ type alias Tabs =
 tabItems : Tabs
 tabItems =
     [ { title = "Eléments", item = FARegular.clone, target = ElementsPanel }
+    , { title = "Images", item = FARegular.images, target = GenericPanel }
+    , { title = "Trale", item = FARegular.chart_bar, target = GenericPanel }
     ]
 
 
@@ -411,7 +344,7 @@ defaultPanel model =
 
 secondaryPanel : Model -> Html Msg
 secondaryPanel model =
-    div [ class "panel panel__secondary" ] []
+    div [ class "panel__secondary" ] []
 
 
 
@@ -420,6 +353,4 @@ secondaryPanel model =
 
 workspace : Model -> Html Msg
 workspace model =
-    div [ class "workspace" ]
-        [ div [ id "three-wrapper" ] []
-        ]
+    div [ class "workspace" ] []

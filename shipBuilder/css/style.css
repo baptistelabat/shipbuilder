@@ -13,20 +13,26 @@ html, #elm-app, #elm-root {
 }
 
 header {
-    background-color: rgb(16, 149, 238);
-    padding: 24px;
+    background-color: rgb(13, 122, 194);
+    border-bottom: 1px solid rgb(15, 99, 155);
+    padding: 12px;
     color: white;
     z-index: 2;
-    box-shadow: 0px 2px 5px rgba(3, 29, 46, 0.137);
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 header h1 {
     margin: 0;
     padding: 0;
-    font-size: 1.5em;
+    font-size: 1.2em;
     font-weight: 300;
+}
+
+header img {
+    height: 30px;
+    margin: -10px;
 }
 
 header .header-menu {
@@ -37,7 +43,7 @@ header .header-menu {
 
 header .header-menu-item {
     cursor: pointer;
-    height: 24px;
+    height: 20px;
 }
 
 header .header-menu-item svg {
@@ -124,7 +130,7 @@ header .header-menu-item+.header-menu-item {
     z-index: 1;
     width: 224px;
     padding: 12px;
-    background: rgb(223, 232, 238);
+    background: hsl(210, 70%, 98%);
     border-right: 1px solid rgb(201, 211, 218);
 }
 
@@ -145,41 +151,19 @@ header .header-menu-item+.header-menu-item {
 }
 
 .panel__secondary {
-    width: 224px;
-    padding: 12px;
-    background: rgb(238, 243, 247);
+    z-index: 0;
     box-shadow: 0px 0px 2px rgba(0, 20, 34, 0.315);
 }
 
-ul.elements {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.workspace {
+    flex: 1 1 auto;
 }
 
-ul.elements li.element {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 12px;
-    margin: 0 -12px;
-    cursor: pointer;
-    align-items: center;
-}
-
-ul.elements li.element:hover {
-    background-color: rgb(238, 243, 247);
-}
-
-ul.elements li.element span.element-name {
-    border-bottom: 1px solid rgba(0, 20, 34, 0.315);
-}
-
-ul.elements li.element span.element-name:hover {
-    cursor: text;
-}
-
-ul.elements li.element span.element-color {
-    height: 20px;
-    width: 20px;
-    border: 2px solid white;
+#three-wrapper {
+    /* Position relative because the canvas needs to be absolutely positionned to allow the wrapper to resize */
+    position: relative;
+    height: 100%;
+    width: 100%;
+    /* overflow hidden to prevent scollbars from entraving resizing */
+    overflow: hidden;
 }
