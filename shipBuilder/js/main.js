@@ -3,6 +3,7 @@
 let div = document.getElementById('elm-app');
 let app = Elm.Main.embed(div);
 
+const mouse = new THREE.Vector2();
 const wrapperId = "three-wrapper"; // defined in elm
 let views = [];
 
@@ -10,6 +11,7 @@ let wrapper = null;
 let canvas = null;
 let renderer = null;
 let scene = null;
+let raycaster = null;
 
 app.ports.send.subscribe(function (message) {
     const data = message.data;
@@ -43,6 +45,7 @@ let makeCube = function (width, height, depth, x, y, z, color) {
 
 let initThree = function (viewsData) {
     window.addEventListener('resize', (window, event) => onResize(), false);
+    document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
 
     views = viewsData.map(view => {
         view.getEye = () => [view.eye.x, view.eye.y, view.eye.z];
@@ -51,18 +54,23 @@ let initThree = function (viewsData) {
         return view;
     });
     wrapper = document.getElementById(wrapperId);
+
     initCanvas(wrapper);
     initRenderer();
     initScene();
     initCameras();
-    initLabels();
+    displayLabels();
 
-    var gridHelper = new THREE.GridHelper(100, 10);
-    scene.add(gridHelper);
+    /**
+     * var gridHelper = new THREE.GridHelper(100, 10);
+     * scene.add(gridHelper);
+     */
+
+    raycaster = new THREE.Raycaster();
     animate();
 };
 
-let initLabels = function () {
+let displayLabels = function () {
     var labels = document.getElementsByClassName("viewport-label");
     for (var i = labels.length - 1; i >= 0; --i) {
         labels[i].remove();
@@ -79,6 +87,7 @@ let initLabels = function () {
 
 let animate = function () {
     updateCameras(views, scene);
+    console.log(getElementsUnderCursor(mouse, views));
     requestAnimationFrame(animate);
 }
 
@@ -87,6 +96,11 @@ let onResize = function (window, event) {
     fitRenderer(canvas);
     updateViewports(views, canvas);
     fitCameras(views, scene);
+}
+
+let onMouseMove = function (event) {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
 }
 
 let updateViewports = function (views, canvas) {
@@ -193,6 +207,44 @@ let computeViewportPosition = function (view, canvas) {
     view.clientTop = Math.round(view.top * canvas.height);
 };
 
+let mouseIsOver = function (view) {
+    return mouse.y >= (view.clientTop + wrapper.offsetTop)
+        && mouse.y <= (view.clientTop + wrapper.offsetTop + view.clientHeight)
+        && mouse.x >= (view.clientLeft + wrapper.offsetLeft)
+        && mouse.x <= (view.clientLeft + wrapper.offsetLeft + view.clientWidth);
+}
+
+let getElementsUnderCursor = function (mouse, views) {
+    // /!\ there should only be one active view at a time
+    const activeView = views.find(view => mouseIsOver(view));
+    if (activeView) {
+        const elements = getElementsUnderCursorForView(mouse, activeView, scene);
+        return elements;
+    } else {
+        return [];
+    }
+}
+
+let getElementsUnderCursorForView = function (mouse, view, scene) {
+    if (view) {
+        const normalizedMouse = normalizeMouseCoordinatesForView(mouse, view);
+        raycaster.setFromCamera(normalizedMouse, view.camera);
+        return raycaster.intersectObjects(scene.children);
+    } else {
+        return [];
+    }
+}
+
+let normalizeMouseCoordinatesForView = function (mouse, view) {
+    // {x: [-1,1], y: [-1,1] }
+    // (-1,-1) = bottom left
+    // ( 1, 1) = top right
+    const offsetX = mouse.x - view.clientLeft - wrapper.offsetLeft;
+    const offsetY = mouse.y - (view.clientTop + view.clientHeight + wrapper.offsetTop);
+    const normalizedX = (offsetX / view.clientWidth) * 2 - 1;
+    const normalizedY = - (offsetY / view.clientHeight) * 2 - 1;
+    return new THREE.Vector2(normalizedX, normalizedY);
+}
 
 /** TODO: rewrite
 let scene;
@@ -231,26 +283,6 @@ gridHelper2.position.z = 0;
 gridHelper2.color = 0x676767;
 scene.add(gridHelper2);
 
-
-function mouseIsOver(view) {
-    var bounds = getViewportBounds(view);
-    return mouse.y >= bounds.topLeft.y
-        && mouse.y <= bounds.bottomRight.y
-        && mouse.x >= bounds.topLeft.x
-        && mouse.x <= bounds.bottomRight.x;
-}
-
-function getViewportBounds(view) {
-    var rect = canvas.getBoundingClientRect();
-    var topLimit = rect.top + view.top * canvas.height;
-    var leftLimit = rect.left + view.left * canvas.width;
-    var rightLimit = leftLimit + view.width * canvas.width;
-    var bottomLimit = topLimit + view.height * canvas.height;
-    return {
-        topLeft: new THREE.Vector2(leftLimit, topLimit),
-        bottomRight: new THREE.Vector2(rightLimit, bottomLimit)
-    };
-}
 
 function onKeyPress(event) {
     console.log(event);
@@ -295,11 +327,6 @@ function onKeyPress(event) {
             break;
     }
 }
-function onMouseMove(event) {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
-}
-
 function onClick(event) {
     switch (event.which) {
         case 1: // left click
@@ -343,7 +370,7 @@ function normalizeMouseCoordinates(view) {
 }
 
 function onWindowResize() {
-    initLabels();
+    displayLabels();
     const wrapper = document.getElementById("canvas-wrapper");
     canvas.width = wrapper.clientWidth;
     canvas.height = wrapper.clientHeight;
@@ -384,7 +411,7 @@ function initCameras() {
     });
 }
 
-function initLabels() {
+function displayLabels() {
     var labels = document.getElementsByClassName("viewport-label");
     for (var i = labels.length - 1; i >= 0; --i) {
         labels[i].remove();
@@ -407,7 +434,7 @@ function initScene() {
 
     scene = new THREE.Scene();
     initCameras();
-    initLabels();
+    displayLabels();
 
 
     //var axesHelper = new THREE.AxesHelper(500);
