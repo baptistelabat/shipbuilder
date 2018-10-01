@@ -8,7 +8,7 @@ const wrapperId = "three-wrapper"; // defined in elm
 
 let views = [];
 
-let hovered = []; // objects under the cursor in the scene
+let hovered = null; // the first object under the cursor in the scene
 let wrapper = null; // parent of canvas, used for resizing
 let canvas = null;
 let renderer = null;
@@ -94,9 +94,13 @@ let shadeHexColor = function (color, percent) {
 
 let animate = function () {
     updateCameras(views, scene);
-    hovered.forEach(element => element.material.color.set(element.baseColor)); // reset highlight on previous elements 
-    hovered = getElementsUnderCursor(mouse, views);
-    hovered.forEach(element => element.material.color.set(shadeHexColor(element.baseColor, 0.333))); // highlight elements under the cursor
+    if (hovered) { // remove highlight from the previous "hovered" element
+        hovered.material.color.set(hovered.baseColor)
+    }
+    hovered = getFirstElementUnderCursor(mouse, views, scene);
+    if (hovered) { // highlight the current "hovered" element
+        hovered.material.color.set(shadeHexColor(hovered.baseColor, 0.333))
+    }
     requestAnimationFrame(animate);
 }
 
@@ -223,7 +227,7 @@ let mouseIsOver = function (view) {
         && mouse.x <= (view.clientLeft + wrapper.offsetLeft + view.clientWidth);
 }
 
-let getElementsUnderCursor = function (mouse, views) {
+let getElementsUnderCursor = function (mouse, views, scene) {
     // /!\ there should only be one active view at a time
     const activeView = views.find(view => mouseIsOver(view));
     if (activeView) {
@@ -231,6 +235,15 @@ let getElementsUnderCursor = function (mouse, views) {
         return elements.map(element => element.object);
     } else {
         return [];
+    }
+}
+
+let getFirstElementUnderCursor = function (mouse, views, scene) {
+    const elements = getElementsUnderCursor(mouse, views, scene);
+    if (elements.length) {
+        return elements[0];
+    } else {
+        return null;
     }
 }
 
