@@ -1,6 +1,7 @@
 port module Main exposing (main, Viewports, Viewport, encodeViewport, encodeViewports)
 
 import Color exposing (Color, hsl)
+import Dict exposing (Dict)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
 import Html exposing (..)
@@ -8,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
+import Json.Decode.Pipeline as Pipeline
 import Math.Vector3 exposing (Vec3, vec3, toRecord)
 import Debug
 
@@ -47,9 +49,24 @@ subscriptions model =
     receive handleJsMessage
 
 
+newElementDecoder : Decode.Decoder Block
+newElementDecoder =
+    Pipeline.decode Block
+        |> Pipeline.required "uuid" Decode.string
+        |> Pipeline.required "label" Decode.string
+
+
 handleJsMessage : JsData -> Msg
 handleJsMessage js =
     case js.tag of
+        "new-element" ->
+            case Decode.decodeValue newElementDecoder js.data of
+                Ok block ->
+                    FromJs <| NewElement block
+
+                Err message ->
+                    FromJs <| JSError message
+
         "select" ->
             case Decode.decodeValue Decode.string js.data of
                 Ok uuid ->
@@ -69,6 +86,7 @@ type JsMsg
     = Select String
     | Unselect
     | JSError String
+    | NewElement Block
 
 
 
@@ -79,7 +97,19 @@ type alias Model =
     { build : String
     , panel : Panel
     , viewports : Viewports
+    , selectedBlock : Maybe Block
+    , blocks : Blocks
     }
+
+
+type alias Block =
+    { uuid : String
+    , label : String
+    }
+
+
+type alias Blocks =
+    Dict String Block
 
 
 init : ( Model, Cmd Msg )
@@ -94,6 +124,8 @@ init =
         ( { build = "0.0.1"
           , panel = ElementsPanel
           , viewports = viewports
+          , selectedBlock = Nothing
+          , blocks = Dict.empty
           }
         , Cmd.batch
             [ encodeViewports viewports |> sendToJs "init-viewports"
@@ -243,7 +275,7 @@ bottomRightCornerViewport background viewport =
 type Msg
     = NoOp
     | SelectPanel Panel
-    | AddCube
+    | AddCube String
     | FromJs JsMsg
 
 
@@ -253,8 +285,8 @@ update msg model =
         NoOp ->
             model ! []
 
-        AddCube ->
-            model ! [ sendToJs "add-cube" Encode.null ]
+        AddCube label ->
+            model ! [ sendToJs "add-cube" (Encode.string label) ]
 
         SelectPanel panel ->
             { model | panel = panel } ! []
@@ -266,6 +298,13 @@ update msg model =
 updateFromJs : JsMsg -> Model -> ( Model, Cmd Msg )
 updateFromJs jsmsg model =
     case jsmsg of
+        NewElement block ->
+            let
+                blocks =
+                    Dict.insert block.uuid block model.blocks
+            in
+                { model | blocks = blocks } ! []
+
         Select uuid ->
             let
                 _ =
@@ -461,7 +500,7 @@ elementsPanel model =
         , class "elements-panel"
         ]
         [ h2 [] [ text "Elements" ]
-        , button [ onClick AddCube ] [ text "Add Cube" ]
+        , button [ onClick (AddCube "testLabel") ] [ text "Add Cube" ]
         ]
 
 

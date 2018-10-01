@@ -23,7 +23,7 @@ app.ports.send.subscribe(function (message) {
             initThree(data);
             break;
         case "add-cube":
-            addCube()
+            addCube(data)
         default:
     }
 })
@@ -32,10 +32,12 @@ let sendToElm = function (tag, data) {
     app.ports.receive.send({ tag: tag, data: data });
 }
 
-let addCube = function (width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0, color = 0x5078ff) {
+let addCube = function (label, width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0, color = 0x5078ff) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     scene.add(cube);
+    sendToElm("new-element", label)
 }
+
 let makeCube = function (width, height, depth, x, y, z, color) {
     var geometry = new THREE.BoxGeometry(width, height, depth);
     geometry.translate(width / 2, height / 2, depth / 2);
