@@ -9,6 +9,7 @@ const wrapperId = "three-wrapper"; // defined in elm
 let views = [];
 
 let hovered = null; // the first object under the cursor in the scene
+let selected = null; // the selected element in the scene
 let wrapper = null; // parent of canvas, used for resizing
 let canvas = null;
 let renderer = null;
@@ -27,7 +28,7 @@ app.ports.send.subscribe(function (message) {
     }
 })
 
-let addCube = function (width = 50, height = 50, depth = 50, x = 0, y = 0, z = 0, color = 0x5078ff) {
+let addCube = function (width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0, color = 0x5078ff) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     scene.add(cube);
 }
@@ -94,7 +95,7 @@ let shadeHexColor = function (color, percent) {
 
 let animate = function () {
     updateCameras(views, scene);
-    if (hovered) { // remove highlight from the previous "hovered" element
+    if (hovered && (!selected || selected && (hovered.uuid !== selected.uuid))) { // remove highlight from the previous "hovered" element
         hovered.material.color.set(hovered.baseColor)
     }
     hovered = getFirstElementUnderCursor(mouse, views, scene);
@@ -160,9 +161,26 @@ let initCanvas = function (parent) {
     canvas.id = "three-canvas";
     canvas.style.position = "absolute"; // the parent can get smaller than the canvas, that will be resized later
 
-    parent.appendChild(canvas);
+    document.addEventListener("click", onClick, false);
 
+    parent.appendChild(canvas);
     fitCanvas(canvas, wrapper);
+}
+
+let onClick = function (event) {
+    switch (event.which) {
+        case 1: // left click
+            selected = hovered;
+            break;
+        case 2: // middle click
+            if (selected && (!hovered || hovered && (selected.uuid !== hovered.uuid))) {
+                selected.material.color.set(selected.baseColor);
+            }
+            selected = null;
+            break;
+        default: // right click
+
+    }
 }
 
 let updateCameras = function (views, scene) {
