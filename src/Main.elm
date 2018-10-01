@@ -130,6 +130,11 @@ removeBlock block blocks =
     Dict.remove block.uuid blocks
 
 
+getBlockByUUID : String -> Blocks -> Maybe Block
+getBlockByUUID uuid blocks =
+    Dict.get uuid blocks
+
+
 init : ( Model, Cmd Msg )
 init =
     let
@@ -311,8 +316,19 @@ update msg model =
             let
                 blocks =
                     removeBlock block model.blocks
+
+                selectedBlock =
+                    case model.selectedBlock of
+                        Just selected ->
+                            if selected.uuid == block.uuid then
+                                Nothing
+                            else
+                                model.selectedBlock
+
+                        Nothing ->
+                            model.selectedBlock
             in
-                { model | blocks = blocks } ! [ sendToJs "remove-block" (encodeBlock block) ]
+                { model | blocks = blocks, selectedBlock = selectedBlock } ! [ sendToJs "remove-block" (encodeBlock block) ]
 
         SelectPanel panel ->
             { model | panel = panel } ! []
@@ -332,10 +348,15 @@ updateFromJs jsmsg model =
                 { model | blocks = blocks } ! []
 
         Select uuid ->
-            model ! []
+            let
+                maybeBlock : Maybe Block
+                maybeBlock =
+                    getBlockByUUID uuid model.blocks
+            in
+                { model | selectedBlock = maybeBlock } ! []
 
         Unselect ->
-            model ! []
+            { model | selectedBlock = Nothing } ! []
 
         JSError message ->
             let
@@ -529,7 +550,12 @@ elementsPanel model =
 
 elementsList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
 elementsList elementsModel =
-    ul [ class "elements" ] <| List.map elementItem <| Dict.values elementsModel.blocks
+    case elementsModel.selectedBlock of
+        Just selected ->
+            ul [ class "elements" ] <| List.map (elementItemWithSelection selected) <| Dict.values elementsModel.blocks
+
+        Nothing ->
+            ul [ class "elements" ] <| List.map elementItem <| Dict.values elementsModel.blocks
 
 
 elementItem : Block -> Html Msg
@@ -542,6 +568,25 @@ elementItem block =
             [ text block.uuid ]
         , div [ class "delete-element", onClick (RemoveBlock block) ] [ FASolid.eraser ]
         ]
+
+
+elementItemWithSelection : Block -> Block -> Html Msg
+elementItemWithSelection selected block =
+    let
+        classes =
+            if selected.uuid == block.uuid then
+                "element-item element-item__selected"
+            else
+                "element-item"
+    in
+        li [ class classes ]
+            [ p [ class "element-label" ]
+                [ text block.label ]
+            , p
+                [ class "element-uuid" ]
+                [ text block.uuid ]
+            , div [ class "delete-element", onClick (RemoveBlock block) ] [ FASolid.eraser ]
+            ]
 
 
 defaultPanel : Model -> Html Msg

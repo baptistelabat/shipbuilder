@@ -231,3 +231,6 @@ li.element-item .delete-element {
 li.element-item .delete-element svg {
     height: 100%;
 }
+li.element-item__selected {
+    border-right: 4px solid red;
+}
