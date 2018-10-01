@@ -112,9 +112,22 @@ type alias Blocks =
     Dict String Block
 
 
+encodeBlock : Block -> Encode.Value
+encodeBlock block =
+    Encode.object
+        [ ( "uuid", Encode.string block.uuid )
+        , ( "label", Encode.string block.label )
+        ]
+
+
 addBlock : Block -> Blocks -> Blocks
 addBlock block blocks =
     Dict.insert block.uuid block blocks
+
+
+removeBlock : Block -> Blocks -> Blocks
+removeBlock block blocks =
+    Dict.remove block.uuid blocks
 
 
 init : ( Model, Cmd Msg )
@@ -282,6 +295,7 @@ type Msg
     | SelectPanel Panel
     | AddCube String
     | FromJs JsMsg
+    | RemoveBlock Block
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -292,6 +306,13 @@ update msg model =
 
         AddCube label ->
             model ! [ sendToJs "add-cube" (Encode.string label) ]
+
+        RemoveBlock block ->
+            let
+                blocks =
+                    removeBlock block model.blocks
+            in
+                { model | blocks = blocks } ! [ sendToJs "remove-block" (encodeBlock block) ]
 
         SelectPanel panel ->
             { model | panel = panel } ! []
@@ -519,6 +540,7 @@ elementItem block =
         , p
             [ class "element-uuid" ]
             [ text block.uuid ]
+        , div [ class "delete-element", onClick (RemoveBlock block) ] [ FASolid.eraser ]
         ]
 
 

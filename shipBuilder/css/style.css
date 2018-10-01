@@ -199,6 +199,7 @@ ul.elements {
 }
 
 li.element-item {
+    position: relative;
     background-color: white;
     margin: 8px 0;
     padding: 8px;
@@ -217,4 +218,16 @@ li.element-item p {
 li.element-item p.element-uuid {
     font-size: 0.65em;
     color: hsl(222, 20%, 60%);
+}
+
+li.element-item .delete-element {
+    height: 16px;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    display: inline-block;
+}
+
+li.element-item .delete-element svg {
+    height: 100%;
 }

@@ -24,6 +24,8 @@ app.ports.send.subscribe(function (message) {
             break;
         case "add-cube":
             addCube(data)
+        case "remove-block":
+            removeBlock(data);
         default:
     }
 })
@@ -50,6 +52,19 @@ let makeCube = function (width, height, depth, x, y, z, color) {
     cube.baseColor = color;
     cube.geometryType = "cube";
     return cube;
+}
+
+let removeBlock = function (block) {
+    const objectToRemove = scene.children.find(child => child.uuid === block.uuid);
+    if (objectToRemove) {
+        if (hovered && hovered.uuid === block.uuid) {
+            hovered = null;
+        }
+        if (selected && selected.uuid === block.uuid) {
+            selected = null;
+        }
+        scene.remove(objectToRemove);
+    }
 }
 
 let initThree = function (viewsData) {
