@@ -3,11 +3,12 @@ html, #elm-app, #elm-root {
     padding: 0;
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    display: flex;
-    flex-direction: column;
     height: 100%;
 }
-
+#elm-root {
+    display: flex;
+    flex-direction: column;
+ }
 * {
     box-sizing: border-box;
 }
@@ -68,7 +69,8 @@ header .header-menu-item+.header-menu-item {
 
 .content-wrapper {
     display: flex;
-    flex: 1 0 auto;
+    min-height: 0px;
+    height: 100%;
 }
 
 .side {
@@ -134,10 +136,12 @@ header .header-menu-item+.header-menu-item {
 }
 
 .panel {
+    display: flex;
+    flex-direction: column;
     z-index: 1;
     width: 224px;
     padding: 12px;
-    background: hsl(210, 70%, 98%);
+    background-color: hsl(210, 53%, 95%);
     border-right: 1px solid rgb(201, 211, 218);
 }
 
@@ -189,8 +193,29 @@ ul.elements {
     margin: 0;
     padding: 0;
     list-style: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 4px -12px -12px -12px;
+    padding: 0 12px 12px;
 }
 
 li.element-item {
-    padding: 8px 0;
+    background-color: white;
+    margin: 8px 0;
+    padding: 8px;
+    box-shadow: 0px 4px 8px hsla(210, 20%, 20%, 6%);
+    border-radius: 8px;
+}
+
+li.element-item:hover {
+    background: hsl(210, 53%, 99%);
+}
+
+li.element-item p {
+    margin: 4px 0;
+}
+
+li.element-item p.element-uuid {
+    font-size: 0.65em;
+    color: hsl(210, 20%, 60%);
 }

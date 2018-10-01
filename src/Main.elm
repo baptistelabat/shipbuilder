@@ -513,7 +513,13 @@ elementsList elementsModel =
 
 elementItem : Block -> Html Msg
 elementItem block =
-    li [ class "element-item" ] [ text block.uuid ]
+    li [ class "element-item" ]
+        [ p [ class "element-label" ]
+            [ text block.label ]
+        , p
+            [ class "element-uuid" ]
+            [ text block.uuid ]
+        ]
 
 
 defaultPanel : Model -> Html Msg
