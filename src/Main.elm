@@ -7,13 +7,18 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Encode as Encode
+import Json.Decode as Decode
 import Math.Vector3 exposing (Vec3, vec3, toRecord)
+import Debug
 
 
-port send : JsCommand -> Cmd msg
+port send : JsData -> Cmd msg
 
 
-type alias JsCommand =
+port receive : (JsData -> msg) -> Sub msg
+
+
+type alias JsData =
     { tag : String
     , data : Encode.Value
     }
@@ -39,7 +44,31 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    receive handleJsMessage
+
+
+handleJsMessage : JsData -> Msg
+handleJsMessage js =
+    case js.tag of
+        "select" ->
+            case Decode.decodeValue Decode.string js.data of
+                Ok uuid ->
+                    FromJs <| Select uuid
+
+                Err message ->
+                    FromJs <| JSError message
+
+        "unselect" ->
+            FromJs Unselect
+
+        unknownTag ->
+            FromJs <| JSError <| "Unknown tag received from JS: " ++ unknownTag
+
+
+type JsMsg
+    = Select String
+    | Unselect
+    | JSError String
 
 
 
@@ -215,6 +244,7 @@ type Msg
     = NoOp
     | SelectPanel Panel
     | AddCube
+    | FromJs JsMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -228,6 +258,30 @@ update msg model =
 
         SelectPanel panel ->
             { model | panel = panel } ! []
+
+        FromJs jsmsg ->
+            updateFromJs jsmsg model
+
+
+updateFromJs : JsMsg -> Model -> ( Model, Cmd Msg )
+updateFromJs jsmsg model =
+    case jsmsg of
+        Select uuid ->
+            let
+                _ =
+                    Debug.log "uuid" uuid
+            in
+                model ! []
+
+        Unselect ->
+            model ! []
+
+        JSError message ->
+            let
+                _ =
+                    Debug.log "error" message
+            in
+                model ! []
 
 
 

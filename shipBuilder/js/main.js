@@ -28,6 +28,10 @@ app.ports.send.subscribe(function (message) {
     }
 })
 
+let sendToElm = function (tag, data) {
+    app.ports.receive.send({ tag: tag, data: data });
+}
+
 let addCube = function (width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0, color = 0x5078ff) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     scene.add(cube);
@@ -170,13 +174,17 @@ let initCanvas = function (parent) {
 let onClick = function (event) {
     switch (event.which) {
         case 1: // left click
-            selected = hovered;
+            if (hovered) {
+                selected = hovered;
+                sendToElm("select", selected.uuid);
+            }
             break;
         case 2: // middle click
             if (selected && (!hovered || hovered && (selected.uuid !== hovered.uuid))) {
                 selected.material.color.set(selected.baseColor);
             }
             selected = null;
+            sendToElm("unselect", null);
             break;
         default: // right click
 
