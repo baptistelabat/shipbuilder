@@ -1,17 +1,19 @@
 'use strict';
 
-let div = document.getElementById('elm-app');
-let app = Elm.Main.embed(div);
+const div = document.getElementById('elm-app');
+const app = Elm.Main.embed(div);
 
 const mouse = new THREE.Vector2();
 const wrapperId = "three-wrapper"; // defined in elm
+
 let views = [];
 
-let wrapper = null;
+let hovered = []; // objects under the cursor in the scene
+let wrapper = null; // parent of canvas, used for resizing
 let canvas = null;
 let renderer = null;
 let scene = null;
-let raycaster = null;
+let raycaster = null; // used to find the elements under the cursor on click, mousemove etc
 
 app.ports.send.subscribe(function (message) {
     const data = message.data;
@@ -85,9 +87,16 @@ let displayLabels = function () {
     });
 }
 
+let shadeHexColor = function (color, percent) {
+    var t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = color >> 16, G = color >> 8 & 0x00FF, B = color & 0x0000FF;
+    return 0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B);
+}
+
 let animate = function () {
     updateCameras(views, scene);
-    console.log(getElementsUnderCursor(mouse, views));
+    hovered.forEach(element => element.material.color.set(element.baseColor)); // reset highlight on previous elements 
+    hovered = getElementsUnderCursor(mouse, views);
+    hovered.forEach(element => element.material.color.set(shadeHexColor(element.baseColor, 0.333))); // highlight elements under the cursor
     requestAnimationFrame(animate);
 }
 
@@ -219,7 +228,7 @@ let getElementsUnderCursor = function (mouse, views) {
     const activeView = views.find(view => mouseIsOver(view));
     if (activeView) {
         const elements = getElementsUnderCursorForView(mouse, activeView, scene);
-        return elements;
+        return elements.map(element => element.object);
     } else {
         return [];
     }
