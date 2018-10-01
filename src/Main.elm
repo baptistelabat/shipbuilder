@@ -112,6 +112,11 @@ type alias Blocks =
     Dict String Block
 
 
+addBlock : Block -> Blocks -> Blocks
+addBlock block blocks =
+    Dict.insert block.uuid block blocks
+
+
 init : ( Model, Cmd Msg )
 init =
     let
@@ -301,16 +306,12 @@ updateFromJs jsmsg model =
         NewElement block ->
             let
                 blocks =
-                    Dict.insert block.uuid block model.blocks
+                    addBlock block model.blocks
             in
                 { model | blocks = blocks } ! []
 
         Select uuid ->
-            let
-                _ =
-                    Debug.log "uuid" uuid
-            in
-                model ! []
+            model ! []
 
         Unselect ->
             model ! []
@@ -501,7 +502,18 @@ elementsPanel model =
         ]
         [ h2 [] [ text "Elements" ]
         , button [ onClick (AddCube "testLabel") ] [ text "Add Cube" ]
+        , elementsList model
         ]
+
+
+elementsList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
+elementsList elementsModel =
+    ul [ class "elements" ] <| List.map elementItem <| Dict.values elementsModel.blocks
+
+
+elementItem : Block -> Html Msg
+elementItem block =
+    li [ class "element-item" ] [ text block.uuid ]
 
 
 defaultPanel : Model -> Html Msg

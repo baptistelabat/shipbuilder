@@ -184,3 +184,13 @@ header .header-menu-item+.header-menu-item {
     /* overflow hidden to prevent scollbars from entraving resizing */
     overflow: hidden;
 }
+
+ul.elements {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+li.element-item {
+    padding: 8px 0;
+}

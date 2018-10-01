@@ -35,7 +35,7 @@ let sendToElm = function (tag, data) {
 let addCube = function (label, width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0, color = 0x5078ff) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     scene.add(cube);
-    sendToElm("new-element", label)
+    sendToElm("new-element", { uuid: cube.uuid, label: label })
 }
 
 let makeCube = function (width, height, depth, x, y, z, color) {
