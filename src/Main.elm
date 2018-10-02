@@ -603,7 +603,10 @@ blocksPanelFocusOn : Block -> Model -> Html Msg
 blocksPanelFocusOn block model =
     div
         [ class "panel blocks-panel blocks-panel__focus" ]
-        [ div [ class "focus-header" ]
+        [ div [ class "focus-title" ]
+            [ text "Properties of block:" ]
+        , div
+            [ class "focus-header" ]
             [ div [ class "focus-back", onClick (SelectPanel (BlocksPanel Nothing)) ] [ FASolid.arrow_left ]
             , div [ class "focus-label" ] [ editableBlockName block ]
             ]

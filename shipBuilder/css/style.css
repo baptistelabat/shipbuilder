@@ -305,6 +305,11 @@ input.block-label {
     margin-bottom: 8px;
     height: 40px;
 }
+.blocks-panel__focus .focus-title {
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    font-style: italic;
+}
 
 .blocks-panel__focus .focus-sub-header {
     margin-bottom: 8px;
