@@ -491,7 +491,6 @@ getPanels model =
     case model.panel of
         BlocksPanel ->
             [ blocksPanel model
-            , secondaryPanel model
             ]
 
         _ ->
