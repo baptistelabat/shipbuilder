@@ -298,7 +298,7 @@ bottomRightCornerViewport background viewport =
 type Msg
     = NoOp
     | SelectPanel Panel
-    | AddCube String
+    | AddBlock String
     | FromJs JsMsg
     | RemoveBlock Block
     | SelectBlock Block
@@ -310,8 +310,8 @@ update msg model =
         NoOp ->
             model ! []
 
-        AddCube label ->
-            model ! [ sendToJs "add-cube" (Encode.string label) ]
+        AddBlock label ->
+            model ! [ sendToJs "add-block" (Encode.string label) ]
 
         RemoveBlock block ->
             let
@@ -547,7 +547,7 @@ elementsPanel model =
         , class "elements-panel"
         ]
         [ h2 [] [ text "Elements" ]
-        , button [ onClick (AddCube "testLabel") ] [ text "Add Cube" ]
+        , button [ onClick (AddBlock "testLabel") ] [ text "Add block" ]
         , elementsList model
         ]
 

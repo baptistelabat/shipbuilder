@@ -22,7 +22,7 @@ app.ports.send.subscribe(function (message) {
         case "init-viewports":
             initThree(data);
             break;
-        case "add-cube":
+        case "add-block":
             addCube(data)
             break;
         case "remove-block":
