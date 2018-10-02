@@ -132,6 +132,11 @@ removeBlock block blocks =
     Dict.remove block.uuid blocks
 
 
+renameBlock : String -> Block -> Block
+renameBlock label block =
+    { block | label = label }
+
+
 getBlockByUUID : String -> Blocks -> Maybe Block
 getBlockByUUID uuid blocks =
     Dict.get uuid blocks
@@ -304,6 +309,7 @@ type Msg
     | FromJs JsMsg
     | RemoveBlock Block
     | SelectBlock Block
+    | RenameBlock Block String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -332,6 +338,32 @@ update msg model =
                             model.selectedBlock
             in
                 { model | blocks = blocks, selectedBlock = selectedBlock } ! [ sendToJs "remove-block" (encodeBlock block) ]
+
+        RenameBlock blockToRename label ->
+            case getBlockByUUID blockToRename.uuid model.blocks of
+                Just block ->
+                    let
+                        renamed =
+                            renameBlock label block
+
+                        blocks =
+                            addBlock renamed model.blocks
+
+                        selected =
+                            case model.selectedBlock of
+                                Just currentSelected ->
+                                    if currentSelected.uuid == renamed.uuid then
+                                        Just renamed
+                                    else
+                                        model.selectedBlock
+
+                                Nothing ->
+                                    model.selectedBlock
+                    in
+                        { model | blocks = blocks, selectedBlock = selected } ! []
+
+                Nothing ->
+                    model ! []
 
         SelectBlock block ->
             { model | selectedBlock = Just block } ! [ sendToJs "select-block" (encodeBlock block) ]
@@ -581,7 +613,7 @@ elementItem block =
 elementItemContent : Block -> List (Html Msg)
 elementItemContent block =
     [ div [ class "element-info-wrapper", onClick (SelectBlock block) ]
-        [ input [ class "element-label", id block.uuid, value block.label ]
+        [ input [ class "element-label", id block.uuid, value block.label, onInput (RenameBlock block) ]
             []
         , p
             [ class "element-uuid" ]
