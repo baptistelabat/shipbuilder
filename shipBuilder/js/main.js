@@ -24,8 +24,13 @@ app.ports.send.subscribe(function (message) {
             break;
         case "add-cube":
             addCube(data)
+            break;
         case "remove-block":
             removeBlock(data);
+            break;
+        case "select-block":
+            selectBlock(data);
+            break;
         default:
     }
 })
@@ -55,7 +60,7 @@ let makeCube = function (width, height, depth, x, y, z, color) {
 }
 
 let removeBlock = function (block) {
-    const objectToRemove = scene.children.find(child => child.uuid === block.uuid);
+    const objectToRemove = findBlockByUUID(block.uuid);
     if (objectToRemove) {
         if (hovered && hovered.uuid === block.uuid) {
             hovered = null;
@@ -65,6 +70,23 @@ let removeBlock = function (block) {
         }
         scene.remove(objectToRemove);
     }
+}
+
+let selectBlock = function (block) {
+    if (block) {
+        if (selected && (selected.uuid !== block.uuid)) {
+            resetElementColor(selected);
+        }
+        const objectToSelect = findBlockByUUID(block.uuid);
+        if (objectToSelect) {
+            highlightObject(objectToSelect);
+            selected = objectToSelect;
+        }
+    }
+}
+
+let findBlockByUUID = function (uuid) {
+    return scene.children.find(child => child.uuid === uuid);
 }
 
 let initThree = function (viewsData) {
@@ -117,13 +139,21 @@ let shadeHexColor = function (color, percent) {
 let animate = function () {
     updateCameras(views, scene);
     if (hovered && (!selected || selected && (hovered.uuid !== selected.uuid))) { // remove highlight from the previous "hovered" element
-        hovered.material.color.set(hovered.baseColor)
+        resetElementColor(hovered);
     }
     hovered = getFirstElementUnderCursor(mouse, views, scene);
     if (hovered) { // highlight the current "hovered" element
-        hovered.material.color.set(shadeHexColor(hovered.baseColor, 0.333))
+        highlightObject(hovered);
     }
     requestAnimationFrame(animate);
+}
+
+let highlightObject = function (object) {
+    object.material.color.set(shadeHexColor(object.baseColor, 0.333))
+}
+
+let resetElementColor = function (element) {
+    element.material.color.set(element.baseColor)
 }
 
 let onResize = function (window, event) {
@@ -189,9 +219,10 @@ let initCanvas = function (parent) {
 }
 
 let onClick = function (event) {
+    const activeViewport = getActiveViewport(views);
     switch (event.which) {
         case 1: // left click
-            if (hovered) {
+            if (activeViewport && hovered) {
                 selected = hovered;
                 sendToElm("select", selected.uuid);
             }
@@ -271,14 +302,17 @@ let mouseIsOver = function (view) {
 }
 
 let getElementsUnderCursor = function (mouse, views, scene) {
-    // /!\ there should only be one active view at a time
-    const activeView = views.find(view => mouseIsOver(view));
+    const activeView = getActiveViewport(views);
     if (activeView) {
         const elements = getElementsUnderCursorForView(mouse, activeView, scene);
         return elements.map(element => element.object);
     } else {
         return [];
     }
+}
+
+let getActiveViewport = function (views) {
+    return views.find(view => mouseIsOver(view));
 }
 
 let getFirstElementUnderCursor = function (mouse, views, scene) {

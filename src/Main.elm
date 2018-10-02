@@ -301,6 +301,7 @@ type Msg
     | AddCube String
     | FromJs JsMsg
     | RemoveBlock Block
+    | SelectBlock Block
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -329,6 +330,9 @@ update msg model =
                             model.selectedBlock
             in
                 { model | blocks = blocks, selectedBlock = selectedBlock } ! [ sendToJs "remove-block" (encodeBlock block) ]
+
+        SelectBlock block ->
+            { model | selectedBlock = Just block } ! [ sendToJs "select-block" (encodeBlock block) ]
 
         SelectPanel panel ->
             { model | panel = panel } ! []
@@ -560,14 +564,25 @@ elementsList elementsModel =
 
 elementItem : Block -> Html Msg
 elementItem block =
-    li [ class "element-item" ]
+    li [ class "element-item" ] <|
+        elementItemContent block
+
+
+elementItemContent : Block -> List (Html Msg)
+elementItemContent block =
+    [ div [ class "element-info-wrapper", onClick (SelectBlock block) ]
         [ p [ class "element-label" ]
             [ text block.label ]
         , p
             [ class "element-uuid" ]
             [ text block.uuid ]
-        , div [ class "delete-element", onClick (RemoveBlock block) ] [ FASolid.eraser ]
         ]
+    , div
+        [ class "delete-element"
+        , onClick (RemoveBlock block)
+        ]
+        [ FASolid.eraser ]
+    ]
 
 
 elementItemWithSelection : Block -> Block -> Html Msg
@@ -579,14 +594,8 @@ elementItemWithSelection selected block =
             else
                 "element-item"
     in
-        li [ class classes ]
-            [ p [ class "element-label" ]
-                [ text block.label ]
-            , p
-                [ class "element-uuid" ]
-                [ text block.uuid ]
-            , div [ class "delete-element", onClick (RemoveBlock block) ] [ FASolid.eraser ]
-            ]
+        li [ class classes ] <|
+            elementItemContent block
 
 
 defaultPanel : Model -> Html Msg
