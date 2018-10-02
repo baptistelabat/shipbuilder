@@ -632,8 +632,7 @@ blockItem block =
 blockItemContent : Block -> List (Html Msg)
 blockItemContent block =
     [ div [ class "block-info-wrapper", onClick (SelectBlock block) ]
-        [ input [ class "block-label", id block.uuid, value block.label, onInput (RenameBlock block) ]
-            []
+        [ editableBlockName block
         , p
             [ class "block-uuid" ]
             [ text block.uuid ]
