@@ -1,7 +1,7 @@
 port module Main exposing (main, Viewports, Viewport, encodeViewport, encodeViewports)
 
 import Color exposing (Color, hsl)
-import Dict exposing (Dict)
+import DictList exposing (DictList)
 import Dom
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
@@ -51,8 +51,8 @@ subscriptions model =
     receive handleJsMessage
 
 
-newElementDecoder : Decode.Decoder Block
-newElementDecoder =
+newBlockDecoder : Decode.Decoder Block
+newBlockDecoder =
     Pipeline.decode Block
         |> Pipeline.required "uuid" Decode.string
         |> Pipeline.required "label" Decode.string
@@ -61,10 +61,10 @@ newElementDecoder =
 handleJsMessage : JsData -> Msg
 handleJsMessage js =
     case js.tag of
-        "new-element" ->
-            case Decode.decodeValue newElementDecoder js.data of
+        "new-block" ->
+            case Decode.decodeValue newBlockDecoder js.data of
                 Ok block ->
-                    FromJs <| NewElement block
+                    FromJs <| NewBlock block
 
                 Err message ->
                     FromJs <| JSError message
@@ -88,7 +88,7 @@ type JsMsg
     = Select String
     | Unselect
     | JSError String
-    | NewElement Block
+    | NewBlock Block
 
 
 
@@ -111,7 +111,7 @@ type alias Block =
 
 
 type alias Blocks =
-    Dict String Block
+    DictList String Block
 
 
 encodeBlock : Block -> Encode.Value
@@ -124,12 +124,12 @@ encodeBlock block =
 
 addBlock : Block -> Blocks -> Blocks
 addBlock block blocks =
-    Dict.insert block.uuid block blocks
+    DictList.insert block.uuid block blocks
 
 
 removeBlock : Block -> Blocks -> Blocks
 removeBlock block blocks =
-    Dict.remove block.uuid blocks
+    DictList.remove block.uuid blocks
 
 
 renameBlock : String -> Block -> Block
@@ -139,7 +139,7 @@ renameBlock label block =
 
 getBlockByUUID : String -> Blocks -> Maybe Block
 getBlockByUUID uuid blocks =
-    Dict.get uuid blocks
+    DictList.get uuid blocks
 
 
 init : ( Model, Cmd Msg )
@@ -152,10 +152,10 @@ init =
             ]
     in
         ( { build = "0.0.1"
-          , panel = ElementsPanel
+          , panel = BlocksPanel
           , viewports = viewports
           , selectedBlock = Nothing
-          , blocks = Dict.empty
+          , blocks = DictList.empty
           }
         , Cmd.batch
             [ encodeViewports viewports |> sendToJs "init-viewports"
@@ -164,7 +164,7 @@ init =
 
 
 type Panel
-    = ElementsPanel
+    = BlocksPanel
     | GenericPanel
 
 
@@ -378,7 +378,7 @@ update msg model =
 updateFromJs : JsMsg -> Model -> ( Model, Cmd Msg )
 updateFromJs jsmsg model =
     case jsmsg of
-        NewElement block ->
+        NewBlock block ->
             let
                 blocks =
                     addBlock block model.blocks
@@ -489,8 +489,8 @@ sideMenu model =
 getPanels : Model -> List (Html Msg)
 getPanels model =
     case model.panel of
-        ElementsPanel ->
-            [ elementsPanel model
+        BlocksPanel ->
+            [ blocksPanel model
             , secondaryPanel model
             ]
 
@@ -530,7 +530,7 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Eléments", item = FARegular.clone, target = ElementsPanel }
+    [ { title = "Eléments", item = FARegular.clone, target = BlocksPanel }
     ]
 
 
@@ -567,77 +567,76 @@ build model =
 panel : Model -> Html Msg
 panel model =
     case model.panel of
-        ElementsPanel ->
-            elementsPanel model
+        BlocksPanel ->
+            blocksPanel model
 
         _ ->
             defaultPanel model
 
 
-elementsPanel : Model -> Html Msg
-elementsPanel model =
+blocksPanel : Model -> Html Msg
+blocksPanel model =
     div
         [ class "panel"
-        , class "elements-panel"
+        , class "blocks-panel"
         ]
-        [ h2 [] [ text "Elements" ]
-        , newBlockItem model
-        , elementsList model
+        [ h2 [] [ text "Blocks" ]
+        , blocksList model
         ]
 
 
-elementsList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
-elementsList elementsModel =
-    case elementsModel.selectedBlock of
+blocksList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
+blocksList blocksModel =
+    case blocksModel.selectedBlock of
         Just selected ->
-            ul [ class "elements" ] <| List.map (elementItemWithSelection selected) <| Dict.values elementsModel.blocks
+            ul [ class "blocks" ] <| (List.map (blockItemWithSelection selected) <| DictList.values blocksModel.blocks) ++ [ newBlockItem ]
 
         Nothing ->
-            ul [ class "elements" ] <| List.map elementItem <| Dict.values elementsModel.blocks
+            ul [ class "blocks" ] <| (List.map blockItem <| DictList.values blocksModel.blocks) ++ [ newBlockItem ]
 
 
-newBlockItem : Model -> Html Msg
-newBlockItem model =
-    div [ class "add-block" ]
-        [ input [ class "element-label", type_ "text", placeholder "New block", value "", onInput AddBlock ]
+newBlockItem : Html Msg
+newBlockItem =
+    li [ class "add-block" ]
+        [ input [ class "block-label", type_ "text", placeholder "New block", value "", onInput AddBlock ]
             []
         ]
 
 
-elementItem : Block -> Html Msg
-elementItem block =
-    li [ class "element-item" ] <|
-        elementItemContent block
+blockItem : Block -> Html Msg
+blockItem block =
+    li [ class "block-item" ] <|
+        blockItemContent block
 
 
-elementItemContent : Block -> List (Html Msg)
-elementItemContent block =
-    [ div [ class "element-info-wrapper", onClick (SelectBlock block) ]
-        [ input [ class "element-label", id block.uuid, value block.label, onInput (RenameBlock block) ]
+blockItemContent : Block -> List (Html Msg)
+blockItemContent block =
+    [ div [ class "block-info-wrapper", onClick (SelectBlock block) ]
+        [ input [ class "block-label", id block.uuid, value block.label, onInput (RenameBlock block) ]
             []
         , p
-            [ class "element-uuid" ]
+            [ class "block-uuid" ]
             [ text block.uuid ]
         ]
     , div
-        [ class "delete-element"
+        [ class "delete-block"
         , onClick (RemoveBlock block)
         ]
         [ FASolid.eraser ]
     ]
 
 
-elementItemWithSelection : Block -> Block -> Html Msg
-elementItemWithSelection selected block =
+blockItemWithSelection : Block -> Block -> Html Msg
+blockItemWithSelection selected block =
     let
         classes =
             if selected.uuid == block.uuid then
-                "element-item element-item__selected"
+                "block-item block-item__selected"
             else
-                "element-item"
+                "block-item"
     in
         li [ class classes ] <|
-            elementItemContent block
+            blockItemContent block
 
 
 defaultPanel : Model -> Html Msg

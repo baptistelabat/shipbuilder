@@ -9,12 +9,12 @@ const wrapperId = "three-wrapper"; // defined in elm
 let views = [];
 
 let hovered = null; // the first object under the cursor in the scene
-let selected = null; // the selected element in the scene
+let selected = null; // the selected object in the scene
 let wrapper = null; // parent of canvas, used for resizing
 let canvas = null;
 let renderer = null;
 let scene = null;
-let raycaster = null; // used to find the elements under the cursor on click, mousemove etc
+let raycaster = null; // used to find the objects under the cursor on click, mousemove etc
 
 app.ports.send.subscribe(function (message) {
     const data = message.data;
@@ -42,7 +42,7 @@ let sendToElm = function (tag, data) {
 let addCube = function (label, width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0, color = 0x5078ff) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     scene.add(cube);
-    sendToElm("new-element", { uuid: cube.uuid, label: label })
+    sendToElm("new-block", { uuid: cube.uuid, label: label })
 }
 
 let makeCube = function (width, height, depth, x, y, z, color) {

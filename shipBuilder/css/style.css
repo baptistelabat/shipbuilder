@@ -188,7 +188,7 @@ header .header-menu-item+.header-menu-item {
     overflow: hidden;
 }
 
-ul.elements {
+ul.blocks {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -198,7 +198,7 @@ ul.elements {
     padding: 0 12px 12px;
 }
 
-li.element-item, .add-block {
+li.block-item, .add-block {
     background-color: white;
     margin: 8px 0;
     box-shadow: 0px 4px 8px hsla(222, 20%, 20%, 6%);
@@ -206,7 +206,7 @@ li.element-item, .add-block {
     display: flex;
 }
 
-li.element-item .element-info-wrapper {
+li.block-item .block-info-wrapper {
     padding: 8px;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
@@ -214,15 +214,15 @@ li.element-item .element-info-wrapper {
     cursor: pointer;
 }
 
-li.element-item .element-info-wrapper:hover, li.element-item .element-info-wrapper:hover input.element-label {
+li.block-item .block-info-wrapper:hover {
     background: hsl(222, 53%, 98%);
 }
 
-li.element-item p {
+li.block-item p {
     margin: 4px 0;
 }
 
-li.element-item p.element-uuid {
+li.block-item p.block-uuid {
     font-size: 0.65em;
     color: hsl(222, 20%, 60%);
     white-space: nowrap;
@@ -230,7 +230,7 @@ li.element-item p.element-uuid {
     text-overflow: ellipsis;
 }
 
-li.element-item .delete-element {
+li.block-item .delete-block {
     display: flex;
     align-items: center;
     background-color: red;
@@ -240,25 +240,30 @@ li.element-item .delete-element {
     padding: 4px;
 }
 
-li.element-item .delete-element:hover {
+li.block-item .delete-block:hover {
     background: hsl(0, 100%, 37%);
 }
 
 
-li.element-item .delete-element svg {
+li.block-item .delete-block svg {
     height: 20px;
 }
 
-li.element-item__selected {
+li.block-item__selected {
     border-left: 4px solid hsl(222, 100%, 34%);
 }
 
 .add-block {
+    background-color: hsl(222, 53%, 98%);
+    border: 1px dashed hsl(222, 20%, 60%);
+    box-shadow: none;
     padding: 16px 8px;
 }
 
-input.element-label {
+
+input.block-label {
     width: 100%;
     border: none;
     border-bottom: 1px solid hsl(222, 20%, 85%);
+    background-color: transparent;
 }
