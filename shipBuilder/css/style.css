@@ -302,17 +302,21 @@ input.block-label {
 .blocks-panel__focus .focus-header {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
     border-bottom: 1px solid hsl(222, 53%, 85%);
+    height: 44px;
 }
 
 .blocks-panel__focus .focus-header .focus-back {
-    margin-right: 8px;
     background-color: hsl(222, 100%, 34%);
     color: white;
     padding: 4px;
-    border-radius: 8px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 .blocks-panel__focus .focus-header .focus-back:hover {
     background-color: hsl(222, 100%, 24%);
@@ -322,7 +326,16 @@ input.block-label {
     height: 16px;
 }
 
-
 .blocks-panel__focus .focus-header .focus-label {
-    size: 1.2em;
+    padding: 0 8px;
+    background-color: white;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.blocks-panel__focus .focus-header .focus-label input.block-label {
+    font-size: 1.05em;
 }
