@@ -1,6 +1,7 @@
 port module Main exposing (main, Viewports, Viewport, encodeViewport, encodeViewports)
 
 import Color exposing (Color, hsl)
+import ColorPicker
 import DictList exposing (DictList)
 import Dom
 import FontAwesome.Regular as FARegular
@@ -106,6 +107,7 @@ type JsMsg
 
 type alias Model =
     { build : String
+    , colorPicker : ColorPicker.State
     , panel : Panel
     , viewports : Viewports
     , selectedBlock : Maybe Block
@@ -162,6 +164,7 @@ init =
             ]
     in
         ( { build = "0.0.1"
+          , colorPicker = ColorPicker.empty
           , panel = BlocksPanel Nothing
           , viewports = viewports
           , selectedBlock = Nothing
@@ -314,6 +317,7 @@ bottomRightCornerViewport background viewport =
 
 type Msg
     = NoOp
+    | ChangeBlockColor Block ColorPicker.Msg
     | SelectPanel Panel
     | AddBlock String
     | FromJs JsMsg
@@ -330,11 +334,80 @@ encodeAddBlockCommand label =
         ]
 
 
+updateBlockInModel : Block -> Model -> Model
+updateBlockInModel block model =
+    model
+        |> updateBlockInBlocks block
+        |> updateBlockInSelection block
+        |> updateBlockInPanel block
+
+
+updateBlockInBlocks : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
+updateBlockInBlocks block model =
+    { model | blocks = DictList.insert block.uuid block model.blocks }
+
+
+updateBlockInSelection : Block -> { a | selectedBlock : Maybe Block } -> { a | selectedBlock : Maybe Block }
+updateBlockInSelection block model =
+    { model
+        | selectedBlock =
+            case model.selectedBlock of
+                Just selected ->
+                    if (selected.uuid == block.uuid) then
+                        Just block
+                    else
+                        model.selectedBlock
+
+                Nothing ->
+                    Nothing
+    }
+
+
+updateBlockInPanel : Block -> { a | panel : Panel } -> { a | panel : Panel }
+updateBlockInPanel block model =
+    { model
+        | panel =
+            case model.panel of
+                BlocksPanel maybeBlock ->
+                    case maybeBlock of
+                        Just focus ->
+                            if focus.uuid == block.uuid then
+                                BlocksPanel (Just block)
+                            else
+                                BlocksPanel maybeBlock
+
+                        Nothing ->
+                            model.panel
+
+                GenericPanel ->
+                    model.panel
+    }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NoOp ->
             model ! []
+
+        ChangeBlockColor block colorPickerMsg ->
+            let
+                ( state, color ) =
+                    ColorPicker.update colorPickerMsg block.color model.colorPicker
+
+                updatedModel : Model
+                updatedModel =
+                    case color of
+                        Just col ->
+                            updateBlockInModel { block | color = col } model
+
+                        Nothing ->
+                            model
+            in
+                { updatedModel
+                    | colorPicker = state
+                }
+                    ! []
 
         AddBlock label ->
             model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
@@ -471,6 +544,15 @@ content model =
         [ sideMenu model
         , workspace model
         ]
+
+
+colorToCssRgbString : Color -> String
+colorToCssRgbString color =
+    let
+        rgb =
+            Color.toRgb color
+    in
+        "rgba(" ++ (toString rgb.red) ++ "," ++ (toString rgb.green) ++ "," ++ (toString rgb.blue) ++ ")"
 
 
 
@@ -641,6 +723,10 @@ blocksPanelFocusOn block model =
         , div [ class "focus-sub-header" ]
             [ div [ class "focus-uuid" ] [ text block.uuid ]
             ]
+        , div [ class "focus-properties" ]
+            [ ColorPicker.view block.color model.colorPicker
+                |> Html.map (ChangeBlockColor block)
+            ]
         ]
 
 
@@ -670,7 +756,7 @@ newBlockItem =
 
 blockItem : Block -> Html Msg
 blockItem block =
-    li [ class "block-item" ] <|
+    li [ class "block-item", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
         blockItemContent block
 
 
@@ -697,15 +783,11 @@ blockItemContent block =
 
 blockItemWithSelection : Block -> Block -> Html Msg
 blockItemWithSelection selected block =
-    let
-        classes =
-            if selected.uuid == block.uuid then
-                "block-item block-item__selected"
-            else
-                "block-item"
-    in
-        li [ class classes ] <|
+    if selected.uuid == block.uuid then
+        li [ class "block-item block-item__selected", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
             blockItemContent block
+    else
+        blockItem block
 
 
 defaultPanel : Model -> Html Msg

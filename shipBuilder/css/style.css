@@ -206,6 +206,11 @@ li.block-item, .add-block {
     display: flex;
 }
 
+li.block-item {
+    border-left-width: 2px;
+    border-left-style: solid;
+}
+
 li.block-item .block-info-wrapper {
     padding: 8px;
     border-top-left-radius: 8px;
@@ -277,7 +282,8 @@ li.block-item .block-action svg {
 }
 
 li.block-item__selected {
-    border-left: 4px solid hsl(222, 100%, 34%);
+    border-left-width: 6px;
+    border-left-style: solid;
 }
 
 .add-block {
