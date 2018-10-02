@@ -628,11 +628,16 @@ blockItemContent block =
             [ class "block-uuid" ]
             [ text block.uuid ]
         ]
+    , div [ class "block-actions" ]
+        [ div [ class "block-action focus-block", onClick (SelectPanel (BlocksPanel (Just block))) ]
+            [ FASolid.arrow_right
+            ]
     , div
-        [ class "delete-block"
+            [ class "block-action delete-block"
         , onClick (RemoveBlock block)
         ]
-        [ FASolid.eraser ]
+            [ FASolid.trash ]
+        ]
     ]
 
 

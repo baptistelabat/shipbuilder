@@ -230,14 +230,41 @@ li.block-item p.block-uuid {
     text-overflow: ellipsis;
 }
 
-li.block-item .delete-block {
+li.block-item .block-actions {
     display: flex;
+    flex-direction: column;
+    width: 28px;
+}
+
+li.block-item .block-action {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
     align-items: center;
+    padding: 4px;
+}
+
+li.block-item .block-action:first-child {
+    border-top-right-radius: 8px;
+}
+
+li.block-item .block-action:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+li.block-item .focus-block {
+    background-color: hsl(222, 100%, 34%);
+    color: white;
+}
+
+li.block-item .focus-block:hover {
+    background: hsl(222, 100%, 24%);
+}
+
+
+li.block-item .delete-block {
     background-color: red;
     color: white;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-    padding: 4px;
 }
 
 li.block-item .delete-block:hover {
@@ -245,8 +272,8 @@ li.block-item .delete-block:hover {
 }
 
 
-li.block-item .delete-block svg {
-    height: 20px;
+li.block-item .block-action svg {
+    height: 16px;
 }
 
 li.block-item__selected {
@@ -259,7 +286,6 @@ li.block-item__selected {
     box-shadow: none;
     padding: 16px 8px;
 }
-
 
 input.block-label {
     width: 100%;
