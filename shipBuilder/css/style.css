@@ -198,7 +198,7 @@ ul.elements {
     padding: 0 12px 12px;
 }
 
-li.element-item {
+li.element-item, .add-block {
     background-color: white;
     margin: 8px 0;
     box-shadow: 0px 4px 8px hsla(222, 20%, 20%, 6%);
@@ -211,9 +211,10 @@ li.element-item .element-info-wrapper {
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
     width: calc(100% - 28px);
+    cursor: pointer;
 }
 
-li.element-item .element-info-wrapper:hover {
+li.element-item .element-info-wrapper:hover, li.element-item .element-info-wrapper:hover input.element-label {
     background: hsl(222, 53%, 98%);
 }
 
@@ -250,4 +251,14 @@ li.element-item .delete-element svg {
 
 li.element-item__selected {
     border-left: 4px solid hsl(222, 100%, 34%);
+}
+
+.add-block {
+    padding: 16px 8px;
+}
+
+input.element-label {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid hsl(222, 20%, 85%);
 }

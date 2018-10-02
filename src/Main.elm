@@ -567,7 +567,7 @@ elementsList elementsModel =
 newBlockItem : Model -> Html Msg
 newBlockItem model =
     div [ class "add-block" ]
-        [ input [ type_ "text", placeholder "New block", value "", onInput AddBlock ]
+        [ input [ class "element-label", type_ "text", placeholder "New block", value "", onInput AddBlock ]
             []
         ]
 
