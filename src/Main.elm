@@ -334,6 +334,14 @@ encodeAddBlockCommand label =
         ]
 
 
+encodeChangeColorCommand : Block -> Encode.Value
+encodeChangeColorCommand block =
+    Encode.object
+        [ ( "uuid", Encode.string block.uuid )
+        , ( "color", encodeColor block.color )
+        ]
+
+
 updateBlockInModel : Block -> Model -> Model
 updateBlockInModel block model =
     model
@@ -394,20 +402,23 @@ update msg model =
             let
                 ( state, color ) =
                     ColorPicker.update colorPickerMsg block.color model.colorPicker
-
-                updatedModel : Model
-                updatedModel =
-                    case color of
-                        Just col ->
-                            updateBlockInModel { block | color = col } model
-
-                        Nothing ->
-                            model
             in
-                { updatedModel
-                    | colorPicker = state
-                }
-                    ! []
+                case color of
+                    Just col ->
+                        let
+                            updatedBlock =
+                                { block | color = col }
+
+                            updatedModel =
+                                updateBlockInModel updatedBlock model
+                        in
+                            { updatedModel
+                                | colorPicker = state
+                            }
+                                ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
+
+                    Nothing ->
+                        model ! []
 
         AddBlock label ->
             model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
@@ -431,41 +442,12 @@ update msg model =
                 { model | blocks = blocks, selectedBlock = selectedBlock } ! [ sendToJs "remove-block" (encodeBlock block) ]
 
         RenameBlock blockToRename label ->
-            case getBlockByUUID blockToRename.uuid model.blocks of
-                Just block ->
-                    let
-                        renamed =
-                            renameBlock label block
-
-                        blocks =
-                            addBlock renamed model.blocks
-
-                        selected =
-                            case model.selectedBlock of
-                                Just currentSelected ->
-                                    if currentSelected.uuid == renamed.uuid then
-                                        Just renamed
-                                    else
-                                        model.selectedBlock
-
-                                Nothing ->
-                                    model.selectedBlock
-
-                        panel =
-                            case model.panel of
-                                BlocksPanel (Just block) ->
-                                    if block.uuid == renamed.uuid then
-                                        BlocksPanel (Just renamed)
-                                    else
-                                        model.panel
-
-                                _ ->
-                                    model.panel
-                    in
-                        { model | blocks = blocks, selectedBlock = selected, panel = panel } ! []
-
-                Nothing ->
-                    model ! []
+            let
+                renamed =
+                    renameBlock label blockToRename
+            in
+                updateBlockInModel renamed model
+                    ! []
 
         SelectBlock block ->
             { model | selectedBlock = Just block } ! [ sendToJs "select-block" (encodeBlock block) ]

@@ -31,12 +31,26 @@ app.ports.send.subscribe(function (message) {
         case "select-block":
             selectBlock(data);
             break;
+        case "update-color":
+            updateColor(data);
         default:
     }
 })
 
 let sendToElm = function (tag, data) {
     app.ports.receive.send({ tag: tag, data: data });
+}
+
+let updateColor = function (data) {
+    const object = findBlockByUUID(data.uuid);
+    if (object) {
+        object.baseColor = getThreeColorFromElmColor(data.color);
+        if ((selected && selected.uuid === object.uuid) || (hovered && hovered.uuid === object.uuid)) {
+            highlightObject(object);
+        } else {
+            resetElementColor(object);
+        }
+    }
 }
 
 let getThreeColorFromElmColor = function (color) {
