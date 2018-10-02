@@ -607,6 +607,9 @@ blocksPanelFocusOn block model =
             [ div [ class "focus-back", onClick (SelectPanel (BlocksPanel Nothing)) ] [ FASolid.arrow_left ]
             , div [ class "focus-label" ] [ editableBlockName block ]
             ]
+        , div [ class "focus-sub-header" ]
+            [ div [ class "focus-uuid" ] [ text block.uuid ]
+            ]
         ]
 
 

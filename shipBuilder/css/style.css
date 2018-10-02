@@ -303,9 +303,22 @@ input.block-label {
     display: flex;
     align-items: center;
     margin-bottom: 8px;
+    height: 40px;
+}
+
+.blocks-panel__focus .focus-sub-header {
+    margin-bottom: 8px;
     padding-bottom: 8px;
     border-bottom: 1px solid hsl(222, 53%, 85%);
-    height: 44px;
+    color: hsl(222, 20%, 60%);
+    font-size: 0.6em;
+
+}
+
+.blocks-panel__focus .focus-sub-header .focus-uuid {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .blocks-panel__focus .focus-header .focus-back {
