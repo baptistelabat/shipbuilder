@@ -152,7 +152,7 @@ init =
             ]
     in
         ( { build = "0.0.1"
-          , panel = BlocksPanel
+          , panel = BlocksPanel Nothing
           , viewports = viewports
           , selectedBlock = Nothing
           , blocks = DictList.empty
@@ -164,7 +164,7 @@ init =
 
 
 type Panel
-    = BlocksPanel
+    = BlocksPanel (Maybe Block)
     | GenericPanel
 
 
@@ -483,13 +483,13 @@ headerMenuItem itemTitle item =
 sideMenu : Model -> Html Msg
 sideMenu model =
     div [ class "side" ] <|
-        List.concat [ [ panelMenu model ], getPanels model ]
+        List.concat [ [ panelMenu model ], [ panel model ] ]
 
 
 getPanels : Model -> List (Html Msg)
 getPanels model =
     case model.panel of
-        BlocksPanel ->
+        BlocksPanel maybeBlock ->
             [ blocksPanel model
             ]
 
@@ -529,7 +529,7 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Eléments", item = FARegular.clone, target = BlocksPanel }
+    [ { title = "Eléments", item = FARegular.clone, target = BlocksPanel Nothing }
     ]
 
 
@@ -566,8 +566,13 @@ build model =
 panel : Model -> Html Msg
 panel model =
     case model.panel of
-        BlocksPanel ->
-            blocksPanel model
+        BlocksPanel maybeBlock ->
+            case maybeBlock of
+                Just block ->
+                    blocksPanelFocusOn block model
+
+                Nothing ->
+                    blocksPanel model
 
         _ ->
             defaultPanel model
@@ -576,12 +581,18 @@ panel model =
 blocksPanel : Model -> Html Msg
 blocksPanel model =
     div
-        [ class "panel"
-        , class "blocks-panel"
+        [ class "panel blocks-panel"
         ]
         [ h2 [] [ text "Blocks" ]
         , blocksList model
         ]
+
+
+blocksPanelFocusOn : Block -> Model -> Html Msg
+blocksPanelFocusOn block model =
+    div
+        [ class "panel blocks-panel blocks-panel__focus" ]
+        [ text "focus" ]
 
 
 blocksList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
