@@ -2,6 +2,7 @@ port module Main exposing (main, Viewports, Viewport, encodeViewport, encodeView
 
 import Color exposing (Color, hsl)
 import Dict exposing (Dict)
+import Dom
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
 import Html exposing (..)
@@ -11,6 +12,7 @@ import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Math.Vector3 exposing (Vec3, vec3, toRecord)
+import Task
 import Debug
 
 
@@ -349,7 +351,7 @@ updateFromJs jsmsg model =
                 blocks =
                     addBlock block model.blocks
             in
-                { model | blocks = blocks } ! []
+                { model | blocks = blocks } ! [ Task.attempt (\_ -> NoOp) (Dom.focus block.uuid) ]
 
         Select uuid ->
             let
@@ -547,7 +549,7 @@ elementsPanel model =
         , class "elements-panel"
         ]
         [ h2 [] [ text "Elements" ]
-        , button [ onClick (AddBlock "testLabel") ] [ text "Add block" ]
+        , newBlockItem model
         , elementsList model
         ]
 
@@ -562,6 +564,14 @@ elementsList elementsModel =
             ul [ class "elements" ] <| List.map elementItem <| Dict.values elementsModel.blocks
 
 
+newBlockItem : Model -> Html Msg
+newBlockItem model =
+    div [ class "add-block" ]
+        [ input [ type_ "text", placeholder "New block", value "", onInput AddBlock ]
+            []
+        ]
+
+
 elementItem : Block -> Html Msg
 elementItem block =
     li [ class "element-item" ] <|
@@ -571,8 +581,8 @@ elementItem block =
 elementItemContent : Block -> List (Html Msg)
 elementItemContent block =
     [ div [ class "element-info-wrapper", onClick (SelectBlock block) ]
-        [ p [ class "element-label" ]
-            [ text block.label ]
+        [ input [ class "element-label", id block.uuid, value block.label ]
+            []
         , p
             [ class "element-uuid" ]
             [ text block.uuid ]
