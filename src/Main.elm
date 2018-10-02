@@ -550,7 +550,17 @@ tab title item panel model =
         -- Check if active
         active : Bool
         active =
-            panel == model.panel
+            case panel of
+                BlocksPanel _ ->
+                    case model.panel of
+                        BlocksPanel _ ->
+                            True
+
+                        _ ->
+                            False
+
+                GenericPanel ->
+                    model.panel == GenericPanel
 
         classes =
             if active then
