@@ -359,8 +359,19 @@ update msg model =
 
                                 Nothing ->
                                     model.selectedBlock
+
+                        panel =
+                            case model.panel of
+                                BlocksPanel (Just block) ->
+                                    if block.uuid == renamed.uuid then
+                                        BlocksPanel (Just renamed)
+                                    else
+                                        model.panel
+
+                                _ ->
+                                    model.panel
                     in
-                        { model | blocks = blocks, selectedBlock = selected } ! []
+                        { model | blocks = blocks, selectedBlock = selected, panel = panel } ! []
 
                 Nothing ->
                     model ! []
@@ -641,10 +652,10 @@ blockItemContent block =
         [ div [ class "block-action focus-block", onClick (SelectPanel (BlocksPanel (Just block))) ]
             [ FASolid.arrow_right
             ]
-    , div
+        , div
             [ class "block-action delete-block"
-        , onClick (RemoveBlock block)
-        ]
+            , onClick (RemoveBlock block)
+            ]
             [ FASolid.trash ]
         ]
     ]
