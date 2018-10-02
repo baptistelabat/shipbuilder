@@ -293,3 +293,36 @@ input.block-label {
     border-bottom: 1px solid hsl(222, 20%, 85%);
     background-color: transparent;
 }
+
+.blocks-panel__focus {
+    display: flex;
+    flex-direction: column;
+}
+
+.blocks-panel__focus .focus-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid hsl(222, 53%, 85%);
+}
+
+.blocks-panel__focus .focus-header .focus-back {
+    margin-right: 8px;
+    background-color: hsl(222, 100%, 34%);
+    color: white;
+    padding: 4px;
+    border-radius: 8px;
+}
+.blocks-panel__focus .focus-header .focus-back:hover {
+    background-color: hsl(222, 100%, 24%);
+}
+
+.blocks-panel__focus .focus-header .focus-back svg {
+    height: 16px;
+}
+
+
+.blocks-panel__focus .focus-header .focus-label {
+    size: 1.2em;
+}

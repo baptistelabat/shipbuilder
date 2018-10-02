@@ -592,7 +592,17 @@ blocksPanelFocusOn : Block -> Model -> Html Msg
 blocksPanelFocusOn block model =
     div
         [ class "panel blocks-panel blocks-panel__focus" ]
-        [ text "focus" ]
+        [ div [ class "focus-header" ]
+            [ div [ class "focus-back", onClick (SelectPanel (BlocksPanel Nothing)) ] [ FASolid.arrow_left ]
+            , div [ class "focus-label" ] [ editableBlockName block ]
+            ]
+        ]
+
+
+editableBlockName : Block -> Html Msg
+editableBlockName block =
+    input [ class "block-label", id block.uuid, value block.label, onInput (RenameBlock block) ]
+        []
 
 
 blocksList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
