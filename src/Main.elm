@@ -56,6 +56,15 @@ newBlockDecoder =
     Pipeline.decode Block
         |> Pipeline.required "uuid" Decode.string
         |> Pipeline.required "label" Decode.string
+        |> Pipeline.required "color" decodeRgbRecord
+
+
+decodeRgbRecord : Decode.Decoder Color
+decodeRgbRecord =
+    Pipeline.decode Color.rgb
+        |> Pipeline.required "red" Decode.int
+        |> Pipeline.required "green" Decode.int
+        |> Pipeline.required "blue" Decode.int
 
 
 handleJsMessage : JsData -> Msg
@@ -107,6 +116,7 @@ type alias Model =
 type alias Block =
     { uuid : String
     , label : String
+    , color : Color
     }
 
 
@@ -312,6 +322,14 @@ type Msg
     | RenameBlock Block String
 
 
+encodeAddBlockCommand : String -> Encode.Value
+encodeAddBlockCommand label =
+    Encode.object
+        [ ( "label", Encode.string label )
+        , ( "color", encodeColor Color.blue )
+        ]
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -319,7 +337,7 @@ update msg model =
             model ! []
 
         AddBlock label ->
-            model ! [ sendToJs "add-block" (Encode.string label) ]
+            model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
 
         RemoveBlock block ->
             let

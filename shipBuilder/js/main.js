@@ -23,7 +23,7 @@ app.ports.send.subscribe(function (message) {
             initThree(data);
             break;
         case "add-block":
-            addCube(data)
+            addCube(data.label, getThreeColorFromElmColor(data.color));
             break;
         case "remove-block":
             removeBlock(data);
@@ -39,10 +39,19 @@ let sendToElm = function (tag, data) {
     app.ports.receive.send({ tag: tag, data: data });
 }
 
-let addCube = function (label, width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0, color = 0x5078ff) {
+let getThreeColorFromElmColor = function (color) {
+    return (new THREE.Color(color.red / 255, color.green / 255, color.blue / 255));
+}
+
+let addCube = function (label, color = 0x5078ff, width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     scene.add(cube);
-    sendToElm("new-block", { uuid: cube.uuid, label: label })
+    sendToElm("new-block", { uuid: cube.uuid, label: label, color: getRgbRecord(color) });
+}
+
+let getRgbRecord = function (threeColor) {
+    const rgbArray = threeColor.toArray();
+    return { red: Math.round(rgbArray[0] * 255), green: Math.round(rgbArray[1] * 255), blue: Math.round(rgbArray[2] * 255) };
 }
 
 let makeCube = function (width, height, depth, x, y, z, color) {
@@ -131,7 +140,8 @@ let displayLabels = function () {
     });
 }
 
-let shadeHexColor = function (color, percent) {
+let shadeThreeColor = function (threeColor, percent) {
+    var color = threeColor.getHex();
     var t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = color >> 16, G = color >> 8 & 0x00FF, B = color & 0x0000FF;
     return 0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B);
 }
@@ -149,7 +159,7 @@ let animate = function () {
 }
 
 let highlightObject = function (object) {
-    object.material.color.set(shadeHexColor(object.baseColor, 0.333))
+    object.material.color.set(shadeThreeColor(object.baseColor, 0.333))
 }
 
 let resetElementColor = function (element) {
@@ -626,7 +636,7 @@ function animate() {
 
     if (intersectMeshes.length) {
         let mesh = intersectMeshes[0];
-        mesh.material.color.set(shadeHexColor(mesh.baseColor, 0.2));
+        mesh.material.color.set(shadeThreeColor(mesh.baseColor, 0.2));
     }
 
     requestAnimationFrame(animate);
@@ -642,7 +652,7 @@ function getMeshesUnder() {
 
 }
 
-function shadeHexColor(color, percent) {
+function shadeThreeColor(color, percent) {
     var t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = color >> 16, G = color >> 8 & 0x00FF, B = color & 0x0000FF;
     return 0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B);
 }
