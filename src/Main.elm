@@ -58,6 +58,36 @@ newBlockDecoder =
         |> Pipeline.required "uuid" Decode.string
         |> Pipeline.required "label" Decode.string
         |> Pipeline.required "color" decodeRgbRecord
+        |> Pipeline.required "position" decodePosition
+        |> Pipeline.required "size" decodeSize
+
+
+decodePosition : Decode.Decoder Position
+decodePosition =
+    Pipeline.decode Position
+        |> Pipeline.required "x" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "y" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "z" (Decode.map floatToFloatInput Decode.float)
+
+
+decodeSize : Decode.Decoder Size
+decodeSize =
+    Pipeline.decode Size
+        |> Pipeline.required "width" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "height" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "depth" (Decode.map floatToFloatInput Decode.float)
+
+
+decodeFloatInput : Decode.Decoder FloatInput
+decodeFloatInput =
+    Pipeline.decode FloatInput
+        |> Pipeline.required "value" Decode.float
+        |> Pipeline.required "string" Decode.string
+
+
+floatToFloatInput : Float -> FloatInput
+floatToFloatInput float =
+    { value = float, string = toString float }
 
 
 decodeRgbRecord : Decode.Decoder Color
@@ -119,7 +149,17 @@ type alias Block =
     { uuid : String
     , label : String
     , color : Color
+    , position : Position
+    , size : Size
     }
+
+
+type alias Position =
+    { x : FloatInput, y : FloatInput, z : FloatInput }
+
+
+type alias Size =
+    { width : FloatInput, height : FloatInput, depth : FloatInput }
 
 
 type alias Blocks =
@@ -131,6 +171,15 @@ encodeBlock block =
     Encode.object
         [ ( "uuid", Encode.string block.uuid )
         , ( "label", Encode.string block.label )
+        ]
+
+
+encodePosition : Position -> Encode.Value
+encodePosition position =
+    Encode.object
+        [ ( "x", Encode.float position.x.value )
+        , ( "y", Encode.float position.y.value )
+        , ( "z", Encode.float position.z.value )
         ]
 
 
@@ -321,8 +370,12 @@ type Msg
     | SelectPanel Panel
     | AddBlock String
     | FromJs JsMsg
+    | UpdatePositionX Block String
+    | UpdatePositionY Block String
+    | UpdatePositionZ Block String
     | RemoveBlock Block
     | SelectBlock Block
+    | SyncPositionInput Block
     | RenameBlock Block String
 
 
@@ -339,6 +392,14 @@ encodeChangeColorCommand block =
     Encode.object
         [ ( "uuid", Encode.string block.uuid )
         , ( "color", encodeColor block.color )
+        ]
+
+
+encodeUpdatePositionCommand : { a | uuid : String, position : Position } -> Encode.Value
+encodeUpdatePositionCommand block =
+    Encode.object
+        [ ( "uuid", Encode.string block.uuid )
+        , ( "position", encodePosition block.position )
         ]
 
 
@@ -369,6 +430,36 @@ updateBlockInSelection block model =
                 Nothing ->
                     Nothing
     }
+
+
+asValueInFloatValue : FloatInput -> Float -> FloatInput
+asValueInFloatValue floatInput value =
+    { floatInput | value = value }
+
+
+asStringInFloatValue : FloatInput -> String -> FloatInput
+asStringInFloatValue floatInput string =
+    { floatInput | string = string }
+
+
+asXInPosition : Position -> FloatInput -> Position
+asXInPosition position x =
+    { position | x = x }
+
+
+asYInPosition : Position -> FloatInput -> Position
+asYInPosition position y =
+    { position | y = y }
+
+
+asZInPosition : Position -> FloatInput -> Position
+asZInPosition position z =
+    { position | z = z }
+
+
+asPositionInBlock : Block -> Position -> Block
+asPositionInBlock block position =
+    { block | position = position }
 
 
 updateBlockInPanel : Block -> { a | panel : Panel } -> { a | panel : Panel }
@@ -455,8 +546,61 @@ update msg model =
         SelectPanel panel ->
             { model | panel = panel } ! []
 
+        SyncPositionInput block ->
+            let
+                updatedModel : Model
+                updatedModel =
+                    syncFloatInput block.position.x
+                        |> asXInPosition block.position
+                        |> flip asYInPosition (syncFloatInput block.position.y)
+                        |> flip asZInPosition (syncFloatInput block.position.z)
+                        |> asPositionInBlock block
+                        |> flip updateBlockInModel model
+            in
+                updatedModel ! []
+
+        UpdatePositionX block input ->
+            updateOnePosition block input .x asXInPosition model
+
+        UpdatePositionY block input ->
+            updateOnePosition block input .y asYInPosition model
+
+        UpdatePositionZ block input ->
+            updateOnePosition block input .z asZInPosition model
+
         FromJs jsmsg ->
             updateFromJs jsmsg model
+
+
+updateOnePosition : Block -> String -> (Position -> FloatInput) -> (Position -> FloatInput -> Position) -> Model -> ( Model, Cmd msg )
+updateOnePosition block input accessor updateFunction model =
+    case String.toFloat input of
+        Ok value ->
+            let
+                updatedBlock : Block
+                updatedBlock =
+                    value
+                        |> asValueInFloatValue (accessor block.position)
+                        |> flip asStringInFloatValue input
+                        |> updateFunction block.position
+                        |> asPositionInBlock block
+            in
+                updateBlockInModel updatedBlock model
+                    ! [ sendToJs "update-position" (encodeUpdatePositionCommand updatedBlock) ]
+
+        Err error ->
+            (input
+                |> asStringInFloatValue (accessor block.position)
+                |> updateFunction block.position
+                |> asPositionInBlock block
+                |> flip updateBlockInModel model
+            )
+                ! []
+
+
+syncFloatInput : FloatInput -> FloatInput
+syncFloatInput input =
+    { input | string = toString input.value }
 
 
 updateFromJs : JsMsg -> Model -> ( Model, Cmd Msg )
@@ -705,11 +849,39 @@ blocksPanelFocusOn block model =
         , div [ class "focus-sub-header" ]
             [ div [ class "focus-uuid" ] [ text block.uuid ]
             ]
-        , div [ class "focus-properties" ]
-            [ ColorPicker.view block.color model.colorPicker
-                |> Html.map (ChangeBlockColor block)
-            ]
+        , div [ class "focus-properties" ] <|
+            blockProperties block model
         ]
+
+
+blockProperties : Block -> Model -> List (Html Msg)
+blockProperties block model =
+    [ ColorPicker.view block.color model.colorPicker
+        |> Html.map (ChangeBlockColor block)
+    , div [ class "block-position" ]
+        [ positionInput .x UpdatePositionX block
+        , positionInput .y UpdatePositionY block
+        , positionInput .z UpdatePositionZ block
+        ]
+    ]
+
+
+positionInput : (Position -> FloatInput) -> (Block -> String -> Msg) -> Block -> Html Msg
+positionInput getPosition msg block =
+    input
+        [ class "block-position-input"
+        , type_ "text"
+        , value (.string (getPosition block.position))
+        , onInput (msg block)
+        , onBlur (SyncPositionInput block)
+        ]
+        []
+
+
+type alias FloatInput =
+    { value : Float
+    , string : String
+    }
 
 
 editableBlockName : Block -> Html Msg

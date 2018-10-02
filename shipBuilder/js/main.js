@@ -33,11 +33,15 @@ app.ports.send.subscribe(function (message) {
             break;
         case "update-color":
             updateColor(data);
+            break;
+        case "update-position":
+            updatePosition(data);
         default:
     }
 })
 
 let sendToElm = function (tag, data) {
+    console.log(tag, data);
     app.ports.receive.send({ tag: tag, data: data });
 }
 
@@ -45,10 +49,28 @@ let updateColor = function (data) {
     const object = findBlockByUUID(data.uuid);
     if (object) {
         object.baseColor = getThreeColorFromElmColor(data.color);
-        if ((selected && selected.uuid === object.uuid) || (hovered && hovered.uuid === object.uuid)) {
+        if (selected && selected.uuid === object.uuid) {
             highlightObject(object);
+            selected = object;
+        } else if (hovered && hovered.uuid === object.uuid) {
+            highlightObject(object);
+            hovered = object;
         } else {
             resetElementColor(object);
+        }
+    }
+}
+// TODO: update hovered and selected
+
+let updatePosition = function (data) {
+    const object = findBlockByUUID(data.uuid);
+    if (object) {
+        const position = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
+        object.position.copy(position);
+        if (selected && selected.uuid === object.uuid) {
+            selected = object;
+        } else if (hovered && hovered.uuid === object.uuid) {
+            hovered = object;
         }
     }
 }
@@ -57,10 +79,31 @@ let getThreeColorFromElmColor = function (color) {
     return (new THREE.Color(color.red / 255, color.green / 255, color.blue / 255));
 }
 
+let getObjectSize = function (object) {
+    object.geometry.computeBoundingBox();
+    var bb = object.geometry.boundingBox;
+    return {
+        width: bb.max.x - bb.min.x,
+        height: bb.max.y - bb.min.y,
+        depth: bb.max.z - bb.min.z
+    }
+}
+
 let addCube = function (label, color = 0x5078ff, width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     scene.add(cube);
-    sendToElm("new-block", { uuid: cube.uuid, label: label, color: getRgbRecord(color) });
+    console.log(cube);
+    sendToElm("new-block", {
+        uuid: cube.uuid,
+        label: label,
+        color: getRgbRecord(color),
+        position: {
+            x: cube.position.x,
+            y: cube.position.y,
+            z: cube.position.z
+        },
+        size: getObjectSize(cube)
+    });
 }
 
 let getRgbRecord = function (threeColor) {
