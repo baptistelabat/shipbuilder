@@ -290,6 +290,9 @@ let onClick = function (event) {
     switch (event.which) {
         case 1: // left click
             if (activeViewport && hovered) {
+                if (selected && selected.uuid !== hovered.uuid) {
+                    resetElementColor(selected);
+                }
                 selected = hovered;
                 sendToElm("select", selected.uuid);
             }
