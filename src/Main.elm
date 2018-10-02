@@ -859,23 +859,29 @@ blockProperties block model =
     [ ColorPicker.view block.color model.colorPicker
         |> Html.map (ChangeBlockColor block)
     , div [ class "block-position" ]
-        [ positionInput .x UpdatePositionX block
-        , positionInput .y UpdatePositionY block
-        , positionInput .z UpdatePositionZ block
+        [ positionInput "x" .x UpdatePositionX block
+        , positionInput "y" .y UpdatePositionY block
+        , positionInput "z" .z UpdatePositionZ block
         ]
     ]
 
 
-positionInput : (Position -> FloatInput) -> (Block -> String -> Msg) -> Block -> Html Msg
-positionInput getPosition msg block =
-    input
-        [ class "block-position-input"
-        , type_ "text"
-        , value (.string (getPosition block.position))
-        , onInput (msg block)
-        , onBlur (SyncPositionInput block)
+positionInput : String -> (Position -> FloatInput) -> (Block -> String -> Msg) -> Block -> Html Msg
+positionInput inputLabel getPosition msg block =
+    div [ class "input-group" ]
+        [ label [ for ("position-" ++ inputLabel) ]
+            [ text inputLabel ]
+        , input
+            [ class "block-position-input"
+            , name ("position-" ++ inputLabel)
+            , id ("position-" ++ inputLabel)
+            , type_ "text"
+            , value (.string (getPosition block.position))
+            , onInput (msg block)
+            , onBlur (SyncPositionInput block)
+            ]
+            []
         ]
-        []
 
 
 type alias FloatInput =
