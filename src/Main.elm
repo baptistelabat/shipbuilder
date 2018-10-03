@@ -462,6 +462,26 @@ asPositionInBlock block position =
     { block | position = position }
 
 
+asWidthInSize : Size -> FloatInput -> Size
+asWidthInSize size width =
+    { size | width = width }
+
+
+asHeightInSize : Size -> FloatInput -> Size
+asHeightInSize size height =
+    { size | height = height }
+
+
+asDepthInSize : Size -> FloatInput -> Size
+asDepthInSize size depth =
+    { size | depth = depth }
+
+
+asSizeInBlock : Block -> Size -> Block
+asSizeInBlock block size =
+    { block | size = size }
+
+
 updateBlockInPanel : Block -> { a | panel : Panel } -> { a | panel : Panel }
 updateBlockInPanel block model =
     { model
