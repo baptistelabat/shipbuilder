@@ -59,8 +59,7 @@ let updateColor = function (data) {
     if (object) {
         object.baseColor = getThreeColorFromElmColor(data.color);
         if (selected && selected.uuid === object.uuid) {
-            highlightObject(object);
-            selected = object;
+            selectBlock(object);
         } else if (hovered && hovered.uuid === object.uuid) {
             highlightObject(object);
             hovered = object;
@@ -76,7 +75,7 @@ let updatePosition = function (data) {
         const position = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
         object.position.copy(position);
         if (selected && selected.uuid === object.uuid) {
-            selected = object;
+            selectBlock(object);
         } else if (hovered && hovered.uuid === object.uuid) {
             hovered = object;
         }
@@ -91,7 +90,7 @@ let updateHeight = function (data) {
         const scale = object.scale;
         object.scale.set(scale.x, newHeight / currentHeight, scale.z);
         if (selected && selected.uuid === object.uuid) {
-            selected = object;
+            selectBlock(object);
         } else if (hovered && hovered.uuid === object.uuid) {
             hovered = object;
         }
@@ -106,7 +105,7 @@ let updateWidth = function (data) {
         const scale = object.scale;
         object.scale.set(newWidth / currentWidth, scale.y, scale.z);
         if (selected && selected.uuid === object.uuid) {
-            selected = object;
+            selectBlock(object);
         } else if (hovered && hovered.uuid === object.uuid) {
             hovered = object;
         }
@@ -121,7 +120,7 @@ let updateDepth = function (data) {
         const scale = object.scale;
         object.scale.set(scale.x, scale.y, newDepth / currentDepth);
         if (selected && selected.uuid === object.uuid) {
-            selected = object;
+            selectBlock(object);
         } else if (hovered && hovered.uuid === object.uuid) {
             hovered = object;
         }
@@ -185,7 +184,7 @@ let removeBlock = function (block) {
             hovered = null;
         }
         if (selected && selected.uuid === block.uuid) {
-            selected = null;
+            unselectBlock();
         }
         scene.remove(objectToRemove);
     }
@@ -363,23 +362,24 @@ let onClick = function (event) {
     switch (event.which) {
         case 1: // left click
             if (activeViewport && hovered) {
-                if (selected && selected.uuid !== hovered.uuid) {
-                    resetElementColor(selected);
-                }
-                selected = hovered;
+                selectBlock(hovered);
                 sendToElm("select", selected.uuid);
             }
             break;
         case 2: // middle click
-            if (selected && (!hovered || hovered && (selected.uuid !== hovered.uuid))) {
-                selected.material.color.set(selected.baseColor);
-            }
-            selected = null;
+            unselectBlock();
             sendToElm("unselect", null);
             break;
         default: // right click
 
     }
+}
+
+let unselectBlock = function () {
+    if (selected && (!hovered || hovered && (selected.uuid !== hovered.uuid))) {
+        selected.material.color.set(selected.baseColor);
+    }
+    selected = null;
 }
 
 let updateCameras = function (views, scene) {
