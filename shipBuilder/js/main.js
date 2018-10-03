@@ -363,6 +363,14 @@ let initGizmos = function () {
                     break;
 
                 case "scale":
+                    const scale = object.scale;
+                    const size = getObjectSize(object);
+                    const newSize = {
+                        width: scale.x * size.width,
+                        height: scale.y * size.height,
+                        depth: scale.z * size.depth
+                    };
+                    sendToElm("sync-size", { uuid: object.uuid, size: newSize });
                     break;
                 default:
                     break;

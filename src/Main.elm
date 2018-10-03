@@ -73,6 +73,17 @@ syncPositionDecoder =
         |> Pipeline.required "position" decodePosition
 
 
+type alias SyncSize =
+    { uuid : String, size : Size }
+
+
+syncSizeDecoder : Decode.Decoder SyncSize
+syncSizeDecoder =
+    Pipeline.decode SyncSize
+        |> Pipeline.required "uuid" Decode.string
+        |> Pipeline.required "size" decodeSize
+
+
 decodePosition : Decode.Decoder Position
 decodePosition =
     Pipeline.decode Position
@@ -136,6 +147,14 @@ handleJsMessage js =
                 Err message ->
                     FromJs <| JSError message
 
+        "sync-size" ->
+            case Decode.decodeValue syncSizeDecoder js.data of
+                Ok syncSize ->
+                    FromJs <| SynchronizeSize syncSize.uuid syncSize.size
+
+                Err message ->
+                    FromJs <| JSError message
+
         "unselect" ->
             FromJs Unselect
 
@@ -149,6 +168,7 @@ type JsMsg
     | JSError String
     | NewBlock Block
     | SynchronizePosition String Position
+    | SynchronizeSize String Size
 
 
 
@@ -800,6 +820,18 @@ updateFromJs jsmsg model =
                 Just block ->
                     position
                         |> asPositionInBlock block
+                        |> flip updateBlockInModel model
+
+                Nothing ->
+                    model
+            )
+                ! []
+
+        SynchronizeSize uuid size ->
+            (case getBlockByUUID uuid model.blocks of
+                Just block ->
+                    size
+                        |> asSizeInBlock block
                         |> flip updateBlockInModel model
 
                 Nothing ->
