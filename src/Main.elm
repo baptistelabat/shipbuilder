@@ -198,6 +198,11 @@ renameBlock label block =
     { block | label = label }
 
 
+getHeight : { a | size : Size } -> Float
+getHeight block =
+    block.size.height.value
+
+
 getBlockByUUID : String -> Blocks -> Maybe Block
 getBlockByUUID uuid blocks =
     DictList.get uuid blocks
@@ -407,6 +412,14 @@ encodeUpdatePositionCommand block =
         ]
 
 
+encodeUpdateHeightCommand : { a | uuid : String, size : Size } -> Encode.Value
+encodeUpdateHeightCommand block =
+    Encode.object
+        [ ( "uuid", Encode.string block.uuid )
+        , ( "height", Encode.float (getHeight block) )
+        ]
+
+
 updateBlockInModel : Block -> Model -> Model
 updateBlockInModel block model =
     model
@@ -584,7 +597,17 @@ update msg model =
                 updatedModel ! []
 
         SyncSizeInput block ->
-            model ! []
+            let
+                updatedModel : Model
+                updatedModel =
+                    syncFloatInput block.size.height
+                        |> asHeightInSize block.size
+                        |> flip asWidthInSize (syncFloatInput block.size.width)
+                        |> flip asDepthInSize (syncFloatInput block.size.depth)
+                        |> asSizeInBlock block
+                        |> flip updateBlockInModel model
+            in
+                updatedModel ! []
 
         UpdatePositionX block input ->
             updateOnePosition block input .x asXInPosition model
@@ -599,7 +622,12 @@ update msg model =
             model ! []
 
         UpdateHeight block input ->
-            model ! []
+            let
+                updatedBlock =
+                    updateHeight block input
+            in
+                (updateBlockInModel updatedBlock model)
+                    ! [ sendToJs "update-height" (encodeUpdateHeightCommand updatedBlock) ]
 
         UpdateDepth block input ->
             model ! []
@@ -632,6 +660,23 @@ updateOnePosition block input accessor updateFunction model =
                 |> flip updateBlockInModel model
             )
                 ! []
+
+
+updateHeight : Block -> String -> Block
+updateHeight block input =
+    case String.toFloat input of
+        Ok value ->
+            (abs value)
+                |> asValueInFloatValue block.size.height
+                |> flip asStringInFloatValue input
+                |> asHeightInSize block.size
+                |> asSizeInBlock block
+
+        Err message ->
+            input
+                |> asStringInFloatValue block.size.height
+                |> asHeightInSize block.size
+                |> asSizeInBlock block
 
 
 syncFloatInput : FloatInput -> FloatInput
