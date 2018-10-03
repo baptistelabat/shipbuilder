@@ -88,7 +88,8 @@ let updateHeight = function (data) {
     if (object) {
         const newHeight = data.height;
         const currentHeight = getObjectSize(object).height;
-        object.scale.set(1, newHeight / currentHeight, 1);
+        const scale = object.scale;
+        object.scale.set(scale.x, newHeight / currentHeight, scale.z);
         if (selected && selected.uuid === object.uuid) {
             selected = object;
         } else if (hovered && hovered.uuid === object.uuid) {
@@ -102,7 +103,8 @@ let updateWidth = function (data) {
     if (object) {
         const newWidth = data.width;
         const currentWidth = getObjectSize(object).width;
-        object.scale.set(newWidth / currentWidth, 1, 1);
+        const scale = object.scale;
+        object.scale.set(newWidth / currentWidth, scale.y, scale.z);
         if (selected && selected.uuid === object.uuid) {
             selected = object;
         } else if (hovered && hovered.uuid === object.uuid) {
@@ -116,7 +118,8 @@ let updateDepth = function (data) {
     if (object) {
         const newDepth = data.depth;
         const currentDepth = getObjectSize(object).depth;
-        object.scale.set(1, 1, newDepth / currentDepth);
+        const scale = object.scale;
+        object.scale.set(scale.x, scale.y, newDepth / currentDepth);
         if (selected && selected.uuid === object.uuid) {
             selected = object;
         } else if (hovered && hovered.uuid === object.uuid) {
