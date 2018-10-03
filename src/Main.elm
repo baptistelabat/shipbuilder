@@ -686,7 +686,7 @@ updateHeight block input =
         Ok value ->
             (abs value)
                 |> asValueInFloatValue block.size.height
-                |> flip asStringInFloatValue input
+                |> flip asStringInFloatValue (toString (abs value))
                 |> asHeightInSize block.size
                 |> asSizeInBlock block
 
@@ -703,7 +703,7 @@ updateWidth block input =
         Ok value ->
             (abs value)
                 |> asValueInFloatValue block.size.width
-                |> flip asStringInFloatValue input
+                |> flip asStringInFloatValue (toString (abs value))
                 |> asWidthInSize block.size
                 |> asSizeInBlock block
 
