@@ -402,7 +402,7 @@ let initCanvas = function (parent) {
     canvas.id = "three-canvas";
     canvas.style.position = "absolute"; // the parent can get smaller than the canvas, that will be resized later
 
-    canvas.addEventListener("mousedown", onClick, false);
+    document.addEventListener("mousedown", onClick, false);
     canvas.addEventListener("dblclick", onDoubleClick, false); // used to cycle through the transform modes
 
     parent.appendChild(canvas);
