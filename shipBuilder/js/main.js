@@ -191,12 +191,12 @@ let removeBlock = function (block) {
 }
 
 let selectBlock = function (block) {
-    if (block) {
-        if (selected && (selected.uuid !== block.uuid)) {
-            resetElementColor(selected);
-        }
+    if (block && block.uuid) {
         const objectToSelect = findBlockByUUID(block.uuid);
         if (objectToSelect) {
+            if (selected && (selected.uuid !== objectToSelect.uuid)) {
+                resetElementColor(selected);
+            }
             highlightObject(objectToSelect);
             selected = objectToSelect;
         }
