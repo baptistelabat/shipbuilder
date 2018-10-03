@@ -223,8 +223,8 @@ init =
     let
         viewports : Viewports
         viewports =
-            [ topHalfViewport (hsl (degrees 210) 0.7 0.98) viewportSide
-            , bottomHalfViewport (hsl (degrees 210) 0.7 0.98) viewportTop
+            [ topHalfViewport (hsl (degrees 222) 0.7 0.98) viewportSide
+            , bottomHalfViewport (hsl (degrees 222) 0.53 0.95) viewportTop
             ]
     in
         ( { build = "0.0.1"
