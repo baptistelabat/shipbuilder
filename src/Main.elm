@@ -62,6 +62,17 @@ newBlockDecoder =
         |> Pipeline.required "size" decodeSize
 
 
+type alias SyncPosition =
+    { uuid : String, position : Position }
+
+
+syncPositionDecoder : Decode.Decoder SyncPosition
+syncPositionDecoder =
+    Pipeline.decode SyncPosition
+        |> Pipeline.required "uuid" Decode.string
+        |> Pipeline.required "position" decodePosition
+
+
 decodePosition : Decode.Decoder Position
 decodePosition =
     Pipeline.decode Position
@@ -117,6 +128,14 @@ handleJsMessage js =
                 Err message ->
                     FromJs <| JSError message
 
+        "sync-position" ->
+            case Decode.decodeValue syncPositionDecoder js.data of
+                Ok syncPosition ->
+                    FromJs <| SynchronizePosition syncPosition.uuid syncPosition.position
+
+                Err message ->
+                    FromJs <| JSError message
+
         "unselect" ->
             FromJs Unselect
 
@@ -129,6 +148,7 @@ type JsMsg
     | Unselect
     | JSError String
     | NewBlock Block
+    | SynchronizePosition String Position
 
 
 
@@ -774,6 +794,18 @@ updateFromJs jsmsg model =
 
         Unselect ->
             { model | selectedBlock = Nothing } ! []
+
+        SynchronizePosition uuid position ->
+            (case getBlockByUUID uuid model.blocks of
+                Just block ->
+                    position
+                        |> asPositionInBlock block
+                        |> flip updateBlockInModel model
+
+                Nothing ->
+                    model
+            )
+                ! []
 
         JSError message ->
             let

@@ -347,13 +347,33 @@ let initGizmos = function () {
     views.forEach(view => {
         var control = new THREE.TransformControls(view, canvas);
         control.addEventListener("objectChange", event => {
+            const mode = control.getMode();
+            const object = control.object;
+            switch (mode) {
+                case "translate":
+                    // Round position to .2f
+                    const position = object.position;
+                    const roundedPosition = {
+                        x: Math.round(position.x * 100) / 100,
+                        y: Math.round(position.y * 100) / 100,
+                        z: Math.round(position.z * 100) / 100
+                    };
+                    object.position.set(roundedPosition.x, roundedPosition.y, roundedPosition.z);
+                    sendToElm("sync-position", { uuid: object.uuid, position: roundedPosition });
+                    break;
+
+                case "scale":
+                    break;
+                default:
+                    break;
+            }
         });
         control.addEventListener("mouseDown", event => {
             preventSelection = true; // prevents selecting another block while transforming one with the gizmo
         });
         control.addEventListener("mouseUp", event => {
             preventSelection = false;
-        })
+        });
 
         control.size = 120;
         control.setMode("translate");
