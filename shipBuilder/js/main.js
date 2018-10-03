@@ -36,6 +36,10 @@ app.ports.send.subscribe(function (message) {
             break;
         case "update-position":
             updatePosition(data);
+            break;
+        case "update-height":
+            updateHeight(data);
+            break;
         default:
     }
 })
@@ -71,6 +75,33 @@ let updatePosition = function (data) {
             hovered = object;
         }
     }
+}
+
+let updateHeight = function (data) {
+    const object = findBlockByUUID(data.uuid);
+    console.log(data);
+    console.log(object);
+    if (object) {
+        const newHeight = data.height;
+        const currentHeight = getObjectSize(object).height;
+        const scale = new THREE.Vector3(1, newHeight / currentHeight, 1); // x: width, y: height, z: depth
+        object.scale.set(1, newHeight / currentHeight, 1);
+        if (selected && selected.uuid === object.uuid) {
+            selected = object;
+        } else if (hovered && hovered.uuid === object.uuid) {
+            hovered = object;
+        }
+        console.log(object.scale);
+        //applyTransform(object);
+    }
+}
+
+let applyTransform = function (object) {
+    object.geometry.applyMatrix(object.matrix);
+
+    object.position.set(0, 0, 0);
+    object.rotation.set(0, 0, 0);
+    object.scale.set(1, 1, 1);
 }
 
 let getThreeColorFromElmColor = function (color) {
