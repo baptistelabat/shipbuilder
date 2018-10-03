@@ -373,9 +373,13 @@ type Msg
     | UpdatePositionX Block String
     | UpdatePositionY Block String
     | UpdatePositionZ Block String
+    | UpdateWidth Block String
+    | UpdateHeight Block String
+    | UpdateDepth Block String
     | RemoveBlock Block
     | SelectBlock Block
     | SyncPositionInput Block
+    | SyncSizeInput Block
     | RenameBlock Block String
 
 
@@ -579,6 +583,9 @@ update msg model =
             in
                 updatedModel ! []
 
+        SyncSizeInput block ->
+            model ! []
+
         UpdatePositionX block input ->
             updateOnePosition block input .x asXInPosition model
 
@@ -587,6 +594,15 @@ update msg model =
 
         UpdatePositionZ block input ->
             updateOnePosition block input .z asZInPosition model
+
+        UpdateWidth block input ->
+            model ! []
+
+        UpdateHeight block input ->
+            model ! []
+
+        UpdateDepth block input ->
+            model ! []
 
         FromJs jsmsg ->
             updateFromJs jsmsg model
@@ -883,6 +899,11 @@ blockProperties block model =
         , positionInput "y" .y UpdatePositionY block
         , positionInput "z" .z UpdatePositionZ block
         ]
+    , div [ class "block-size" ]
+        [ sizeInput "width" .width UpdateWidth block
+        , sizeInput "height" .height UpdateHeight block
+        , sizeInput "depth" .depth UpdateDepth block
+        ]
     ]
 
 
@@ -899,6 +920,24 @@ positionInput inputLabel getPosition msg block =
             , value (.string (getPosition block.position))
             , onInput (msg block)
             , onBlur (SyncPositionInput block)
+            ]
+            []
+        ]
+
+
+sizeInput : String -> (Size -> FloatInput) -> (Block -> String -> Msg) -> Block -> Html Msg
+sizeInput inputLabel getSize msg block =
+    div [ class "input-group" ]
+        [ label [ for ("size-" ++ inputLabel) ]
+            [ text inputLabel ]
+        , input
+            [ class "block-size-input"
+            , name ("size-" ++ inputLabel)
+            , id ("size-" ++ inputLabel)
+            , type_ "text"
+            , value (.string (getSize block.size))
+            , onInput (msg block)
+            , onBlur (SyncSizeInput block)
             ]
             []
         ]
