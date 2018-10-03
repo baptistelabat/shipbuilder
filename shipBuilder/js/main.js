@@ -225,7 +225,7 @@ let initThree = function (viewsData) {
     initScene();
     initCameras();
     displayLabels();
-
+    initGizmos();
     /**
      * var gridHelper = new THREE.GridHelper(100, 10);
      * scene.add(gridHelper);
@@ -325,6 +325,26 @@ let initCameras = function () {
             view.camera = camera;
         });
     }
+}
+
+let initGizmos = function () {
+    views.forEach(view => {
+        var control = new THREE.TransformControls(view, canvas);
+        control.addEventListener("objectChange", event => {
+            console.log(event);
+        })
+
+        control.size = 120;
+        control.setMode("translate");
+        const canControl = view.getCanControl();
+        control.showX = canControl[0];
+        control.showY = canControl[1];
+        control.showZ = canControl[2];
+
+        view.control = control;
+        scene.add(control);
+    })
+
 }
 
 let initCanvas = function (parent) {
