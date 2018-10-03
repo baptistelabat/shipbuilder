@@ -347,7 +347,12 @@ let initGizmos = function () {
     views.forEach(view => {
         var control = new THREE.TransformControls(view, canvas);
         control.addEventListener("objectChange", event => {
-            console.log(event);
+        });
+        control.addEventListener("mouseDown", event => {
+            preventSelection = true; // prevents selecting another block while transforming one with the gizmo
+        });
+        control.addEventListener("mouseUp", event => {
+            preventSelection = false;
         })
 
         control.size = 120;
