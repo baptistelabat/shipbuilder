@@ -17,10 +17,10 @@ import Task
 import Debug
 
 
-port send : JsData -> Cmd msg
+port toJs : JsData -> Cmd msg
 
 
-port receive : (JsData -> msg) -> Sub msg
+port fromJs : (JsData -> msg) -> Sub msg
 
 
 type alias JsData =
@@ -31,7 +31,7 @@ type alias JsData =
 
 sendToJs : String -> Encode.Value -> Cmd msg
 sendToJs tag data =
-    send
+    toJs
         { tag = tag
         , data = data
         }
@@ -49,7 +49,7 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    receive handleJsMessage
+    fromJs jsMsgToMsg
 
 
 newBlockDecoder : Decode.Decoder Block
@@ -120,8 +120,8 @@ decodeRgbRecord =
         |> Pipeline.required "blue" Decode.int
 
 
-handleJsMessage : JsData -> Msg
-handleJsMessage js =
+jsMsgToMsg : JsData -> Msg
+jsMsgToMsg js =
     case js.tag of
         "new-block" ->
             case Decode.decodeValue newBlockDecoder js.data of

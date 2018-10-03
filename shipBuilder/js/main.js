@@ -17,7 +17,7 @@ let scene = null;
 let raycaster = null; // used to find the objects under the cursor on click, mousemove etc
 let preventSelection = false;
 
-app.ports.send.subscribe(function (message) {
+app.ports.toJs.subscribe(function (message) {
     const data = message.data;
     switch (message.tag) {
         case "init-viewports":
@@ -52,7 +52,7 @@ app.ports.send.subscribe(function (message) {
 })
 
 let sendToElm = function (tag, data) {
-    app.ports.receive.send({ tag: tag, data: data });
+    app.ports.fromJs.send({ tag: tag, data: data });
 }
 
 let updateColor = function (data) {
@@ -393,8 +393,7 @@ let initGizmos = function () {
 
         view.control = control;
         scene.add(control);
-    })
-
+    });
 }
 
 let initCanvas = function (parent) {
