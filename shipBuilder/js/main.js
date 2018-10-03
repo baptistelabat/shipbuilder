@@ -40,6 +40,9 @@ app.ports.send.subscribe(function (message) {
         case "update-height":
             updateHeight(data);
             break;
+        case "update-width":
+            updateWidth(data);
+            break;
         default:
     }
 })
@@ -79,30 +82,32 @@ let updatePosition = function (data) {
 
 let updateHeight = function (data) {
     const object = findBlockByUUID(data.uuid);
-    console.log(data);
-    console.log(object);
     if (object) {
         const newHeight = data.height;
         const currentHeight = getObjectSize(object).height;
-        const scale = new THREE.Vector3(1, newHeight / currentHeight, 1); // x: width, y: height, z: depth
         object.scale.set(1, newHeight / currentHeight, 1);
         if (selected && selected.uuid === object.uuid) {
             selected = object;
         } else if (hovered && hovered.uuid === object.uuid) {
             hovered = object;
         }
-        console.log(object.scale);
-        //applyTransform(object);
     }
 }
 
-let applyTransform = function (object) {
-    object.geometry.applyMatrix(object.matrix);
-
-    object.position.set(0, 0, 0);
-    object.rotation.set(0, 0, 0);
-    object.scale.set(1, 1, 1);
+let updateWidth = function (data) {
+    const object = findBlockByUUID(data.uuid);
+    if (object) {
+        const newWidth = data.width;
+        const currentWidth = getObjectSize(object).width;
+        object.scale.set(newWidth / currentWidth, 1, 1);
+        if (selected && selected.uuid === object.uuid) {
+            selected = object;
+        } else if (hovered && hovered.uuid === object.uuid) {
+            hovered = object;
+        }
+    }
 }
+
 
 let getThreeColorFromElmColor = function (color) {
     return (new THREE.Color(color.red / 255, color.green / 255, color.blue / 255));

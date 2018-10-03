@@ -203,6 +203,11 @@ getHeight block =
     block.size.height.value
 
 
+getWidth : { a | size : Size } -> Float
+getWidth block =
+    block.size.width.value
+
+
 getBlockByUUID : String -> Blocks -> Maybe Block
 getBlockByUUID uuid blocks =
     DictList.get uuid blocks
@@ -420,6 +425,14 @@ encodeUpdateHeightCommand block =
         ]
 
 
+encodeUpdateWidthCommand : { a | uuid : String, size : Size } -> Encode.Value
+encodeUpdateWidthCommand block =
+    Encode.object
+        [ ( "uuid", Encode.string block.uuid )
+        , ( "width", Encode.float (getWidth block) )
+        ]
+
+
 updateBlockInModel : Block -> Model -> Model
 updateBlockInModel block model =
     model
@@ -619,7 +632,12 @@ update msg model =
             updateOnePosition block input .z asZInPosition model
 
         UpdateWidth block input ->
-            model ! []
+            let
+                updatedBlock =
+                    updateWidth block input
+            in
+                (updateBlockInModel updatedBlock model)
+                    ! [ sendToJs "update-width" (encodeUpdateWidthCommand updatedBlock) ]
 
         UpdateHeight block input ->
             let
@@ -676,6 +694,23 @@ updateHeight block input =
             input
                 |> asStringInFloatValue block.size.height
                 |> asHeightInSize block.size
+                |> asSizeInBlock block
+
+
+updateWidth : Block -> String -> Block
+updateWidth block input =
+    case String.toFloat input of
+        Ok value ->
+            (abs value)
+                |> asValueInFloatValue block.size.width
+                |> flip asStringInFloatValue input
+                |> asWidthInSize block.size
+                |> asSizeInBlock block
+
+        Err message ->
+            input
+                |> asStringInFloatValue block.size.width
+                |> asWidthInSize block.size
                 |> asSizeInBlock block
 
 
