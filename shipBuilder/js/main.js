@@ -200,7 +200,23 @@ let selectBlock = function (block) {
             highlightObject(objectToSelect);
             selected = objectToSelect;
         }
+        attachViewControl(selected);
     }
+}
+
+
+let attachViewControl = function (block) {
+    let currentView = getActiveViewport(views);
+    if (!currentView && views.length) {
+        currentView = views[0];
+    }
+    if (currentView) {
+        currentView.control.attach(block);
+    }
+    var otherViews = views.filter(view => view.camera.uuid !== currentView.camera.uuid);
+    otherViews.forEach(view => {
+        view.control.detach();
+    })
 }
 
 let findBlockByUUID = function (uuid) {
