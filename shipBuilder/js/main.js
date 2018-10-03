@@ -188,6 +188,9 @@ let removeBlock = function (block) {
             unselectBlock();
         }
         scene.remove(objectToRemove);
+        // memory optimization
+        objectToRemove.geometry.dispose();
+        objectToRemove.material.dispose();
     }
 }
 
