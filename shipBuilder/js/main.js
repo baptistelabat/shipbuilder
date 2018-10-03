@@ -365,11 +365,12 @@ let initGizmos = function () {
                 case "scale":
                     const scale = object.scale;
                     const size = getObjectSize(object);
-                    const newSize = {
-                        width: scale.x * size.width,
-                        height: scale.y * size.height,
-                        depth: scale.z * size.depth
+                    const newSize = { // rounded to .2f
+                        width: Math.round(100 * scale.x * size.width) / 100,
+                        height: Math.round(100 * scale.y * size.height) / 100,
+                        depth: Math.round(100 * scale.z * size.depth) / 100
                     };
+                    object.scale.set(newSize.width / size.width, newSize.height / size.height, newSize.depth / size.depth)
                     sendToElm("sync-size", { uuid: object.uuid, size: newSize });
                     break;
                 default:
