@@ -418,8 +418,14 @@ let onClick = function (event) {
 }
 
 let unselectBlock = function () {
-    if (selected && (!hovered || hovered && (selected.uuid !== hovered.uuid))) {
-        selected.material.color.set(selected.baseColor);
+    if (selected) {
+        if (!hovered || hovered && (selected.uuid !== hovered.uuid)) {
+            resetElementColor(selected);
+        }
+        // detach gizmo
+        views.forEach(view => {
+            view.control.detach();
+        })
     }
     selected = null;
 }
