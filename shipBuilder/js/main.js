@@ -41,7 +41,6 @@ app.ports.send.subscribe(function (message) {
 })
 
 let sendToElm = function (tag, data) {
-    console.log(tag, data);
     app.ports.receive.send({ tag: tag, data: data });
 }
 
@@ -60,7 +59,6 @@ let updateColor = function (data) {
         }
     }
 }
-// TODO: update hovered and selected
 
 let updatePosition = function (data) {
     const object = findBlockByUUID(data.uuid);
@@ -92,7 +90,6 @@ let getObjectSize = function (object) {
 let addCube = function (label, color = 0x5078ff, width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0) {
     var cube = makeCube(width, height, depth, x, y, z, color);
     scene.add(cube);
-    console.log(cube);
     sendToElm("new-block", {
         uuid: cube.uuid,
         label: label,
