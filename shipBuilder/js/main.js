@@ -15,6 +15,7 @@ let canvas = null;
 let renderer = null;
 let scene = null;
 let raycaster = null; // used to find the objects under the cursor on click, mousemove etc
+let preventSelection = false;
 
 app.ports.send.subscribe(function (message) {
     const data = message.data;
@@ -367,7 +368,7 @@ let initCanvas = function (parent) {
     canvas.id = "three-canvas";
     canvas.style.position = "absolute"; // the parent can get smaller than the canvas, that will be resized later
 
-    document.addEventListener("click", onClick, false);
+    document.addEventListener("mousedown", onClick, false);
 
     parent.appendChild(canvas);
     fitCanvas(canvas, wrapper);
@@ -377,7 +378,7 @@ let onClick = function (event) {
     const activeViewport = getActiveViewport(views);
     switch (event.which) {
         case 1: // left click
-            if (activeViewport && hovered) {
+            if (activeViewport && hovered && !preventSelection) {
                 selectBlock(hovered);
                 sendToElm("select", selected.uuid);
             }
