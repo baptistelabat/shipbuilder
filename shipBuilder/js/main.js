@@ -43,6 +43,9 @@ app.ports.send.subscribe(function (message) {
         case "update-width":
             updateWidth(data);
             break;
+        case "update-depth":
+            updateDepth(data);
+            break;
         default:
     }
 })
@@ -100,6 +103,20 @@ let updateWidth = function (data) {
         const newWidth = data.width;
         const currentWidth = getObjectSize(object).width;
         object.scale.set(newWidth / currentWidth, 1, 1);
+        if (selected && selected.uuid === object.uuid) {
+            selected = object;
+        } else if (hovered && hovered.uuid === object.uuid) {
+            hovered = object;
+        }
+    }
+}
+
+let updateDepth = function (data) {
+    const object = findBlockByUUID(data.uuid);
+    if (object) {
+        const newDepth = data.depth;
+        const currentDepth = getObjectSize(object).depth;
+        object.scale.set(1, 1, newDepth / currentDepth);
         if (selected && selected.uuid === object.uuid) {
             selected = object;
         } else if (hovered && hovered.uuid === object.uuid) {
