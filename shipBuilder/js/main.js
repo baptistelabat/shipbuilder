@@ -394,6 +394,7 @@ let initCanvas = function (parent) {
     canvas.style.position = "absolute"; // the parent can get smaller than the canvas, that will be resized later
 
     document.addEventListener("mousedown", onClick, false);
+    document.addEventListener("dblclick", onDoubleClick, false); // used to cycle through the transform modes
 
     parent.appendChild(canvas);
     fitCanvas(canvas, wrapper);
@@ -414,6 +415,19 @@ let onClick = function (event) {
             break;
         default: // right click
 
+    }
+}
+
+let onDoubleClick = function (event) { // cycle through the transform modes
+    const activeViewport = getActiveViewport(views);
+    if (activeViewport && hovered) {
+        views.forEach(view => {
+            if (view.control.getMode() === "translate") {
+                view.control.setMode("scale");
+            } else {
+                view.control.setMode("translate");
+            }
+        })
     }
 }
 
