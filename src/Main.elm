@@ -771,11 +771,18 @@ updateHeight : Block -> String -> Block
 updateHeight block input =
     case String.toFloat input of
         Ok value ->
-            (abs value)
-                |> asValueInFloatValue block.size.height
-                |> flip asStringInFloatValue input
-                |> asHeightInSize block.size
-                |> asSizeInBlock block
+            let
+                newValue =
+                    if value == 0 then
+                        0.1
+                    else
+                        (abs value)
+            in
+                newValue
+                    |> asValueInFloatValue block.size.height
+                    |> flip asStringInFloatValue input
+                    |> asHeightInSize block.size
+                    |> asSizeInBlock block
 
         Err message ->
             input
@@ -788,11 +795,18 @@ updateWidth : Block -> String -> Block
 updateWidth block input =
     case String.toFloat input of
         Ok value ->
-            (abs value)
-                |> asValueInFloatValue block.size.width
-                |> flip asStringInFloatValue input
-                |> asWidthInSize block.size
-                |> asSizeInBlock block
+            let
+                newValue =
+                    if value == 0 then
+                        0.1
+                    else
+                        (abs value)
+            in
+                newValue
+                    |> asValueInFloatValue block.size.width
+                    |> flip asStringInFloatValue input
+                    |> asWidthInSize block.size
+                    |> asSizeInBlock block
 
         Err message ->
             input
@@ -805,11 +819,18 @@ updateDepth : Block -> String -> Block
 updateDepth block input =
     case String.toFloat input of
         Ok value ->
-            (abs value)
-                |> asValueInFloatValue block.size.depth
-                |> flip asStringInFloatValue input
-                |> asDepthInSize block.size
-                |> asSizeInBlock block
+            let
+                newValue =
+                    if value == 0 then
+                        0.1
+                    else
+                        (abs value)
+            in
+                newValue
+                    |> asValueInFloatValue block.size.depth
+                    |> flip asStringInFloatValue input
+                    |> asDepthInSize block.size
+                    |> asSizeInBlock block
 
         Err message ->
             input
@@ -1139,23 +1160,44 @@ updateBlockPositionZInModel block floatInput =
 
 updateBlockHeightInModel : Block -> FloatInput -> Block
 updateBlockHeightInModel block floatInput =
-    floatInput
-        |> asHeightInSize block.size
-        |> asSizeInBlock block
+    let
+        validFloatInput =
+            if floatInput.value <= 0.1 then
+                { value = 0.1, string = "0.1" }
+            else
+                floatInput
+    in
+        validFloatInput
+            |> asHeightInSize block.size
+            |> asSizeInBlock block
 
 
 updateBlockWidthInModel : Block -> FloatInput -> Block
 updateBlockWidthInModel block floatInput =
-    floatInput
-        |> asWidthInSize block.size
-        |> asSizeInBlock block
+    let
+        validFloatInput =
+            if floatInput.value <= 0.1 then
+                { value = 0.1, string = "0.1" }
+            else
+                floatInput
+    in
+        validFloatInput
+            |> asWidthInSize block.size
+            |> asSizeInBlock block
 
 
 updateBlockDepthInModel : Block -> FloatInput -> Block
 updateBlockDepthInModel block floatInput =
-    floatInput
-        |> asDepthInSize block.size
-        |> asSizeInBlock block
+    let
+        validFloatInput =
+            if floatInput.value <= 0.1 then
+                { value = 0.1, string = "0.1" }
+            else
+                floatInput
+    in
+        validFloatInput
+            |> asDepthInSize block.size
+            |> asSizeInBlock block
 
 
 viewPositionInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> Html Msg
