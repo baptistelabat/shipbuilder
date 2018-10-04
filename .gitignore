@@ -2,6 +2,8 @@
 generated-code
 shipBuilder/js/elm.js
 build-artifacts
+.elm-analyse
+elm-stuff/**/documentation.json
 # Artifacts
 *.zip
 # elm-verify-examples
