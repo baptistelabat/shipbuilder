@@ -149,6 +149,24 @@ blockA =
     }
 
 
+blockAYellow : Block
+blockAYellow =
+    { uuid = "abcd"
+    , label = "Helicopter"
+    , color = Color.yellow
+    , position =
+        { x = { value = 0, string = "0" }
+        , y = { value = 0, string = "0" }
+        , z = { value = 0, string = "0" }
+        }
+    , size =
+        { width = { value = 10, string = "10" }
+        , height = { value = 10, string = "10" }
+        , depth = { value = 10, string = "10" }
+        }
+    }
+
+
 blockB : Block
 blockB =
     { uuid = "efgh"
@@ -212,9 +230,15 @@ suite =
                     Expect.equal viewportsJsonString <| stringifyViewports viewports
             ]
         , describe "Blocks"
-            [ test "Init with one block" <|
+            [ test "Add one block to an empty list" <|
                 \_ ->
                     Expect.equal (DictList.fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo DictList.empty blockA)
+            , test "Add one block to a list containing that exact block" <|
+                \_ ->
+                    Expect.equal (DictList.fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ]) blockA)
+            , test "Add one block to a list containing a block with the same uuid" <|
+                \_ ->
+                    Expect.equal (DictList.fromList [ ( blockAYellow.uuid, blockAYellow ) ]) (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ]) blockAYellow)
             , test "Add one block to an existing list (same order)" <|
                 \_ ->
                     Expect.equal
@@ -261,13 +285,21 @@ suite =
                             (DictList.fromList [ ( blockA.uuid, blockA ), ( blockB.uuid, blockB ) ])
                             blockA
                         )
-            , test "Removing one block from a list without this block" <|
+            , test "Removing one block from a list without that block" <|
                 \_ ->
                     Expect.equal
                         (DictList.fromList [ ( blockB.uuid, blockB ) ])
                         (removeBlockFrom
                             (DictList.fromList [ ( blockB.uuid, blockB ) ])
                             blockC
+                        )
+            , test "Removing an updated version of a block from a list with that block" <|
+                \_ ->
+                    Expect.equal
+                        DictList.empty
+                        (removeBlockFrom
+                            (DictList.fromList [ ( blockA.uuid, blockA ) ])
+                            blockAYellow
                         )
             , test "Removing one block from an empty list" <|
                 \_ ->
