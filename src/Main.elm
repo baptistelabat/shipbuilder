@@ -162,6 +162,17 @@ jsMsgToMsg js =
             FromJs <| JSError <| "Unknown tag received from JS: " ++ unknownTag
 
 
+addToFloatInput : Float -> FloatInput -> FloatInput
+addToFloatInput toAdd floatInput =
+    let
+        newValue : Float
+        newValue =
+            -- rounded to .2f
+            (toFloat (round ((floatInput.value + toAdd) * 100))) / 100
+    in
+        { value = newValue, string = toString newValue }
+
+
 type JsMsg
     = Select String
     | Unselect
@@ -425,6 +436,7 @@ type Msg
     | SelectPanel Panel
     | AddBlock String
     | FromJs JsMsg
+    | KeyDown (FloatInput -> Block) FloatInput (Block -> Cmd Msg) KeyEvent
     | UpdatePositionX Block String
     | UpdatePositionY Block String
     | UpdatePositionZ Block String
@@ -616,6 +628,44 @@ update msg model =
 
         AddBlock label ->
             model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
+
+        KeyDown updateFloatInput floatInput command keyEvent ->
+            let
+                increment =
+                    if keyEvent.shift && not keyEvent.alt then
+                        10
+                    else if keyEvent.alt && not keyEvent.shift then
+                        0.1
+                    else
+                        1
+            in
+                case keyEvent.key of
+                    38 ->
+                        -- Arrow up
+                        let
+                            newFloatInput : FloatInput
+                            newFloatInput =
+                                addToFloatInput increment floatInput
+
+                            updatedBlock =
+                                updateFloatInput newFloatInput
+                        in
+                            (updateBlockInModel updatedBlock model) ! [ command updatedBlock ]
+
+                    40 ->
+                        -- Arrow downlet
+                        let
+                            newFloatInput : FloatInput
+                            newFloatInput =
+                                addToFloatInput (-increment) floatInput
+
+                            updatedBlock =
+                                updateFloatInput newFloatInput
+                        in
+                            (updateBlockInModel updatedBlock model) ! [ command updatedBlock ]
+
+                    _ ->
+                        model ! []
 
         RemoveBlock block ->
             let
@@ -1074,9 +1124,9 @@ blockProperties block model =
     [ ColorPicker.view block.color model.colorPicker
         |> Html.map (ChangeBlockColor block)
     , div [ class "block-position" ]
-        [ positionInput "x" .x UpdatePositionX block
-        , positionInput "y" .y UpdatePositionY block
-        , positionInput "z" .z UpdatePositionZ block
+        [ positionInput "x" block.position.x (UpdatePositionX block) block (updateBlockPositionXInModel block)
+        , positionInput "y" block.position.y (UpdatePositionY block) block (updateBlockPositionYInModel block)
+        , positionInput "z" block.position.z (UpdatePositionZ block) block (updateBlockPositionZInModel block)
         ]
     , div [ class "block-size" ]
         [ sizeInput "width" .width UpdateWidth block
@@ -1086,8 +1136,29 @@ blockProperties block model =
     ]
 
 
-positionInput : String -> (Position -> FloatInput) -> (Block -> String -> Msg) -> Block -> Html Msg
-positionInput inputLabel getPosition msg block =
+updateBlockPositionXInModel : Block -> FloatInput -> Block
+updateBlockPositionXInModel block floatInput =
+    floatInput
+        |> asXInPosition block.position
+        |> asPositionInBlock block
+
+
+updateBlockPositionYInModel : Block -> FloatInput -> Block
+updateBlockPositionYInModel block floatInput =
+    floatInput
+        |> asYInPosition block.position
+        |> asPositionInBlock block
+
+
+updateBlockPositionZInModel : Block -> FloatInput -> Block
+updateBlockPositionZInModel block floatInput =
+    floatInput
+        |> asZInPosition block.position
+        |> asPositionInBlock block
+
+
+positionInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> Html Msg
+positionInput inputLabel position inputMsg block updatePosition =
     div [ class "input-group" ]
         [ label [ for ("position-" ++ inputLabel) ]
             [ text inputLabel ]
@@ -1096,12 +1167,40 @@ positionInput inputLabel getPosition msg block =
             , name ("position-" ++ inputLabel)
             , id ("position-" ++ inputLabel)
             , type_ "text"
-            , value (.string (getPosition block.position))
-            , onInput (msg block)
+            , value (.string position)
+            , onInput inputMsg
             , onBlur (SyncPositionInput block)
+            , onKeyDown (KeyDown updatePosition position sendPositionUpdate)
             ]
             []
         ]
+
+
+sendPositionUpdate : Block -> Cmd Msg
+sendPositionUpdate block =
+    sendToJs "update-position" <| encodeUpdatePositionCommand block
+
+
+onKeyDown : (KeyEvent -> msg) -> Attribute msg
+onKeyDown tagger =
+    on "keydown" (Decode.map tagger keyEventDecoder)
+
+
+type alias KeyEvent =
+    { key : Int
+    , shift : Bool
+    , alt : Bool
+    , ctrl : Bool
+    }
+
+
+keyEventDecoder : Decode.Decoder KeyEvent
+keyEventDecoder =
+    Pipeline.decode KeyEvent
+        |> Pipeline.required "keyCode" Decode.int
+        |> Pipeline.required "shiftKey" Decode.bool
+        |> Pipeline.required "altKey" Decode.bool
+        |> Pipeline.required "ctrlKey" Decode.bool
 
 
 sizeInput : String -> (Size -> FloatInput) -> (Block -> String -> Msg) -> Block -> Html Msg
