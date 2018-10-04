@@ -671,6 +671,16 @@ removeBlock block model =
         ({ model | blocks = blocks } |> unselectBlockIfSelected block) ! [ sendToJs "remove-block" (encodeBlock block) ]
 
 
+updateBlockLabel : Block -> String -> Model -> ( Model, Cmd Msg )
+updateBlockLabel blockToRename label model =
+    let
+        renamed =
+            renameBlock label blockToRename
+    in
+        updateBlockInModel renamed model
+            ! []
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -690,12 +700,7 @@ update msg model =
             removeBlock block model
 
         RenameBlock blockToRename label ->
-            let
-                renamed =
-                    renameBlock label blockToRename
-            in
-                updateBlockInModel renamed model
-                    ! []
+            updateBlockLabel blockToRename label model
 
         SelectBlock block ->
             (selectBlock block model) ! [ sendToJs "select-block" (encodeBlock block) ]
