@@ -1,4 +1,15 @@
-port module Main exposing (main, Viewports, Viewport, encodeViewport, encodeViewports)
+port module Main
+    exposing
+        ( Block
+        , Blocks
+        , addBlockTo
+        , removeBlockFrom
+        , encodeViewport
+        , encodeViewports
+        , main
+        , Viewport
+        , Viewports
+        )
 
 import Color exposing (Color, hsl)
 import ColorPicker
