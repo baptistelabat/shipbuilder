@@ -622,6 +622,46 @@ addBlock label model =
     model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
 
 
+keyDown : (FloatInput -> Block) -> FloatInput -> (Block -> Cmd Msg) -> KeyEvent -> Model -> ( Model, Cmd Msg )
+keyDown updateFloatInput floatInput command keyEvent model =
+    let
+        increment =
+            if keyEvent.shift && not keyEvent.alt then
+                10
+            else if keyEvent.alt && not keyEvent.shift then
+                0.1
+            else
+                1
+    in
+        case keyEvent.key of
+            38 ->
+                -- Arrow up
+                let
+                    newFloatInput : FloatInput
+                    newFloatInput =
+                        addToFloatInput increment floatInput
+
+                    updatedBlock =
+                        updateFloatInput newFloatInput
+                in
+                    (updateBlockInModel updatedBlock model) ! [ command updatedBlock ]
+
+            40 ->
+                -- Arrow downlet
+                let
+                    newFloatInput : FloatInput
+                    newFloatInput =
+                        addToFloatInput (-increment) floatInput
+
+                    updatedBlock =
+                        updateFloatInput newFloatInput
+                in
+                    (updateBlockInModel updatedBlock model) ! [ command updatedBlock ]
+
+            _ ->
+                model ! []
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -635,42 +675,7 @@ update msg model =
             addBlock label model
 
         KeyDown updateFloatInput floatInput command keyEvent ->
-            let
-                increment =
-                    if keyEvent.shift && not keyEvent.alt then
-                        10
-                    else if keyEvent.alt && not keyEvent.shift then
-                        0.1
-                    else
-                        1
-            in
-                case keyEvent.key of
-                    38 ->
-                        -- Arrow up
-                        let
-                            newFloatInput : FloatInput
-                            newFloatInput =
-                                addToFloatInput increment floatInput
-
-                            updatedBlock =
-                                updateFloatInput newFloatInput
-                        in
-                            (updateBlockInModel updatedBlock model) ! [ command updatedBlock ]
-
-                    40 ->
-                        -- Arrow downlet
-                        let
-                            newFloatInput : FloatInput
-                            newFloatInput =
-                                addToFloatInput (-increment) floatInput
-
-                            updatedBlock =
-                                updateFloatInput newFloatInput
-                        in
-                            (updateBlockInModel updatedBlock model) ! [ command updatedBlock ]
-
-                    _ ->
-                        model ! []
+            keyDown updateFloatInput floatInput command keyEvent model
 
         RemoveBlock block ->
             let
