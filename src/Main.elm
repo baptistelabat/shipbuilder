@@ -991,7 +991,7 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Eléments", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
+    [ { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     ]
 
 
