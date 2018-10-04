@@ -234,8 +234,8 @@ encodePosition position =
         ]
 
 
-addBlock : Block -> Blocks -> Blocks
-addBlock block blocks =
+addBlockTo : Blocks -> Block -> Blocks
+addBlockTo blocks block =
     DictList.insert block.uuid block blocks
 
 
@@ -244,8 +244,8 @@ toList blocks =
     DictList.values blocks
 
 
-removeBlock : Block -> Blocks -> Blocks
-removeBlock block blocks =
+removeBlockFrom : Blocks -> Block -> Blocks
+removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
 
 
@@ -509,7 +509,7 @@ encodeUpdateDepthCommand block =
 
 updateBlockInModel : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
 updateBlockInModel block model =
-    { model | blocks = addBlock block model.blocks }
+    { model | blocks = addBlockTo model.blocks block }
 
 
 asValueInFloatValue : FloatInput -> Float -> FloatInput
@@ -665,7 +665,7 @@ update msg model =
         RemoveBlock block ->
             let
                 blocks =
-                    removeBlock block model.blocks
+                    removeBlockFrom model.blocks block
             in
                 ({ model | blocks = blocks } |> unselectBlockIfSelected block) ! [ sendToJs "remove-block" (encodeBlock block) ]
 
@@ -855,7 +855,7 @@ updateFromJs jsmsg model =
         NewBlock block ->
             let
                 blocks =
-                    addBlock block model.blocks
+                    addBlockTo model.blocks block
             in
                 { model | blocks = blocks } ! [ Task.attempt (\_ -> NoOp) (Dom.focus block.uuid) ]
 
