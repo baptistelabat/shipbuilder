@@ -593,13 +593,8 @@ unselectBlock model =
     { model | selectedBlock = Nothing }
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        NoOp ->
-            model ! []
-
-        ChangeBlockColor block colorPickerMsg ->
+changeBlockColor : Block -> ColorPicker.Msg -> Model -> ( Model, Cmd Msg )
+changeBlockColor block colorPickerMsg model =
             let
                 ( state, color ) =
                     ColorPicker.update colorPickerMsg block.color model.colorPicker
@@ -620,6 +615,16 @@ update msg model =
 
                     Nothing ->
                         model ! []
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        NoOp ->
+            model ! []
+
+        ChangeBlockColor block colorPickerMsg ->
+            changeBlockColor block colorPickerMsg model
 
         AddBlock label ->
             model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
