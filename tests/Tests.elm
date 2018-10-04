@@ -245,5 +245,37 @@ suite =
                             )
                             blockA
                         )
+            , test "Removing one block from a list with one block" <|
+                \_ ->
+                    Expect.equal
+                        DictList.empty
+                        (removeBlockFrom
+                            (DictList.fromList [ ( blockA.uuid, blockA ) ])
+                            blockA
+                        )
+            , test "Removing one block from a list with two block" <|
+                \_ ->
+                    Expect.equal
+                        (DictList.fromList [ ( blockB.uuid, blockB ) ])
+                        (removeBlockFrom
+                            (DictList.fromList [ ( blockA.uuid, blockA ), ( blockB.uuid, blockB ) ])
+                            blockA
+                        )
+            , test "Removing one block from a list without this block" <|
+                \_ ->
+                    Expect.equal
+                        (DictList.fromList [ ( blockB.uuid, blockB ) ])
+                        (removeBlockFrom
+                            (DictList.fromList [ ( blockB.uuid, blockB ) ])
+                            blockC
+                        )
+            , test "Removing one block from an empty list" <|
+                \_ ->
+                    Expect.equal
+                        DictList.empty
+                        (removeBlockFrom
+                            (DictList.fromList [ ( blockB.uuid, blockB ) ])
+                            blockB
+                        )
             ]
         ]
