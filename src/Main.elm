@@ -662,6 +662,15 @@ keyDown updateFloatInput floatInput command keyEvent model =
                 model ! []
 
 
+removeBlock : Block -> Model -> ( Model, Cmd Msg )
+removeBlock block model =
+    let
+        blocks =
+            removeBlockFrom model.blocks block
+    in
+        ({ model | blocks = blocks } |> unselectBlockIfSelected block) ! [ sendToJs "remove-block" (encodeBlock block) ]
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -678,11 +687,7 @@ update msg model =
             keyDown updateFloatInput floatInput command keyEvent model
 
         RemoveBlock block ->
-            let
-                blocks =
-                    removeBlockFrom model.blocks block
-            in
-                ({ model | blocks = blocks } |> unselectBlockIfSelected block) ! [ sendToJs "remove-block" (encodeBlock block) ]
+            removeBlock block model
 
         RenameBlock blockToRename label ->
             let
