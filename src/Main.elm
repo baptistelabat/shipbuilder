@@ -595,26 +595,31 @@ unselectBlock model =
 
 changeBlockColor : Block -> ColorPicker.Msg -> Model -> ( Model, Cmd Msg )
 changeBlockColor block colorPickerMsg model =
-            let
-                ( state, color ) =
-                    ColorPicker.update colorPickerMsg block.color model.colorPicker
-            in
-                case color of
-                    Just col ->
-                        let
-                            updatedBlock =
-                                { block | color = col }
+    let
+        ( state, color ) =
+            ColorPicker.update colorPickerMsg block.color model.colorPicker
+    in
+        case color of
+            Just col ->
+                let
+                    updatedBlock =
+                        { block | color = col }
 
-                            updatedModel =
-                                updateBlockInModel updatedBlock model
-                        in
-                            { updatedModel
-                                | colorPicker = state
-                            }
-                                ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
+                    updatedModel =
+                        updateBlockInModel updatedBlock model
+                in
+                    { updatedModel
+                        | colorPicker = state
+                    }
+                        ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
 
-                    Nothing ->
-                        model ! []
+            Nothing ->
+                model ! []
+
+
+addBlock : String -> Model -> ( Model, Cmd Msg )
+addBlock label model =
+    model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -627,7 +632,7 @@ update msg model =
             changeBlockColor block colorPickerMsg model
 
         AddBlock label ->
-            model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
+            addBlock label model
 
         KeyDown updateFloatInput floatInput command keyEvent ->
             let
