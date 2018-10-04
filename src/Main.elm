@@ -191,7 +191,7 @@ type alias Model =
     , colorPicker : ColorPicker.State
     , viewMode : ViewMode
     , viewports : Viewports
-    , selectedBlock : Maybe Block
+    , selectedBlock : Maybe String
     , blocks : Blocks
     }
 
@@ -502,32 +502,9 @@ encodeUpdateDepthCommand block =
         ]
 
 
-updateBlockInModel : Block -> Model -> Model
+updateBlockInModel : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
 updateBlockInModel block model =
-    model
-        |> updateBlockInBlocks block
-        |> updateBlockInSelection block
-
-
-updateBlockInBlocks : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
-updateBlockInBlocks block model =
     { model | blocks = DictList.insert block.uuid block model.blocks }
-
-
-updateBlockInSelection : Block -> { a | selectedBlock : Maybe Block } -> { a | selectedBlock : Maybe Block }
-updateBlockInSelection block model =
-    { model
-        | selectedBlock =
-            case model.selectedBlock of
-                Just selected ->
-                    if (selected.uuid == block.uuid) then
-                        Just block
-                    else
-                        model.selectedBlock
-
-                Nothing ->
-                    Nothing
-    }
 
 
 asValueInFloatValue : FloatInput -> Float -> FloatInput
@@ -578,6 +555,37 @@ asDepthInSize size depth =
 asSizeInBlock : Block -> Size -> Block
 asSizeInBlock block size =
     { block | size = size }
+
+
+getSelectedBlock : Model -> Maybe Block
+getSelectedBlock model =
+    case model.selectedBlock of
+        Just uuid ->
+            getBlockByUUID uuid model.blocks
+
+        Nothing ->
+            Nothing
+
+
+selectBlock : Block -> Model -> Model
+selectBlock block model =
+    { model | selectedBlock = Just block.uuid }
+
+
+unselectBlockIfSelected : Block -> Model -> Model
+unselectBlockIfSelected block model =
+    { model
+        | selectedBlock =
+            if model.selectedBlock == Just block.uuid then
+                Nothing
+            else
+                model.selectedBlock
+    }
+
+
+unselectBlock : Model -> Model
+unselectBlock model =
+    { model | selectedBlock = Nothing }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -653,19 +661,8 @@ update msg model =
             let
                 blocks =
                     removeBlock block model.blocks
-
-                selectedBlock =
-                    case model.selectedBlock of
-                        Just selected ->
-                            if selected.uuid == block.uuid then
-                                Nothing
-                            else
-                                model.selectedBlock
-
-                        Nothing ->
-                            model.selectedBlock
             in
-                { model | blocks = blocks, selectedBlock = selectedBlock } ! [ sendToJs "remove-block" (encodeBlock block) ]
+                ({ model | blocks = blocks } |> unselectBlockIfSelected block) ! [ sendToJs "remove-block" (encodeBlock block) ]
 
         RenameBlock blockToRename label ->
             let
@@ -676,7 +673,7 @@ update msg model =
                     ! []
 
         SelectBlock block ->
-            { model | selectedBlock = Just block } ! [ sendToJs "select-block" (encodeBlock block) ]
+            (selectBlock block model) ! [ sendToJs "select-block" (encodeBlock block) ]
 
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode } ! []
@@ -842,10 +839,10 @@ updateFromJs jsmsg model =
                 maybeBlock =
                     getBlockByUUID uuid model.blocks
             in
-                { model | selectedBlock = maybeBlock } ! []
+                { model | selectedBlock = Maybe.map .uuid maybeBlock } ! []
 
         Unselect ->
-            { model | selectedBlock = Nothing } ! []
+            (unselectBlock model) ! []
 
         SynchronizePosition uuid position ->
             (case getBlockByUUID uuid model.blocks of
@@ -1238,11 +1235,11 @@ viewEditableBlockName block =
         []
 
 
-viewBlockList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
+viewBlockList : { a | blocks : Blocks, selectedBlock : Maybe String } -> Html Msg
 viewBlockList blocksModel =
     case blocksModel.selectedBlock of
-        Just selected ->
-            ul [ class "blocks" ] <| (List.map (viewBlockItemWithSelection selected) <| DictList.values blocksModel.blocks) ++ [ viewNewBlockItem ]
+        Just uuid ->
+            ul [ class "blocks" ] <| (List.map (viewBlockItemWithSelection uuid) <| DictList.values blocksModel.blocks) ++ [ viewNewBlockItem ]
 
         Nothing ->
             ul [ class "blocks" ] <| (List.map viewBlockItem <| DictList.values blocksModel.blocks) ++ [ viewNewBlockItem ]
@@ -1283,9 +1280,9 @@ viewBlockItemContent block =
     ]
 
 
-viewBlockItemWithSelection : Block -> Block -> Html Msg
-viewBlockItemWithSelection selected block =
-    if selected.uuid == block.uuid then
+viewBlockItemWithSelection : String -> Block -> Html Msg
+viewBlockItemWithSelection uuid block =
+    if uuid == block.uuid then
         li [ class "block-item block-item__selected", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
             viewBlockItemContent block
     else
