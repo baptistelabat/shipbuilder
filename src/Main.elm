@@ -1129,11 +1129,26 @@ blockProperties block model =
         , positionInput "z" block.position.z (UpdatePositionZ block) block (updateBlockPositionZInModel block)
         ]
     , div [ class "block-size" ]
-        [ sizeInput "width" .width UpdateWidth block
-        , sizeInput "height" .height UpdateHeight block
-        , sizeInput "depth" .depth UpdateDepth block
+        [ sizeInput "width" block.size.width (UpdateWidth block) block (updateBlockWidthInModel block) sendWidthUpdate
+        , sizeInput "height" block.size.height (UpdateHeight block) block (updateBlockHeightInModel block) sendHeightUpdate
+        , sizeInput "depth" block.size.depth (UpdateDepth block) block (updateBlockDepthInModel block) sendDepthUpdate
         ]
     ]
+
+
+sendHeightUpdate : Block -> Cmd Msg
+sendHeightUpdate block =
+    sendToJs "update-height" (encodeUpdateHeightCommand block)
+
+
+sendWidthUpdate : Block -> Cmd Msg
+sendWidthUpdate block =
+    sendToJs "update-width" (encodeUpdateWidthCommand block)
+
+
+sendDepthUpdate : Block -> Cmd Msg
+sendDepthUpdate block =
+    sendToJs "update-depth" (encodeUpdateDepthCommand block)
 
 
 updateBlockPositionXInModel : Block -> FloatInput -> Block
@@ -1155,6 +1170,27 @@ updateBlockPositionZInModel block floatInput =
     floatInput
         |> asZInPosition block.position
         |> asPositionInBlock block
+
+
+updateBlockHeightInModel : Block -> FloatInput -> Block
+updateBlockHeightInModel block floatInput =
+    floatInput
+        |> asHeightInSize block.size
+        |> asSizeInBlock block
+
+
+updateBlockWidthInModel : Block -> FloatInput -> Block
+updateBlockWidthInModel block floatInput =
+    floatInput
+        |> asWidthInSize block.size
+        |> asSizeInBlock block
+
+
+updateBlockDepthInModel : Block -> FloatInput -> Block
+updateBlockDepthInModel block floatInput =
+    floatInput
+        |> asDepthInSize block.size
+        |> asSizeInBlock block
 
 
 positionInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> Html Msg
@@ -1203,8 +1239,8 @@ keyEventDecoder =
         |> Pipeline.required "ctrlKey" Decode.bool
 
 
-sizeInput : String -> (Size -> FloatInput) -> (Block -> String -> Msg) -> Block -> Html Msg
-sizeInput inputLabel getSize msg block =
+sizeInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> (Block -> Cmd Msg) -> Html Msg
+sizeInput inputLabel size inputMsg block updateSize sendSizeUpdate =
     div [ class "input-group" ]
         [ label [ for ("size-" ++ inputLabel) ]
             [ text inputLabel ]
@@ -1213,9 +1249,10 @@ sizeInput inputLabel getSize msg block =
             , name ("size-" ++ inputLabel)
             , id ("size-" ++ inputLabel)
             , type_ "text"
-            , value (.string (getSize block.size))
-            , onInput (msg block)
+            , value (.string size)
+            , onInput inputMsg
             , onBlur (SyncSizeInput block)
+            , onKeyDown (KeyDown updateSize size sendSizeUpdate)
             ]
             []
         ]
