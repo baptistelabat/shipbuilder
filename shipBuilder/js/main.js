@@ -373,6 +373,15 @@ let initGizmos = function () {
                         height: Math.round(100 * scale.y * size.height) / 100,
                         depth: Math.round(100 * scale.z * size.depth) / 100
                     };
+                    if (newSize.width <= 0) {
+                        newSize.width = 0.1;
+                    }
+                    if (newSize.height <= 0) {
+                        newSize.height = 0.1;
+                    }
+                    if (newSize.depth <= 0) {
+                        newSize.depth = 0.1;
+                    }
                     object.scale.set(newSize.width / size.width, newSize.height / size.height, newSize.depth / size.depth)
                     sendToElm("sync-size", { uuid: object.uuid, size: newSize });
                     break;
