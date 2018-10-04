@@ -239,6 +239,11 @@ addBlock block blocks =
     DictList.insert block.uuid block blocks
 
 
+toList : Blocks -> List Block
+toList blocks =
+    DictList.values blocks
+
+
 removeBlock : Block -> Blocks -> Blocks
 removeBlock block blocks =
     DictList.remove block.uuid blocks
@@ -504,7 +509,7 @@ encodeUpdateDepthCommand block =
 
 updateBlockInModel : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
 updateBlockInModel block model =
-    { model | blocks = DictList.insert block.uuid block model.blocks }
+    { model | blocks = addBlock block model.blocks }
 
 
 asValueInFloatValue : FloatInput -> Float -> FloatInput
@@ -1281,10 +1286,10 @@ viewBlockList : { a | blocks : Blocks, selectedBlock : Maybe String } -> Html Ms
 viewBlockList blocksModel =
     case blocksModel.selectedBlock of
         Just uuid ->
-            ul [ class "blocks" ] <| (List.map (viewBlockItemWithSelection uuid) <| DictList.values blocksModel.blocks) ++ [ viewNewBlockItem ]
+            ul [ class "blocks" ] <| (List.map (viewBlockItemWithSelection uuid) <| (toList blocksModel.blocks)) ++ [ viewNewBlockItem ]
 
         Nothing ->
-            ul [ class "blocks" ] <| (List.map viewBlockItem <| DictList.values blocksModel.blocks) ++ [ viewNewBlockItem ]
+            ul [ class "blocks" ] <| (List.map viewBlockItem <| (toList blocksModel.blocks)) ++ [ viewNewBlockItem ]
 
 
 viewNewBlockItem : Html Msg
