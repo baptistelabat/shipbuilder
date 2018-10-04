@@ -681,6 +681,11 @@ updateBlockLabel blockToRename label model =
             ! []
 
 
+updateSelectedBlock : Block -> Model -> ( Model, Cmd Msg )
+updateSelectedBlock block model =
+    (selectBlock block model) ! [ sendToJs "select-block" (encodeBlock block) ]
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -703,7 +708,7 @@ update msg model =
             updateBlockLabel blockToRename label model
 
         SelectBlock block ->
-            (selectBlock block model) ! [ sendToJs "select-block" (encodeBlock block) ]
+            updateSelectedBlock block model
 
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode } ! []
