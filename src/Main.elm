@@ -189,7 +189,7 @@ type JsMsg
 type alias Model =
     { build : String
     , colorPicker : ColorPicker.State
-    , panel : Panel
+    , viewMode : ViewMode
     , viewports : Viewports
     , selectedBlock : Maybe Block
     , blocks : Blocks
@@ -280,7 +280,7 @@ init =
     in
         ( { build = "0.0.1"
           , colorPicker = ColorPicker.empty
-          , panel = BlocksPanel Nothing
+          , viewMode = SpaceReservation WholeList
           , viewports = viewports
           , selectedBlock = Nothing
           , blocks = DictList.empty
@@ -291,9 +291,13 @@ init =
         )
 
 
-type Panel
-    = BlocksPanel (Maybe Block)
-    | GenericPanel
+type ViewMode
+    = SpaceReservation SpaceReservationView
+
+
+type SpaceReservationView
+    = WholeList
+    | DetailedBlock String
 
 
 type alias Viewports =
@@ -433,7 +437,7 @@ bottomRightCornerViewport background viewport =
 type Msg
     = NoOp
     | ChangeBlockColor Block ColorPicker.Msg
-    | SelectPanel Panel
+    | SwitchViewMode ViewMode
     | AddBlock String
     | FromJs JsMsg
     | KeyDown (FloatInput -> Block) FloatInput (Block -> Cmd Msg) KeyEvent
@@ -503,7 +507,6 @@ updateBlockInModel block model =
     model
         |> updateBlockInBlocks block
         |> updateBlockInSelection block
-        |> updateBlockInPanel block
 
 
 updateBlockInBlocks : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
@@ -575,27 +578,6 @@ asDepthInSize size depth =
 asSizeInBlock : Block -> Size -> Block
 asSizeInBlock block size =
     { block | size = size }
-
-
-updateBlockInPanel : Block -> { a | panel : Panel } -> { a | panel : Panel }
-updateBlockInPanel block model =
-    { model
-        | panel =
-            case model.panel of
-                BlocksPanel maybeBlock ->
-                    case maybeBlock of
-                        Just focus ->
-                            if focus.uuid == block.uuid then
-                                BlocksPanel (Just block)
-                            else
-                                BlocksPanel maybeBlock
-
-                        Nothing ->
-                            model.panel
-
-                GenericPanel ->
-                    model.panel
-    }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -696,8 +678,8 @@ update msg model =
         SelectBlock block ->
             { model | selectedBlock = Just block } ! [ sendToJs "select-block" (encodeBlock block) ]
 
-        SelectPanel panel ->
-            { model | panel = panel } ! []
+        SwitchViewMode newViewMode ->
+            { model | viewMode = newViewMode } ! []
 
         SyncPositionInput block ->
             let
@@ -912,28 +894,28 @@ type alias MenuItems =
 view : Model -> Html Msg
 view model =
     div [ id "elm-root" ]
-        [ header
-        , content model
+        [ viewHeader
+        , viewContent model
         ]
 
 
-header : Html Msg
-header =
+viewHeader : Html Msg
+viewHeader =
     Html.header []
         [ div [ class "header-left" ]
             -- groups img and title together for flexbox
             [ img [ src "img/SIREHNA_R.png" ] []
             , h1 [] [ text "ShipBuilder" ]
             ]
-        , headerMenu
+        , viewHeaderMenu
         ]
 
 
-content : Model -> Html Msg
-content model =
+viewContent : Model -> Html Msg
+viewContent model =
     div [ class "content-wrapper" ]
-        [ sideMenu model
-        , workspace model
+        [ viewSideMenu model
+        , viewWorkspace model
         ]
 
 
@@ -958,70 +940,51 @@ headerMenuItems =
     ]
 
 
-headerMenu : Html Msg
-headerMenu =
-    let
-        getHeaderMenuItem : MenuItem -> Html Msg
-        getHeaderMenuItem ( title, item ) =
-            headerMenuItem title item
-    in
-        div [ class "header-menu" ] <|
-            List.map getHeaderMenuItem headerMenuItems
+viewHeaderMenu : Html Msg
+viewHeaderMenu =
+    div [ class "header-menu" ] <|
+        List.map viewHeaderMenuItem headerMenuItems
 
 
-headerMenuItem : String -> Html Msg -> Html Msg
-headerMenuItem itemTitle item =
+viewHeaderMenuItem : MenuItem -> Html Msg
+viewHeaderMenuItem ( itemTitle, icon ) =
     div
         [ class "header-menu-item"
         , title itemTitle
         ]
-        [ item ]
+        [ icon ]
 
 
 
 -- SIDE
 
 
-sideMenu : Model -> Html Msg
-sideMenu model =
-    div [ class "side" ] <|
-        List.concat [ [ panelMenu model ], [ panel model ] ]
-
-
-getPanels : Model -> List (Html Msg)
-getPanels model =
-    case model.panel of
-        BlocksPanel maybeBlock ->
-            [ blocksPanel model
-            ]
-
-        _ ->
-            [ defaultPanel model ]
-
-
-panelMenu : Model -> Html Msg
-panelMenu model =
-    div [ class "panel-menu" ]
-        [ tabs model
-        , build model
+viewSideMenu : Model -> Html Msg
+viewSideMenu model =
+    div [ class "side" ]
+        [ viewPanelMenu model
+        , viewPanel model
         ]
 
 
-tabs : Model -> Html Msg
-tabs model =
-    let
-        getTab : Tab -> Html Msg
-        getTab tabItem =
-            tab tabItem.title tabItem.item tabItem.target model
-    in
-        div [ class "tabs" ] <|
-            List.map getTab tabItems
+viewPanelMenu : Model -> Html Msg
+viewPanelMenu model =
+    div [ class "panel-menu" ]
+        [ viewTabs model
+        , viewBuild model
+        ]
+
+
+viewTabs : Model -> Html Msg
+viewTabs model =
+    div [ class "tabs" ] <|
+        List.map (viewTab model) tabItems
 
 
 type alias Tab =
     { title : String
-    , item : Html Msg
-    , target : Panel
+    , icon : Html Msg
+    , viewMode : ViewMode
     }
 
 
@@ -1031,107 +994,112 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Eléments", item = FARegular.clone, target = BlocksPanel Nothing }
+    [ { title = "Eléments", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     ]
 
 
-tab : String -> Html Msg -> Panel -> Model -> Html Msg
-tab title item panel model =
+viewModesMatch : ViewMode -> ViewMode -> Bool
+viewModesMatch left right =
+    case left of
+        SpaceReservation _ ->
+            case right of
+                SpaceReservation _ ->
+                    True
+
+
+viewTab : Model -> Tab -> Html Msg
+viewTab model tab =
     let
-        -- Check if active
-        active : Bool
-        active =
-            case panel of
-                BlocksPanel _ ->
-                    case model.panel of
-                        BlocksPanel _ ->
-                            True
-
-                        _ ->
-                            False
-
-                GenericPanel ->
-                    model.panel == GenericPanel
-
         classes =
-            if active then
-                [ "tab-item", "active" ]
+            if viewModesMatch tab.viewMode model.viewMode then
+                "tab-item active"
             else
-                [ "tab-item" ]
+                "tab-item"
     in
         div
-            (List.concat
-                [ (List.map class classes)
-                , [ onClick (SelectPanel panel) ]
-                ]
-            )
-            [ item
-            , p [] [ text title ]
+            [ class classes
+            , onClick (SwitchViewMode tab.viewMode)
+            ]
+            [ tab.icon
+            , p [] [ text tab.title ]
             ]
 
 
-build : Model -> Html Msg
-build model =
+viewBuild : Model -> Html Msg
+viewBuild model =
     p [ class "build-info" ] [ text model.build ]
 
 
-panel : Model -> Html Msg
-panel model =
-    case model.panel of
-        BlocksPanel maybeBlock ->
-            case maybeBlock of
-                Just block ->
-                    blocksPanelFocusOn block model
-
-                Nothing ->
-                    blocksPanel model
-
-        _ ->
-            defaultPanel model
+viewPanel : Model -> Html Msg
+viewPanel model =
+    case model.viewMode of
+        SpaceReservation spaceReservationView ->
+            viewSpaceReservationPanel spaceReservationView model
 
 
-blocksPanel : Model -> Html Msg
-blocksPanel model =
+viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
+viewSpaceReservationPanel spaceReservationView model =
+    case spaceReservationView of
+        DetailedBlock uuid ->
+            viewDetailedBlock uuid model
+
+        WholeList ->
+            viewWholeList model
+
+
+viewWholeList : Model -> Html Msg
+viewWholeList model =
     div
         [ class "panel blocks-panel"
         ]
         [ h2 [] [ text "Blocks" ]
-        , blocksList model
+        , viewBlockList model
         ]
 
 
-blocksPanelFocusOn : Block -> Model -> Html Msg
-blocksPanelFocusOn block model =
+viewDetailedBlock : String -> Model -> Html Msg
+viewDetailedBlock uuid model =
     div
         [ class "panel blocks-panel blocks-panel__focus" ]
-        [ div [ class "focus-title" ]
-            [ text "Properties of block:" ]
-        , div
-            [ class "focus-header" ]
-            [ div [ class "focus-back", onClick (SelectPanel (BlocksPanel Nothing)) ] [ FASolid.arrow_left ]
-            , div [ class "focus-label" ] [ editableBlockName block ]
-            ]
-        , div [ class "focus-sub-header" ]
-            [ div [ class "focus-uuid" ] [ text block.uuid ]
-            ]
-        , div [ class "focus-properties" ] <|
-            blockProperties block model
-        ]
+    <|
+        case getBlockByUUID uuid model.blocks of
+            Just block ->
+                [ div [ class "focus-title" ]
+                    [ text "Properties of block:" ]
+                , div
+                    [ class "focus-header" ]
+                    [ viewBackToWholeList
+                    , div [ class "focus-label" ] [ viewEditableBlockName block ]
+                    ]
+                , div [ class "focus-sub-header" ]
+                    [ div [ class "focus-uuid" ] [ text block.uuid ]
+                    ]
+                , div [ class "focus-properties" ] <|
+                    viewBlockProperties block model
+                ]
+
+            Nothing ->
+                []
 
 
-blockProperties : Block -> Model -> List (Html Msg)
-blockProperties block model =
+viewBackToWholeList : Html Msg
+viewBackToWholeList =
+    div [ class "focus-back", onClick (SwitchViewMode (SpaceReservation WholeList)) ] [ FASolid.arrow_left ]
+
+
+viewBlockProperties : Block -> Model -> List (Html Msg)
+viewBlockProperties block model =
     [ ColorPicker.view block.color model.colorPicker
         |> Html.map (ChangeBlockColor block)
     , div [ class "block-position" ]
-        [ positionInput "x" block.position.x (UpdatePositionX block) block (updateBlockPositionXInModel block)
-        , positionInput "y" block.position.y (UpdatePositionY block) block (updateBlockPositionYInModel block)
-        , positionInput "z" block.position.z (UpdatePositionZ block) block (updateBlockPositionZInModel block)
+        [ viewPositionInput "x" block.position.x (UpdatePositionX block) block (updateBlockPositionXInModel block)
+        , viewPositionInput "y" block.position.y (UpdatePositionY block) block (updateBlockPositionYInModel block)
+        , viewPositionInput "z" block.position.z (UpdatePositionZ block) block (updateBlockPositionZInModel block)
         ]
     , div [ class "block-size" ]
-        [ sizeInput "width" block.size.width (UpdateWidth block) block (updateBlockWidthInModel block) sendWidthUpdate
-        , sizeInput "height" block.size.height (UpdateHeight block) block (updateBlockHeightInModel block) sendHeightUpdate
-        , sizeInput "depth" block.size.depth (UpdateDepth block) block (updateBlockDepthInModel block) sendDepthUpdate
+        [ viewSizeInput "width" block.size.width (UpdateWidth block) block (updateBlockWidthInModel block) sendWidthUpdate
+        , viewSizeInput "height" block.size.height (UpdateHeight block) block (updateBlockHeightInModel block) sendHeightUpdate
+        , viewSizeInput "depth" block.size.depth (UpdateDepth block) block (updateBlockDepthInModel block) sendDepthUpdate
         ]
     ]
 
@@ -1193,8 +1161,8 @@ updateBlockDepthInModel block floatInput =
         |> asSizeInBlock block
 
 
-positionInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> Html Msg
-positionInput inputLabel position inputMsg block updatePosition =
+viewPositionInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> Html Msg
+viewPositionInput inputLabel position inputMsg block updatePosition =
     div [ class "input-group" ]
         [ label [ for ("position-" ++ inputLabel) ]
             [ text inputLabel ]
@@ -1239,8 +1207,8 @@ keyEventDecoder =
         |> Pipeline.required "ctrlKey" Decode.bool
 
 
-sizeInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> (Block -> Cmd Msg) -> Html Msg
-sizeInput inputLabel size inputMsg block updateSize sendSizeUpdate =
+viewSizeInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> (Block -> Cmd Msg) -> Html Msg
+viewSizeInput inputLabel size inputMsg block updateSize sendSizeUpdate =
     div [ class "input-group" ]
         [ label [ for ("size-" ++ inputLabel) ]
             [ text inputLabel ]
@@ -1264,46 +1232,46 @@ type alias FloatInput =
     }
 
 
-editableBlockName : Block -> Html Msg
-editableBlockName block =
+viewEditableBlockName : Block -> Html Msg
+viewEditableBlockName block =
     input [ class "block-label", id block.uuid, value block.label, onInput (RenameBlock block) ]
         []
 
 
-blocksList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
-blocksList blocksModel =
+viewBlockList : { a | blocks : Blocks, selectedBlock : Maybe Block } -> Html Msg
+viewBlockList blocksModel =
     case blocksModel.selectedBlock of
         Just selected ->
-            ul [ class "blocks" ] <| (List.map (blockItemWithSelection selected) <| DictList.values blocksModel.blocks) ++ [ newBlockItem ]
+            ul [ class "blocks" ] <| (List.map (viewBlockItemWithSelection selected) <| DictList.values blocksModel.blocks) ++ [ viewNewBlockItem ]
 
         Nothing ->
-            ul [ class "blocks" ] <| (List.map blockItem <| DictList.values blocksModel.blocks) ++ [ newBlockItem ]
+            ul [ class "blocks" ] <| (List.map viewBlockItem <| DictList.values blocksModel.blocks) ++ [ viewNewBlockItem ]
 
 
-newBlockItem : Html Msg
-newBlockItem =
+viewNewBlockItem : Html Msg
+viewNewBlockItem =
     li [ class "add-block" ]
         [ input [ class "block-label", type_ "text", placeholder "New block", value "", onInput AddBlock ]
             []
         ]
 
 
-blockItem : Block -> Html Msg
-blockItem block =
+viewBlockItem : Block -> Html Msg
+viewBlockItem block =
     li [ class "block-item", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
-        blockItemContent block
+        viewBlockItemContent block
 
 
-blockItemContent : Block -> List (Html Msg)
-blockItemContent block =
+viewBlockItemContent : Block -> List (Html Msg)
+viewBlockItemContent block =
     [ div [ class "block-info-wrapper", onClick (SelectBlock block) ]
-        [ editableBlockName block
+        [ viewEditableBlockName block
         , p
             [ class "block-uuid" ]
             [ text block.uuid ]
         ]
     , div [ class "block-actions" ]
-        [ div [ class "block-action focus-block", onClick (SelectPanel (BlocksPanel (Just block))) ]
+        [ div [ class "block-action focus-block", onClick (SwitchViewMode (SpaceReservation (DetailedBlock block.uuid))) ]
             [ FASolid.arrow_right
             ]
         , div
@@ -1315,33 +1283,21 @@ blockItemContent block =
     ]
 
 
-blockItemWithSelection : Block -> Block -> Html Msg
-blockItemWithSelection selected block =
+viewBlockItemWithSelection : Block -> Block -> Html Msg
+viewBlockItemWithSelection selected block =
     if selected.uuid == block.uuid then
         li [ class "block-item block-item__selected", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
-            blockItemContent block
+            viewBlockItemContent block
     else
-        blockItem block
-
-
-defaultPanel : Model -> Html Msg
-defaultPanel model =
-    div
-        [ class "panel" ]
-        []
-
-
-secondaryPanel : Model -> Html Msg
-secondaryPanel model =
-    div [ class "panel panel__secondary" ] []
+        viewBlockItem block
 
 
 
 -- WORKSPACE
 
 
-workspace : Model -> Html Msg
-workspace model =
+viewWorkspace : Model -> Html Msg
+viewWorkspace model =
     div [ class "workspace" ]
         [ div [ id "three-wrapper" ] []
         ]
