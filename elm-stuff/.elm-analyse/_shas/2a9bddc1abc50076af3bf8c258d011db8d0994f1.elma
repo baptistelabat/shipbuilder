@@ -1,6 +1,0 @@
-port module Ports exposing (..)
-
-import Json.Encode
-
-
-port createViewports : Value -> Cmd msg
