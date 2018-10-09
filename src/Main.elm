@@ -309,6 +309,7 @@ init =
 
 type ViewMode
     = SpaceReservation SpaceReservationView
+    | HullStudio
 
 
 type SpaceReservationView
@@ -1059,6 +1060,7 @@ type alias Tabs =
 tabItems : Tabs
 tabItems =
     [ { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
+    , { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
     ]
 
 
@@ -1069,6 +1071,17 @@ viewModesMatch left right =
             case right of
                 SpaceReservation _ ->
                     True
+
+                _ ->
+                    False
+
+        HullStudio ->
+            case right of
+                HullStudio ->
+                    True
+
+                _ ->
+                    False
 
 
 viewTab : Model -> Tab -> Html Msg
@@ -1099,6 +1112,9 @@ viewPanel model =
     case model.viewMode of
         SpaceReservation spaceReservationView ->
             viewSpaceReservationPanel spaceReservationView model
+
+        HullStudio ->
+            viewSpaceReservationPanel WholeList model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
