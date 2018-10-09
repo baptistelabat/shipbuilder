@@ -19,6 +19,27 @@ let loader = new THREE.STLLoader();
 
 let preventSelection = false;
 
+let coordinatesTransform = new THREE.Matrix3();
+coordinatesTransform.set(
+    1, 0, 0,
+    0, 0, 1,
+    0, -1, 0
+);
+
+let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
+    const initVector = new THREE.Vector3(x, y, z);
+    const resultVector = initVector.applyMatrix3(coordinatesTransform);
+    return resultVector;
+}
+
+let toShipCoordinates = function (x, y, z, coordinatesTransform) {
+    const initVector = new THREE.Vector3(x, y, z);
+    const inversedTransform = new THREE.Matrix3();
+    inversedTransform.getInverse(coordinatesTransform);
+    const resultVector = initVector.applyMatrix3(inversedTransform);
+    return resultVector;
+}
+
 app.ports.toJs.subscribe(function (message) {
     const data = message.data;
     switch (message.tag) {
