@@ -203,6 +203,7 @@ type alias Model =
     , viewMode : ViewMode
     , viewports : Viewports
     , selectedBlock : Maybe String
+    , selectedHullReference : Maybe String
     , blocks : Blocks
     }
 
@@ -299,6 +300,7 @@ init =
           , viewMode = SpaceReservation WholeList
           , viewports = viewports
           , selectedBlock = Nothing
+          , selectedHullReference = Nothing
           , blocks = DictList.empty
           }
         , Cmd.batch
@@ -724,7 +726,7 @@ update msg model =
             updateSelectedBlock block model
 
         SelectHullReference hullReference ->
-            model ! []
+            { model | selectedHullReference = Just hullReference.path } ! []
 
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode } ! []
