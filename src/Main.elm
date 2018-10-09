@@ -1127,12 +1127,44 @@ viewSpaceReservationPanel spaceReservationView model =
             viewWholeList model
 
 
+type alias HullReference =
+    { label : String
+    , path : String
+    }
+
+
+hullReferences : List HullReference
+hullReferences =
+    [ { label = "Anthineas", path = "assets/anthineas.stl" }
+    ]
+
+
 viewHullStudioPanel : Model -> Html Msg
 viewHullStudioPanel model =
     div
         [ class "panel hull-panel"
         ]
-        []
+        [ h2 [] [ text "Hull Studio" ]
+        , viewHullReferences model
+        ]
+
+
+viewHullReferences : Model -> Html Msg
+viewHullReferences model =
+    ul [ class "hull-references" ] <|
+        List.map
+            viewHullReference
+            hullReferences
+
+
+viewHullReference : HullReference -> Html Msg
+viewHullReference ref =
+    li [ class "hull-reference" ]
+        [ div [ class "hull-info-wrapper" ]
+            [ p [ class "hull-label" ] [ text ref.label ]
+            , p [ class "hull-path" ] [ text ref.path ]
+            ]
+        ]
 
 
 viewWholeList : Model -> Html Msg
