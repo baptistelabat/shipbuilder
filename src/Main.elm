@@ -466,6 +466,7 @@ type Msg
     | UpdateDepth Block String
     | RemoveBlock Block
     | SelectBlock Block
+    | SelectHullReference HullReference
     | SyncPositionInput Block
     | SyncSizeInput Block
     | RenameBlock Block String
@@ -721,6 +722,9 @@ update msg model =
 
         SelectBlock block ->
             updateSelectedBlock block model
+
+        SelectHullReference hullReference ->
+            model ! []
 
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode } ! []
@@ -1159,7 +1163,7 @@ viewHullReferences model =
 
 viewHullReference : HullReference -> Html Msg
 viewHullReference ref =
-    li [ class "hull-reference" ]
+    li [ class "hull-reference", onClick (SelectHullReference ref) ]
         [ div [ class "hull-info-wrapper" ]
             [ p [ class "hull-label" ] [ text ref.label ]
             , p [ class "hull-path" ] [ text ref.path ]
