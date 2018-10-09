@@ -726,7 +726,7 @@ update msg model =
             updateSelectedBlock block model
 
         SelectHullReference hullReference ->
-            { model | selectedHullReference = Just hullReference.path } ! []
+            { model | selectedHullReference = Just hullReference.path } ! [ sendToJs "load-hull" <| Encode.string hullReference.path ]
 
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode } ! []

@@ -26,6 +26,9 @@ app.ports.toJs.subscribe(function (message) {
         case "add-block":
             addCube(data.label, getThreeColorFromElmColor(data.color));
             break;
+        case "load-hull":
+            loadHull(data);
+            break;
         case "remove-block":
             removeBlock(data);
             break;
@@ -68,6 +71,10 @@ let updateColor = function (data) {
             resetElementColor(object);
         }
     }
+}
+
+let loadHull = function (path) {
+    console.log(path);
 }
 
 let updatePosition = function (data) {
