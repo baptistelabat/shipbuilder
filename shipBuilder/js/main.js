@@ -101,13 +101,16 @@ let loadHull = function (path) {
     loader.load(path, (bufferGeometry) => {
         const hullColor = new THREE.Color(0.77, 0.77, 0.80);
         const geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
+        geometry.vertices = geometry.vertices.map(vertex => {
+            return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
+        });
         const material = new THREE.MeshBasicMaterial({ color: hullColor });
         const hull = new THREE.Mesh(geometry, material);
 
         hull.baseColor = hullColor;
         scene.add(hull);
 
-        sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.faces, vertices: hull.vertices })
+        sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.geometry.faces, vertices: hull.geometry.vertices })
     });
 }
 
