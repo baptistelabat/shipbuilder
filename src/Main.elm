@@ -401,12 +401,12 @@ encodeCanControl canControl =
 
 viewportSide : Float -> Float -> Float -> Float -> Color -> Viewport
 viewportSide left top width height background =
-    Viewport "Side" left top width height background (vec3 0 0 1000) { x = True, y = True, z = False }
+    Viewport "Side" left top width height background (vec3 0 1000 0) { x = True, y = False, z = True }
 
 
 viewportTop : Float -> Float -> Float -> Float -> Color -> Viewport
 viewportTop left top width height background =
-    Viewport "Top" left top width height background (vec3 0 1000 0) { x = True, y = False, z = True }
+    Viewport "Top" left top width height background (vec3 0 0 -1000) { x = True, y = True, z = False }
 
 
 topHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport

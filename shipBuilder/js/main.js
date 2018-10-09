@@ -273,9 +273,15 @@ let initThree = function (viewsData) {
     document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
 
     views = viewsData.map(view => {
-        view.getEye = () => [view.eye.x, view.eye.y, view.eye.z];
+        view.getEye = () => {
+            const converted = toThreeJsCoordinates(view.eye.x, view.eye.y, view.eye.z, coordinatesTransform);
+            return [converted.x, converted.y, converted.z]
+        };
         view.getBackground = () => new THREE.Color(view.background.red / 255, view.background.green / 255, view.background.blue / 255);
-        view.getCanControl = () => [view.canControl.x, view.canControl.y, view.canControl.z];
+        view.getCanControl = () => {
+            const converted = toThreeJsCoordinates(view.canControl.x, view.canControl.y, view.canControl.z, coordinatesTransform);
+            return [converted.x, converted.y, converted.z]
+        };
         return view;
     });
     wrapper = document.getElementById(wrapperId);
