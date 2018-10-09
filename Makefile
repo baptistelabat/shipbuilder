@@ -9,8 +9,8 @@ shipBuilder/js/elm.js: src/*
 
 artifacts: shipBuilder.zip
 
-shipBuilder.zip: shipBuilder/index.html shipBuilder/js/elm.js shipBuilder/*.css shipBuilder/img/*
-	zip -r -9 shipBuilder.zip shipBuilder/index.html shipBuilder/js shipBuilder/css shipBuilder/img
+shipBuilder.zip: shipBuilder/index.html shipBuilder/js/elm.js shipBuilder/*.css shipBuilder/assets/*
+	zip -r -9 shipBuilder.zip shipBuilder/index.html shipBuilder/js shipBuilder/css shipBuilder/assets
 
 clean:
 	rm -rf shipBuilder/js/elm.js shipBuilder.zip elm-stuff/generated-code elm-stuff/build-artifacts

@@ -10,7 +10,7 @@ build:
       paths:
         - shipBuilder/shipBuilder.html
         - shipBuilder/css
-        - shipBuilder/img
+        - shipBuilder/assets
         - shipBuilder/js
 
 pages:
