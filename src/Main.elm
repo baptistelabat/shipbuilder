@@ -1114,7 +1114,7 @@ viewPanel model =
             viewSpaceReservationPanel spaceReservationView model
 
         HullStudio ->
-            viewSpaceReservationPanel WholeList model
+            viewHullStudioPanel model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
@@ -1125,6 +1125,14 @@ viewSpaceReservationPanel spaceReservationView model =
 
         WholeList ->
             viewWholeList model
+
+
+viewHullStudioPanel : Model -> Html Msg
+viewHullStudioPanel model =
+    div
+        [ class "panel hull-panel"
+        ]
+        []
 
 
 viewWholeList : Model -> Html Msg
