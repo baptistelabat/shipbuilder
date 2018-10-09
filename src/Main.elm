@@ -203,6 +203,7 @@ type alias Model =
     , viewMode : ViewMode
     , viewports : Viewports
     , selectedBlock : Maybe String
+    , selectedHullReference : Maybe String
     , blocks : Blocks
     }
 
@@ -299,6 +300,7 @@ init =
           , viewMode = SpaceReservation WholeList
           , viewports = viewports
           , selectedBlock = Nothing
+          , selectedHullReference = Nothing
           , blocks = DictList.empty
           }
         , Cmd.batch
@@ -309,6 +311,7 @@ init =
 
 type ViewMode
     = SpaceReservation SpaceReservationView
+    | HullStudio
 
 
 type SpaceReservationView
@@ -465,6 +468,7 @@ type Msg
     | UpdateDepth Block String
     | RemoveBlock Block
     | SelectBlock Block
+    | SelectHullReference HullReference
     | SyncPositionInput Block
     | SyncSizeInput Block
     | RenameBlock Block String
@@ -721,6 +725,9 @@ update msg model =
         SelectBlock block ->
             updateSelectedBlock block model
 
+        SelectHullReference hullReference ->
+            { model | selectedHullReference = Just hullReference.path } ! [ sendToJs "load-hull" <| Encode.string hullReference.path ]
+
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode } ! []
 
@@ -968,7 +975,7 @@ viewHeader =
     Html.header []
         [ div [ class "header-left" ]
             -- groups img and title together for flexbox
-            [ img [ src "img/SIREHNA_R.png" ] []
+            [ img [ src "assets/SIREHNA_R.png" ] []
             , h1 [] [ text "ShipBuilder" ]
             ]
         , viewHeaderMenu
@@ -1059,6 +1066,7 @@ type alias Tabs =
 tabItems : Tabs
 tabItems =
     [ { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
+    , { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
     ]
 
 
@@ -1069,6 +1077,17 @@ viewModesMatch left right =
             case right of
                 SpaceReservation _ ->
                     True
+
+                _ ->
+                    False
+
+        HullStudio ->
+            case right of
+                HullStudio ->
+                    True
+
+                _ ->
+                    False
 
 
 viewTab : Model -> Tab -> Html Msg
@@ -1100,6 +1119,9 @@ viewPanel model =
         SpaceReservation spaceReservationView ->
             viewSpaceReservationPanel spaceReservationView model
 
+        HullStudio ->
+            viewHullStudioPanel model
+
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
 viewSpaceReservationPanel spaceReservationView model =
@@ -1109,6 +1131,80 @@ viewSpaceReservationPanel spaceReservationView model =
 
         WholeList ->
             viewWholeList model
+
+
+type alias HullReference =
+    { label : String
+    , path : String
+    }
+
+
+hullReferences : List HullReference
+hullReferences =
+    [ { label = "Anthineas", path = "assets/anthineas.stl" }
+    ]
+
+
+viewHullStudioPanel : Model -> Html Msg
+viewHullStudioPanel model =
+    div
+        [ class "panel hull-panel"
+        ]
+    <|
+        case model.selectedHullReference of
+            Just pathOfHullReference ->
+                [ h2 [] [ text "Hull Studio" ]
+                , viewHullReferencesWithSelection model pathOfHullReference
+                ]
+
+            Nothing ->
+                [ h2 [] [ text "Hull Studio" ]
+                , viewHullReferences model
+                ]
+
+
+viewHullReferences : Model -> Html Msg
+viewHullReferences model =
+    ul [ class "hull-references" ] <|
+        List.map
+            viewHullReference
+            hullReferences
+
+
+viewHullReferencesWithSelection : Model -> String -> Html Msg
+viewHullReferencesWithSelection model pathOfSelectedHullReference =
+    ul [ class "hull-references" ] <|
+        List.map (viewHullReferenceWithSelection pathOfSelectedHullReference) hullReferences
+
+
+viewHullReference : HullReference -> Html Msg
+viewHullReference ref =
+    li [ class "hull-reference", onClick (SelectHullReference ref) ]
+        [ div [ class "hull-info-wrapper" ]
+            [ p [ class "hull-label" ] [ text ref.label ]
+            , p [ class "hull-path" ] [ text ref.path ]
+            ]
+        ]
+
+
+viewHullReferenceWithSelection : String -> HullReference -> Html Msg
+viewHullReferenceWithSelection pathOfSelectedHullReference ref =
+    li
+        [ class <|
+            if ref.path == pathOfSelectedHullReference then
+                "hull-reference hull-reference__selected"
+            else
+                "hull-reference"
+        , onClick (SelectHullReference ref)
+        ]
+        [ div
+            []
+            []
+        , div [ class "hull-info-wrapper" ]
+            [ p [ class "hull-label" ] [ text ref.label ]
+            , p [ class "hull-path" ] [ text ref.path ]
+            ]
+        ]
 
 
 viewWholeList : Model -> Html Msg

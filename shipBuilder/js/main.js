@@ -14,7 +14,9 @@ let wrapper = null; // parent of canvas, used for resizing
 let canvas = null;
 let renderer = null;
 let scene = null;
-let raycaster = null; // used to find the objects under the cursor on click, mousemove etc
+let raycaster = new THREE.Raycaster(); // used to find the objects under the cursor on click, mousemove etc
+let loader = new THREE.STLLoader();
+
 let preventSelection = false;
 
 app.ports.toJs.subscribe(function (message) {
@@ -25,6 +27,9 @@ app.ports.toJs.subscribe(function (message) {
             break;
         case "add-block":
             addCube(data.label, getThreeColorFromElmColor(data.color));
+            break;
+        case "load-hull":
+            loadHull(data);
             break;
         case "remove-block":
             removeBlock(data);
@@ -68,6 +73,20 @@ let updateColor = function (data) {
             resetElementColor(object);
         }
     }
+}
+
+let loadHull = function (path) {
+    loader.load(path, (bufferGeometry) => {
+        const hullColor = new THREE.Color(0.77, 0.77, 0.80);
+        const geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
+        const material = new THREE.MeshBasicMaterial({ color: hullColor });
+        const hull = new THREE.Mesh(geometry, material);
+
+        hull.baseColor = hullColor;
+        scene.add(hull);
+
+        sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.faces, vertices: hull.vertices })
+    });
 }
 
 let updatePosition = function (data) {
@@ -250,7 +269,6 @@ let initThree = function (viewsData) {
      * scene.add(gridHelper);
      */
 
-    raycaster = new THREE.Raycaster();
     animate();
 };
 

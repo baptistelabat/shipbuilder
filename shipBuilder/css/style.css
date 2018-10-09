@@ -188,7 +188,7 @@ header .header-menu-item+.header-menu-item {
     overflow: hidden;
 }
 
-ul.blocks {
+ul.blocks, ul.hull-references  {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -198,19 +198,20 @@ ul.blocks {
     padding: 0 12px;
 }
 
-li.block-item, .add-block {
+
+li.block-item, .add-block, li.hull-reference {
     background-color: white;
     margin: 0 -12px;
     padding: 4px 0;
     display: flex;
 }
 
-li.block-item {
+li.block-item, li.hull-reference {
     border-left-width: 0;
     border-left-style: solid;
 }
 
-li.block-item .block-info-wrapper {
+li.block-item .block-info-wrapper, li.hull-reference .hull-info-wrapper {
     padding: 8px 12px;
     width: 100%;
     cursor: pointer;
@@ -219,23 +220,28 @@ li.block-item:hover .block-info-wrapper {
     width: calc(100% - 28px);
 }
 
-li.block-item:hover {
+li.block-item:hover, li.hull-reference:hover {
     border-left-width: 6px;
 }
 
-li.block-item:hover .block-info-wrapper {
+li.hull-reference {
+    border-color: hsl(222, 100%, 74%);
+}
+
+li.block-item:hover .block-info-wrapper, li.hull-reference:hover .hull-info-wrapper {
     padding-left: 6px;
 }
 
 li.block-item:hover .block-actions {
     display: flex;
+
 }
 
-li.block-item p {
+li.block-item p, li.hull-reference p {
     margin: 4px 0;
 }
 
-li.block-item p.block-uuid {
+li.block-item p.block-uuid, li.hull-reference p.hull-path {
     font-size: 0.65em;
     color: hsl(222, 20%, 60%);
     white-space: nowrap;
@@ -285,11 +291,11 @@ li.block-item .block-action svg {
     height: 16px;
 }
 
-li.block-item__selected {
+li.block-item__selected, li.hull-reference__selected {
     border-left-width: 6px;
     border-left-style: solid;
 }
-li.block-item__selected .block-info-wrapper {
+li.block-item__selected .block-info-wrapper, li.hull-reference__selected .hull-info-wrapper {
     padding-left: 6px;
 }
 
