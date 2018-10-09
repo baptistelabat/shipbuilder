@@ -969,7 +969,7 @@ viewHeader =
     Html.header []
         [ div [ class "header-left" ]
             -- groups img and title together for flexbox
-            [ img [ src "img/SIREHNA_R.png" ] []
+            [ img [ src "assets/SIREHNA_R.png" ] []
             , h1 [] [ text "ShipBuilder" ]
             ]
         , viewHeaderMenu
