@@ -19,11 +19,12 @@ let loader = new THREE.STLLoader();
 
 let preventSelection = false;
 
+// Ship to ThreeJs
 let coordinatesTransform = new THREE.Matrix3();
 coordinatesTransform.set(
     1, 0, 0,
-    0, 0, 1,
-    0, -1, 0
+    0, 0, -1,
+    0, 1, 0
 );
 
 let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
