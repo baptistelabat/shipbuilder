@@ -81,9 +81,8 @@ let loadHull = function (path) {
         const geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
         const material = new THREE.MeshBasicMaterial({ color: hullColor });
         const hull = new THREE.Mesh(geometry, material);
-        hull.scale.set(100, 100, 100);
-        hull.baseColor = hullColor;
 
+        hull.baseColor = hullColor;
         scene.add(hull);
 
         sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.faces, vertices: hull.vertices })
