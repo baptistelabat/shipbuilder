@@ -114,7 +114,7 @@ let loadHull = function (path) {
 let updatePosition = function (data) {
     const object = findBlockByUUID(data.uuid);
     if (object) {
-        const position = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
+        const position = toThreeJsCoordinates(data.position.x, data.position.y, data.position.z, coordinatesTransform);
         object.position.copy(position);
         if (selected && selected.uuid === object.uuid) {
             selectBlock(object);
@@ -408,7 +408,9 @@ let initGizmos = function () {
                         z: Math.round(position.z * 100) / 100
                     };
                     object.position.set(roundedPosition.x, roundedPosition.y, roundedPosition.z);
-                    sendToElm("sync-position", { uuid: object.uuid, position: roundedPosition });
+                    sendToElm("sync-position", {
+                        uuid: object.uuid, position: toShipCoordinates(roundedPosition.x, roundedPosition.y, roundedPosition.z, coordinatesTransform)
+                    });
                     break;
 
                 case "scale":
