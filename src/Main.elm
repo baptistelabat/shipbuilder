@@ -1150,9 +1150,17 @@ viewHullStudioPanel model =
     div
         [ class "panel hull-panel"
         ]
-        [ h2 [] [ text "Hull Studio" ]
-        , viewHullReferences model
-        ]
+    <|
+        case model.selectedHullReference of
+            Just pathOfHullReference ->
+                [ h2 [] [ text "Hull Studio" ]
+                , viewHullReferencesWithSelection model pathOfHullReference
+                ]
+
+            Nothing ->
+                [ h2 [] [ text "Hull Studio" ]
+                , viewHullReferences model
+                ]
 
 
 viewHullReferences : Model -> Html Msg
@@ -1163,10 +1171,36 @@ viewHullReferences model =
             hullReferences
 
 
+viewHullReferencesWithSelection : Model -> String -> Html Msg
+viewHullReferencesWithSelection model pathOfSelectedHullReference =
+    ul [ class "hull-references" ] <|
+        List.map (viewHullReferenceWithSelection pathOfSelectedHullReference) hullReferences
+
+
 viewHullReference : HullReference -> Html Msg
 viewHullReference ref =
     li [ class "hull-reference", onClick (SelectHullReference ref) ]
         [ div [ class "hull-info-wrapper" ]
+            [ p [ class "hull-label" ] [ text ref.label ]
+            , p [ class "hull-path" ] [ text ref.path ]
+            ]
+        ]
+
+
+viewHullReferenceWithSelection : String -> HullReference -> Html Msg
+viewHullReferenceWithSelection pathOfSelectedHullReference ref =
+    li
+        [ class <|
+            if ref.path == pathOfSelectedHullReference then
+                "hull-reference hull-reference__selected"
+            else
+                "hull-reference"
+        , onClick (SelectHullReference ref)
+        ]
+        [ div
+            []
+            []
+        , div [ class "hull-info-wrapper" ]
             [ p [ class "hull-label" ] [ text ref.label ]
             , p [ class "hull-path" ] [ text ref.path ]
             ]
