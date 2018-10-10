@@ -65,6 +65,11 @@ subscriptions model =
     fromJs jsMsgToMsg
 
 
+openSaveFileCmd : Cmd msg
+openSaveFileCmd =
+    sendToJs "read-json-file" (Encode.string "open-save-file")
+
+
 newBlockDecoder : Decode.Decoder Block
 newBlockDecoder =
     Pipeline.decode Block
@@ -601,6 +606,7 @@ type Msg
     | AddBlock String
     | FromJs JsMsg
     | KeyDown (FloatInput -> Block) FloatInput (Block -> Cmd Msg) KeyEvent
+    | OpenSaveFile
     | UpdatePositionX Block String
     | UpdatePositionY Block String
     | UpdatePositionZ Block String
@@ -825,6 +831,9 @@ update msg model =
 
         KeyDown updateFloatInput floatInput command keyEvent ->
             keyDown updateFloatInput floatInput command keyEvent model
+
+        OpenSaveFile ->
+            model ! [ openSaveFileCmd ]
 
         RemoveBlock block ->
             removeBlock block model
@@ -1151,6 +1160,7 @@ viewOpenMenuItem =
             , id "open-save-file"
             , name "open-save-file"
             , class "hidden-input"
+            , on "change" (Decode.succeed OpenSaveFile)
             ]
             []
         ]
