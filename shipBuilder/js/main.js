@@ -7,6 +7,7 @@ const mouse = new THREE.Vector2();
 const wrapperId = "three-wrapper"; // defined in elm
 
 let views = [];
+let mode = null;
 
 let hovered = null; // the first object under the cursor in the scene
 let selected = null; // the selected object in the scene
@@ -54,10 +55,13 @@ app.ports.toJs.subscribe(function (message) {
             loadHull(data);
             break;
         case "remove-block":
-            removeBlock(data);
+            removeObject(data);
             break;
         case "select-block":
             selectBlock(data);
+            break;
+        case "switch-mode":
+            switchMode(data);
             break;
         case "update-color":
             updateColor(data);
@@ -68,7 +72,6 @@ app.ports.toJs.subscribe(function (message) {
         case "update-size":
             updateSize(data);
             break;
-            break;
         default:
     }
 })
@@ -77,12 +80,17 @@ let sendToElm = function (tag, data) {
     app.ports.fromJs.send({ tag: tag, data: data });
 }
 
+let switchMode = function (newMode) {
+    unselectObject();
+    mode = newMode;
+}
+
 let updateColor = function (data) {
-    const object = findBlockByUUID(data.uuid);
+    const object = findObjectByUUID(data.uuid);
     if (object) {
         object.baseColor = getThreeColorFromElmColor(data.color);
         if (isObjectSelected(object)) {
-            selectBlock(object);
+            selectObject(object);
         } else if (isObjectHovered(object)) {
             highlightObject(object);
             hovered = object;
@@ -126,12 +134,12 @@ let loadHull = function (path) {
 }
 
 let updatePosition = function (data) {
-    const object = findBlockByUUID(data.uuid);
+    const object = findObjectByUUID(data.uuid);
     if (object) {
         const position = toThreeJsCoordinates(data.position.x, data.position.y, data.position.z, coordinatesTransform);
         object.position.copy(position);
         if (isObjectSelected(object)) {
-            selectBlock(object);
+            selectObject(object);
         } else if (isObjectHovered(object)) {
             hovered = object;
         }
@@ -139,7 +147,7 @@ let updatePosition = function (data) {
 }
 
 let updateSize = function (data) {
-    const object = findBlockByUUID(data.uuid);
+    const object = findObjectByUUID(data.uuid);
     if (object) {
         const newSize = sizeToThreeJsCoordinates(data.x, data.y, data.z, coordinatesTransform);
         const currentSize = getObjectSize(object);
@@ -151,7 +159,7 @@ let updateSize = function (data) {
         const currentZSize = currentSize.z;
         object.scale.set(newXSize / currentXSize, newYSize / currentYSize, newZSize / currentZSize);
         if (isObjectSelected(object)) {
-            selectBlock(object);
+            selectObject(object);
         } else if (isObjectHovered(object)) {
             hovered = object;
         }
@@ -211,8 +219,8 @@ let makeCube = function (sizeX, sizeY, sizeZ, x, y, z, color) {
     return cube;
 }
 
-let removeBlock = function (block) {
-    const objectToRemove = findBlockByUUID(block.uuid);
+let removeObject = function (block) {
+    const objectToRemove = findObjectByUUID(block.uuid);
     if (objectToRemove) {
         if (isObjectHovered(object)) {
             hovered = null;
@@ -235,12 +243,37 @@ let removeFromScene = function (objectToRemove) {
 
 let selectBlock = function (block) {
     if (block && block.uuid) {
-        const objectToSelect = findBlockByUUID(block.uuid);
-        if (objectToSelect) {
-            if (isObjectSelected(objectToSelect)) {
+        const objectToSelect = findObjectByUUID(block.uuid);
+        if (objectToSelect && objectToSelect.sbType === mode) {
+            if (selected) {
                 resetElementColor(selected);
             }
             highlightObject(objectToSelect);
+            selected = objectToSelect;
+        }
+        attachViewControl(selected);
+    }
+}
+
+let selectObject = function (object) {
+    switch (mode) {
+        case "block":
+            selectBlock(object);
+            break;
+
+        case "hull":
+            selectHull(object);
+            break;
+
+        default:
+            break;
+    }
+}
+
+let selectHull = function (hull) {
+    if (hull && hull.uuid) {
+        const objectToSelect = findObjectByUUID(hull.uuid);
+        if (objectToSelect && objectToSelect.sbType === mode) {
             selected = objectToSelect;
         }
         attachViewControl(selected);
@@ -262,7 +295,7 @@ let attachViewControl = function (block) {
     })
 }
 
-let findBlockByUUID = function (uuid) {
+let findObjectByUUID = function (uuid) {
     return scene.children.find(child => child.uuid === uuid);
 }
 
@@ -474,7 +507,7 @@ let onClick = function (event) {
     switch (event.which) {
         case 1: // left click
             if (activeViewport && hovered && !preventSelection) {
-                selectBlock(hovered);
+                selectObject(hovered);
                 sendToElm("select", selected.uuid);
             }
             break;
@@ -598,8 +631,9 @@ let getActiveViewport = function (views) {
 
 let getFirstElementUnderCursor = function (mouse, views, scene) {
     const elements = getElementsUnderCursor(mouse, views, scene);
-    if (elements.length) {
-        return elements[0];
+    const modeElements = elements.filter(element => element.sbType && element.sbType === mode);
+    if (modeElements.length) {
+        return modeElements[0];
     } else {
         return null;
     }

@@ -294,10 +294,14 @@ init =
             [ topHalfViewport (hsl (degrees 222) 0.7 0.98) viewportSide
             , bottomHalfViewport (hsl (degrees 222) 0.53 0.95) viewportTop
             ]
+
+        viewMode : ViewMode
+        viewMode =
+            SpaceReservation WholeList
     in
         ( { build = "0.0.1"
           , colorPicker = ColorPicker.empty
-          , viewMode = SpaceReservation WholeList
+          , viewMode = viewMode
           , viewports = viewports
           , selectedBlock = Nothing
           , selectedHullReference = Nothing
@@ -305,6 +309,7 @@ init =
           }
         , Cmd.batch
             [ encodeViewports viewports |> sendToJs "init-viewports"
+            , encodeViewMode viewMode |> sendToJs "switch-mode"
             ]
         )
 
@@ -360,6 +365,17 @@ encodeViewport viewport =
         , ( "eye", encodeVector3 viewport.eye )
         , ( "canControl", encodeCanControl viewport.canControl )
         ]
+
+
+encodeViewMode : ViewMode -> Encode.Value
+encodeViewMode viewMode =
+    Encode.string <|
+        case viewMode of
+            SpaceReservation _ ->
+                "block"
+
+            HullStudio ->
+                "hull"
 
 
 encodeColor : Color -> Encode.Value
@@ -715,7 +731,7 @@ update msg model =
             { model | selectedHullReference = Just hullReference.path } ! [ sendToJs "load-hull" <| Encode.string hullReference.path ]
 
         SwitchViewMode newViewMode ->
-            { model | viewMode = newViewMode } ! []
+            { model | viewMode = newViewMode } ! [ sendToJs "switch-mode" <| encodeViewMode newViewMode ]
 
         SyncPositionInput block ->
             let
