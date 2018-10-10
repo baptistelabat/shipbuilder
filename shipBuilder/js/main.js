@@ -109,6 +109,7 @@ let loadHull = function (path) {
         const hull = new THREE.Mesh(geometry, material);
 
         hull.baseColor = hullColor;
+        hull.sbType = "hull";
         scene.add(hull);
 
         sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.geometry.faces, vertices: shipVertices });
@@ -197,7 +198,7 @@ let makeCube = function (sizeX, sizeY, sizeZ, x, y, z, color) {
     var cube = new THREE.Mesh(geometry, material);
     cube.position.fromArray([x, y, z]);
     cube.baseColor = color;
-    cube.geometryType = "cube";
+    cube.sbType = "block";
     return cube;
 }
 
