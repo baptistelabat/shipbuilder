@@ -17,6 +17,7 @@ import DictList exposing (DictList)
 import Dom
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
+import Http exposing (encodeUri)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -978,20 +979,20 @@ type alias MenuItems =
 view : Model -> Html Msg
 view model =
     div [ id "elm-root" ]
-        [ viewHeader
+        [ viewHeader model
         , viewContent model
         ]
 
 
-viewHeader : Html Msg
-viewHeader =
+viewHeader : Model -> Html Msg
+viewHeader model =
     Html.header []
         [ div [ class "header-left" ]
             -- groups img and title together for flexbox
             [ img [ src "assets/SIREHNA_R.png" ] []
             , h1 [] [ text "ShipBuilder" ]
             ]
-        , viewHeaderMenu
+        , viewHeaderMenu model
         ]
 
 
@@ -1016,27 +1017,36 @@ colorToCssRgbString color =
 -- HEADER MENU
 
 
-headerMenuItems : MenuItems
-headerMenuItems =
-    [ ( "Ouvrir", FASolid.folder_open )
-    , ( "Télécharger", FASolid.download )
-    , ( "Imprimer", FASolid.print )
-    ]
-
-
-viewHeaderMenu : Html Msg
-viewHeaderMenu =
-    div [ class "header-menu" ] <|
-        List.map viewHeaderMenuItem headerMenuItems
-
-
-viewHeaderMenuItem : MenuItem -> Html Msg
-viewHeaderMenuItem ( itemTitle, icon ) =
+viewSaveMenuItem : Model -> Html Msg
+viewSaveMenuItem model =
     div
         [ class "header-menu-item"
-        , title itemTitle
+        , title "Open"
         ]
-        [ icon ]
+        [ a
+            [ type_ "button"
+            , href <| "data:application/json;charset=utf-8," ++ encodeUri (stringifyEncodeValue (encodeModelForSave model))
+            , downloadAs "shipbuilder.json"
+            ]
+            [ FASolid.download ]
+        ]
+
+
+viewHeaderMenu : Model -> Html Msg
+viewHeaderMenu model =
+    div [ class "header-menu" ]
+        [ viewOpenMenuItem
+        , viewSaveMenuItem model
+        ]
+
+
+viewOpenMenuItem : Html Msg
+viewOpenMenuItem =
+    div
+        [ class "header-menu-item"
+        , title "Open"
+        ]
+        [ FASolid.folder_open ]
 
 
 

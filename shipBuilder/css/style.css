@@ -54,6 +54,10 @@ header .header-menu-item {
     height: 20px;
 }
 
+header .header-menu-item a {
+    color: white;
+}
+
 header .header-menu-item svg {
     height: 100%;
 }
