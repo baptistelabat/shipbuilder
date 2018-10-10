@@ -99,6 +99,15 @@ let absVector3 = function (vector3) {
 
 let loadHull = function (path) {
     loader.load(path, (bufferGeometry) => {
+        // there can only be one hull in the scene
+        const previousHull = scene.children.find(child => child.sbType && child.sbType === "hull");
+        if (previousHull) {
+            if (isObjectSelected(previousHull)) {
+                unselectObject();
+            }
+            removeFromScene(previousHull);
+        }
+
         const hullColor = new THREE.Color(0.77, 0.77, 0.80);
         const geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
         const shipVertices = geometry.vertices;
@@ -217,11 +226,11 @@ let removeBlock = function (block) {
 }
 
 let removeFromScene = function (objectToRemove) {
-        scene.remove(objectToRemove);
-        // memory optimization
-        objectToRemove.geometry.dispose();
-        objectToRemove.material.dispose();
-    }
+    scene.remove(objectToRemove);
+    // memory optimization
+    objectToRemove.geometry.dispose();
+    objectToRemove.material.dispose();
+}
 
 
 let selectBlock = function (block) {
