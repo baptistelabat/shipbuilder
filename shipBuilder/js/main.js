@@ -631,8 +631,9 @@ let getActiveViewport = function (views) {
 
 let getFirstElementUnderCursor = function (mouse, views, scene) {
     const elements = getElementsUnderCursor(mouse, views, scene);
-    if (elements.length) {
-        return elements[0];
+    const modeElements = elements.filter(element => element.sbType && element.sbType === mode);
+    if (modeElements.length) {
+        return modeElements[0];
     } else {
         return null;
     }
