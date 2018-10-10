@@ -122,7 +122,8 @@ let loadHull = function (path) {
         geometry.vertices = shipVertices.map(vertex => {
             return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
         });
-        const material = new THREE.MeshBasicMaterial({ color: hullColor });
+        const material = new THREE.MeshBasicMaterial({ color: hullColor, opacity: 0.7 });
+        material.transparent = true;
         const hull = new THREE.Mesh(geometry, material);
 
         hull.baseColor = hullColor;
