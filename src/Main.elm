@@ -233,6 +233,14 @@ encodeBlocks blocks =
     Encode.list <| List.map encodeBlock (toList blocks)
 
 
+encodeModelForSave : Model -> Encode.Value
+encodeModelForSave model =
+    Encode.object
+        [ ( "version", Encode.int 1 )
+        , ( "blocks", encodeBlocks model.blocks )
+        ]
+
+
 encodeBlock : Block -> Encode.Value
 encodeBlock block =
     Encode.object
