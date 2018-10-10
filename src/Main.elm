@@ -12,6 +12,7 @@ port module Main
         )
 
 import Color exposing (Color, hsl)
+import SIRColorPicker
 import DictList exposing (DictList)
 import Dom
 import FontAwesome.Regular as FARegular
@@ -468,7 +469,7 @@ bottomRightCornerViewport background viewport =
 
 type Msg
     = NoOp
-    | ChangeBlockColor Block String
+    | ChangeBlockColor Block Color
     | SwitchViewMode ViewMode
     | AddBlock String
     | FromJs JsMsg
@@ -491,7 +492,8 @@ encodeAddBlockCommand : String -> Encode.Value
 encodeAddBlockCommand label =
     Encode.object
         [ ( "label", Encode.string label )
-        , ( "color", encodeColor Color.blue )
+        , ( "color", encodeColor SIRColorPicker.indigo )
+          -- blue
         ]
 
 
@@ -682,8 +684,16 @@ update msg model =
         NoOp ->
             model ! []
 
-        ChangeBlockColor block cssColor ->
-            model ! []
+        ChangeBlockColor block newColor ->
+            let
+                updatedBlock =
+                    { block | color = newColor }
+
+                updatedModel =
+                    updateBlockInModel updatedBlock model
+            in
+                updatedModel
+                    ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
 
         AddBlock label ->
             addBlock label model
@@ -1224,8 +1234,9 @@ viewBackToWholeList =
 
 viewBlockProperties : Block -> Model -> List (Html Msg)
 viewBlockProperties block model =
-    [ --TODO color picker
-      div [ class "block-position" ]
+    [ SIRColorPicker.view block.color block ChangeBlockColor
+    , div
+        [ class "block-position" ]
         [ viewPositionInput "x" block.position.x (UpdatePositionX block) block (updateBlockPositionXInModel block)
         , viewPositionInput "y" block.position.y (UpdatePositionY block) block (updateBlockPositionYInModel block)
         , viewPositionInput "z" block.position.z (UpdatePositionZ block) block (updateBlockPositionZInModel block)
