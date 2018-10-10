@@ -81,9 +81,9 @@ let updateColor = function (data) {
     const object = findBlockByUUID(data.uuid);
     if (object) {
         object.baseColor = getThreeColorFromElmColor(data.color);
-        if (selected && selected.uuid === object.uuid) {
+        if (isObjectSelected(object)) {
             selectBlock(object);
-        } else if (hovered && hovered.uuid === object.uuid) {
+        } else if (isObjectHovered(object)) {
             highlightObject(object);
             hovered = object;
         } else {
@@ -120,9 +120,9 @@ let updatePosition = function (data) {
     if (object) {
         const position = toThreeJsCoordinates(data.position.x, data.position.y, data.position.z, coordinatesTransform);
         object.position.copy(position);
-        if (selected && selected.uuid === object.uuid) {
+        if (isObjectSelected(object)) {
             selectBlock(object);
-        } else if (hovered && hovered.uuid === object.uuid) {
+        } else if (isObjectHovered(object)) {
             hovered = object;
         }
     }
@@ -140,9 +140,9 @@ let updateSize = function (data) {
         const newZSize = newSize.z;
         const currentZSize = currentSize.z;
         object.scale.set(newXSize / currentXSize, newYSize / currentYSize, newZSize / currentZSize);
-        if (selected && selected.uuid === object.uuid) {
+        if (isObjectSelected(object)) {
             selectBlock(object);
-        } else if (hovered && hovered.uuid === object.uuid) {
+        } else if (isObjectHovered(object)) {
             hovered = object;
         }
     }
@@ -204,11 +204,11 @@ let makeCube = function (sizeX, sizeY, sizeZ, x, y, z, color) {
 let removeBlock = function (block) {
     const objectToRemove = findBlockByUUID(block.uuid);
     if (objectToRemove) {
-        if (hovered && hovered.uuid === block.uuid) {
+        if (isObjectHovered(object)) {
             hovered = null;
         }
-        if (selected && selected.uuid === block.uuid) {
-            unselectBlock();
+        if (isObjectSelected(object)) {
+            unselectObject();
         }
         scene.remove(objectToRemove);
         // memory optimization
@@ -221,7 +221,7 @@ let selectBlock = function (block) {
     if (block && block.uuid) {
         const objectToSelect = findBlockByUUID(block.uuid);
         if (objectToSelect) {
-            if (selected && (selected.uuid !== objectToSelect.uuid)) {
+            if (isObjectSelected(objectToSelect)) {
                 resetElementColor(selected);
             }
             highlightObject(objectToSelect);
@@ -469,6 +469,13 @@ let onClick = function (event) {
         default: // right click
 
     }
+}
+
+let isObjectSelected = function (object) {
+    return selected && (selected.uuid === object.uuid);
+}
+let isObjectHovered = function (object) {
+    return hovered && (hovered.uuid === object.uuid);
 }
 
 let onDoubleClick = function (event) { // cycle through the transform modes
