@@ -12,7 +12,7 @@ port module Main
         )
 
 import Color exposing (Color, hsl)
-import ColorPicker
+import SIRColorPicker
 import DictList exposing (DictList)
 import Dom
 import FontAwesome.Regular as FARegular
@@ -199,7 +199,6 @@ type JsMsg
 
 type alias Model =
     { build : String
-    , colorPicker : ColorPicker.State
     , viewMode : ViewMode
     , viewports : Viewports
     , selectedBlock : Maybe String
@@ -300,7 +299,6 @@ init =
             SpaceReservation WholeList
     in
         ( { build = "0.0.1"
-          , colorPicker = ColorPicker.empty
           , viewMode = viewMode
           , viewports = viewports
           , selectedBlock = Nothing
@@ -471,7 +469,7 @@ bottomRightCornerViewport background viewport =
 
 type Msg
     = NoOp
-    | ChangeBlockColor Block ColorPicker.Msg
+    | ChangeBlockColor Block Color
     | SwitchViewMode ViewMode
     | AddBlock String
     | FromJs JsMsg
@@ -494,7 +492,8 @@ encodeAddBlockCommand : String -> Encode.Value
 encodeAddBlockCommand label =
     Encode.object
         [ ( "label", Encode.string label )
-        , ( "color", encodeColor Color.blue )
+        , ( "color", encodeColor SIRColorPicker.indigo )
+          -- blue
         ]
 
 
@@ -610,30 +609,6 @@ unselectBlock model =
     { model | selectedBlock = Nothing }
 
 
-changeBlockColor : Block -> ColorPicker.Msg -> Model -> ( Model, Cmd Msg )
-changeBlockColor block colorPickerMsg model =
-    let
-        ( state, color ) =
-            ColorPicker.update colorPickerMsg block.color model.colorPicker
-    in
-        case color of
-            Just col ->
-                let
-                    updatedBlock =
-                        { block | color = col }
-
-                    updatedModel =
-                        updateBlockInModel updatedBlock model
-                in
-                    { updatedModel
-                        | colorPicker = state
-                    }
-                        ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
-
-            Nothing ->
-                model ! []
-
-
 addBlock : String -> Model -> ( Model, Cmd Msg )
 addBlock label model =
     model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
@@ -709,8 +684,16 @@ update msg model =
         NoOp ->
             model ! []
 
-        ChangeBlockColor block colorPickerMsg ->
-            changeBlockColor block colorPickerMsg model
+        ChangeBlockColor block newColor ->
+            let
+                updatedBlock =
+                    { block | color = newColor }
+
+                updatedModel =
+                    updateBlockInModel updatedBlock model
+            in
+                updatedModel
+                    ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
 
         AddBlock label ->
             addBlock label model
@@ -1251,9 +1234,9 @@ viewBackToWholeList =
 
 viewBlockProperties : Block -> Model -> List (Html Msg)
 viewBlockProperties block model =
-    [ ColorPicker.view block.color model.colorPicker
-        |> Html.map (ChangeBlockColor block)
-    , div [ class "block-position" ]
+    [ SIRColorPicker.view block.color block ChangeBlockColor
+    , div
+        [ class "block-position" ]
         [ viewPositionInput "x" block.position.x (UpdatePositionX block) block (updateBlockPositionXInModel block)
         , viewPositionInput "y" block.position.y (UpdatePositionY block) block (updateBlockPositionYInModel block)
         , viewPositionInput "z" block.position.z (UpdatePositionZ block) block (updateBlockPositionZInModel block)

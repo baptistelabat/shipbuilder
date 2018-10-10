@@ -1,0 +1,18 @@
+.sir-color-picker {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sir-color-item {
+    height: 24px;
+    width: 24px;
+    cursor: pointer;
+}
+
+.sir-color-item:hover {
+    transform: scale(1.3);
+}
+
+.sir-color-item__selected {
+    border: 2px solid white;
+}
