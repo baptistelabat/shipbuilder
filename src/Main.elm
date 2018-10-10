@@ -280,6 +280,7 @@ encodeModelForSave model =
     Encode.object
         [ ( "version", Encode.int 1 )
         , ( "blocks", encodeBlocks model.blocks )
+        , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
         ]
 
 
