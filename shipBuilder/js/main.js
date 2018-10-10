@@ -7,6 +7,7 @@ const mouse = new THREE.Vector2();
 const wrapperId = "three-wrapper"; // defined in elm
 
 let views = [];
+let mode = null;
 
 let hovered = null; // the first object under the cursor in the scene
 let selected = null; // the selected object in the scene
@@ -59,6 +60,9 @@ app.ports.toJs.subscribe(function (message) {
         case "select-block":
             selectBlock(data);
             break;
+        case "switch-mode":
+            switchMode(data);
+            break;
         case "update-color":
             updateColor(data);
             break;
@@ -68,13 +72,17 @@ app.ports.toJs.subscribe(function (message) {
         case "update-size":
             updateSize(data);
             break;
-            break;
         default:
     }
 })
 
 let sendToElm = function (tag, data) {
     app.ports.fromJs.send({ tag: tag, data: data });
+}
+
+let switchMode = function (newMode) {
+    unselectObject();
+    mode = newMode;
 }
 
 let updateColor = function (data) {
