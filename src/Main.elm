@@ -245,6 +245,15 @@ encodePosition position =
         ]
 
 
+encodeSize : Size -> Encode.Value
+encodeSize size =
+    Encode.object
+        [ ( "x", Encode.float size.length.value )
+        , ( "y", Encode.float size.width.value )
+        , ( "z", Encode.float size.height.value )
+        ]
+
+
 addBlockTo : Blocks -> Block -> Blocks
 addBlockTo blocks block =
     DictList.insert block.uuid block blocks
@@ -517,9 +526,7 @@ encodeUpdateSizeCommand : { a | uuid : String, size : Size } -> Encode.Value
 encodeUpdateSizeCommand block =
     Encode.object
         [ ( "uuid", Encode.string block.uuid )
-        , ( "x", Encode.float (getLength block) )
-        , ( "y", Encode.float (getWidth block) )
-        , ( "z", Encode.float (getHeight block) )
+        , ( "size", encodeSize block.size )
         ]
 
 

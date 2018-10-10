@@ -150,7 +150,7 @@ let updatePosition = function (data) {
 let updateSize = function (data) {
     const object = findObjectByUUID(data.uuid);
     if (object) {
-        const newSize = sizeToThreeJsCoordinates(data.x, data.y, data.z, coordinatesTransform);
+        const newSize = sizeToThreeJsCoordinates(data.size.x, data.size.y, data.size.z, coordinatesTransform);
         const currentSize = getObjectSize(object);
         const newXSize = newSize.x;
         const currentXSize = currentSize.x;
