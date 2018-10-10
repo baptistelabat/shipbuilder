@@ -24,13 +24,13 @@ let preventSelection = false;
 let coordinatesTransform = new THREE.Matrix3();
 
 
-let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
+let toShipCoordinates = function (x, y, z, coordinatesTransform) {
     const initVector = new THREE.Vector3(x, y, z);
     const resultVector = initVector.applyMatrix3(coordinatesTransform);
     return resultVector;
 }
 
-let toShipCoordinates = function (x, y, z, coordinatesTransform) {
+let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
     const initVector = new THREE.Vector3(x, y, z);
     const inversedTransform = new THREE.Matrix3();
     inversedTransform.getInverse(coordinatesTransform);
@@ -317,8 +317,12 @@ let initThree = function (data) {
     });
     mode = initMode;
 
-    // the elm matrix maps three coordinate system to ship
-    coordinatesTransform.fromArray(initCoordinatesTransform);
+    // the elm matrix maps the ship's coordinate system to ThreeJs' one
+    const inversedCoordinatesTransform = new THREE.Matrix3();
+    inversedCoordinatesTransform.fromArray(initCoordinatesTransform);
+    coordinatesTransform.getInverse(inversedCoordinatesTransform);
+
+
     wrapper = document.getElementById(wrapperId);
 
     initCanvas(wrapper);

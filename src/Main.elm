@@ -216,21 +216,21 @@ makeCoordinatesTransform x y z =
 coordinatesTransformToList : CoordinatesTransform -> List Float
 coordinatesTransformToList coordinatesTransform =
     [ getX coordinatesTransform.x
-    , getY coordinatesTransform.x
-    , getZ coordinatesTransform.x
     , getX coordinatesTransform.y
-    , getY coordinatesTransform.y
-    , getZ coordinatesTransform.y
     , getX coordinatesTransform.z
+    , getY coordinatesTransform.x
+    , getY coordinatesTransform.y
     , getY coordinatesTransform.z
+    , getZ coordinatesTransform.x
+    , getZ coordinatesTransform.y
     , getZ coordinatesTransform.z
     ]
 
 
 defaultCoordinatesTransform : CoordinatesTransform
 defaultCoordinatesTransform =
-    -- ThreeJs to Ship
-    makeCoordinatesTransform (vec3 1 0 0) (vec3 0 0 1) (vec3 0 -1 0)
+    -- Ship to ThreeJs
+    makeCoordinatesTransform (vec3 1 0 0) (vec3 0 0 -1) (vec3 0 1 0)
 
 
 type alias Model =
