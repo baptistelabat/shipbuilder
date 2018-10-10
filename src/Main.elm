@@ -12,6 +12,7 @@ port module Main
         )
 
 import Color exposing (Color, hsl)
+import Color exposing (Color, rgba, hsl)
 import SIRColorPicker
 import DictList exposing (DictList)
 import Dom
@@ -87,6 +88,30 @@ syncPositionDecoder =
 
 type alias SyncSize =
     { uuid : String, size : Size }
+
+
+decodeBlocks : Decode.Decoder (List Block)
+decodeBlocks =
+    Decode.list decodeBlock
+
+
+decodeBlock : Decode.Decoder Block
+decodeBlock =
+    Pipeline.decode Block
+        |> Pipeline.required "uuid" Decode.string
+        |> Pipeline.required "label" Decode.string
+        |> Pipeline.required "color" decodeColor
+        |> Pipeline.required "position" decodePosition
+        |> Pipeline.required "size" decodeSize
+
+
+decodeColor : Decode.Decoder Color
+decodeColor =
+    Pipeline.decode Color.rgba
+        |> Pipeline.required "red" Decode.int
+        |> Pipeline.required "green" Decode.int
+        |> Pipeline.required "blue" Decode.int
+        |> Pipeline.required "alpha" Decode.float
 
 
 syncSizeDecoder : Decode.Decoder SyncSize
