@@ -24,7 +24,7 @@ import Html.Events exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
-import Math.Vector3 exposing (Vec3, vec3, toRecord)
+import Math.Vector3 exposing (Vec3, vec3, getX, getY, getZ, toRecord)
 import Task
 import Debug
 
@@ -198,10 +198,45 @@ type JsMsg
 -- MODEL
 
 
+type alias CoordinatesTransform =
+    { x : Vec3
+    , y : Vec3
+    , z : Vec3
+    }
+
+
+makeCoordinatesTransform : Vec3 -> Vec3 -> Vec3 -> CoordinatesTransform
+makeCoordinatesTransform x y z =
+    { x = x
+    , y = y
+    , z = z
+    }
+
+
+coordinatesTransformToList : CoordinatesTransform -> List Float
+coordinatesTransformToList coordinatesTransform =
+    [ getX coordinatesTransform.x
+    , getY coordinatesTransform.x
+    , getZ coordinatesTransform.x
+    , getX coordinatesTransform.y
+    , getY coordinatesTransform.y
+    , getZ coordinatesTransform.y
+    , getX coordinatesTransform.z
+    , getY coordinatesTransform.z
+    , getZ coordinatesTransform.z
+    ]
+
+
+defaultCoordinatesTransform : CoordinatesTransform
+defaultCoordinatesTransform =
+    makeCoordinatesTransform (vec3 1 0 0) (vec3 0 0 1) (vec3 0 -1 0)
+
+
 type alias Model =
     { build : String
     , viewMode : ViewMode
     , viewports : Viewports
+    , coordinatesTransform : CoordinatesTransform
     , selectedBlock : Maybe String
     , selectedHullReference : Maybe String
     , blocks : Blocks
@@ -245,6 +280,11 @@ encodeModelForSave model =
         [ ( "version", Encode.int 1 )
         , ( "blocks", encodeBlocks model.blocks )
         ]
+
+
+encodeCoordinatesTransform : CoordinatesTransform -> Encode.Value
+encodeCoordinatesTransform coordinatesTransform =
+    Encode.list <| List.map Encode.float (coordinatesTransformToList coordinatesTransform)
 
 
 encodeBlock : Block -> Encode.Value
@@ -319,6 +359,15 @@ getBlockByUUID uuid blocks =
 init : ( Model, Cmd Msg )
 init =
     let
+        model =
+            initModel
+    in
+        ( initModel, encodeInitThreeCommand model |> sendToJs "init-three" )
+
+
+initModel : Model
+initModel =
+    let
         viewports : Viewports
         viewports =
             [ topHalfViewport (hsl (degrees 222) 0.7 0.98) viewportSide
@@ -329,18 +378,14 @@ init =
         viewMode =
             SpaceReservation WholeList
     in
-        ( { build = "0.0.1"
-          , viewMode = viewMode
-          , viewports = viewports
-          , selectedBlock = Nothing
-          , selectedHullReference = Nothing
-          , blocks = DictList.empty
-          }
-        , Cmd.batch
-            [ encodeViewports viewports |> sendToJs "init-viewports"
-            , encodeViewMode viewMode |> sendToJs "switch-mode"
-            ]
-        )
+        { build = "0.0.1"
+        , viewMode = viewMode
+        , viewports = viewports
+        , coordinatesTransform = defaultCoordinatesTransform
+        , selectedBlock = Nothing
+        , selectedHullReference = Nothing
+        , blocks = DictList.empty
+        }
 
 
 type ViewMode
@@ -380,6 +425,15 @@ type alias Viewport =
 encodeViewports : Viewports -> Encode.Value
 encodeViewports viewports =
     Encode.list <| List.map encodeViewport viewports
+
+
+encodeInitThreeCommand : Model -> Encode.Value
+encodeInitThreeCommand model =
+    Encode.object
+        [ ( "viewports", encodeViewports model.viewports )
+        , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        , ( "mode", encodeViewMode model.viewMode )
+        ]
 
 
 encodeViewport : Viewport -> Encode.Value

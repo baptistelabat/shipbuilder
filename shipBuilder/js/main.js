@@ -45,7 +45,7 @@ let toShipCoordinates = function (x, y, z, coordinatesTransform) {
 app.ports.toJs.subscribe(function (message) {
     const data = message.data;
     switch (message.tag) {
-        case "init-viewports":
+        case "init-three":
             initThree(data);
             break;
         case "add-block":
@@ -300,11 +300,12 @@ let findObjectByUUID = function (uuid) {
     return scene.children.find(child => child.uuid === uuid);
 }
 
-let initThree = function (viewsData) {
+let initThree = function (data) {
     window.addEventListener('resize', (window, event) => onResize(), false);
     document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
 
-    views = viewsData.map(view => {
+    const viewports = data.viewports;
+    views = viewports.map(view => {
         view.getEye = () => {
             const converted = toThreeJsCoordinates(view.eye.x, view.eye.y, view.eye.z, coordinatesTransform);
             return [converted.x, converted.y, converted.z]
