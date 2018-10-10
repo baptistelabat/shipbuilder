@@ -180,6 +180,14 @@ decodeRgbRecord =
 jsMsgToMsg : JsData -> Msg
 jsMsgToMsg js =
     case js.tag of
+        "save-data" ->
+            case Decode.decodeValue saveFileDecoder js.data of
+                Ok fileContents ->
+                    FromJs <| RestoreSave fileContents
+
+                Err message ->
+                    FromJs <| JSError message
+
         "new-block" ->
             case Decode.decodeValue newBlockDecoder js.data of
                 Ok block ->
@@ -235,6 +243,7 @@ type JsMsg
     | Unselect
     | JSError String
     | NewBlock Block
+    | RestoreSave SaveFile
     | SynchronizePosition String Position
     | SynchronizeSize String Size
 
@@ -1026,6 +1035,13 @@ updateFromJs jsmsg model =
             in
                 { model | blocks = blocks } ! [ Task.attempt (\_ -> NoOp) (Dom.focus block.uuid) ]
 
+        RestoreSave saveFile ->
+            let
+                _ =
+                    Debug.log "saveFile" saveFile
+            in
+                model ! []
+
         Select uuid ->
             let
                 maybeBlock : Maybe Block
@@ -1153,7 +1169,7 @@ viewOpenMenuItem =
         ]
         [ label
             [ for "open-save-file" ]
-        [ FASolid.folder_open ]
+            [ FASolid.folder_open ]
         , input
             [ type_ "file"
             , accept "application/json, .json"
