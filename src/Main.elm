@@ -1176,13 +1176,13 @@ viewHullReference ref =
 viewHullReferenceWithSelection : String -> HullReference -> Html Msg
 viewHullReferenceWithSelection pathOfSelectedHullReference ref =
     li
-        [ class <|
-            if ref.path == pathOfSelectedHullReference then
-                "hull-reference hull-reference__selected"
-            else
-                "hull-reference"
-        , onClick (SelectHullReference ref)
-        ]
+        (if ref.path == pathOfSelectedHullReference then
+            [ class "hull-reference hull-reference__selected" ]
+         else
+            [ class "hull-reference"
+            , onClick (SelectHullReference ref)
+            ]
+        )
         [ div
             []
             []
