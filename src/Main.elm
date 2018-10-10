@@ -1102,7 +1102,18 @@ viewOpenMenuItem =
         [ class "header-menu-item"
         , title "Open"
         ]
+        [ label
+            [ for "open-save-file" ]
         [ FASolid.folder_open ]
+        , input
+            [ type_ "file"
+            , accept "application/json, .json"
+            , id "open-save-file"
+            , name "open-save-file"
+            , class "hidden-input"
+            ]
+            []
+        ]
 
 
 
