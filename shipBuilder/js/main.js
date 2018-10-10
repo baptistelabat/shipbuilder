@@ -304,8 +304,11 @@ let initThree = function (data) {
     window.addEventListener('resize', (window, event) => onResize(), false);
     document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
 
-    const viewports = data.viewports;
-    views = viewports.map(view => {
+    const initViewports = data.viewports;
+    const initMode = data.mode;
+    const initCoordinatesTransform = data.coordinatesTransform;
+
+    views = initViewports.map(view => {
         view.getEye = () => {
             const converted = toThreeJsCoordinates(view.eye.x, view.eye.y, view.eye.z, coordinatesTransform);
             return [converted.x, converted.y, converted.z]
@@ -317,6 +320,9 @@ let initThree = function (data) {
         };
         return view;
     });
+    mode = initMode;
+    coordinatesTransform.fromArray(initCoordinatesTransform);
+
     wrapper = document.getElementById(wrapperId);
 
     initCanvas(wrapper);
