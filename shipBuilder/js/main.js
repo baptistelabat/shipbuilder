@@ -210,12 +210,18 @@ let removeBlock = function (block) {
         if (isObjectSelected(object)) {
             unselectObject();
         }
+
+        removeFromScene(block);
+    }
+}
+
+let removeFromScene = function (objectToRemove) {
         scene.remove(objectToRemove);
         // memory optimization
         objectToRemove.geometry.dispose();
         objectToRemove.material.dispose();
     }
-}
+
 
 let selectBlock = function (block) {
     if (block && block.uuid) {
