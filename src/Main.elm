@@ -106,9 +106,9 @@ decodePosition =
 decodeSize : Decode.Decoder Size
 decodeSize =
     Pipeline.decode Size
-        |> Pipeline.required "width" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "height" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "depth" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "x" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "y" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "z" (Decode.map floatToFloatInput Decode.float)
 
 
 decodeFloatInput : Decode.Decoder FloatInput
@@ -222,7 +222,7 @@ type alias Position =
 
 
 type alias Size =
-    { width : FloatInput, height : FloatInput, depth : FloatInput }
+    { length : FloatInput, width : FloatInput, height : FloatInput }
 
 
 type alias Blocks =
@@ -276,9 +276,9 @@ getWidth block =
     block.size.width.value
 
 
-getDepth : { a | size : Size } -> Float
-getDepth block =
-    block.size.depth.value
+getLength : { a | size : Size } -> Float
+getLength block =
+    block.size.length.value
 
 
 getBlockByUUID : String -> Blocks -> Maybe Block
@@ -401,12 +401,12 @@ encodeCanControl canControl =
 
 viewportSide : Float -> Float -> Float -> Float -> Color -> Viewport
 viewportSide left top width height background =
-    Viewport "Side" left top width height background (vec3 0 0 1000) { x = True, y = True, z = False }
+    Viewport "Side" left top width height background (vec3 0 1000 0) { x = True, y = False, z = True }
 
 
 viewportTop : Float -> Float -> Float -> Float -> Color -> Viewport
 viewportTop left top width height background =
-    Viewport "Top" left top width height background (vec3 0 1000 0) { x = True, y = False, z = True }
+    Viewport "Top" left top width height background (vec3 0 0 -1000) { x = True, y = True, z = False }
 
 
 topHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
@@ -463,9 +463,9 @@ type Msg
     | UpdatePositionX Block String
     | UpdatePositionY Block String
     | UpdatePositionZ Block String
-    | UpdateWidth Block String
+    | UpdateLength Block String
     | UpdateHeight Block String
-    | UpdateDepth Block String
+    | UpdateWidth Block String
     | RemoveBlock Block
     | SelectBlock Block
     | SelectHullReference HullReference
@@ -498,27 +498,13 @@ encodeUpdatePositionCommand block =
         ]
 
 
-encodeUpdateHeightCommand : { a | uuid : String, size : Size } -> Encode.Value
-encodeUpdateHeightCommand block =
+encodeUpdateSizeCommand : { a | uuid : String, size : Size } -> Encode.Value
+encodeUpdateSizeCommand block =
     Encode.object
         [ ( "uuid", Encode.string block.uuid )
-        , ( "height", Encode.float (getHeight block) )
-        ]
-
-
-encodeUpdateWidthCommand : { a | uuid : String, size : Size } -> Encode.Value
-encodeUpdateWidthCommand block =
-    Encode.object
-        [ ( "uuid", Encode.string block.uuid )
-        , ( "width", Encode.float (getWidth block) )
-        ]
-
-
-encodeUpdateDepthCommand : { a | uuid : String, size : Size } -> Encode.Value
-encodeUpdateDepthCommand block =
-    Encode.object
-        [ ( "uuid", Encode.string block.uuid )
-        , ( "depth", Encode.float (getDepth block) )
+        , ( "x", Encode.float (getLength block) )
+        , ( "y", Encode.float (getWidth block) )
+        , ( "z", Encode.float (getHeight block) )
         ]
 
 
@@ -567,9 +553,9 @@ asHeightInSize size height =
     { size | height = height }
 
 
-asDepthInSize : Size -> FloatInput -> Size
-asDepthInSize size depth =
-    { size | depth = depth }
+asLengthInSize : Size -> FloatInput -> Size
+asLengthInSize size length =
+    { size | length = length }
 
 
 asSizeInBlock : Block -> Size -> Block
@@ -751,7 +737,7 @@ update msg model =
                     syncFloatInput block.size.height
                         |> asHeightInSize block.size
                         |> flip asWidthInSize (syncFloatInput block.size.width)
-                        |> flip asDepthInSize (syncFloatInput block.size.depth)
+                        |> flip asLengthInSize (syncFloatInput block.size.length)
                         |> asSizeInBlock block
                         |> flip updateBlockInModel model
             in
@@ -766,13 +752,13 @@ update msg model =
         UpdatePositionZ block input ->
             updateOnePosition block input .z asZInPosition model
 
-        UpdateWidth block input ->
+        UpdateLength block input ->
             let
                 updatedBlock =
-                    updateWidth block input
+                    updateLength block input
             in
                 (updateBlockInModel updatedBlock model)
-                    ! [ sendToJs "update-width" (encodeUpdateWidthCommand updatedBlock) ]
+                    ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
 
         UpdateHeight block input ->
             let
@@ -780,15 +766,15 @@ update msg model =
                     updateHeight block input
             in
                 (updateBlockInModel updatedBlock model)
-                    ! [ sendToJs "update-height" (encodeUpdateHeightCommand updatedBlock) ]
+                    ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
 
-        UpdateDepth block input ->
+        UpdateWidth block input ->
             let
                 updatedBlock =
-                    updateDepth block input
+                    updateWidth block input
             in
                 (updateBlockInModel updatedBlock model)
-                    ! [ sendToJs "update-depth" (encodeUpdateDepthCommand updatedBlock) ]
+                    ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
 
         FromJs jsmsg ->
             updateFromJs jsmsg model
@@ -868,8 +854,8 @@ updateWidth block input =
                 |> asSizeInBlock block
 
 
-updateDepth : Block -> String -> Block
-updateDepth block input =
+updateLength : Block -> String -> Block
+updateLength block input =
     case String.toFloat input of
         Ok value ->
             let
@@ -880,15 +866,15 @@ updateDepth block input =
                         (abs value)
             in
                 newValue
-                    |> asValueInFloatValue block.size.depth
+                    |> asValueInFloatValue block.size.length
                     |> flip asStringInFloatValue input
-                    |> asDepthInSize block.size
+                    |> asLengthInSize block.size
                     |> asSizeInBlock block
 
         Err message ->
             input
-                |> asStringInFloatValue block.size.depth
-                |> asDepthInSize block.size
+                |> asStringInFloatValue block.size.length
+                |> asLengthInSize block.size
                 |> asSizeInBlock block
 
 
@@ -1257,26 +1243,16 @@ viewBlockProperties block model =
         , viewPositionInput "z" block.position.z (UpdatePositionZ block) block (updateBlockPositionZInModel block)
         ]
     , div [ class "block-size" ]
-        [ viewSizeInput "width" block.size.width (UpdateWidth block) block (updateBlockWidthInModel block) sendWidthUpdate
-        , viewSizeInput "height" block.size.height (UpdateHeight block) block (updateBlockHeightInModel block) sendHeightUpdate
-        , viewSizeInput "depth" block.size.depth (UpdateDepth block) block (updateBlockDepthInModel block) sendDepthUpdate
+        [ viewSizeInput "length" block.size.length (UpdateLength block) block (updateBlockLengthInModel block)
+        , viewSizeInput "height" block.size.height (UpdateHeight block) block (updateBlockHeightInModel block)
+        , viewSizeInput "width" block.size.width (UpdateWidth block) block (updateBlockWidthInModel block)
         ]
     ]
 
 
-sendHeightUpdate : Block -> Cmd Msg
-sendHeightUpdate block =
-    sendToJs "update-height" (encodeUpdateHeightCommand block)
-
-
-sendWidthUpdate : Block -> Cmd Msg
-sendWidthUpdate block =
-    sendToJs "update-width" (encodeUpdateWidthCommand block)
-
-
-sendDepthUpdate : Block -> Cmd Msg
-sendDepthUpdate block =
-    sendToJs "update-depth" (encodeUpdateDepthCommand block)
+sendSizeUpdate : Block -> Cmd Msg
+sendSizeUpdate block =
+    sendToJs "update-size" (encodeUpdateSizeCommand block)
 
 
 updateBlockPositionXInModel : Block -> FloatInput -> Block
@@ -1328,8 +1304,8 @@ updateBlockWidthInModel block floatInput =
             |> asSizeInBlock block
 
 
-updateBlockDepthInModel : Block -> FloatInput -> Block
-updateBlockDepthInModel block floatInput =
+updateBlockLengthInModel : Block -> FloatInput -> Block
+updateBlockLengthInModel block floatInput =
     let
         validFloatInput =
             if floatInput.value <= 0.1 then
@@ -1338,7 +1314,7 @@ updateBlockDepthInModel block floatInput =
                 floatInput
     in
         validFloatInput
-            |> asDepthInSize block.size
+            |> asLengthInSize block.size
             |> asSizeInBlock block
 
 
@@ -1388,8 +1364,8 @@ keyEventDecoder =
         |> Pipeline.required "ctrlKey" Decode.bool
 
 
-viewSizeInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> (Block -> Cmd Msg) -> Html Msg
-viewSizeInput inputLabel size inputMsg block updateSize sendSizeUpdate =
+viewSizeInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> Html Msg
+viewSizeInput inputLabel size inputMsg block updateSize =
     div [ class "input-group" ]
         [ label [ for ("size-" ++ inputLabel) ]
             [ text inputLabel ]

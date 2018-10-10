@@ -19,6 +19,28 @@ let loader = new THREE.STLLoader();
 
 let preventSelection = false;
 
+// Ship to ThreeJs
+let coordinatesTransform = new THREE.Matrix3();
+coordinatesTransform.set(
+    1, 0, 0,
+    0, 0, -1,
+    0, 1, 0
+);
+
+let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
+    const initVector = new THREE.Vector3(x, y, z);
+    const resultVector = initVector.applyMatrix3(coordinatesTransform);
+    return resultVector;
+}
+
+let toShipCoordinates = function (x, y, z, coordinatesTransform) {
+    const initVector = new THREE.Vector3(x, y, z);
+    const inversedTransform = new THREE.Matrix3();
+    inversedTransform.getInverse(coordinatesTransform);
+    const resultVector = initVector.applyMatrix3(inversedTransform);
+    return resultVector;
+}
+
 app.ports.toJs.subscribe(function (message) {
     const data = message.data;
     switch (message.tag) {
@@ -43,14 +65,9 @@ app.ports.toJs.subscribe(function (message) {
         case "update-position":
             updatePosition(data);
             break;
-        case "update-height":
-            updateHeight(data);
+        case "update-size":
+            updateSize(data);
             break;
-        case "update-width":
-            updateWidth(data);
-            break;
-        case "update-depth":
-            updateDepth(data);
             break;
         default:
     }
@@ -75,24 +92,33 @@ let updateColor = function (data) {
     }
 }
 
+let absVector3 = function (vector3) {
+    return new THREE.Vector3(Math.abs(vector3.x), Math.abs(vector3.y), Math.abs(vector3.z));
+}
+
+
 let loadHull = function (path) {
     loader.load(path, (bufferGeometry) => {
         const hullColor = new THREE.Color(0.77, 0.77, 0.80);
         const geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
+        const shipVertices = geometry.vertices;
+        geometry.vertices = shipVertices.map(vertex => {
+            return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
+        });
         const material = new THREE.MeshBasicMaterial({ color: hullColor });
         const hull = new THREE.Mesh(geometry, material);
 
         hull.baseColor = hullColor;
         scene.add(hull);
 
-        sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.faces, vertices: hull.vertices })
+        sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.geometry.faces, vertices: shipVertices });
     });
 }
 
 let updatePosition = function (data) {
     const object = findBlockByUUID(data.uuid);
     if (object) {
-        const position = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
+        const position = toThreeJsCoordinates(data.position.x, data.position.y, data.position.z, coordinatesTransform);
         object.position.copy(position);
         if (selected && selected.uuid === object.uuid) {
             selectBlock(object);
@@ -102,13 +128,18 @@ let updatePosition = function (data) {
     }
 }
 
-let updateHeight = function (data) {
+let updateSize = function (data) {
     const object = findBlockByUUID(data.uuid);
     if (object) {
-        const newHeight = data.height;
-        const currentHeight = getObjectSize(object).height;
-        const scale = object.scale;
-        object.scale.set(scale.x, newHeight / currentHeight, scale.z);
+        const newSize = sizeToThreeJsCoordinates(data.x, data.y, data.z, coordinatesTransform);
+        const currentSize = getObjectSize(object);
+        const newXSize = newSize.x;
+        const currentXSize = currentSize.x;
+        const newYSize = newSize.y;
+        const currentYSize = currentSize.y;
+        const newZSize = newSize.z;
+        const currentZSize = currentSize.z;
+        object.scale.set(newXSize / currentXSize, newYSize / currentYSize, newZSize / currentZSize);
         if (selected && selected.uuid === object.uuid) {
             selectBlock(object);
         } else if (hovered && hovered.uuid === object.uuid) {
@@ -116,37 +147,6 @@ let updateHeight = function (data) {
         }
     }
 }
-
-let updateWidth = function (data) {
-    const object = findBlockByUUID(data.uuid);
-    if (object) {
-        const newWidth = data.width;
-        const currentWidth = getObjectSize(object).width;
-        const scale = object.scale;
-        object.scale.set(newWidth / currentWidth, scale.y, scale.z);
-        if (selected && selected.uuid === object.uuid) {
-            selectBlock(object);
-        } else if (hovered && hovered.uuid === object.uuid) {
-            hovered = object;
-        }
-    }
-}
-
-let updateDepth = function (data) {
-    const object = findBlockByUUID(data.uuid);
-    if (object) {
-        const newDepth = data.depth;
-        const currentDepth = getObjectSize(object).depth;
-        const scale = object.scale;
-        object.scale.set(scale.x, scale.y, newDepth / currentDepth);
-        if (selected && selected.uuid === object.uuid) {
-            selectBlock(object);
-        } else if (hovered && hovered.uuid === object.uuid) {
-            hovered = object;
-        }
-    }
-}
-
 
 let getThreeColorFromElmColor = function (color) {
     return (new THREE.Color(color.red / 255, color.green / 255, color.blue / 255));
@@ -156,26 +156,30 @@ let getObjectSize = function (object) {
     object.geometry.computeBoundingBox();
     var bb = object.geometry.boundingBox;
     return {
-        width: bb.max.x - bb.min.x,
-        height: bb.max.y - bb.min.y,
-        depth: bb.max.z - bb.min.z
+        x: bb.max.x - bb.min.x,
+        y: bb.max.y - bb.min.y,
+        z: bb.max.z - bb.min.z
     }
 }
 
-let addCube = function (label, color = 0x5078ff, width = 80, height = 50, depth = 70, x = 0, y = 0, z = 0) {
-    var cube = makeCube(width, height, depth, x, y, z, color);
+let addCube = function (label, color = 0x5078ff, sizeX = 80, sizeY = 50, sizeZ = 70, x = 0, y = 0, z = 0) {
+    var cube = makeCube(sizeX, sizeY, sizeZ, x, y, z, color);
     scene.add(cube);
     sendToElm("new-block", {
         uuid: cube.uuid,
         label: label,
         color: getRgbRecord(color),
-        position: {
-            x: cube.position.x,
-            y: cube.position.y,
-            z: cube.position.z
-        },
-        size: getObjectSize(cube)
+        position: toShipCoordinates(cube.position.x, cube.position.y, cube.position.z, coordinatesTransform),
+        size: sizeToShipCoordinates(getObjectSize(cube))
     });
+    // TODO: rewrite size and position !
+}
+
+let sizeToShipCoordinates = function (size) {
+    return absVector3(toShipCoordinates(size.x, size.y, size.z, coordinatesTransform));
+}
+let sizeToThreeJsCoordinates = function (x, y, z) {
+    return absVector3(toThreeJsCoordinates(x, y, z, coordinatesTransform));
 }
 
 let getRgbRecord = function (threeColor) {
@@ -183,9 +187,9 @@ let getRgbRecord = function (threeColor) {
     return { red: Math.round(rgbArray[0] * 255), green: Math.round(rgbArray[1] * 255), blue: Math.round(rgbArray[2] * 255) };
 }
 
-let makeCube = function (width, height, depth, x, y, z, color) {
-    var geometry = new THREE.BoxGeometry(width, height, depth);
-    geometry.translate(width / 2, height / 2, depth / 2);
+let makeCube = function (sizeX, sizeY, sizeZ, x, y, z, color) {
+    var geometry = new THREE.BoxGeometry(sizeX, sizeY, sizeZ);
+    geometry.translate(sizeX / 2, sizeY / 2, sizeZ / 2);
 
     var material = new THREE.MeshBasicMaterial({ color: color /*, opacity: 0.7*/ });
     //material.transparent = true;
@@ -251,9 +255,15 @@ let initThree = function (viewsData) {
     document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
 
     views = viewsData.map(view => {
-        view.getEye = () => [view.eye.x, view.eye.y, view.eye.z];
+        view.getEye = () => {
+            const converted = toThreeJsCoordinates(view.eye.x, view.eye.y, view.eye.z, coordinatesTransform);
+            return [converted.x, converted.y, converted.z]
+        };
         view.getBackground = () => new THREE.Color(view.background.red / 255, view.background.green / 255, view.background.blue / 255);
-        view.getCanControl = () => [view.canControl.x, view.canControl.y, view.canControl.z];
+        view.getCanControl = () => {
+            const converted = toThreeJsCoordinates(view.canControl.x, view.canControl.y, view.canControl.z, coordinatesTransform);
+            return [converted.x, converted.y, converted.z]
+        };
         return view;
     });
     wrapper = document.getElementById(wrapperId);
@@ -380,28 +390,33 @@ let initGizmos = function () {
                         z: Math.round(position.z * 100) / 100
                     };
                     object.position.set(roundedPosition.x, roundedPosition.y, roundedPosition.z);
-                    sendToElm("sync-position", { uuid: object.uuid, position: roundedPosition });
+                    sendToElm("sync-position", {
+                        uuid: object.uuid, position: toShipCoordinates(roundedPosition.x, roundedPosition.y, roundedPosition.z, coordinatesTransform)
+                    });
                     break;
 
                 case "scale":
                     const scale = object.scale;
                     const size = getObjectSize(object);
                     const newSize = { // rounded to .2f
-                        width: Math.round(100 * scale.x * size.width) / 100,
-                        height: Math.round(100 * scale.y * size.height) / 100,
-                        depth: Math.round(100 * scale.z * size.depth) / 100
+                        x: Math.round(100 * scale.x * size.x) / 100,
+                        y: Math.round(100 * scale.y * size.y) / 100,
+                        z: Math.round(100 * scale.z * size.z) / 100
                     };
-                    if (newSize.width <= 0) {
-                        newSize.width = 0.1;
+                    if (newSize.x <= 0) {
+                        newSize.x = 0.1;
                     }
-                    if (newSize.height <= 0) {
-                        newSize.height = 0.1;
+                    if (newSize.y <= 0) {
+                        newSize.y = 0.1;
                     }
-                    if (newSize.depth <= 0) {
-                        newSize.depth = 0.1;
+                    if (newSize.z <= 0) {
+                        newSize.z = 0.1;
                     }
-                    object.scale.set(newSize.width / size.width, newSize.height / size.height, newSize.depth / size.depth)
-                    sendToElm("sync-size", { uuid: object.uuid, size: newSize });
+
+                    object.scale.set(newSize.x / size.x, newSize.y / size.y, newSize.z / size.z)
+                    sendToElm("sync-size", {
+                        uuid: object.uuid, size: sizeToShipCoordinates(newSize)
+                    });
                     break;
                 default:
                     break;
