@@ -233,6 +233,9 @@ encodeBlock block =
     Encode.object
         [ ( "uuid", Encode.string block.uuid )
         , ( "label", Encode.string block.label )
+        , ( "color", encodeColor block.color )
+        , ( "position", encodePosition block.position )
+        , ( "size", encodeSize block.size )
         ]
 
 
