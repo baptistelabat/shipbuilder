@@ -222,14 +222,14 @@ let makeCube = function (sizeX, sizeY, sizeZ, x, y, z, color) {
 let removeObject = function (block) {
     const objectToRemove = findObjectByUUID(block.uuid);
     if (objectToRemove) {
-        if (isObjectHovered(object)) {
+        if (isObjectHovered(objectToRemove)) {
             hovered = null;
         }
-        if (isObjectSelected(object)) {
+        if (isObjectSelected(objectToRemove)) {
             unselectObject();
         }
 
-        removeFromScene(block);
+        removeFromScene(objectToRemove);
     }
 }
 
