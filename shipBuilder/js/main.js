@@ -81,9 +81,9 @@ let updateColor = function (data) {
     const object = findBlockByUUID(data.uuid);
     if (object) {
         object.baseColor = getThreeColorFromElmColor(data.color);
-        if (selected && selected.uuid === object.uuid) {
+        if (isObjectSelected(object)) {
             selectBlock(object);
-        } else if (hovered && hovered.uuid === object.uuid) {
+        } else if (isObjectHovered(object)) {
             highlightObject(object);
             hovered = object;
         } else {
@@ -99,6 +99,15 @@ let absVector3 = function (vector3) {
 
 let loadHull = function (path) {
     loader.load(path, (bufferGeometry) => {
+        // there can only be one hull in the scene
+        const previousHull = scene.children.find(child => child.sbType && child.sbType === "hull");
+        if (previousHull) {
+            if (isObjectSelected(previousHull)) {
+                unselectObject();
+            }
+            removeFromScene(previousHull);
+        }
+
         const hullColor = new THREE.Color(0.77, 0.77, 0.80);
         const geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
         const shipVertices = geometry.vertices;
@@ -109,6 +118,7 @@ let loadHull = function (path) {
         const hull = new THREE.Mesh(geometry, material);
 
         hull.baseColor = hullColor;
+        hull.sbType = "hull";
         scene.add(hull);
 
         sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.geometry.faces, vertices: shipVertices });
@@ -120,9 +130,9 @@ let updatePosition = function (data) {
     if (object) {
         const position = toThreeJsCoordinates(data.position.x, data.position.y, data.position.z, coordinatesTransform);
         object.position.copy(position);
-        if (selected && selected.uuid === object.uuid) {
+        if (isObjectSelected(object)) {
             selectBlock(object);
-        } else if (hovered && hovered.uuid === object.uuid) {
+        } else if (isObjectHovered(object)) {
             hovered = object;
         }
     }
@@ -140,9 +150,9 @@ let updateSize = function (data) {
         const newZSize = newSize.z;
         const currentZSize = currentSize.z;
         object.scale.set(newXSize / currentXSize, newYSize / currentYSize, newZSize / currentZSize);
-        if (selected && selected.uuid === object.uuid) {
+        if (isObjectSelected(object)) {
             selectBlock(object);
-        } else if (hovered && hovered.uuid === object.uuid) {
+        } else if (isObjectHovered(object)) {
             hovered = object;
         }
     }
@@ -197,31 +207,37 @@ let makeCube = function (sizeX, sizeY, sizeZ, x, y, z, color) {
     var cube = new THREE.Mesh(geometry, material);
     cube.position.fromArray([x, y, z]);
     cube.baseColor = color;
-    cube.geometryType = "cube";
+    cube.sbType = "block";
     return cube;
 }
 
 let removeBlock = function (block) {
     const objectToRemove = findBlockByUUID(block.uuid);
     if (objectToRemove) {
-        if (hovered && hovered.uuid === block.uuid) {
+        if (isObjectHovered(object)) {
             hovered = null;
         }
-        if (selected && selected.uuid === block.uuid) {
-            unselectBlock();
+        if (isObjectSelected(object)) {
+            unselectObject();
         }
-        scene.remove(objectToRemove);
-        // memory optimization
-        objectToRemove.geometry.dispose();
-        objectToRemove.material.dispose();
+
+        removeFromScene(block);
     }
 }
+
+let removeFromScene = function (objectToRemove) {
+    scene.remove(objectToRemove);
+    // memory optimization
+    objectToRemove.geometry.dispose();
+    objectToRemove.material.dispose();
+}
+
 
 let selectBlock = function (block) {
     if (block && block.uuid) {
         const objectToSelect = findBlockByUUID(block.uuid);
         if (objectToSelect) {
-            if (selected && (selected.uuid !== objectToSelect.uuid)) {
+            if (isObjectSelected(objectToSelect)) {
                 resetElementColor(selected);
             }
             highlightObject(objectToSelect);
@@ -463,12 +479,19 @@ let onClick = function (event) {
             }
             break;
         case 2: // middle click
-            unselectBlock();
+            unselectObject();
             sendToElm("unselect", null);
             break;
         default: // right click
 
     }
+}
+
+let isObjectSelected = function (object) {
+    return selected && (selected.uuid === object.uuid);
+}
+let isObjectHovered = function (object) {
+    return hovered && (hovered.uuid === object.uuid);
 }
 
 let onDoubleClick = function (event) { // cycle through the transform modes
@@ -484,7 +507,7 @@ let onDoubleClick = function (event) { // cycle through the transform modes
     }
 }
 
-let unselectBlock = function () {
+let unselectObject = function () {
     if (selected) {
         if (!hovered || hovered && (selected.uuid !== hovered.uuid)) {
             resetElementColor(selected);
