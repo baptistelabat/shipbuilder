@@ -20,13 +20,9 @@ let loader = new THREE.STLLoader();
 
 let preventSelection = false;
 
-// Ship to ThreeJs
+// ThreeJs to ship
 let coordinatesTransform = new THREE.Matrix3();
-coordinatesTransform.set(
-    1, 0, 0,
-    0, 0, -1,
-    0, 1, 0
-);
+
 
 let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
     const initVector = new THREE.Vector3(x, y, z);
@@ -307,7 +303,6 @@ let initThree = function (data) {
     const initViewports = data.viewports;
     const initMode = data.mode;
     const initCoordinatesTransform = data.coordinatesTransform;
-
     views = initViewports.map(view => {
         view.getEye = () => {
             const converted = toThreeJsCoordinates(view.eye.x, view.eye.y, view.eye.z, coordinatesTransform);
@@ -321,8 +316,9 @@ let initThree = function (data) {
         return view;
     });
     mode = initMode;
-    coordinatesTransform.fromArray(initCoordinatesTransform);
 
+    // the elm matrix maps three coordinate system to ship
+    coordinatesTransform.fromArray(initCoordinatesTransform);
     wrapper = document.getElementById(wrapperId);
 
     initCanvas(wrapper);

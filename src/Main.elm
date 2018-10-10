@@ -229,6 +229,7 @@ coordinatesTransformToList coordinatesTransform =
 
 defaultCoordinatesTransform : CoordinatesTransform
 defaultCoordinatesTransform =
+    -- ThreeJs to Ship
     makeCoordinatesTransform (vec3 1 0 0) (vec3 0 0 1) (vec3 0 -1 0)
 
 
