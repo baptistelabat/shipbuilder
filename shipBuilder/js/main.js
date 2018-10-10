@@ -44,6 +44,9 @@ app.ports.toJs.subscribe(function (message) {
         case "init-three":
             initThree(data);
             break;
+        case "read-json-file":
+            readFile(data);
+            break;
         case "add-block":
             addCube(data.label, getThreeColorFromElmColor(data.color));
             break;
@@ -72,6 +75,7 @@ app.ports.toJs.subscribe(function (message) {
     }
 })
 
+
 let sendToElm = function (tag, data) {
     app.ports.fromJs.send({ tag: tag, data: data });
 }
@@ -79,6 +83,26 @@ let sendToElm = function (tag, data) {
 let switchMode = function (newMode) {
     unselectObject();
     mode = newMode;
+}
+
+let readFile = function (inputId) {
+    var node = document.getElementById(inputId);
+    if (node === null) {
+        return;
+    }
+
+    var file = node.files[0];
+    var reader = new FileReader();
+
+    // FileReader API is event based. Once a file is selected
+    // it fires events. We hook into the `onload` event for our reader.
+    reader.onload = (function (event) {
+        var contents = event.target.result;
+        sendToElm("save-data", JSON.parse(contents));
+    });
+
+    // Connect our FileReader with the file that was selected in our `input` node.
+    reader.readAsText(file);
 }
 
 let updateColor = function (data) {
