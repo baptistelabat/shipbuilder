@@ -228,6 +228,11 @@ type alias Blocks =
     DictList String Block
 
 
+stringifyEncodeValue : Encode.Value -> String
+stringifyEncodeValue value =
+    Encode.encode 4 value
+
+
 encodeBlocks : Blocks -> Encode.Value
 encodeBlocks blocks =
     Encode.list <| List.map encodeBlock (toList blocks)
