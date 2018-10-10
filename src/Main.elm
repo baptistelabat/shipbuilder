@@ -11,7 +11,7 @@ port module Main
         , Viewports
         )
 
-import Color exposing (Color, hsl)
+import Array exposing (Array)
 import Color exposing (Color, rgba, hsl)
 import SIRColorPicker
 import DictList exposing (DictList)
@@ -88,6 +88,21 @@ syncPositionDecoder =
 
 type alias SyncSize =
     { uuid : String, size : Size }
+
+
+type alias SaveFile =
+    { version : Int
+    , blocks : List Block
+    , coordinatesTransform : Array Float
+    }
+
+
+saveFileDecoder : Decode.Decoder SaveFile
+saveFileDecoder =
+    Pipeline.decode SaveFile
+        |> Pipeline.required "version" Decode.int
+        |> Pipeline.required "blocks" decodeBlocks
+        |> Pipeline.required "coordinatesTransform" (Decode.array Decode.float)
 
 
 decodeBlocks : Decode.Decoder (List Block)
