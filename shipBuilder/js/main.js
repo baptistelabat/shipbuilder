@@ -469,7 +469,7 @@ let onClick = function (event) {
             }
             break;
         case 2: // middle click
-            unselectBlock();
+            unselectObject();
             sendToElm("unselect", null);
             break;
         default: // right click
@@ -497,7 +497,7 @@ let onDoubleClick = function (event) { // cycle through the transform modes
     }
 }
 
-let unselectBlock = function () {
+let unselectObject = function () {
     if (selected) {
         if (!hovered || hovered && (selected.uuid !== hovered.uuid)) {
             resetElementColor(selected);
