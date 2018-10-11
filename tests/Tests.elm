@@ -11,7 +11,9 @@ import Main
         , init
         , initCmd
         , initModel
+        , Msg(..)
         , sendToJs
+        , update
           --Blocks
         , Block
         , Blocks
@@ -370,7 +372,7 @@ suite =
                         (stringifyCoordinatesTransform defaultCoordinatesTransform)
                         stringOfDefaultCoordinatesTransform
             ]
-        , describe "Init"
+        , describe "init"
             [ test "init with initModel" <|
                 \_ ->
                     init
@@ -391,5 +393,23 @@ suite =
                             "init-three"
                             (encodeInitThreeCommand initModel)
                         )
+            ]
+        , describe "update"
+            [ describe "NoOp"
+                [ test "leaves model untouched" <|
+                    \_ ->
+                        initModel
+                            |> update NoOp
+                            |> Tuple.first
+                            |> Expect.equal initModel
+                , test
+                    "has no side effect"
+                  <|
+                    \_ ->
+                        initModel
+                            |> update NoOp
+                            |> Tuple.second
+                            |> Expect.equal Cmd.none
+                ]
             ]
         ]

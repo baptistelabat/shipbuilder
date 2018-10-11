@@ -5,7 +5,9 @@ port module Main
         , init
         , initCmd
         , initModel
+        , Msg(..)
         , sendToJs
+        , update
           --Blocks
         , Block
         , Blocks
