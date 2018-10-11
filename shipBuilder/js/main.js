@@ -116,6 +116,13 @@ let restoreSave = function (savedData) {
     restoreBlocks(savedBlocks);
 }
 
+
+let restoreBlocks = function (blocks) {
+    blocks.forEach(block => {
+        restoreBlock(block.uuid, block.color, block.position, block.size);
+    });
+}
+
 let setCoordinatesTransformFromElm = function (elmCoordinatesTransform) {
     // the elm matrix maps threejs's coordinate system to the ship's one
     // we want the ship's coordinate system mapped to threejs' one
