@@ -105,6 +105,15 @@ let readFile = function (inputId) {
     reader.readAsText(file);
 }
 
+
+let setCoordinatesTransformFromElm = function (elmCoordinatesTransform) {
+    // the elm matrix maps threejs's coordinate system to the ship's one
+    // we want the ship's coordinate system mapped to threejs' one
+    const inversedCoordinatesTransform = new THREE.Matrix3();
+    inversedCoordinatesTransform.fromArray(elmCoordinatesTransform);
+    coordinatesTransform.getInverse(inversedCoordinatesTransform);
+}
+
 let updateColor = function (data) {
     const object = findObjectByUUID(data.uuid);
     if (object) {
@@ -341,11 +350,7 @@ let initThree = function (data) {
     });
     mode = initMode;
 
-    // the elm matrix maps the ship's coordinate system to ThreeJs' one
-    const inversedCoordinatesTransform = new THREE.Matrix3();
-    inversedCoordinatesTransform.fromArray(initCoordinatesTransform);
-    coordinatesTransform.getInverse(inversedCoordinatesTransform);
-
+    setCoordinatesTransformFromElm(initCoordinatesTransform);
 
     wrapper = document.getElementById(wrapperId);
 
