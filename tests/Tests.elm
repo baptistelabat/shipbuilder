@@ -4,6 +4,7 @@ import Array
 import Color
 import DictList
 import Expect exposing (Expectation)
+import Fuzz
 import Json.Encode as Encode
 import Main
     exposing
@@ -438,19 +439,36 @@ suite =
                         |> Tuple.second
                         |> Expect.equal Cmd.none
             ]
+        , describe "AddBlock"
+            [ test "leaves the model untouched" <|
+                \_ ->
+                    initModel
+                        |> update (AddBlock "aLabel")
+                        |> Tuple.first
+                        |> Expect.equal initModel
+            , test "has a side effect" <|
+                \_ ->
+                    initModel
+                        |> update (AddBlock "aLabel")
+                        |> Tuple.second
+                        |> Expect.notEqual Cmd.none
+            , fuzz Fuzz.string "leaves the model untouched no matter the label" <|
+                \label ->
+                    initModel
+                        |> update (AddBlock label)
+                        |> Tuple.first
+                        |> Expect.equal initModel
+            , fuzz Fuzz.string "has a side effect no matter the label" <|
+                \label ->
+                    initModel
+                        |> update (AddBlock label)
+                        |> Tuple.second
+                        |> Expect.notEqual Cmd.none
+            ]
         ]
 
 
 
--- ChangeBlockColor block newColor ->
---             let
---                 updatedBlock =
---                     { block | color = newColor }
---                 updatedModel =
---                     updateBlockInModel updatedBlock model
---             in
---                 updatedModel
---                     ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
 --         AddBlock label ->
 --             addBlock label model
 --         KeyDown updateFloatInput floatInput command keyEvent ->
