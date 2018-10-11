@@ -1,6 +1,8 @@
 port module Main
     exposing
         ( main
+        , init
+        , initModel
           --Blocks
         , Block
         , Blocks

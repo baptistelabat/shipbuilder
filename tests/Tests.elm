@@ -7,8 +7,10 @@ import Expect exposing (Expectation)
 import Json.Encode as Encode
 import Main
     exposing
-        ( --Blocks
-          Block
+        ( init
+        , initModel
+          --Blocks
+        , Block
         , Blocks
         , addBlockTo
         , removeBlockFrom
@@ -364,5 +366,17 @@ suite =
                     Expect.equal
                         (stringifyCoordinatesTransform defaultCoordinatesTransform)
                         stringOfDefaultCoordinatesTransform
+            ]
+        , describe "Init"
+            [ test "init with initModel" <|
+                \_ ->
+                    init
+                        |> Tuple.first
+                        |> Expect.equal initModel
+            , test "init has side effect" <|
+                \_ ->
+                    init
+                        |> Tuple.second
+                        |> Expect.notEqual Cmd.none
             ]
         ]
