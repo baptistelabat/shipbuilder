@@ -112,10 +112,18 @@ let restoreSave = function (savedData) {
     const savedBlocks = savedData.blocks;
     const savedCoordinatesTransform = savedData.coordinatesTransform;
 
+    resetScene(views, scene);
     setCoordinatesTransformFromElm(savedCoordinatesTransform);
     restoreBlocks(savedBlocks);
 }
 
+let resetScene = function (views, scene) {
+    views.forEach(view => { // if we don't detach the controls, the removal of the selected block (if any) won't work
+        view.control.detach();
+    })
+    const sbObjectsToDelete = scene.children.filter(child => child.sbType && (child.sbType === "block" || child.sbType === "hull"));
+    sbObjectsToDelete.forEach(toDelete => removeFromScene(toDelete));
+}
 
 let restoreBlocks = function (blocks) {
     blocks.forEach(block => {
