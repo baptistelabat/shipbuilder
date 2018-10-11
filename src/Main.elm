@@ -901,15 +901,20 @@ update msg model =
             model ! []
 
         ChangeBlockColor block newColor ->
-            let
-                updatedBlock =
-                    { block | color = newColor }
+            case getBlockByUUID block.uuid model.blocks of
+                Just recoveredBlock ->
+                    let
+                        updatedBlock =
+                            { block | color = newColor }
 
-                updatedModel =
-                    updateBlockInModel updatedBlock model
-            in
-                updatedModel
-                    ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
+                        updatedModel =
+                            updateBlockInModel updatedBlock model
+                    in
+                        updatedModel
+                            ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
+
+                Nothing ->
+                    model ! []
 
         AddBlock label ->
             addBlock label model
