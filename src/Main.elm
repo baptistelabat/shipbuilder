@@ -248,6 +248,52 @@ type JsMsg
     | SynchronizeSize String Size
 
 
+saveFileDataToModel : Model -> SaveFile -> Model
+saveFileDataToModel model saveFile =
+    let
+        maybeCoordinatesTransform : Maybe CoordinatesTransform
+        maybeCoordinatesTransform =
+            arrayToCoordinatesTransform saveFile.coordinatesTransform
+
+        savedBlocks =
+            listOfBlocksToBlocks saveFile.blocks
+    in
+        case maybeCoordinatesTransform of
+            Just savedCoordinatesTransform ->
+                { model
+                    | blocks = savedBlocks
+                    , coordinatesTransform = savedCoordinatesTransform
+                }
+
+            Nothing ->
+                model
+
+
+listOfBlocksToBlocks : List Block -> Blocks
+listOfBlocksToBlocks blockList =
+    DictList.fromList <| List.map (\block -> ( block.uuid, block )) blockList
+
+
+arrayToCoordinatesTransform : Array Float -> Maybe CoordinatesTransform
+arrayToCoordinatesTransform array =
+    let
+        listOfTransforms : List Float
+        listOfTransforms =
+            Array.toList array
+    in
+        case listOfTransforms of
+            [ xx, yx, zx, xy, yy, zy, xz, yz, zz ] ->
+                Just <| makeCoordinatesTransform (vec3 xx xy xz) (vec3 yx yy yz) (vec3 zx zy zz)
+
+            _ ->
+                Nothing
+
+
+restoreSaveCmd : Model -> Cmd Msg
+restoreSaveCmd model =
+    Cmd.none
+
+
 
 -- MODEL
 
@@ -1037,10 +1083,10 @@ updateFromJs jsmsg model =
 
         RestoreSave saveFile ->
             let
-                _ =
-                    Debug.log "saveFile" saveFile
+                newModel =
+                    Debug.log "newModel" <| saveFileDataToModel model saveFile
             in
-                model ! []
+                newModel ! [ restoreSaveCmd newModel ]
 
         Select uuid ->
             let
