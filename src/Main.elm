@@ -292,7 +292,13 @@ arrayToCoordinatesTransform array =
 
 restoreSaveCmd : Model -> Cmd Msg
 restoreSaveCmd model =
-    Cmd.none
+
+encodeRestoreSaveCmd : Model -> Encode.Value
+encodeRestoreSaveCmd model =
+    Encode.object
+        [ ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        , ( "blocks", encodeBlocks model.blocks )
+        ]
 
 
 
