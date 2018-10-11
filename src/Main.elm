@@ -248,8 +248,8 @@ type JsMsg
     | SynchronizeSize String Size
 
 
-saveFileDataToModel : Model -> SaveFile -> Model
-saveFileDataToModel model saveFile =
+restoreSaveInModel : Model -> SaveFile -> Model
+restoreSaveInModel model saveFile =
     let
         maybeCoordinatesTransform : Maybe CoordinatesTransform
         maybeCoordinatesTransform =
@@ -1084,7 +1084,7 @@ updateFromJs jsmsg model =
         RestoreSave saveFile ->
             let
                 newModel =
-                    Debug.log "newModel" <| saveFileDataToModel model saveFile
+                    restoreSaveInModel model saveFile
             in
                 newModel ! [ restoreSaveCmd newModel ]
 
