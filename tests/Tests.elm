@@ -8,6 +8,7 @@ import Json.Encode as Encode
 import Main
     exposing
         ( init
+        , initCmd
         , initModel
           --Blocks
         , Block
@@ -373,10 +374,12 @@ suite =
                     init
                         |> Tuple.first
                         |> Expect.equal initModel
-            , test "init has side effect" <|
+            , test "init has initCmd as side effect" <|
                 \_ ->
-                    init
-                        |> Tuple.second
-                        |> Expect.notEqual Cmd.none
+                    let
+                        ( model, cmd ) =
+                            init
+                    in
+                        Expect.equal cmd (initCmd model)
             ]
         ]

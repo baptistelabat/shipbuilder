@@ -2,6 +2,7 @@ port module Main
     exposing
         ( main
         , init
+        , initCmd
         , initModel
           --Blocks
         , Block
@@ -484,7 +485,7 @@ init =
         model =
             initModel
     in
-        ( initModel, encodeInitThreeCommand model |> sendToJs "init-three" )
+        ( initModel, initCmd model )
 
 
 initModel : Model
@@ -508,6 +509,11 @@ initModel =
         , selectedHullReference = Nothing
         , blocks = DictList.empty
         }
+
+
+initCmd : Model -> Cmd Msg
+initCmd model =
+    encodeInitThreeCommand model |> sendToJs "init-three"
 
 
 type ViewMode
