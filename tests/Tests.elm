@@ -412,4 +412,18 @@ suite =
                             |> Expect.equal Cmd.none
                 ]
             ]
+        , describe "ChangeBlockColor"
+            [ test "updates only the color of the given block" <|
+                \_ ->
+                    { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                        |> update (ChangeBlockColor blockA Color.yellow)
+                        |> Tuple.first
+                        |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
+            , test "has a side effect" <|
+                \_ ->
+                    { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                        |> update (ChangeBlockColor blockA Color.yellow)
+                        |> Tuple.second
+                        |> Expect.notEqual Cmd.none
+        ]
         ]
