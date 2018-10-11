@@ -1,14 +1,23 @@
 port module Main
     exposing
-        ( Block
+        ( main
+          --Blocks
+        , Block
         , Blocks
         , addBlockTo
         , removeBlockFrom
-        , encodeViewport
-        , encodeViewports
-        , main
+          -- CoordinatesTransform
+        , CoordinatesTransform
+        , arrayToCoordinatesTransform
+        , coordinatesTransformToList
+        , defaultCoordinatesTransform
+        , encodeCoordinatesTransform
+        , makeCoordinatesTransform
+          -- Viewports
         , Viewport
         , Viewports
+        , encodeViewport
+        , encodeViewports
         )
 
 import Array exposing (Array)
