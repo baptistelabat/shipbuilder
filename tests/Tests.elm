@@ -391,4 +391,5 @@ suite =
                             "init-three"
                             (encodeInitThreeCommand initModel)
                         )
+            ]
         ]
