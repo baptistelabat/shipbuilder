@@ -233,6 +233,38 @@ let addCube = function (label, color = 0x5078ff, sizeX = 80, sizeY = 50, sizeZ =
     // TODO: rewrite size and position !
 }
 
+// position and size in ship coordinates
+let restoreBlock = function (uuid, color, position, size) {
+    const threeJsSize = sizeToThreeJsCoordinates(size.x, size.y, size.z, coordinatesTransform);
+    const threeJsPosition = toThreeJsCoordinates(position.x, position.y, position.z, coordinatesTransform);
+    const threeJsColor = getThreeColorFromElmColor(color);
+    const geometry = restoreCubeGeometry(threeJsSize);
+    const material = restoreMaterial(threeJsColor);
+
+    const block = new THREE.Mesh(geometry, material);
+    block.uuid = uuid;
+    block.position.fromArray([threeJsPosition.x, threeJsPosition.y, threeJsPosition.z]);
+    block.baseColor = threeJsColor;
+    block.sbType = "block";
+    scene.add(block);
+}
+
+// input : size in threejs coordinates
+let restoreCubeGeometry = function (size) {
+    const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+    geometry.translate(size.x / 2, size.y / 2, size.z / 2); // place the origin in the bottom left 
+    return geometry;
+}
+
+// input : threejs color
+let restoreMaterial = function (color, opacity = 1) {
+    const material = new THREE.MeshBasicMaterial({ color: color, opacity });
+    if (opacity < 1) {
+        material.transparent = true;
+    }
+    return material;
+}
+
 let sizeToShipCoordinates = function (size) {
     return absVector3(toShipCoordinates(size.x, size.y, size.z, coordinatesTransform));
 }
