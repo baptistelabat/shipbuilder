@@ -54,6 +54,14 @@ header .header-menu-item {
     height: 20px;
 }
 
+header .header-menu-item a {
+    color: white;
+}
+
+header .header-menu-item label {
+    cursor: pointer;
+}
+
 header .header-menu-item svg {
     height: 100%;
 }
@@ -377,4 +385,8 @@ input.block-label {
     margin-bottom: 4px;
     display: inline-block;
     padding-left: 4px;
+}
+
+.hidden-input {
+    display: none;
 }

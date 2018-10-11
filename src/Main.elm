@@ -11,19 +11,21 @@ port module Main
         , Viewports
         )
 
-import Color exposing (Color, hsl)
+import Array exposing (Array)
+import Color exposing (Color, rgba, hsl)
 import SIRColorPicker
 import DictList exposing (DictList)
 import Dom
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
+import Http exposing (encodeUri)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
-import Math.Vector3 exposing (Vec3, vec3, toRecord)
+import Math.Vector3 exposing (Vec3, vec3, getX, getY, getZ, toRecord)
 import Task
 import Debug
 
@@ -63,6 +65,11 @@ subscriptions model =
     fromJs jsMsgToMsg
 
 
+openSaveFileCmd : Cmd msg
+openSaveFileCmd =
+    sendToJs "read-json-file" (Encode.string "open-save-file")
+
+
 newBlockDecoder : Decode.Decoder Block
 newBlockDecoder =
     Pipeline.decode Block
@@ -86,6 +93,45 @@ syncPositionDecoder =
 
 type alias SyncSize =
     { uuid : String, size : Size }
+
+
+type alias SaveFile =
+    { version : Int
+    , blocks : List Block
+    , coordinatesTransform : Array Float
+    }
+
+
+saveFileDecoder : Decode.Decoder SaveFile
+saveFileDecoder =
+    Pipeline.decode SaveFile
+        |> Pipeline.required "version" Decode.int
+        |> Pipeline.required "blocks" decodeBlocks
+        |> Pipeline.required "coordinatesTransform" (Decode.array Decode.float)
+
+
+decodeBlocks : Decode.Decoder (List Block)
+decodeBlocks =
+    Decode.list decodeBlock
+
+
+decodeBlock : Decode.Decoder Block
+decodeBlock =
+    Pipeline.decode Block
+        |> Pipeline.required "uuid" Decode.string
+        |> Pipeline.required "label" Decode.string
+        |> Pipeline.required "color" decodeColor
+        |> Pipeline.required "position" decodePosition
+        |> Pipeline.required "size" decodeSize
+
+
+decodeColor : Decode.Decoder Color
+decodeColor =
+    Pipeline.decode Color.rgba
+        |> Pipeline.required "red" Decode.int
+        |> Pipeline.required "green" Decode.int
+        |> Pipeline.required "blue" Decode.int
+        |> Pipeline.required "alpha" Decode.float
 
 
 syncSizeDecoder : Decode.Decoder SyncSize
@@ -134,6 +180,14 @@ decodeRgbRecord =
 jsMsgToMsg : JsData -> Msg
 jsMsgToMsg js =
     case js.tag of
+        "save-data" ->
+            case Decode.decodeValue saveFileDecoder js.data of
+                Ok fileContents ->
+                    FromJs <| RestoreSave fileContents
+
+                Err message ->
+                    FromJs <| JSError message
+
         "new-block" ->
             case Decode.decodeValue newBlockDecoder js.data of
                 Ok block ->
@@ -189,18 +243,110 @@ type JsMsg
     | Unselect
     | JSError String
     | NewBlock Block
+    | RestoreSave SaveFile
     | SynchronizePosition String Position
     | SynchronizeSize String Size
+
+
+restoreSaveInModel : Model -> SaveFile -> Model
+restoreSaveInModel model saveFile =
+    let
+        maybeCoordinatesTransform : Maybe CoordinatesTransform
+        maybeCoordinatesTransform =
+            arrayToCoordinatesTransform saveFile.coordinatesTransform
+
+        savedBlocks =
+            listOfBlocksToBlocks saveFile.blocks
+    in
+        case maybeCoordinatesTransform of
+            Just savedCoordinatesTransform ->
+                { initModel
+                  -- resets focused block and selections
+                    | blocks = savedBlocks
+                    , coordinatesTransform = savedCoordinatesTransform
+                }
+
+            Nothing ->
+                model
+
+
+listOfBlocksToBlocks : List Block -> Blocks
+listOfBlocksToBlocks blockList =
+    DictList.fromList <| List.map (\block -> ( block.uuid, block )) blockList
+
+
+arrayToCoordinatesTransform : Array Float -> Maybe CoordinatesTransform
+arrayToCoordinatesTransform array =
+    let
+        listOfTransforms : List Float
+        listOfTransforms =
+            Array.toList array
+    in
+        case listOfTransforms of
+            [ xx, yx, zx, xy, yy, zy, xz, yz, zz ] ->
+                Just <| makeCoordinatesTransform (vec3 xx xy xz) (vec3 yx yy yz) (vec3 zx zy zz)
+
+            _ ->
+                Nothing
+
+
+restoreSaveCmd : Model -> Cmd Msg
+restoreSaveCmd model =
+    sendToJs "restore-save" <| encodeRestoreSaveCmd model
+
+
+encodeRestoreSaveCmd : Model -> Encode.Value
+encodeRestoreSaveCmd model =
+    Encode.object
+        [ ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        , ( "blocks", encodeBlocks model.blocks )
+        ]
 
 
 
 -- MODEL
 
 
+type alias CoordinatesTransform =
+    { x : Vec3
+    , y : Vec3
+    , z : Vec3
+    }
+
+
+makeCoordinatesTransform : Vec3 -> Vec3 -> Vec3 -> CoordinatesTransform
+makeCoordinatesTransform x y z =
+    { x = x
+    , y = y
+    , z = z
+    }
+
+
+coordinatesTransformToList : CoordinatesTransform -> List Float
+coordinatesTransformToList coordinatesTransform =
+    [ getX coordinatesTransform.x
+    , getX coordinatesTransform.y
+    , getX coordinatesTransform.z
+    , getY coordinatesTransform.x
+    , getY coordinatesTransform.y
+    , getY coordinatesTransform.z
+    , getZ coordinatesTransform.x
+    , getZ coordinatesTransform.y
+    , getZ coordinatesTransform.z
+    ]
+
+
+defaultCoordinatesTransform : CoordinatesTransform
+defaultCoordinatesTransform =
+    -- Ship to ThreeJs
+    makeCoordinatesTransform (vec3 1 0 0) (vec3 0 0 -1) (vec3 0 1 0)
+
+
 type alias Model =
     { build : String
     , viewMode : ViewMode
     , viewports : Viewports
+    , coordinatesTransform : CoordinatesTransform
     , selectedBlock : Maybe String
     , selectedHullReference : Maybe String
     , blocks : Blocks
@@ -228,11 +374,38 @@ type alias Blocks =
     DictList String Block
 
 
+stringifyEncodeValue : Encode.Value -> String
+stringifyEncodeValue value =
+    Encode.encode 4 value
+
+
+encodeBlocks : Blocks -> Encode.Value
+encodeBlocks blocks =
+    Encode.list <| List.map encodeBlock (toList blocks)
+
+
+encodeModelForSave : Model -> Encode.Value
+encodeModelForSave model =
+    Encode.object
+        [ ( "version", Encode.int 1 )
+        , ( "blocks", encodeBlocks model.blocks )
+        , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        ]
+
+
+encodeCoordinatesTransform : CoordinatesTransform -> Encode.Value
+encodeCoordinatesTransform coordinatesTransform =
+    Encode.list <| List.map Encode.float (coordinatesTransformToList coordinatesTransform)
+
+
 encodeBlock : Block -> Encode.Value
 encodeBlock block =
     Encode.object
         [ ( "uuid", Encode.string block.uuid )
         , ( "label", Encode.string block.label )
+        , ( "color", encodeColor block.color )
+        , ( "position", encodePosition block.position )
+        , ( "size", encodeSize block.size )
         ]
 
 
@@ -242,6 +415,15 @@ encodePosition position =
         [ ( "x", Encode.float position.x.value )
         , ( "y", Encode.float position.y.value )
         , ( "z", Encode.float position.z.value )
+        ]
+
+
+encodeSize : Size -> Encode.Value
+encodeSize size =
+    Encode.object
+        [ ( "x", Encode.float size.length.value )
+        , ( "y", Encode.float size.width.value )
+        , ( "z", Encode.float size.height.value )
         ]
 
 
@@ -288,6 +470,15 @@ getBlockByUUID uuid blocks =
 init : ( Model, Cmd Msg )
 init =
     let
+        model =
+            initModel
+    in
+        ( initModel, encodeInitThreeCommand model |> sendToJs "init-three" )
+
+
+initModel : Model
+initModel =
+    let
         viewports : Viewports
         viewports =
             [ topHalfViewport (hsl (degrees 222) 0.7 0.98) viewportSide
@@ -298,18 +489,14 @@ init =
         viewMode =
             SpaceReservation WholeList
     in
-        ( { build = "0.0.1"
-          , viewMode = viewMode
-          , viewports = viewports
-          , selectedBlock = Nothing
-          , selectedHullReference = Nothing
-          , blocks = DictList.empty
-          }
-        , Cmd.batch
-            [ encodeViewports viewports |> sendToJs "init-viewports"
-            , encodeViewMode viewMode |> sendToJs "switch-mode"
-            ]
-        )
+        { build = "0.0.1"
+        , viewMode = viewMode
+        , viewports = viewports
+        , coordinatesTransform = defaultCoordinatesTransform
+        , selectedBlock = Nothing
+        , selectedHullReference = Nothing
+        , blocks = DictList.empty
+        }
 
 
 type ViewMode
@@ -349,6 +536,15 @@ type alias Viewport =
 encodeViewports : Viewports -> Encode.Value
 encodeViewports viewports =
     Encode.list <| List.map encodeViewport viewports
+
+
+encodeInitThreeCommand : Model -> Encode.Value
+encodeInitThreeCommand model =
+    Encode.object
+        [ ( "viewports", encodeViewports model.viewports )
+        , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        , ( "mode", encodeViewMode model.viewMode )
+        ]
 
 
 encodeViewport : Viewport -> Encode.Value
@@ -474,6 +670,7 @@ type Msg
     | AddBlock String
     | FromJs JsMsg
     | KeyDown (FloatInput -> Block) FloatInput (Block -> Cmd Msg) KeyEvent
+    | OpenSaveFile
     | UpdatePositionX Block String
     | UpdatePositionY Block String
     | UpdatePositionZ Block String
@@ -517,9 +714,7 @@ encodeUpdateSizeCommand : { a | uuid : String, size : Size } -> Encode.Value
 encodeUpdateSizeCommand block =
     Encode.object
         [ ( "uuid", Encode.string block.uuid )
-        , ( "x", Encode.float (getLength block) )
-        , ( "y", Encode.float (getWidth block) )
-        , ( "z", Encode.float (getHeight block) )
+        , ( "size", encodeSize block.size )
         ]
 
 
@@ -700,6 +895,9 @@ update msg model =
 
         KeyDown updateFloatInput floatInput command keyEvent ->
             keyDown updateFloatInput floatInput command keyEvent model
+
+        OpenSaveFile ->
+            model ! [ openSaveFileCmd ]
 
         RemoveBlock block ->
             removeBlock block model
@@ -892,6 +1090,13 @@ updateFromJs jsmsg model =
             in
                 { model | blocks = blocks } ! [ Task.attempt (\_ -> NoOp) (Dom.focus block.uuid) ]
 
+        RestoreSave saveFile ->
+            let
+                newModel =
+                    restoreSaveInModel model saveFile
+            in
+                newModel ! [ restoreSaveCmd newModel ]
+
         Select uuid ->
             let
                 maybeBlock : Maybe Block
@@ -950,20 +1155,20 @@ type alias MenuItems =
 view : Model -> Html Msg
 view model =
     div [ id "elm-root" ]
-        [ viewHeader
+        [ viewHeader model
         , viewContent model
         ]
 
 
-viewHeader : Html Msg
-viewHeader =
+viewHeader : Model -> Html Msg
+viewHeader model =
     Html.header []
         [ div [ class "header-left" ]
             -- groups img and title together for flexbox
             [ img [ src "assets/SIREHNA_R.png" ] []
             , h1 [] [ text "ShipBuilder" ]
             ]
-        , viewHeaderMenu
+        , viewHeaderMenu model
         ]
 
 
@@ -988,27 +1193,48 @@ colorToCssRgbString color =
 -- HEADER MENU
 
 
-headerMenuItems : MenuItems
-headerMenuItems =
-    [ ( "Ouvrir", FASolid.folder_open )
-    , ( "Télécharger", FASolid.download )
-    , ( "Imprimer", FASolid.print )
-    ]
-
-
-viewHeaderMenu : Html Msg
-viewHeaderMenu =
-    div [ class "header-menu" ] <|
-        List.map viewHeaderMenuItem headerMenuItems
-
-
-viewHeaderMenuItem : MenuItem -> Html Msg
-viewHeaderMenuItem ( itemTitle, icon ) =
+viewSaveMenuItem : Model -> Html Msg
+viewSaveMenuItem model =
     div
         [ class "header-menu-item"
-        , title itemTitle
+        , title "Open"
         ]
-        [ icon ]
+        [ a
+            [ type_ "button"
+            , href <| "data:application/json;charset=utf-8," ++ encodeUri (stringifyEncodeValue (encodeModelForSave model))
+            , downloadAs "shipbuilder.json"
+            ]
+            [ FASolid.download ]
+        ]
+
+
+viewHeaderMenu : Model -> Html Msg
+viewHeaderMenu model =
+    div [ class "header-menu" ]
+        [ viewOpenMenuItem
+        , viewSaveMenuItem model
+        ]
+
+
+viewOpenMenuItem : Html Msg
+viewOpenMenuItem =
+    div
+        [ class "header-menu-item"
+        , title "Open"
+        ]
+        [ label
+            [ for "open-save-file" ]
+            [ FASolid.folder_open ]
+        , input
+            [ type_ "file"
+            , accept "application/json, .json"
+            , id "open-save-file"
+            , name "open-save-file"
+            , class "hidden-input"
+            , on "change" (Decode.succeed OpenSaveFile)
+            ]
+            []
+        ]
 
 
 

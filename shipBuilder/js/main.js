@@ -20,21 +20,17 @@ let loader = new THREE.STLLoader();
 
 let preventSelection = false;
 
-// Ship to ThreeJs
+// ThreeJs to ship
 let coordinatesTransform = new THREE.Matrix3();
-coordinatesTransform.set(
-    1, 0, 0,
-    0, 0, -1,
-    0, 1, 0
-);
 
-let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
+
+let toShipCoordinates = function (x, y, z, coordinatesTransform) {
     const initVector = new THREE.Vector3(x, y, z);
     const resultVector = initVector.applyMatrix3(coordinatesTransform);
     return resultVector;
 }
 
-let toShipCoordinates = function (x, y, z, coordinatesTransform) {
+let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
     const initVector = new THREE.Vector3(x, y, z);
     const inversedTransform = new THREE.Matrix3();
     inversedTransform.getInverse(coordinatesTransform);
@@ -45,8 +41,14 @@ let toShipCoordinates = function (x, y, z, coordinatesTransform) {
 app.ports.toJs.subscribe(function (message) {
     const data = message.data;
     switch (message.tag) {
-        case "init-viewports":
+        case "init-three":
             initThree(data);
+            break;
+        case "read-json-file":
+            readFile(data);
+            break;
+        case "restore-save":
+            restoreSave(data);
             break;
         case "add-block":
             addCube(data.label, getThreeColorFromElmColor(data.color));
@@ -76,6 +78,7 @@ app.ports.toJs.subscribe(function (message) {
     }
 })
 
+
 let sendToElm = function (tag, data) {
     app.ports.fromJs.send({ tag: tag, data: data });
 }
@@ -83,6 +86,57 @@ let sendToElm = function (tag, data) {
 let switchMode = function (newMode) {
     unselectObject();
     mode = newMode;
+}
+
+let readFile = function (inputId) {
+    var node = document.getElementById(inputId);
+    if (node === null) {
+        return;
+    }
+
+    var file = node.files[0];
+    var reader = new FileReader();
+
+    // FileReader API is event based. Once a file is selected
+    // it fires events. We hook into the `onload` event for our reader.
+    reader.onload = (function (event) {
+        var contents = event.target.result;
+        sendToElm("save-data", JSON.parse(contents));
+    });
+
+    // Connect our FileReader with the file that was selected in our `input` node.
+    reader.readAsText(file);
+}
+
+let restoreSave = function (savedData) {
+    const savedBlocks = savedData.blocks;
+    const savedCoordinatesTransform = savedData.coordinatesTransform;
+
+    resetScene(views, scene);
+    setCoordinatesTransformFromElm(savedCoordinatesTransform);
+    restoreBlocks(savedBlocks);
+}
+
+let resetScene = function (views, scene) {
+    views.forEach(view => { // if we don't detach the controls, the removal of the selected block (if any) won't work
+        view.control.detach();
+    })
+    const sbObjectsToDelete = scene.children.filter(child => child.sbType && (child.sbType === "block" || child.sbType === "hull"));
+    sbObjectsToDelete.forEach(toDelete => removeFromScene(toDelete));
+}
+
+let restoreBlocks = function (blocks) {
+    blocks.forEach(block => {
+        restoreBlock(block.uuid, block.color, block.position, block.size);
+    });
+}
+
+let setCoordinatesTransformFromElm = function (elmCoordinatesTransform) {
+    // the elm matrix maps threejs's coordinate system to the ship's one
+    // we want the ship's coordinate system mapped to threejs' one
+    const inversedCoordinatesTransform = new THREE.Matrix3();
+    inversedCoordinatesTransform.fromArray(elmCoordinatesTransform);
+    coordinatesTransform.getInverse(inversedCoordinatesTransform);
 }
 
 let updateColor = function (data) {
@@ -150,7 +204,7 @@ let updatePosition = function (data) {
 let updateSize = function (data) {
     const object = findObjectByUUID(data.uuid);
     if (object) {
-        const newSize = sizeToThreeJsCoordinates(data.x, data.y, data.z, coordinatesTransform);
+        const newSize = sizeToThreeJsCoordinates(data.size.x, data.size.y, data.size.z, coordinatesTransform);
         const currentSize = getObjectSize(object);
         const newXSize = newSize.x;
         const currentXSize = currentSize.x;
@@ -192,6 +246,38 @@ let addCube = function (label, color = 0x5078ff, sizeX = 80, sizeY = 50, sizeZ =
         size: sizeToShipCoordinates(getObjectSize(cube))
     });
     // TODO: rewrite size and position !
+}
+
+// position and size in ship coordinates
+let restoreBlock = function (uuid, color, position, size) {
+    const threeJsSize = sizeToThreeJsCoordinates(size.x, size.y, size.z, coordinatesTransform);
+    const threeJsPosition = toThreeJsCoordinates(position.x, position.y, position.z, coordinatesTransform);
+    const threeJsColor = getThreeColorFromElmColor(color);
+    const geometry = restoreCubeGeometry(threeJsSize);
+    const material = restoreMaterial(threeJsColor);
+
+    const block = new THREE.Mesh(geometry, material);
+    block.uuid = uuid;
+    block.position.fromArray([threeJsPosition.x, threeJsPosition.y, threeJsPosition.z]);
+    block.baseColor = threeJsColor;
+    block.sbType = "block";
+    scene.add(block);
+}
+
+// input : size in threejs coordinates
+let restoreCubeGeometry = function (size) {
+    const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+    geometry.translate(size.x / 2, size.y / 2, size.z / 2); // place the origin in the bottom left 
+    return geometry;
+}
+
+// input : threejs color
+let restoreMaterial = function (color, opacity = 1) {
+    const material = new THREE.MeshBasicMaterial({ color: color, opacity });
+    if (opacity < 1) {
+        material.transparent = true;
+    }
+    return material;
 }
 
 let sizeToShipCoordinates = function (size) {
@@ -300,11 +386,14 @@ let findObjectByUUID = function (uuid) {
     return scene.children.find(child => child.uuid === uuid);
 }
 
-let initThree = function (viewsData) {
+let initThree = function (data) {
     window.addEventListener('resize', (window, event) => onResize(), false);
     document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
 
-    views = viewsData.map(view => {
+    const initViewports = data.viewports;
+    const initMode = data.mode;
+    const initCoordinatesTransform = data.coordinatesTransform;
+    views = initViewports.map(view => {
         view.getEye = () => {
             const converted = toThreeJsCoordinates(view.eye.x, view.eye.y, view.eye.z, coordinatesTransform);
             return [converted.x, converted.y, converted.z]
@@ -316,6 +405,10 @@ let initThree = function (viewsData) {
         };
         return view;
     });
+    mode = initMode;
+
+    setCoordinatesTransformFromElm(initCoordinatesTransform);
+
     wrapper = document.getElementById(wrapperId);
 
     initCanvas(wrapper);
