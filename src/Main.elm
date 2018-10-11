@@ -260,7 +260,8 @@ restoreSaveInModel model saveFile =
     in
         case maybeCoordinatesTransform of
             Just savedCoordinatesTransform ->
-                { model
+                { initModel
+                  -- resets focused block and selections
                     | blocks = savedBlocks
                     , coordinatesTransform = savedCoordinatesTransform
                 }
