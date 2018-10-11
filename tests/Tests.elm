@@ -7,9 +7,11 @@ import Expect exposing (Expectation)
 import Json.Encode as Encode
 import Main
     exposing
-        ( init
+        ( encodeInitThreeCommand
+        , init
         , initCmd
         , initModel
+        , sendToJs
           --Blocks
         , Block
         , Blocks
@@ -381,5 +383,12 @@ suite =
                             init
                     in
                         Expect.equal cmd (initCmd model)
-            ]
+            , test "initCmd is init-three" <|
+                \_ ->
+                    Expect.equal
+                        (initCmd initModel)
+                        (sendToJs
+                            "init-three"
+                            (encodeInitThreeCommand initModel)
+                        )
         ]

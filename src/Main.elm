@@ -1,9 +1,11 @@
 port module Main
     exposing
         ( main
+        , encodeInitThreeCommand
         , init
         , initCmd
         , initModel
+        , sendToJs
           --Blocks
         , Block
         , Blocks
