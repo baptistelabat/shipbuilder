@@ -1,3 +1,23 @@
+#elm-root {
+    --primary-color: hsl(222, 100%, 34%);
+    --primary-color__accent: hsl(222, 100%, 24%);
+    --primary-color__contrast: hsl(222, 100%, 20%);
+
+    --on-primary-color: white;
+    --on-primary-color__accent: hsl(222, 100%, 74%);
+    --on-primary-color__muted: hsl(222, 55%, 70%);
+
+    --secondary-color: hsl(222, 53%, 95%);
+    --secondary-color__accent: white;
+    --secondary-color__contrast: hsl(222, 20%, 82%);
+
+    --on-secondary-color: black;
+    --on-secondary-color__accent: hsl(222, 20%, 20%);
+    --on-secondary-color__muted: hsl(222, 20%, 60%);
+
+    --shadow-color: hsla(205, 100%, 7%, 0.315)
+}
+
 body,
 html, #elm-app, #elm-root {
     padding: 0;
@@ -14,10 +34,10 @@ html, #elm-app, #elm-root {
 }
 
 header {
-    background-color: hsl(222, 100%, 34%);
-    border-bottom: 1px solid hsl(222, 100%, 14%);
+    background-color: var(--primary-color);
+    border-bottom: 1px solid var(--primary-color__contrast);
     padding: 12px;
-    color: white;
+    color: var(--on-primary-color);
     z-index: 2;
     display: flex;
     justify-content: space-between;
@@ -55,7 +75,7 @@ header .header-menu-item {
 }
 
 header .header-menu-item a {
-    color: white;
+    color: var(--on-primary-color);
 }
 
 header .header-menu-item label {
@@ -67,7 +87,7 @@ header .header-menu-item svg {
 }
 
 header .header-menu-item:hover svg {
-    color: hsl(222, 100%, 74%);
+    color: var(--on-primary-color__accent);
 }
 
 
@@ -93,8 +113,8 @@ header .header-menu-item+.header-menu-item {
     width: 56px;
     z-index: 2;
     height: 100%;
-    color: white;
-    background: hsl(222, 100%, 34%);
+    color: var(--on-primary-color);
+    background: var(--primary-color);
 }
 
 .tabs {
@@ -105,7 +125,7 @@ header .header-menu-item+.header-menu-item {
 .build-info {
     width: calc(100% - 8px);
     font-size: 0.6em;
-    color: rgb(122, 130, 236);
+    color: var(--on-primary-color__muted);
     margin: 4px;
     padding: 0;
 }
@@ -130,15 +150,15 @@ header .header-menu-item+.header-menu-item {
 }
 
 .tab-item:hover, .tab-item.active {
-    background-color: hsl(222, 100%, 24%);
+    background-color: var(--primary-color__accent);
 }
 .tab-item:hover {
-    color: hsl(222, 100%, 74%);
+    color: var(--on-primary-color__accent);
 }
 
 .tab-item:focus,
 .tab-item:active {
-    background-color: hsl(222, 100%, 20%);
+    background-color: var(--primary-color__contrast);
 }
 
 
@@ -148,14 +168,15 @@ header .header-menu-item+.header-menu-item {
     z-index: 1;
     width: 224px;
     padding: 12px;
-    background-color: hsl(222, 53%, 95%);
-    border-right: 1px solid rgb(201, 211, 218);
+    background-color: var(--secondary-color);
+    border-right: 1px solid var(--secondary-color__contrast);
+    color: var(--on-secondary-color);
 }
 
 .panel .panel-header {
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid rgb(204, 213, 218);
+    border-bottom: 1px solid var(--secondary-color__contrast);
     padding: 0 0 8px;
     margin: 0 0 12px;
     align-items: center;
@@ -170,7 +191,7 @@ header .header-menu-item+.header-menu-item {
 
 .panel__secondary {
     z-index: 0;
-    box-shadow: 0px 0px 2px rgba(0, 20, 34, 0.315);
+    box-shadow: 0px 0px 2px var(--shadow-color);
 }
 
 .workspace {
@@ -182,8 +203,8 @@ header .header-menu-item+.header-menu-item {
     left: 20px;
     font-size: 0.9em;
     padding: 8px 12px;
-    color: hsl(222, 20%, 20%);
-    background-color: hsl(222, 20%, 80%);
+    color: var(--on-secondary-color__accent);
+    background-color: var(--secondary-color__contrast);
     border-radius: 8px;
 }
 
@@ -208,7 +229,7 @@ ul.blocks, ul.hull-references  {
 
 
 li.block-item, .add-block, li.hull-reference {
-    background-color: white;
+    background-color: var(--secondary-color__accent);
     margin: 0 -12px;
     padding: 4px 0;
     display: flex;
@@ -233,7 +254,7 @@ li.block-item:hover, li.hull-reference:hover {
 }
 
 li.hull-reference {
-    border-color: hsl(222, 100%, 74%);
+    border-color: var(--on-primary-color__accent);
 }
 
 li.block-item:hover .block-info-wrapper, li.hull-reference:hover .hull-info-wrapper {
@@ -251,7 +272,7 @@ li.block-item p, li.hull-reference p {
 
 li.block-item p.block-uuid, li.hull-reference p.hull-path {
     font-size: 0.65em;
-    color: hsl(222, 20%, 60%);
+    color: var(--on-secondary-color__muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -281,16 +302,16 @@ li.block-item .block-action:last-child {
 }
 
 li.block-item .focus-block {
-    color: hsl(222, 100%, 34%);
+    color: var(--primary-color);
 }
 
 li.block-item .focus-block:hover {
-    color: hsl(222, 100%, 24%);
+    color: var(--primary-color__accent);
 }
 
 
 li.block-item .delete-block {
-    color: hsl(222, 20%, 20%);
+    color: var(--on-secondary-color);
 }
 
 
@@ -308,7 +329,7 @@ li.block-item__selected .block-info-wrapper, li.hull-reference__selected .hull-i
 }
 
 .add-block {
-    background-color: white;
+    background-color: var(--secondary-color__accent);
     box-shadow: none;
     padding: 20px 12px;
 }
@@ -316,8 +337,9 @@ li.block-item__selected .block-info-wrapper, li.hull-reference__selected .hull-i
 input.block-label {
     width: 100%;
     border: none;
-    border-bottom: 1px solid hsl(222, 20%, 85%);
+    border-bottom: 1px solid var(--secondary-color__contrast);
     background-color: transparent;
+    color: var(--on-secondary-color);
 }
 
 .blocks-panel__focus {
@@ -339,8 +361,8 @@ input.block-label {
 .blocks-panel__focus .focus-sub-header {
     margin-bottom: 12px;
     padding-bottom: 12px;
-    border-bottom: 1px solid hsl(222, 53%, 85%);
-    color: hsl(222, 20%, 60%);
+    border-bottom: 1px solid var(--secondary-color);
+    color: var(--on-secondary-color__muted);
     font-size: 0.6em;
 
 }
@@ -352,14 +374,14 @@ input.block-label {
 }
 
 .blocks-panel__focus .focus-header .focus-back {
-    color: hsl(222, 100%, 34%);
+    color: var(--primary-color);
     padding: 4px;
     height: 100%;
     display: flex;
     align-items: center;
 }
 .blocks-panel__focus .focus-header .focus-back:hover {
-    color: hsl(222, 100%, 24%);
+    color: var(--primary-color__accent);
 }
 
 .blocks-panel__focus .focus-header .focus-back svg {
