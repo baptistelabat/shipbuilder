@@ -292,6 +292,8 @@ arrayToCoordinatesTransform array =
 
 restoreSaveCmd : Model -> Cmd Msg
 restoreSaveCmd model =
+    sendToJs "restore-save" <| encodeRestoreSaveCmd model
+
 
 encodeRestoreSaveCmd : Model -> Encode.Value
 encodeRestoreSaveCmd model =
