@@ -47,6 +47,9 @@ app.ports.toJs.subscribe(function (message) {
         case "read-json-file":
             readFile(data);
             break;
+        case "restore-save":
+            restoreSave(data);
+            break;
         case "add-block":
             addCube(data.label, getThreeColorFromElmColor(data.color));
             break;
@@ -105,6 +108,13 @@ let readFile = function (inputId) {
     reader.readAsText(file);
 }
 
+let restoreSave = function (savedData) {
+    const savedBlocks = savedData.blocks;
+    const savedCoordinatesTransform = savedData.coordinatesTransform;
+
+    setCoordinatesTransformFromElm(savedCoordinatesTransform);
+    restoreBlocks(savedBlocks);
+}
 
 let setCoordinatesTransformFromElm = function (elmCoordinatesTransform) {
     // the elm matrix maps threejs's coordinate system to the ship's one
