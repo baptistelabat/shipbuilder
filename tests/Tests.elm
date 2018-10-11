@@ -142,9 +142,9 @@ blockA =
         , z = { value = 0, string = "0" }
         }
     , size =
-        { width = { value = 10, string = "10" }
+        { length = { value = 10, string = "10" }
+        , width = { value = 10, string = "10" }
         , height = { value = 10, string = "10" }
-        , depth = { value = 10, string = "10" }
         }
     }
 
@@ -160,9 +160,9 @@ blockAYellow =
         , z = { value = 0, string = "0" }
         }
     , size =
-        { width = { value = 10, string = "10" }
+        { length = { value = 10, string = "10" }
+        , width = { value = 10, string = "10" }
         , height = { value = 10, string = "10" }
-        , depth = { value = 10, string = "10" }
         }
     }
 
@@ -178,9 +178,9 @@ blockB =
         , z = { value = 0, string = "0" }
         }
     , size =
-        { width = { value = 10, string = "10" }
+        { length = { value = 10, string = "10" }
+        , width = { value = 10, string = "10" }
         , height = { value = 10, string = "10" }
-        , depth = { value = 10, string = "10" }
         }
     }
 
@@ -196,9 +196,9 @@ blockC =
         , z = { value = 0, string = "0" }
         }
     , size =
-        { width = { value = 10, string = "10" }
+        { length = { value = 10, string = "10" }
+        , width = { value = 10, string = "10" }
         , height = { value = 10, string = "10" }
-        , depth = { value = 10, string = "10" }
         }
     }
 
