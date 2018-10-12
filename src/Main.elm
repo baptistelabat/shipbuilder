@@ -6,7 +6,6 @@ port module Main
         , initCmd
         , initModel
         , Msg(..)
-        , sendToJs
         , update
           --Blocks
         , Block
@@ -56,14 +55,6 @@ type alias JsData =
     { tag : String
     , data : Encode.Value
     }
-
-
-sendToJs : String -> Encode.Value -> Cmd msg
-sendToJs tag data =
-    toJs
-        { tag = tag
-        , data = data
-        }
 
 
 main : Program Never Model Msg
@@ -301,9 +292,9 @@ arrayToCoordinatesTransform array =
                 Nothing
 
 
-restoreSaveCmd : Model -> Cmd Msg
+restoreSaveCmd : Model -> JsData
 restoreSaveCmd model =
-    sendToJs "restore-save" <| encodeRestoreSaveCmd model
+    { tag = "restore-save", data = encodeRestoreSaveCmd model }
 
 
 encodeRestoreSaveCmd : Model -> Encode.Value
@@ -484,7 +475,7 @@ init =
         model =
             initModel
     in
-        ( initModel, initCmd model )
+        ( initModel, toJs <| initCmd model )
 
 
 initModel : Model
@@ -510,9 +501,9 @@ initModel =
         }
 
 
-initCmd : Model -> Cmd Msg
+initCmd : Model -> JsData
 initCmd model =
-    encodeInitThreeCommand model |> sendToJs "init-three"
+    { tag = "init-three", data = encodeInitThreeCommand model }
 
 
 type ViewMode
@@ -909,7 +900,7 @@ updateFromJs jsmsg model =
                     restoreSaveInModel model saveFile
             in
                 -- TODO: split and move in ToJs ?
-                newModel ! [ restoreSaveCmd newModel ]
+                newModel ! [ toJs <| restoreSaveCmd newModel ]
 
         Select uuid ->
             let
