@@ -33,13 +33,7 @@ import Json.Decode.Pipeline as Pipeline
 import Task
 import Debug
 import Viewports exposing (Viewports, encodeViewports)
-import CoordinatesTransform
-    exposing
-        ( CoordinatesTransform
-        , coordinatesTransformFromList
-        , encodeCoordinatesTransform
-        , defaultCoordinatesTransform
-        )
+import CoordinatesTransform exposing (CoordinatesTransform)
 
 
 port toJs : JsData -> Cmd msg
@@ -252,7 +246,7 @@ restoreSaveInModel model saveFile =
     let
         maybeCoordinatesTransform : Maybe CoordinatesTransform
         maybeCoordinatesTransform =
-            coordinatesTransformFromList saveFile.coordinatesTransform
+            CoordinatesTransform.fromList saveFile.coordinatesTransform
 
         savedBlocks =
             listOfBlocksToBlocks saveFile.blocks
@@ -282,7 +276,7 @@ restoreSaveCmd model =
 encodeRestoreSaveCmd : Model -> Encode.Value
 encodeRestoreSaveCmd model =
     Encode.object
-        [ ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        [ ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "blocks", encodeBlocks model.blocks )
         ]
 
@@ -338,7 +332,7 @@ encodeModelForSave model =
     Encode.object
         [ ( "version", Encode.int 1 )
         , ( "blocks", encodeBlocks model.blocks )
-        , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         ]
 
 
@@ -434,7 +428,7 @@ initModel =
         { build = "0.0.1"
         , viewMode = viewMode
         , viewports = viewports
-        , coordinatesTransform = defaultCoordinatesTransform
+        , coordinatesTransform = CoordinatesTransform.default
         , selectedBlock = Nothing
         , selectedHullReference = Nothing
         , blocks = DictList.empty
@@ -460,7 +454,7 @@ encodeInitThreeCommand : Model -> Encode.Value
 encodeInitThreeCommand model =
     Encode.object
         [ ( "viewports", encodeViewports model.viewports )
-        , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "mode", encodeViewMode model.viewMode )
         ]
 

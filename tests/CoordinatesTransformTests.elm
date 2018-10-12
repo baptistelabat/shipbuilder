@@ -24,7 +24,7 @@ stringOfDefaultCoordinatesTransform =
 
 stringifyCoordinatesTransform : CoordinatesTransform -> String
 stringifyCoordinatesTransform coordinatesTransform =
-    Encode.encode 4 <| encodeCoordinatesTransform coordinatesTransform
+    Encode.encode 4 <| encode coordinatesTransform
 
 
 suite : Test
@@ -32,25 +32,25 @@ suite =
     describe "CoordinatesTransform"
         [ test "defaultCoordinatesTransform" <|
             \_ ->
-                Expect.equal defaultCoordinatesTransform { x = (vec3 1 0 0), y = (vec3 0 0 -1), z = (vec3 0 1 0) }
+                Expect.equal default { x = (vec3 1 0 0), y = (vec3 0 0 -1), z = (vec3 0 1 0) }
         , test "coordinatesTransformToList" <|
             \_ ->
                 Expect.equal
-                    (coordinatesTransformToList defaultCoordinatesTransform)
+                    (toList default)
                     [ 1, 0, 0, 0, 0, 1, 0, -1, 0 ]
         , test "coordinatesTransformFromList for defaultCoordinatesTransform" <|
             \_ ->
                 Expect.equal
-                    (coordinatesTransformFromList [ 1, 0, 0, 0, 0, 1, 0, -1, 0 ])
-                    (Just defaultCoordinatesTransform)
+                    (fromList [ 1, 0, 0, 0, 0, 1, 0, -1, 0 ])
+                    (Just default)
         , test "coordinatesTransformFromList with array too short" <|
             \_ ->
                 Expect.equal
-                    (coordinatesTransformFromList [ 1, 0, 0, 0, 0, 1, 0 ])
+                    (fromList [ 1, 0, 0, 0, 0, 1, 0 ])
                     (Nothing)
         , test "encodeCoordinatesTransform" <|
             \_ ->
                 Expect.equal
-                    (stringifyCoordinatesTransform defaultCoordinatesTransform)
+                    (stringifyCoordinatesTransform default)
                     stringOfDefaultCoordinatesTransform
         ]

@@ -1,21 +1,22 @@
 module CoordinatesTransform
     exposing
         ( CoordinatesTransform
-        , encodeCoordinatesTransform
-        , defaultCoordinatesTransform
-        , coordinatesTransformFromList
-        , coordinatesTransformToList
+        , default
+        , encode
+        , fromList
+        , fromVectors
+        , toList
         )
 
 import Json.Encode as Encode
 import Math.Vector3 exposing (Vec3, vec3, getX, getY, getZ)
 
 
-coordinatesTransformFromList : List Float -> Maybe CoordinatesTransform
-coordinatesTransformFromList listOfTransforms =
+fromList : List Float -> Maybe CoordinatesTransform
+fromList listOfTransforms =
     case listOfTransforms of
         [ xx, yx, zx, xy, yy, zy, xz, yz, zz ] ->
-            Just <| makeCoordinatesTransform (vec3 xx xy xz) (vec3 yx yy yz) (vec3 zx zy zz)
+            Just <| fromVectors (vec3 xx xy xz) (vec3 yx yy yz) (vec3 zx zy zz)
 
         _ ->
             Nothing
@@ -28,21 +29,21 @@ type alias CoordinatesTransform =
     }
 
 
-encodeCoordinatesTransform : CoordinatesTransform -> Encode.Value
-encodeCoordinatesTransform coordinatesTransform =
-    Encode.list <| List.map Encode.float (coordinatesTransformToList coordinatesTransform)
+encode : CoordinatesTransform -> Encode.Value
+encode coordinatesTransform =
+    Encode.list <| List.map Encode.float (toList coordinatesTransform)
 
 
-makeCoordinatesTransform : Vec3 -> Vec3 -> Vec3 -> CoordinatesTransform
-makeCoordinatesTransform x y z =
+fromVectors : Vec3 -> Vec3 -> Vec3 -> CoordinatesTransform
+fromVectors x y z =
     { x = x
     , y = y
     , z = z
     }
 
 
-coordinatesTransformToList : CoordinatesTransform -> List Float
-coordinatesTransformToList coordinatesTransform =
+toList : CoordinatesTransform -> List Float
+toList coordinatesTransform =
     [ getX coordinatesTransform.x
     , getX coordinatesTransform.y
     , getX coordinatesTransform.z
@@ -55,7 +56,7 @@ coordinatesTransformToList coordinatesTransform =
     ]
 
 
-defaultCoordinatesTransform : CoordinatesTransform
-defaultCoordinatesTransform =
+default : CoordinatesTransform
+default =
     -- Ship to ThreeJs
-    makeCoordinatesTransform (vec3 1 0 0) (vec3 0 0 -1) (vec3 0 1 0)
+    fromVectors (vec3 1 0 0) (vec3 0 0 -1) (vec3 0 1 0)
