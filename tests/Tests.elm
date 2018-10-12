@@ -414,132 +414,60 @@ suite =
                                 |> Tuple.second
                                 |> Expect.equal Cmd.none
                     ]
-                ]
-            , describe "ToJs"
-                [ describe "ChangeBlockColor"
-                    [ test "updates only the color of the given block" <|
-                        \_ ->
-                            { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                                |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
-                                |> Tuple.first
-                                |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
-                    , test "leaves model untouched if the block doesn't exist" <|
-                        \_ ->
-                            { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                                |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
-                                |> Tuple.first
-                                |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                    , test "has a side effect" <|
-                        \_ ->
-                            { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                                |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
-                                |> Tuple.second
-                                |> Expect.notEqual Cmd.none
-                    , test "has no side effect if the block doesn't exist" <|
-                        \_ ->
-                            { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                                |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
-                                |> Tuple.second
-                                |> Expect.equal Cmd.none
-                    ]
-                , describe "AddBlock"
-                    [ test "leaves the model untouched" <|
-                        \_ ->
-                            initModel
-                                |> update (ToJs <| AddBlock "aLabel")
-                                |> Tuple.first
-                                |> Expect.equal initModel
-                    , test "has a side effect" <|
-                        \_ ->
-                            initModel
-                                |> update (ToJs <| AddBlock "aLabel")
-                                |> Tuple.second
-                                |> Expect.notEqual Cmd.none
-                    , fuzz Fuzz.string "leaves the model untouched no matter the label" <|
-                        \label ->
-                            initModel
-                                |> update (ToJs <| AddBlock label)
-                                |> Tuple.first
-                                |> Expect.equal initModel
-                    , fuzz Fuzz.string "has a side effect no matter the label" <|
-                        \label ->
-                            initModel
-                                |> update (ToJs <| AddBlock label)
-                                |> Tuple.second
-                                |> Expect.notEqual Cmd.none
+                , describe "ToJs"
+                    [ describe "ChangeBlockColor"
+                        [ test "updates only the color of the given block" <|
+                            \_ ->
+                                { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                    |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
+                                    |> Tuple.first
+                                    |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
+                        , test "leaves model untouched if the block doesn't exist" <|
+                            \_ ->
+                                { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                    |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
+                                    |> Tuple.first
+                                    |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                        , test "has a side effect" <|
+                            \_ ->
+                                { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                    |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
+                                    |> Tuple.second
+                                    |> Expect.notEqual Cmd.none
+                        , test "has no side effect if the block doesn't exist" <|
+                            \_ ->
+                                { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                    |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
+                                    |> Tuple.second
+                                    |> Expect.equal Cmd.none
+                        ]
+                    , describe "AddBlock"
+                        [ test "leaves the model untouched" <|
+                            \_ ->
+                                initModel
+                                    |> update (ToJs <| AddBlock "aLabel")
+                                    |> Tuple.first
+                                    |> Expect.equal initModel
+                        , test "has a side effect" <|
+                            \_ ->
+                                initModel
+                                    |> update (ToJs <| AddBlock "aLabel")
+                                    |> Tuple.second
+                                    |> Expect.notEqual Cmd.none
+                        , fuzz Fuzz.string "leaves the model untouched no matter the label" <|
+                            \label ->
+                                initModel
+                                    |> update (ToJs <| AddBlock label)
+                                    |> Tuple.first
+                                    |> Expect.equal initModel
+                        , fuzz Fuzz.string "has a side effect no matter the label" <|
+                            \label ->
+                                initModel
+                                    |> update (ToJs <| AddBlock label)
+                                    |> Tuple.second
+                                    |> Expect.notEqual Cmd.none
+                        ]
                     ]
                 ]
             ]
         ]
-
-
-
---         AddBlock label ->
---             addBlock label model
---         KeyDown updateFloatInput floatInput command keyEvent ->
---             keyDown updateFloatInput floatInput command keyEvent model
---         OpenSaveFile ->
---             model ! [ openSaveFileCmd ]
---         RemoveBlock block ->
---             removeBlock block model
---         RenameBlock blockToRename label ->
---             updateBlockLabel blockToRename label model
---         SelectBlock block ->
---             updateSelectedBlock block model
---         SelectHullReference hullReference ->
---             { model | selectedHullReference = Just hullReference.path } ! [ sendToJs "load-hull" <| Encode.string hullReference.path ]
---         SwitchViewMode newViewMode ->
---             { model | viewMode = newViewMode } ! [ sendToJs "switch-mode" <| encodeViewMode newViewMode ]
---         SyncPositionInput block ->
---             let
---                 updatedModel : Model
---                 updatedModel =
---                     syncFloatInput block.position.x
---                         |> asXInPosition block.position
---                         |> flip asYInPosition (syncFloatInput block.position.y)
---                         |> flip asZInPosition (syncFloatInput block.position.z)
---                         |> asPositionInBlock block
---                         |> flip updateBlockInModel model
---             in
---                 updatedModel ! []
---         SyncSizeInput block ->
---             let
---                 updatedModel : Model
---                 updatedModel =
---                     syncFloatInput block.size.height
---                         |> asHeightInSize block.size
---                         |> flip asWidthInSize (syncFloatInput block.size.width)
---                         |> flip asLengthInSize (syncFloatInput block.size.length)
---                         |> asSizeInBlock block
---                         |> flip updateBlockInModel model
---             in
---                 updatedModel ! []
---         UpdatePositionX block input ->
---             updateOnePosition block input .x asXInPosition model
---         UpdatePositionY block input ->
---             updateOnePosition block input .y asYInPosition model
---         UpdatePositionZ block input ->
---             updateOnePosition block input .z asZInPosition model
---         UpdateLength block input ->
---             let
---                 updatedBlock =
---                     updateLength block input
---             in
---                 (updateBlockInModel updatedBlock model)
---                     ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
---         UpdateHeight block input ->
---             let
---                 updatedBlock =
---                     updateHeight block input
---             in
---                 (updateBlockInModel updatedBlock model)
---                     ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
---         UpdateWidth block input ->
---             let
---                 updatedBlock =
---                     updateWidth block input
---             in
---                 (updateBlockInModel updatedBlock model)
---                     ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
---         FromJs jsmsg ->
---             updateFromJs jsmsg model
