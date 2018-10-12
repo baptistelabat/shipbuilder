@@ -34,6 +34,7 @@ import Task
 import Debug
 import Viewports exposing (Viewports, encodeViewports)
 import CoordinatesTransform exposing (CoordinatesTransform)
+import HullReferences exposing (HullReference, HullReferences)
 
 
 port toJs : JsData -> Cmd msg
@@ -1082,7 +1083,7 @@ type alias HullReference =
     }
 
 
-hullReferences : List HullReference
+hullReferences : HullReferences
 hullReferences =
     [ { label = "Anthineas", path = "assets/anthineas.stl" }
     ]
@@ -1315,64 +1316,12 @@ viewSpaceReservationPanel spaceReservationView model =
 
 viewHullStudioPanel : Model -> Html Msg
 viewHullStudioPanel model =
-    div
-        [ class "panel hull-panel"
-        ]
-    <|
-        case model.selectedHullReference of
-            Just pathOfHullReference ->
-                [ h2 [] [ text "Hull Studio" ]
-                , viewHullReferencesWithSelection model pathOfHullReference
-                ]
+    case model.selectedHullReference of
+        Just selectedHullReferencePath ->
+            HullReferences.viewHullStudioPanelWithSelection hullReferences (ToJs << SelectHullReference) selectedHullReferencePath
 
-            Nothing ->
-                [ h2 [] [ text "Hull Studio" ]
-                , viewHullReferences model
-                ]
-
-
-viewHullReferences : Model -> Html Msg
-viewHullReferences model =
-    ul [ class "hull-references" ] <|
-        List.map
-            viewHullReference
-            hullReferences
-
-
-viewHullReferencesWithSelection : Model -> String -> Html Msg
-viewHullReferencesWithSelection model pathOfSelectedHullReference =
-    ul [ class "hull-references" ] <|
-        List.map (viewHullReferenceWithSelection pathOfSelectedHullReference) hullReferences
-
-
-viewHullReference : HullReference -> Html Msg
-viewHullReference ref =
-    li [ class "hull-reference", onClick (ToJs (SelectHullReference ref)) ]
-        [ div [ class "hull-info-wrapper" ]
-            [ p [ class "hull-label" ] [ text ref.label ]
-            , p [ class "hull-path" ] [ text ref.path ]
-            ]
-        ]
-
-
-viewHullReferenceWithSelection : String -> HullReference -> Html Msg
-viewHullReferenceWithSelection pathOfSelectedHullReference ref =
-    li
-        (if ref.path == pathOfSelectedHullReference then
-            [ class "hull-reference hull-reference__selected" ]
-         else
-            [ class "hull-reference"
-            , onClick (ToJs (SelectHullReference ref))
-            ]
-        )
-        [ div
-            []
-            []
-        , div [ class "hull-info-wrapper" ]
-            [ p [ class "hull-label" ] [ text ref.label ]
-            , p [ class "hull-path" ] [ text ref.path ]
-            ]
-        ]
+        Nothing ->
+            HullReferences.viewHullStudioPanel hullReferences (ToJs << SelectHullReference)
 
 
 viewWholeList : Model -> Html Msg
