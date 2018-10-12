@@ -22,11 +22,6 @@ port module Main
         , defaultCoordinatesTransform
         , encodeCoordinatesTransform
         , makeCoordinatesTransform
-          -- Viewports
-        , Viewport
-        , Viewports
-        , encodeViewport
-        , encodeViewports
         )
 
 import Array exposing (Array)
@@ -46,6 +41,7 @@ import Json.Decode.Pipeline as Pipeline
 import Math.Vector3 exposing (Vec3, vec3, getX, getY, getZ, toRecord)
 import Task
 import Debug
+import Viewports exposing (Viewports, Viewport, encodeViewport, encodeViewports)
 
 
 port toJs : JsData -> Cmd msg
@@ -486,9 +482,7 @@ initModel =
     let
         viewports : Viewports
         viewports =
-            [ topHalfViewport (hsl (degrees 222) 0.7 0.98) viewportSide
-            , bottomHalfViewport (hsl (degrees 222) 0.53 0.95) viewportTop
-            ]
+            Viewports.init
 
         viewMode : ViewMode
         viewMode =
@@ -519,55 +513,12 @@ type SpaceReservationView
     | DetailedBlock String
 
 
-type alias Viewports =
-    List Viewport
-
-
-type alias Viewport =
-    { label : String
-    , left :
-        -- between 0 and 1, left margin of the viewport within the canvas
-        Float
-    , top :
-        -- between 0 and 1, top margin of the viewport within the canvas
-        Float
-    , width :
-        -- between 0 and 1, ratio of the width between the viewport and the canvas
-        Float
-    , height :
-        -- between 0 and 1, ratio of the height between the viewport and the canvas
-        Float
-    , background : Color
-    , eye : Vec3
-    , canControl : { x : Bool, y : Bool, z : Bool }
-    }
-
-
-encodeViewports : Viewports -> Encode.Value
-encodeViewports viewports =
-    Encode.list <| List.map encodeViewport viewports
-
-
 encodeInitThreeCommand : Model -> Encode.Value
 encodeInitThreeCommand model =
     Encode.object
         [ ( "viewports", encodeViewports model.viewports )
         , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
         , ( "mode", encodeViewMode model.viewMode )
-        ]
-
-
-encodeViewport : Viewport -> Encode.Value
-encodeViewport viewport =
-    Encode.object
-        [ ( "label", Encode.string viewport.label )
-        , ( "left", Encode.float viewport.left )
-        , ( "top", Encode.float viewport.top )
-        , ( "width", Encode.float viewport.width )
-        , ( "height", Encode.float viewport.height )
-        , ( "background", encodeColor viewport.background )
-        , ( "eye", encodeVector3 viewport.eye )
-        , ( "canControl", encodeCanControl viewport.canControl )
         ]
 
 
@@ -595,78 +546,6 @@ encodeColor color =
             , ( "blue", Encode.int rgb.blue )
             , ( "alpha", Encode.float rgb.alpha )
             ]
-
-
-encodeVector3 : Vec3 -> Encode.Value
-encodeVector3 vector =
-    let
-        record =
-            toRecord vector
-    in
-        Encode.object
-            [ ( "x", Encode.float record.x )
-            , ( "y", Encode.float record.y )
-            , ( "z", Encode.float record.z )
-            ]
-
-
-encodeCanControl : { x : Bool, y : Bool, z : Bool } -> Encode.Value
-encodeCanControl canControl =
-    Encode.object
-        [ ( "x", Encode.bool canControl.x )
-        , ( "y", Encode.bool canControl.y )
-        , ( "z", Encode.bool canControl.z )
-        ]
-
-
-viewportSide : Float -> Float -> Float -> Float -> Color -> Viewport
-viewportSide left top width height background =
-    Viewport "Side" left top width height background (vec3 0 1000 0) { x = True, y = False, z = True }
-
-
-viewportTop : Float -> Float -> Float -> Float -> Color -> Viewport
-viewportTop left top width height background =
-    Viewport "Top" left top width height background (vec3 0 0 -1000) { x = True, y = True, z = False }
-
-
-topHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-topHalfViewport background viewport =
-    viewport 0 0 1 0.5 background
-
-
-bottomHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-bottomHalfViewport background viewport =
-    viewport 0 0.5 1 0.5 background
-
-
-leftHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-leftHalfViewport background viewport =
-    viewport 0 0 0.5 1 background
-
-
-rightHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-rightHalfViewport background viewport =
-    viewport 0.5 0 0.5 1 background
-
-
-topLeftCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-topLeftCornerViewport background viewport =
-    viewport 0 0 0.5 0.5 background
-
-
-topRightCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-topRightCornerViewport background viewport =
-    viewport 0.5 0 0.5 0.5 background
-
-
-bottomLeftCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-bottomLeftCornerViewport background viewport =
-    viewport 0 0.5 0.5 0.5 background
-
-
-bottomRightCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-bottomRightCornerViewport background viewport =
-    viewport 0.5 0.5 0.5 0.5 background
 
 
 
