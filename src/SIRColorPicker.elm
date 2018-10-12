@@ -45,8 +45,8 @@ toCssColor color =
             ++ ")"
 
 
-viewColorItem : aBlock -> (aBlock -> Color -> msg) -> Color -> Color -> Html msg
-viewColorItem block msg selectedColor color =
+viewColorItem : (Color -> msg) -> Color -> Color -> Html msg
+viewColorItem msg selectedColor color =
     let
         cssColor : String
         cssColor =
@@ -60,17 +60,17 @@ viewColorItem block msg selectedColor color =
              else
                 [ class "sir-color-item"
                 , style [ ( "background-color", cssColor ) ]
-                , onClick (msg block color)
+                , onClick (msg color)
                 ]
             )
             []
 
 
-view : Color -> aBlock -> (aBlock -> Color -> msg) -> Html msg
-view selectedColor block msg =
+view : Color -> (Color -> msg) -> Html msg
+view selectedColor msg =
     div
         [ class "sir-color-picker" ]
-        (List.map (viewColorItem block msg selectedColor)
+        (List.map (viewColorItem msg selectedColor)
             palette
         )
 
