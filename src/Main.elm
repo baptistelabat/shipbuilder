@@ -1151,10 +1151,15 @@ view model =
 viewHeader : Model -> Html Msg
 viewHeader model =
     Html.header []
-        [ div [ class "header-left" ]
+        [ div
+            [ class "header-left" ]
             -- groups img and title together for flexbox
-            [ img [ src "assets/SIREHNA_R.png" ] []
-            , h1 [] [ text "ShipBuilder" ]
+            [ img
+                [ src "assets/SIREHNA_R.png" ]
+                []
+            , h1
+                []
+                [ text "ShipBuilder" ]
             ]
         , viewHeaderMenu model
         ]
@@ -1189,7 +1194,12 @@ viewSaveMenuItem model =
         ]
         [ a
             [ type_ "button"
-            , href <| "data:application/json;charset=utf-8," ++ encodeUri (stringifyEncodeValue (encodeModelForSave model))
+            , href <|
+                "data:application/json;charset=utf-8,"
+                    ++ (encodeUri <|
+                            stringifyEncodeValue <|
+                                encodeModelForSave model
+                       )
             , downloadAs "shipbuilder.json"
             ]
             [ FASolid.download ]
@@ -1219,7 +1229,7 @@ viewOpenMenuItem =
             , id "open-save-file"
             , name "open-save-file"
             , class "hidden-input"
-            , on "change" (Decode.succeed (ToJs OpenSaveFile))
+            , on "change" <| Decode.succeed <| ToJs OpenSaveFile
             ]
             []
         ]
@@ -1282,7 +1292,7 @@ viewTab model tab =
     in
         div
             [ class classes
-            , onClick (ToJs (SwitchViewMode tab.viewMode))
+            , onClick <| ToJs <| SwitchViewMode tab.viewMode
             ]
             [ tab.icon
             , p [] [ text tab.title ]
@@ -1318,17 +1328,21 @@ viewHullStudioPanel : Model -> Html Msg
 viewHullStudioPanel model =
     case model.selectedHullReference of
         Just selectedHullReferencePath ->
-            HullReferences.viewHullStudioPanelWithSelection hullReferences (ToJs << SelectHullReference) selectedHullReferencePath
+            HullReferences.viewHullStudioPanelWithSelection
+                hullReferences
+                (ToJs << SelectHullReference)
+                selectedHullReferencePath
 
         Nothing ->
-            HullReferences.viewHullStudioPanel hullReferences (ToJs << SelectHullReference)
+            HullReferences.viewHullStudioPanel
+                hullReferences
+                (ToJs << SelectHullReference)
 
 
 viewWholeList : Model -> Html Msg
 viewWholeList model =
     div
-        [ class "panel blocks-panel"
-        ]
+        [ class "panel blocks-panel" ]
         [ h2 [] [ text "Blocks" ]
         , viewBlockList model
         ]
@@ -1341,17 +1355,25 @@ viewDetailedBlock uuid model =
     <|
         case getBlockByUUID uuid model.blocks of
             Just block ->
-                [ div [ class "focus-title" ]
+                [ div
+                    [ class "focus-title" ]
                     [ text "Properties of block:" ]
                 , div
                     [ class "focus-header" ]
                     [ viewBackToWholeList
-                    , div [ class "focus-label" ] [ viewEditableBlockName block ]
+                    , div
+                        [ class "focus-label" ]
+                        [ viewEditableBlockName block ]
                     ]
-                , div [ class "focus-sub-header" ]
-                    [ div [ class "focus-uuid" ] [ text block.uuid ]
+                , div
+                    [ class "focus-sub-header" ]
+                    [ div
+                        [ class "focus-uuid" ]
+                        [ text block.uuid ]
                     ]
-                , div [ class "focus-properties" ] <|
+                , div
+                    [ class "focus-properties" ]
+                  <|
                     viewBlockProperties block model
                 ]
 
@@ -1363,7 +1385,7 @@ viewBackToWholeList : Html Msg
 viewBackToWholeList =
     div
         [ class "focus-back"
-        , onClick (ToJs (SwitchViewMode (SpaceReservation WholeList)))
+        , onClick <| ToJs <| SwitchViewMode <| SpaceReservation WholeList
         ]
         [ FASolid.arrow_left ]
 
@@ -1373,10 +1395,12 @@ viewBlockProperties block model =
     [ SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
     , div
         [ class "block-position" ]
-        (List.map (flip viewPositionInput block) [ X, Y, Z ])
+      <|
+        List.map (flip viewPositionInput block) [ X, Y, Z ]
     , div
         [ class "block-size" ]
-        (List.map (flip viewSizeInput block) [ Length, Width, Height ])
+      <|
+        List.map (flip viewSizeInput block) [ Length, Width, Height ]
     ]
 
 
@@ -1506,7 +1530,12 @@ type alias FloatInput =
 
 viewEditableBlockName : Block -> Html Msg
 viewEditableBlockName block =
-    input [ class "block-label", id block.uuid, value block.label, onInput (\input -> NoJs (RenameBlock block input)) ]
+    input
+        [ class "block-label"
+        , id block.uuid
+        , value block.label
+        , onInput <| NoJs << RenameBlock block
+        ]
         []
 
 
@@ -1514,51 +1543,90 @@ viewBlockList : { a | blocks : Blocks, selectedBlock : Maybe String } -> Html Ms
 viewBlockList blocksModel =
     case blocksModel.selectedBlock of
         Just uuid ->
-            ul [ class "blocks" ] <| (List.map (viewBlockItemWithSelection uuid) <| (toList blocksModel.blocks)) ++ [ viewNewBlockItem ]
+            ul
+                [ class "blocks" ]
+            <|
+                (List.map (viewBlockItemWithSelection uuid) <| toList blocksModel.blocks)
+                    ++ [ viewNewBlockItem ]
 
         Nothing ->
-            ul [ class "blocks" ] <| (List.map viewBlockItem <| (toList blocksModel.blocks)) ++ [ viewNewBlockItem ]
+            ul
+                [ class "blocks" ]
+            <|
+                (List.map viewBlockItem <| (toList blocksModel.blocks))
+                    ++ [ viewNewBlockItem ]
 
 
 viewNewBlockItem : Html Msg
 viewNewBlockItem =
     li [ class "add-block" ]
-        [ input [ class "block-label", type_ "text", placeholder "New block", value "", onInput (\input -> ToJs (AddBlock input)) ]
+        [ input
+            [ class "block-label"
+            , type_ "text"
+            , placeholder "New block"
+            , value ""
+            , onInput <| ToJs << AddBlock
+            ]
             []
         ]
 
 
 viewBlockItem : Block -> Html Msg
 viewBlockItem block =
-    li [ class "block-item", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
+    li
+        [ class "block-item"
+        , style [ ( "borderColor", colorToCssRgbString block.color ) ]
+        ]
+    <|
         viewBlockItemContent block
 
 
 viewBlockItemContent : Block -> List (Html Msg)
 viewBlockItemContent block =
-    [ div [ class "block-info-wrapper", onClick (ToJs (SelectBlock block)) ]
+    [ div
+        [ class "block-info-wrapper"
+        , onClick <| ToJs <| SelectBlock block
+        ]
         [ viewEditableBlockName block
         , p
             [ class "block-uuid" ]
             [ text block.uuid ]
         ]
-    , div [ class "block-actions" ]
-        [ div [ class "block-action focus-block", onClick (ToJs (SwitchViewMode (SpaceReservation (DetailedBlock block.uuid)))) ]
-            [ FASolid.arrow_right
-            ]
-        , div
-            [ class "block-action delete-block"
-            , onClick (ToJs (RemoveBlock block))
-            ]
-            [ FASolid.trash ]
+    , div
+        [ class "block-actions" ]
+        [ viewFocusBlockAction block
+        , viewDeleteBlockAction block
         ]
     ]
+
+
+viewFocusBlockAction : Block -> Html Msg
+viewFocusBlockAction block =
+    div
+        [ class "block-action focus-block"
+        , onClick <| ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock block.uuid
+        ]
+        [ FASolid.arrow_right
+        ]
+
+
+viewDeleteBlockAction : Block -> Html Msg
+viewDeleteBlockAction block =
+    div
+        [ class "block-action delete-block"
+        , onClick <| ToJs <| RemoveBlock block
+        ]
+        [ FASolid.trash ]
 
 
 viewBlockItemWithSelection : String -> Block -> Html Msg
 viewBlockItemWithSelection uuid block =
     if uuid == block.uuid then
-        li [ class "block-item block-item__selected", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
+        li
+            [ class "block-item block-item__selected"
+            , style [ ( "borderColor", colorToCssRgbString block.color ) ]
+            ]
+        <|
             viewBlockItemContent block
     else
         viewBlockItem block
