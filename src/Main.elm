@@ -6,6 +6,9 @@ port module Main
         , initCmd
         , initModel
         , Msg(..)
+        , NoJsMsg(..)
+        , ToJsMsg(..)
+        , toJs
         , update
           --Blocks
         , Block
@@ -879,7 +882,7 @@ updateToJs msg model =
         toJsCmd =
             sendCmdToJs updatedModel msg
     in
-        updatedModel ! [ sendCmdToJs model msg ]
+        ( updatedModel, sendCmdToJs model msg )
 
 
 updateFromJs : FromJsMsg -> Model -> ( Model, Cmd Msg )
@@ -1078,7 +1081,7 @@ updateModelToJs msg model =
                             |> flip updateBlockInModel model
 
 
-sendCmdToJs : Model -> ToJsMsg -> Cmd cmd
+sendCmdToJs : Model -> ToJsMsg -> Cmd msg
 sendCmdToJs model msg =
     case msg2json model msg of
         Just jsCmd ->

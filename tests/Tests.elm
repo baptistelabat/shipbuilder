@@ -13,7 +13,9 @@ import Main
         , initCmd
         , initModel
         , Msg(..)
-        , sendToJs
+        , NoJsMsg(..)
+        , ToJsMsg(..)
+        , toJs
         , update
           --Blocks
         , Block
@@ -385,85 +387,88 @@ suite =
                         ( model, cmd ) =
                             init
                     in
-                        Expect.equal cmd (initCmd model)
+                        Expect.equal cmd (toJs <| initCmd model)
             , test "initCmd is init-three" <|
                 \_ ->
                     Expect.equal
                         (initCmd initModel)
-                        (sendToJs
-                            "init-three"
-                            (encodeInitThreeCommand initModel)
-                        )
+                        { tag = "init-three"
+                        , data = (encodeInitThreeCommand initModel)
+                        }
             ]
         , describe "update"
-            [ describe "NoOp"
-                [ test "leaves model untouched" <|
-                    \_ ->
-                        initModel
-                            |> update NoOp
-                            |> Tuple.first
-                            |> Expect.equal initModel
-                , test
-                    "has no side effect"
-                  <|
-                    \_ ->
-                        initModel
-                            |> update NoOp
-                            |> Tuple.second
-                            |> Expect.equal Cmd.none
+            [ describe "NoJs"
+                [ describe "NoOp"
+                    [ test "leaves model untouched" <|
+                        \_ ->
+                            initModel
+                                |> update (NoJs NoOp)
+                                |> Tuple.first
+                                |> Expect.equal initModel
+                    , test
+                        "has no side effect"
+                      <|
+                        \_ ->
+                            initModel
+                                |> update (NoJs NoOp)
+                                |> Tuple.second
+                                |> Expect.equal Cmd.none
+                    ]
                 ]
-            ]
-        , describe "ChangeBlockColor"
-            [ test "updates only the color of the given block" <|
-                \_ ->
-                    { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                        |> update (ChangeBlockColor blockA Color.yellow)
-                        |> Tuple.first
-                        |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
-            , test "leaves model untouched if the block doesn't exist" <|
-                \_ ->
-                    { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                        |> update (ChangeBlockColor blockB Color.yellow)
-                        |> Tuple.first
-                        |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-            , test "has a side effect" <|
-                \_ ->
-                    { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                        |> update (ChangeBlockColor blockA Color.yellow)
-                        |> Tuple.second
-                        |> Expect.notEqual Cmd.none
-            , test "has no side effect if the block doesn't exist" <|
-                \_ ->
-                    { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                        |> update (ChangeBlockColor blockB Color.yellow)
-                        |> Tuple.second
-                        |> Expect.equal Cmd.none
-            ]
-        , describe "AddBlock"
-            [ test "leaves the model untouched" <|
-                \_ ->
-                    initModel
-                        |> update (AddBlock "aLabel")
-                        |> Tuple.first
-                        |> Expect.equal initModel
-            , test "has a side effect" <|
-                \_ ->
-                    initModel
-                        |> update (AddBlock "aLabel")
-                        |> Tuple.second
-                        |> Expect.notEqual Cmd.none
-            , fuzz Fuzz.string "leaves the model untouched no matter the label" <|
-                \label ->
-                    initModel
-                        |> update (AddBlock label)
-                        |> Tuple.first
-                        |> Expect.equal initModel
-            , fuzz Fuzz.string "has a side effect no matter the label" <|
-                \label ->
-                    initModel
-                        |> update (AddBlock label)
-                        |> Tuple.second
-                        |> Expect.notEqual Cmd.none
+            , describe "ToJs"
+                [ describe "ChangeBlockColor"
+                    [ test "updates only the color of the given block" <|
+                        \_ ->
+                            { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
+                                |> Tuple.first
+                                |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
+                    , test "leaves model untouched if the block doesn't exist" <|
+                        \_ ->
+                            { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
+                                |> Tuple.first
+                                |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                    , test "has a side effect" <|
+                        \_ ->
+                            { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
+                                |> Tuple.second
+                                |> Expect.notEqual Cmd.none
+                    , test "has no side effect if the block doesn't exist" <|
+                        \_ ->
+                            { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
+                                |> Tuple.second
+                                |> Expect.equal Cmd.none
+                    ]
+                , describe "AddBlock"
+                    [ test "leaves the model untouched" <|
+                        \_ ->
+                            initModel
+                                |> update (ToJs <| AddBlock "aLabel")
+                                |> Tuple.first
+                                |> Expect.equal initModel
+                    , test "has a side effect" <|
+                        \_ ->
+                            initModel
+                                |> update (ToJs <| AddBlock "aLabel")
+                                |> Tuple.second
+                                |> Expect.notEqual Cmd.none
+                    , fuzz Fuzz.string "leaves the model untouched no matter the label" <|
+                        \label ->
+                            initModel
+                                |> update (ToJs <| AddBlock label)
+                                |> Tuple.first
+                                |> Expect.equal initModel
+                    , fuzz Fuzz.string "has a side effect no matter the label" <|
+                        \label ->
+                            initModel
+                                |> update (ToJs <| AddBlock label)
+                                |> Tuple.second
+                                |> Expect.notEqual Cmd.none
+                    ]
+                ]
             ]
         ]
 
