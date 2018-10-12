@@ -533,7 +533,7 @@ encodeUpdateSizeCommand block =
 
 updateBlockInModel : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
 updateBlockInModel block model =
-    { model | blocks = addBlockTo model.blocks block }
+    { model | blocks = updateBlockInBlocks block model.blocks }
 
 
 asValueInFloatInput : FloatInput -> Float -> FloatInput
