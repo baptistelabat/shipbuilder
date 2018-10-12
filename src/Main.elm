@@ -15,17 +15,9 @@ port module Main
         , Blocks
         , addBlockTo
         , removeBlockFrom
-          -- CoordinatesTransform
-        , CoordinatesTransform
-        , arrayToCoordinatesTransform
-        , coordinatesTransformToList
-        , defaultCoordinatesTransform
-        , encodeCoordinatesTransform
-        , makeCoordinatesTransform
         )
 
-import Array exposing (Array)
-import Color exposing (Color, rgba, hsl)
+import Color exposing (Color)
 import SIRColorPicker
 import DictList exposing (DictList)
 import Dom
@@ -38,10 +30,16 @@ import Html.Events exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
-import Math.Vector3 exposing (Vec3, vec3, getX, getY, getZ, toRecord)
 import Task
 import Debug
-import Viewports exposing (Viewports, Viewport, encodeViewport, encodeViewports)
+import Viewports exposing (Viewports, encodeViewports)
+import CoordinatesTransform
+    exposing
+        ( CoordinatesTransform
+        , coordinatesTransformFromList
+        , encodeCoordinatesTransform
+        , defaultCoordinatesTransform
+        )
 
 
 port toJs : JsData -> Cmd msg
@@ -99,7 +97,7 @@ type alias SyncSize =
 type alias SaveFile =
     { version : Int
     , blocks : List Block
-    , coordinatesTransform : Array Float
+    , coordinatesTransform : List Float
     }
 
 
@@ -108,7 +106,7 @@ saveFileDecoder =
     Pipeline.decode SaveFile
         |> Pipeline.required "version" Decode.int
         |> Pipeline.required "blocks" decodeBlocks
-        |> Pipeline.required "coordinatesTransform" (Decode.array Decode.float)
+        |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
 
 
 decodeBlocks : Decode.Decoder (List Block)
@@ -254,7 +252,7 @@ restoreSaveInModel model saveFile =
     let
         maybeCoordinatesTransform : Maybe CoordinatesTransform
         maybeCoordinatesTransform =
-            arrayToCoordinatesTransform saveFile.coordinatesTransform
+            coordinatesTransformFromList saveFile.coordinatesTransform
 
         savedBlocks =
             listOfBlocksToBlocks saveFile.blocks
@@ -276,21 +274,6 @@ listOfBlocksToBlocks blockList =
     DictList.fromList <| List.map (\block -> ( block.uuid, block )) blockList
 
 
-arrayToCoordinatesTransform : Array Float -> Maybe CoordinatesTransform
-arrayToCoordinatesTransform array =
-    let
-        listOfTransforms : List Float
-        listOfTransforms =
-            Array.toList array
-    in
-        case listOfTransforms of
-            [ xx, yx, zx, xy, yy, zy, xz, yz, zz ] ->
-                Just <| makeCoordinatesTransform (vec3 xx xy xz) (vec3 yx yy yz) (vec3 zx zy zz)
-
-            _ ->
-                Nothing
-
-
 restoreSaveCmd : Model -> JsData
 restoreSaveCmd model =
     { tag = "restore-save", data = encodeRestoreSaveCmd model }
@@ -306,41 +289,6 @@ encodeRestoreSaveCmd model =
 
 
 -- MODEL
-
-
-type alias CoordinatesTransform =
-    { x : Vec3
-    , y : Vec3
-    , z : Vec3
-    }
-
-
-makeCoordinatesTransform : Vec3 -> Vec3 -> Vec3 -> CoordinatesTransform
-makeCoordinatesTransform x y z =
-    { x = x
-    , y = y
-    , z = z
-    }
-
-
-coordinatesTransformToList : CoordinatesTransform -> List Float
-coordinatesTransformToList coordinatesTransform =
-    [ getX coordinatesTransform.x
-    , getX coordinatesTransform.y
-    , getX coordinatesTransform.z
-    , getY coordinatesTransform.x
-    , getY coordinatesTransform.y
-    , getY coordinatesTransform.z
-    , getZ coordinatesTransform.x
-    , getZ coordinatesTransform.y
-    , getZ coordinatesTransform.z
-    ]
-
-
-defaultCoordinatesTransform : CoordinatesTransform
-defaultCoordinatesTransform =
-    -- Ship to ThreeJs
-    makeCoordinatesTransform (vec3 1 0 0) (vec3 0 0 -1) (vec3 0 1 0)
 
 
 type alias Model =
@@ -392,11 +340,6 @@ encodeModelForSave model =
         , ( "blocks", encodeBlocks model.blocks )
         , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
         ]
-
-
-encodeCoordinatesTransform : CoordinatesTransform -> Encode.Value
-encodeCoordinatesTransform coordinatesTransform =
-    Encode.list <| List.map Encode.float (coordinatesTransformToList coordinatesTransform)
 
 
 encodeBlock : Block -> Encode.Value
@@ -664,16 +607,6 @@ asLengthInSize size length =
 asSizeInBlock : Block -> Size -> Block
 asSizeInBlock block size =
     { block | size = size }
-
-
-getSelectedBlock : Model -> Maybe Block
-getSelectedBlock model =
-    case model.selectedBlock of
-        Just uuid ->
-            getBlockByUUID uuid model.blocks
-
-        Nothing ->
-            Nothing
 
 
 syncFloatInput : FloatInput -> FloatInput

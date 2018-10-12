@@ -1,4 +1,4 @@
-module Tests exposing (..)
+module MainTests exposing (..)
 
 import Array
 import Color
@@ -22,13 +22,6 @@ import Main
         , Blocks
         , addBlockTo
         , removeBlockFrom
-          -- CoordinatesTransform
-        , CoordinatesTransform
-        , arrayToCoordinatesTransform
-        , coordinatesTransformToList
-        , defaultCoordinatesTransform
-        , encodeCoordinatesTransform
-        , makeCoordinatesTransform
         )
 import Math.Vector3 exposing (vec3)
 import Test exposing (..)
@@ -104,31 +97,6 @@ blockC =
         , height = { value = 10, string = "10" }
         }
     }
-
-
-valueToIndentedString : Encode.Value -> String
-valueToIndentedString json =
-    Encode.encode 4 json
-
-
-stringOfDefaultCoordinatesTransform : String
-stringOfDefaultCoordinatesTransform =
-    """[
-    1,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-    -1,
-    0
-]"""
-
-
-stringifyCoordinatesTransform : CoordinatesTransform -> String
-stringifyCoordinatesTransform =
-    valueToIndentedString << encodeCoordinatesTransform
 
 
 suite : Test
@@ -214,31 +182,6 @@ suite =
                             (DictList.fromList [ ( blockB.uuid, blockB ) ])
                             blockB
                         )
-            ]
-        , describe "CoordinatesTransform"
-            [ test "defaultCoordinatesTransform" <|
-                \_ ->
-                    Expect.equal defaultCoordinatesTransform { x = (vec3 1 0 0), y = (vec3 0 0 -1), z = (vec3 0 1 0) }
-            , test "coordinatesTransformToList" <|
-                \_ ->
-                    Expect.equal
-                        (coordinatesTransformToList defaultCoordinatesTransform)
-                        [ 1, 0, 0, 0, 0, 1, 0, -1, 0 ]
-            , test "arrayToCoordinatesTransform for defaultCoordinatesTransform" <|
-                \_ ->
-                    Expect.equal
-                        (arrayToCoordinatesTransform <| Array.fromList [ 1, 0, 0, 0, 0, 1, 0, -1, 0 ])
-                        (Just defaultCoordinatesTransform)
-            , test "arrayToCoordinatesTransform with array too short" <|
-                \_ ->
-                    Expect.equal
-                        (arrayToCoordinatesTransform <| Array.fromList [ 1, 0, 0, 0, 0, 1, 0 ])
-                        (Nothing)
-            , test "encodeCoordinatesTransform" <|
-                \_ ->
-                    Expect.equal
-                        (stringifyCoordinatesTransform defaultCoordinatesTransform)
-                        stringOfDefaultCoordinatesTransform
             ]
         , describe "init"
             [ test "init with initModel" <|
