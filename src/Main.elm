@@ -371,6 +371,14 @@ addBlockTo blocks block =
     DictList.insert block.uuid block blocks
 
 
+updateBlockInBlocks : Block -> Blocks -> Blocks
+updateBlockInBlocks block blocks =
+    if DictList.member block.uuid blocks then
+        addBlockTo blocks block
+    else
+        blocks
+
+
 toList : Blocks -> List Block
 toList blocks =
     DictList.values blocks
