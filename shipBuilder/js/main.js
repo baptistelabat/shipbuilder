@@ -663,7 +663,9 @@ let unselectObject = function () {
         }
         // detach gizmo
         views.forEach(view => {
-            view.control.detach();
+            if (view.control) {
+                view.control.detach();
+            }
         })
     }
     selected = null;
