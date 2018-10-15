@@ -16,6 +16,11 @@ type alias Viewports =
     List Viewport
 
 
+type CameraType
+    = Orthographic
+    | Perspective
+
+
 type alias Viewport =
     { label : String
     , left :
@@ -33,6 +38,7 @@ type alias Viewport =
     , background : Color
     , eye : Vec3
     , canControl : { x : Bool, y : Bool, z : Bool }
+    , cameraType : CameraType
     }
 
 
@@ -94,6 +100,7 @@ viewportSide left top width height background =
     , background = background
     , eye = (vec3 0 1000 0)
     , canControl = { x = True, y = False, z = True }
+    , cameraType = Orthographic
     }
 
 
@@ -107,6 +114,7 @@ viewportTop left top width height background =
     , background = background
     , eye = (vec3 0 0 -1000)
     , canControl = { x = True, y = True, z = False }
+    , cameraType = Orthographic
     }
 
 
@@ -120,6 +128,7 @@ viewportFront left top width height background =
     , background = background
     , eye = (vec3 1000 0 0)
     , canControl = { x = False, y = True, z = True }
+    , cameraType = Orthographic
     }
 
 
