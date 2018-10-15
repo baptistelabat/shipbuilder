@@ -86,6 +86,17 @@ let sendToElm = function (tag, data) {
 let switchMode = function (newMode) {
     unselectObject();
     mode = newMode;
+
+    const sbObjects = scene.children.filter(child => child.sbType);
+    sbObjects.forEach(object => {
+        if (object.sbType === mode) {
+            object.material.opacity = 1;
+            object.material.transparent = false;
+        } else {
+            object.material.opacity = 0.2;
+            object.material.transparent = true;
+        }
+    })
 }
 
 let readFile = function (inputId) {
@@ -172,14 +183,13 @@ let loadHull = function (path) {
             removeFromScene(previousHull);
         }
 
-        const hullColor = new THREE.Color(0.77, 0.77, 0.80);
+        const hullColor = new THREE.Color(0.56, 0.69, 1);
         const geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
         const shipVertices = geometry.vertices;
         geometry.vertices = shipVertices.map(vertex => {
             return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
         });
-        const material = new THREE.MeshBasicMaterial({ color: hullColor, opacity: 0.7 });
-        material.transparent = true;
+        const material = new THREE.MeshBasicMaterial({ color: hullColor });
         const hull = new THREE.Mesh(geometry, material);
 
         hull.baseColor = hullColor;
@@ -647,9 +657,9 @@ let onDoubleClick = function (event) { // cycle through the transform modes
     const activeViewport = getActiveViewport(views);
     if (activeViewport && hovered) {
         views.forEach(view => {
-            if (view.control.getMode() === "translate") {
+            if (view.control && view.control.getMode() === "translate") {
                 view.control.setMode("scale");
-            } else {
+            } else if (view.control) {
                 view.control.setMode("translate");
             }
         })
