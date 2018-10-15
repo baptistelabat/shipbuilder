@@ -200,7 +200,6 @@ header .header-menu-item+.header-menu-item {
 
 .viewport-label {
     position: absolute;
-    left: 20px;
     font-size: 0.9em;
     padding: 8px 12px;
     color: var(--on-secondary-color__accent);

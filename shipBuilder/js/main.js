@@ -450,6 +450,7 @@ let displayLabels = function () {
         label.innerText = view.label;
         label.classList.add("viewport-label");
         label.style.top = 20 + view.top * wrapper.clientHeight + "px";
+        label.style.left = 20 + view.left * wrapper.clientWidth + "px";
         wrapper.appendChild(label);
     });
 }
