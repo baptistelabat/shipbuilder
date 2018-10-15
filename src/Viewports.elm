@@ -44,8 +44,10 @@ type alias Viewport =
 
 init : Viewports
 init =
-    [ topHalfViewport (hsl (degrees 222) 0.7 0.98) viewportSide
-    , bottomHalfViewport (hsl (degrees 222) 0.53 0.95) viewportTop
+    [ topLeftCornerViewport (hsl (degrees 222) 0.7 0.98) viewportSide
+    , topRightCornerViewport (hsl (degrees 222) 0.53 0.95) viewportFront
+    , bottomLeftCornerViewport (hsl (degrees 222) 0.53 0.95) viewportTop
+    , bottomRightCornerViewport (hsl (degrees 222) 0.7 0.98) viewportPerspective
     ]
 
 
