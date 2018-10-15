@@ -461,8 +461,8 @@ initModel =
         , selectedHullReference = Nothing
         , blocks = DictList.empty
         , partitions =
-            { decks = { number = 0, spacing = 0 }
-            , bulkheads = { number = 0, spacing = 0 }
+            { decks = { number = 0, spacing = { string = "0", value = 0 } }
+            , bulkheads = { number = 0, spacing = { string = "0", value = 0 } }
             }
         }
 
