@@ -412,3 +412,31 @@ input.block-label {
 .hidden-input {
     display: none;
 }
+
+.partioning-panel {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.stacked-subpanel {
+    flex: 1 1 auto;
+}
+.stacked-subpanel-header {
+    padding: 12px;
+    background-color: var(--secondary-color__accent);
+    border-color: var(--secondary-color__contrast);
+    border-style: solid;
+    border-width: 0;
+    border-bottom-width: 1px;
+}
+.stacked-subpanel + .stacked-subpanel .stacked-subpanel-header {
+    border-top-width: 1px;
+}
+
+.stacked-subpanel-title {
+
+}
+.stacked-subpanel-content {
+    padding: 12px;
+}

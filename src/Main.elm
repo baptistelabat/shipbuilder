@@ -1365,7 +1365,41 @@ viewHullStudioPanel model =
 
 viewPartitioning : Model -> Html Msg
 viewPartitioning model =
-    div [ class "panel partioning-panel" ] []
+    div
+        [ class "panel partioning-panel" ]
+        [ viewDecks model
+        , viewBulkheads model
+        ]
+
+
+viewDecks : Model -> Html Msg
+viewDecks model =
+    div [ class "decks stacked-subpanel" ]
+        [ div
+            [ class "stacked-subpanel-header" ]
+            [ h2
+                [ class "stacked-subpanel-title" ]
+                [ text "Decks" ]
+            ]
+        , div
+            [ class "stacked-subpanel-content" ]
+            []
+        ]
+
+
+viewBulkheads : Model -> Html Msg
+viewBulkheads model =
+    div [ class "bulkheads stacked-subpanel" ]
+        [ div
+            [ class "stacked-subpanel-header" ]
+            [ h2
+                [ class "stacked-subpanel-title" ]
+                [ text "Bulkheads" ]
+            ]
+        , div
+            [ class "stacked-subpanel-content" ]
+            []
+        ]
 
 
 viewWholeList : Model -> Html Msg
