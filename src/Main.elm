@@ -318,6 +318,24 @@ type alias Blocks =
     DictList String Block
 
 
+type alias Partitions =
+    { decks : Decks
+    , bulkheads : Bulkheads
+    }
+
+
+type alias Decks =
+    { number : Int
+    , spacing : Float
+    }
+
+
+type alias Bulkheads =
+    { number : Int
+    , spacing : Float
+    }
+
+
 stringifyEncodeValue : Encode.Value -> String
 stringifyEncodeValue value =
     Encode.encode 4 value
