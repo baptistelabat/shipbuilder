@@ -294,6 +294,7 @@ type alias Model =
     , selectedBlock : Maybe String
     , selectedHullReference : Maybe String
     , blocks : Blocks
+    , partitions : Partitions
     }
 
 
@@ -326,13 +327,13 @@ type alias Partitions =
 
 type alias Decks =
     { number : Int
-    , spacing : Float
+    , spacing : FloatInput
     }
 
 
 type alias Bulkheads =
     { number : Int
-    , spacing : Float
+    , spacing : FloatInput
     }
 
 
@@ -459,6 +460,10 @@ initModel =
         , selectedBlock = Nothing
         , selectedHullReference = Nothing
         , blocks = DictList.empty
+        , partitions =
+            { decks = { number = 0, spacing = 0 }
+            , bulkheads = { number = 0, spacing = 0 }
+            }
         }
 
 
@@ -1385,13 +1390,13 @@ viewPartitioning : Model -> Html Msg
 viewPartitioning model =
     div
         [ class "panel partioning-panel" ]
-        [ viewDecks model
-        , viewBulkheads model
+        [ viewDecks model.partitions.decks
+        , viewBulkheads model.partitions.bulkheads
         ]
 
 
-viewDecks : Model -> Html Msg
-viewDecks model =
+viewDecks : Decks -> Html Msg
+viewDecks decks =
     div [ class "decks stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
@@ -1401,12 +1406,22 @@ viewDecks model =
             ]
         , div
             [ class "stacked-subpanel-content" ]
-            []
+            [ div
+                [ class "input-group" ]
+                [ label [ for "decks-number" ] [ text "Number of decks" ]
+                , input [ type_ "number", id "decks-number", value <| toString decks.number ] []
+                ]
+            , div
+                [ class "input-group" ]
+                [ label [ for "decks-spacing" ] [ text "Spacing of decks" ]
+                , input [ type_ "text", id "decks-spacing", value <| toString decks.spacing ] []
+                ]
+            ]
         ]
 
 
-viewBulkheads : Model -> Html Msg
-viewBulkheads model =
+viewBulkheads : Bulkheads -> Html Msg
+viewBulkheads bulkheads =
     div [ class "bulkheads stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
@@ -1416,7 +1431,17 @@ viewBulkheads model =
             ]
         , div
             [ class "stacked-subpanel-content" ]
-            []
+            [ div
+                [ class "input-group" ]
+                [ label [ for "bulkheads-number" ] [ text "Number of bulkheads" ]
+                , input [ type_ "number", id "bulkheads-number", value <| toString bulkheads.number ] []
+                ]
+            , div
+                [ class "input-group" ]
+                [ label [ for "bulkheads-spacing" ] [ text "Spacing of bulkheads" ]
+                , input [ type_ "text", id "bulkheads-spacing", value <| toString bulkheads.spacing ] []
+                ]
+            ]
         ]
 
 
