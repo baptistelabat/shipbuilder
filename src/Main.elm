@@ -452,6 +452,7 @@ initCmd model =
 type ViewMode
     = SpaceReservation SpaceReservationView
     | HullStudio
+    | Partitioning
 
 
 type SpaceReservationView
@@ -477,6 +478,9 @@ encodeViewMode viewMode =
 
             HullStudio ->
                 "hull"
+
+            Partitioning ->
+                "partition"
 
 
 encodeColor : Color -> Encode.Value
@@ -1082,6 +1086,7 @@ tabItems : Tabs
 tabItems =
     [ { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     , { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
+    , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning }
     ]
 
 
@@ -1288,6 +1293,14 @@ viewModesMatch left right =
                 _ ->
                     False
 
+        Partitioning ->
+            case right of
+                Partitioning ->
+                    True
+
+                _ ->
+                    False
+
 
 viewTab : Model -> Tab -> Html Msg
 viewTab model tab =
@@ -1321,6 +1334,9 @@ viewPanel model =
         HullStudio ->
             viewHullStudioPanel model
 
+        Partitioning ->
+            viewPartitioning model
+
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
 viewSpaceReservationPanel spaceReservationView model =
@@ -1345,6 +1361,11 @@ viewHullStudioPanel model =
             HullReferences.viewHullStudioPanel
                 hullReferences
                 (ToJs << SelectHullReference)
+
+
+viewPartitioning : Model -> Html Msg
+viewPartitioning model =
+    div [ class "panel partioning-panel" ] []
 
 
 viewWholeList : Model -> Html Msg
