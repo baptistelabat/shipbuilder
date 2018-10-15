@@ -133,6 +133,20 @@ viewportFront left top width height background =
     }
 
 
+viewportPerspective : Float -> Float -> Float -> Float -> Color -> Viewport
+viewportPerspective left top width height background =
+    { label = "Perspective"
+    , left = left
+    , top = top
+    , width = width
+    , height = height
+    , background = background
+    , eye = (vec3 1000 1000 -1000)
+    , canControl = { x = False, y = False, z = False }
+    , cameraType = Perspective
+    }
+
+
 topHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
 topHalfViewport background viewport =
     viewport 0 0 1 0.5 background
