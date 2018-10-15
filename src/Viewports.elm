@@ -94,6 +94,11 @@ viewportTop left top width height background =
     Viewport "Top" left top width height background (vec3 0 0 -1000) { x = True, y = True, z = False }
 
 
+viewportFront : Float -> Float -> Float -> Float -> Color -> Viewport
+viewportFront left top width height background =
+    Viewport "Front" left top width height background (vec3 1000 0 0) { x = False, y = True, z = True }
+
+
 topHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
 topHalfViewport background viewport =
     viewport 0 0 1 0.5 background
