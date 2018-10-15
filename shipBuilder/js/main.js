@@ -485,6 +485,7 @@ let onResize = function (window, event) {
     fitRenderer(canvas);
     updateViewports(views, canvas);
     fitCameras(views, scene);
+    displayLabels();
 }
 
 let onMouseMove = function (event) {
