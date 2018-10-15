@@ -119,7 +119,9 @@ let restoreSave = function (savedData) {
 
 let resetScene = function (views, scene) {
     views.forEach(view => { // if we don't detach the controls, the removal of the selected block (if any) won't work
-        view.control.detach();
+        if (view.control) {
+            view.control.detach();
+        }
     })
     const sbObjectsToDelete = scene.children.filter(child => child.sbType && (child.sbType === "block" || child.sbType === "hull"));
     sbObjectsToDelete.forEach(toDelete => removeFromScene(toDelete));
