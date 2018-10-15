@@ -1414,7 +1414,7 @@ viewDecks decks =
             , div
                 [ class "input-group" ]
                 [ label [ for "decks-spacing" ] [ text "Spacing of decks" ]
-                , input [ type_ "text", id "decks-spacing", value <| toString decks.spacing ] []
+                , input [ type_ "text", id "decks-spacing", value decks.spacing.string ] []
                 ]
             ]
         ]
@@ -1439,7 +1439,7 @@ viewBulkheads bulkheads =
             , div
                 [ class "input-group" ]
                 [ label [ for "bulkheads-spacing" ] [ text "Spacing of bulkheads" ]
-                , input [ type_ "text", id "bulkheads-spacing", value <| toString bulkheads.spacing ] []
+                , input [ type_ "text", id "bulkheads-spacing", value bulkheads.spacing.string ] []
                 ]
             ]
         ]
