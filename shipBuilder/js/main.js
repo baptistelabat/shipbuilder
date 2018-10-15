@@ -373,12 +373,14 @@ let attachViewControl = function (block) {
     if (!currentView && views.length) {
         currentView = views[0];
     }
-    if (currentView) {
+    if (currentView && currentView.control) {
         currentView.control.attach(block);
     }
     var otherViews = views.filter(view => view.camera.uuid !== currentView.camera.uuid);
     otherViews.forEach(view => {
-        view.control.detach();
+        if (view.control) {
+            view.control.detach();
+        }
     })
 }
 
@@ -500,18 +502,32 @@ let initCameras = function () {
             computeViewportPosition(view, canvas);
             computeViewportSize(view, canvas);
 
-            var camera = new THREE.OrthographicCamera( // --> frustum
-                // centered in viewport
-                view.clientWidth / - 2,
-                view.clientWidth / 2,
-                view.clientHeight / 2,
-                view.clientHeight / - 2,
-                // includes everything between {first} units from the camera to {second} units from the camera
-                0,
-                2000
-            );
+            var camera = null;
+            if (view.cameraType === "Orthographic") {
+                camera = new THREE.OrthographicCamera( // --> frustum
+                    // centered in viewport
+                    view.clientWidth / - 2,
+                    view.clientWidth / 2,
+                    view.clientHeight / 2,
+                    view.clientHeight / - 2,
+                    // includes everything between {first} units from the camera to {second} units from the camera
+                    0,
+                    2000
+                );
+                camera.position.fromArray(view.getEye());
+            } else if (view.cameraType === "Perspective") {
+                camera = new THREE.PerspectiveCamera(
+                    // fov
+                    18,
+                    // ratio
+                    view.clientWidth / view.clientHeight,
+                    // includes everything between {first} units from the camera to {second} units from the camera
+                    0.1,
+                    2000
+                );
+                camera.position.fromArray(view.getEye());
+            }
 
-            camera.position.fromArray(view.getEye());
             view.camera = camera;
         });
     }
@@ -519,68 +535,72 @@ let initCameras = function () {
 
 let initGizmos = function () {
     views.forEach(view => {
-        var control = new THREE.TransformControls(view, canvas);
-        control.addEventListener("objectChange", event => {
-            const mode = control.getMode();
-            const object = control.object;
-            switch (mode) {
-                case "translate":
-                    // Round position to .2f
-                    const position = object.position;
-                    const roundedPosition = {
-                        x: Math.round(position.x * 100) / 100,
-                        y: Math.round(position.y * 100) / 100,
-                        z: Math.round(position.z * 100) / 100
-                    };
-                    object.position.set(roundedPosition.x, roundedPosition.y, roundedPosition.z);
-                    sendToElm("sync-position", {
-                        uuid: object.uuid, position: toShipCoordinates(roundedPosition.x, roundedPosition.y, roundedPosition.z, coordinatesTransform)
-                    });
-                    break;
-
-                case "scale":
-                    const scale = object.scale;
-                    const size = getObjectSize(object);
-                    const newSize = { // rounded to .2f
-                        x: Math.round(100 * scale.x * size.x) / 100,
-                        y: Math.round(100 * scale.y * size.y) / 100,
-                        z: Math.round(100 * scale.z * size.z) / 100
-                    };
-                    if (newSize.x <= 0) {
-                        newSize.x = 0.1;
-                    }
-                    if (newSize.y <= 0) {
-                        newSize.y = 0.1;
-                    }
-                    if (newSize.z <= 0) {
-                        newSize.z = 0.1;
-                    }
-
-                    object.scale.set(newSize.x / size.x, newSize.y / size.y, newSize.z / size.z)
-                    sendToElm("sync-size", {
-                        uuid: object.uuid, size: sizeToShipCoordinates(newSize)
-                    });
-                    break;
-                default:
-                    break;
-            }
-        });
-        control.addEventListener("mouseDown", event => {
-            preventSelection = true; // prevents selecting another block while transforming one with the gizmo
-        });
-        control.addEventListener("mouseUp", event => {
-            preventSelection = false;
-        });
-
-        control.size = 120;
-        control.setMode("translate");
         const canControl = view.getCanControl();
-        control.showX = canControl[0];
-        control.showY = canControl[1];
-        control.showZ = canControl[2];
+        if (canControl[0] || canControl[1] || canControl[2]) {
+            // make a control if at least one axis can be controlled
+            var control = new THREE.TransformControls(view, canvas);
+            control.addEventListener("objectChange", event => {
+                const mode = control.getMode();
+                const object = control.object;
+                switch (mode) {
+                    case "translate":
+                        // Round position to .2f
+                        const position = object.position;
+                        const roundedPosition = {
+                            x: Math.round(position.x * 100) / 100,
+                            y: Math.round(position.y * 100) / 100,
+                            z: Math.round(position.z * 100) / 100
+                        };
+                        object.position.set(roundedPosition.x, roundedPosition.y, roundedPosition.z);
+                        sendToElm("sync-position", {
+                            uuid: object.uuid, position: toShipCoordinates(roundedPosition.x, roundedPosition.y, roundedPosition.z, coordinatesTransform)
+                        });
+                        break;
 
-        view.control = control;
-        scene.add(control);
+                    case "scale":
+                        const scale = object.scale;
+                        const size = getObjectSize(object);
+                        const newSize = { // rounded to .2f
+                            x: Math.round(100 * scale.x * size.x) / 100,
+                            y: Math.round(100 * scale.y * size.y) / 100,
+                            z: Math.round(100 * scale.z * size.z) / 100
+                        };
+                        if (newSize.x <= 0) {
+                            newSize.x = 0.1;
+                        }
+                        if (newSize.y <= 0) {
+                            newSize.y = 0.1;
+                        }
+                        if (newSize.z <= 0) {
+                            newSize.z = 0.1;
+                        }
+
+                        object.scale.set(newSize.x / size.x, newSize.y / size.y, newSize.z / size.z)
+                        sendToElm("sync-size", {
+                            uuid: object.uuid, size: sizeToShipCoordinates(newSize)
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            });
+            control.addEventListener("mouseDown", event => {
+                preventSelection = true; // prevents selecting another block while transforming one with the gizmo
+            });
+            control.addEventListener("mouseUp", event => {
+                preventSelection = false;
+            });
+
+            control.size = 120;
+            control.setMode("translate");
+            control.showX = canControl[0];
+            control.showY = canControl[1];
+            control.showZ = canControl[2];
+
+            view.control = control;
+            scene.add(control);
+        }
+
     });
 }
 
@@ -654,28 +674,32 @@ let updateCameras = function (views, scene) {
 let updateCamera = function (view, scene) {
     if (view) {
         const camera = view.camera;
+        if (camera) {
+            renderer.setViewport(view.clientLeft, view.clientTop, view.clientWidth, view.clientHeight);
+            renderer.setScissor(view.clientLeft, view.clientTop, view.clientWidth, view.clientHeight);
+            renderer.setScissorTest(true);
+            renderer.setClearColor(view.getBackground());
+            camera.lookAt(scene.position);
 
-        renderer.setViewport(view.clientLeft, view.clientTop, view.clientWidth, view.clientHeight);
-        renderer.setScissor(view.clientLeft, view.clientTop, view.clientWidth, view.clientHeight);
-        renderer.setScissorTest(true);
-        renderer.setClearColor(view.getBackground());
-        camera.lookAt(scene.position);
-
-        camera.aspect = view.clientWidth / view.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.render(scene, camera);
+            camera.aspect = view.clientWidth / view.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.render(scene, camera);
+        }
     }
 }
 
 let fitCameras = function (views) {
     views.forEach(view => {
         var camera = view.camera;
-        camera.left = view.clientWidth / - 2;
-        camera.right = view.clientWidth / 2;
-        camera.top = view.clientHeight / 2;
-        camera.bottom = view.clientHeight / - 2
 
-        camera.updateProjectionMatrix();
+        if (camera && view.cameraType === "Orthographic") {
+            camera.left = view.clientWidth / - 2;
+            camera.right = view.clientWidth / 2;
+            camera.top = view.clientHeight / 2;
+            camera.bottom = view.clientHeight / - 2
+
+            camera.updateProjectionMatrix();
+        }
     })
 }
 
