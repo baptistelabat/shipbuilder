@@ -65,6 +65,7 @@ encodeViewport viewport =
         , ( "background", encodeColor viewport.background )
         , ( "eye", encodeVector3 viewport.eye )
         , ( "canControl", encodeCanControl viewport.canControl )
+        , ( "cameraType", Encode.string <| toString viewport.cameraType )
         ]
 
 
