@@ -657,9 +657,9 @@ let onDoubleClick = function (event) { // cycle through the transform modes
     const activeViewport = getActiveViewport(views);
     if (activeViewport && hovered) {
         views.forEach(view => {
-            if (view.control.getMode() === "translate") {
+            if (view.control && view.control.getMode() === "translate") {
                 view.control.setMode("scale");
-            } else {
+            } else if (view.control) {
                 view.control.setMode("translate");
             }
         })
