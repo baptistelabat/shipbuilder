@@ -1,18 +1,23 @@
 port module Main
     exposing
-        ( Block
+        ( main
+        , encodeInitThreeCommand
+        , init
+        , initCmd
+        , initModel
+        , Msg(..)
+        , NoJsMsg(..)
+        , ToJsMsg(..)
+        , toJs
+        , update
+          --Blocks
+        , Block
         , Blocks
         , addBlockTo
         , removeBlockFrom
-        , encodeViewport
-        , encodeViewports
-        , main
-        , Viewport
-        , Viewports
         )
 
-import Array exposing (Array)
-import Color exposing (Color, rgba, hsl)
+import Color exposing (Color)
 import SIRColorPicker
 import DictList exposing (DictList)
 import Dom
@@ -25,9 +30,11 @@ import Html.Events exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
-import Math.Vector3 exposing (Vec3, vec3, getX, getY, getZ, toRecord)
 import Task
 import Debug
+import Viewports exposing (Viewports, encodeViewports)
+import CoordinatesTransform exposing (CoordinatesTransform)
+import HullReferences exposing (HullReference, HullReferences)
 
 
 port toJs : JsData -> Cmd msg
@@ -40,14 +47,6 @@ type alias JsData =
     { tag : String
     , data : Encode.Value
     }
-
-
-sendToJs : String -> Encode.Value -> Cmd msg
-sendToJs tag data =
-    toJs
-        { tag = tag
-        , data = data
-        }
 
 
 main : Program Never Model Msg
@@ -63,11 +62,6 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     fromJs jsMsgToMsg
-
-
-openSaveFileCmd : Cmd msg
-openSaveFileCmd =
-    sendToJs "read-json-file" (Encode.string "open-save-file")
 
 
 newBlockDecoder : Decode.Decoder Block
@@ -98,7 +92,7 @@ type alias SyncSize =
 type alias SaveFile =
     { version : Int
     , blocks : List Block
-    , coordinatesTransform : Array Float
+    , coordinatesTransform : List Float
     }
 
 
@@ -107,7 +101,7 @@ saveFileDecoder =
     Pipeline.decode SaveFile
         |> Pipeline.required "version" Decode.int
         |> Pipeline.required "blocks" decodeBlocks
-        |> Pipeline.required "coordinatesTransform" (Decode.array Decode.float)
+        |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
 
 
 decodeBlocks : Decode.Decoder (List Block)
@@ -238,7 +232,7 @@ addToFloatInput toAdd floatInput =
         { value = newValue, string = toString newValue }
 
 
-type JsMsg
+type FromJsMsg
     = Select String
     | Unselect
     | JSError String
@@ -253,7 +247,7 @@ restoreSaveInModel model saveFile =
     let
         maybeCoordinatesTransform : Maybe CoordinatesTransform
         maybeCoordinatesTransform =
-            arrayToCoordinatesTransform saveFile.coordinatesTransform
+            CoordinatesTransform.fromList saveFile.coordinatesTransform
 
         savedBlocks =
             listOfBlocksToBlocks saveFile.blocks
@@ -275,71 +269,21 @@ listOfBlocksToBlocks blockList =
     DictList.fromList <| List.map (\block -> ( block.uuid, block )) blockList
 
 
-arrayToCoordinatesTransform : Array Float -> Maybe CoordinatesTransform
-arrayToCoordinatesTransform array =
-    let
-        listOfTransforms : List Float
-        listOfTransforms =
-            Array.toList array
-    in
-        case listOfTransforms of
-            [ xx, yx, zx, xy, yy, zy, xz, yz, zz ] ->
-                Just <| makeCoordinatesTransform (vec3 xx xy xz) (vec3 yx yy yz) (vec3 zx zy zz)
-
-            _ ->
-                Nothing
-
-
-restoreSaveCmd : Model -> Cmd Msg
+restoreSaveCmd : Model -> JsData
 restoreSaveCmd model =
-    sendToJs "restore-save" <| encodeRestoreSaveCmd model
+    { tag = "restore-save", data = encodeRestoreSaveCmd model }
 
 
 encodeRestoreSaveCmd : Model -> Encode.Value
 encodeRestoreSaveCmd model =
     Encode.object
-        [ ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        [ ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "blocks", encodeBlocks model.blocks )
         ]
 
 
 
 -- MODEL
-
-
-type alias CoordinatesTransform =
-    { x : Vec3
-    , y : Vec3
-    , z : Vec3
-    }
-
-
-makeCoordinatesTransform : Vec3 -> Vec3 -> Vec3 -> CoordinatesTransform
-makeCoordinatesTransform x y z =
-    { x = x
-    , y = y
-    , z = z
-    }
-
-
-coordinatesTransformToList : CoordinatesTransform -> List Float
-coordinatesTransformToList coordinatesTransform =
-    [ getX coordinatesTransform.x
-    , getX coordinatesTransform.y
-    , getX coordinatesTransform.z
-    , getY coordinatesTransform.x
-    , getY coordinatesTransform.y
-    , getY coordinatesTransform.z
-    , getZ coordinatesTransform.x
-    , getZ coordinatesTransform.y
-    , getZ coordinatesTransform.z
-    ]
-
-
-defaultCoordinatesTransform : CoordinatesTransform
-defaultCoordinatesTransform =
-    -- Ship to ThreeJs
-    makeCoordinatesTransform (vec3 1 0 0) (vec3 0 0 -1) (vec3 0 1 0)
 
 
 type alias Model =
@@ -389,13 +333,8 @@ encodeModelForSave model =
     Encode.object
         [ ( "version", Encode.int 1 )
         , ( "blocks", encodeBlocks model.blocks )
-        , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         ]
-
-
-encodeCoordinatesTransform : CoordinatesTransform -> Encode.Value
-encodeCoordinatesTransform coordinatesTransform =
-    Encode.list <| List.map Encode.float (coordinatesTransformToList coordinatesTransform)
 
 
 encodeBlock : Block -> Encode.Value
@@ -430,6 +369,14 @@ encodeSize size =
 addBlockTo : Blocks -> Block -> Blocks
 addBlockTo blocks block =
     DictList.insert block.uuid block blocks
+
+
+updateBlockInBlocks : Block -> Blocks -> Blocks
+updateBlockInBlocks block blocks =
+    if DictList.member block.uuid blocks then
+        addBlockTo blocks block
+    else
+        blocks
 
 
 toList : Blocks -> List Block
@@ -473,7 +420,7 @@ init =
         model =
             initModel
     in
-        ( initModel, encodeInitThreeCommand model |> sendToJs "init-three" )
+        ( initModel, toJs <| initCmd model )
 
 
 initModel : Model
@@ -481,9 +428,7 @@ initModel =
     let
         viewports : Viewports
         viewports =
-            [ topHalfViewport (hsl (degrees 222) 0.7 0.98) viewportSide
-            , bottomHalfViewport (hsl (degrees 222) 0.53 0.95) viewportTop
-            ]
+            Viewports.init
 
         viewMode : ViewMode
         viewMode =
@@ -492,11 +437,16 @@ initModel =
         { build = "0.0.1"
         , viewMode = viewMode
         , viewports = viewports
-        , coordinatesTransform = defaultCoordinatesTransform
+        , coordinatesTransform = CoordinatesTransform.default
         , selectedBlock = Nothing
         , selectedHullReference = Nothing
         , blocks = DictList.empty
         }
+
+
+initCmd : Model -> JsData
+initCmd model =
+    { tag = "init-three", data = encodeInitThreeCommand model }
 
 
 type ViewMode
@@ -509,55 +459,12 @@ type SpaceReservationView
     | DetailedBlock String
 
 
-type alias Viewports =
-    List Viewport
-
-
-type alias Viewport =
-    { label : String
-    , left :
-        -- between 0 and 1, left margin of the viewport within the canvas
-        Float
-    , top :
-        -- between 0 and 1, top margin of the viewport within the canvas
-        Float
-    , width :
-        -- between 0 and 1, ratio of the width between the viewport and the canvas
-        Float
-    , height :
-        -- between 0 and 1, ratio of the height between the viewport and the canvas
-        Float
-    , background : Color
-    , eye : Vec3
-    , canControl : { x : Bool, y : Bool, z : Bool }
-    }
-
-
-encodeViewports : Viewports -> Encode.Value
-encodeViewports viewports =
-    Encode.list <| List.map encodeViewport viewports
-
-
 encodeInitThreeCommand : Model -> Encode.Value
 encodeInitThreeCommand model =
     Encode.object
         [ ( "viewports", encodeViewports model.viewports )
-        , ( "coordinatesTransform", encodeCoordinatesTransform model.coordinatesTransform )
+        , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "mode", encodeViewMode model.viewMode )
-        ]
-
-
-encodeViewport : Viewport -> Encode.Value
-encodeViewport viewport =
-    Encode.object
-        [ ( "label", Encode.string viewport.label )
-        , ( "left", Encode.float viewport.left )
-        , ( "top", Encode.float viewport.top )
-        , ( "width", Encode.float viewport.width )
-        , ( "height", Encode.float viewport.height )
-        , ( "background", encodeColor viewport.background )
-        , ( "eye", encodeVector3 viewport.eye )
-        , ( "canControl", encodeCanControl viewport.canControl )
         ]
 
 
@@ -587,102 +494,8 @@ encodeColor color =
             ]
 
 
-encodeVector3 : Vec3 -> Encode.Value
-encodeVector3 vector =
-    let
-        record =
-            toRecord vector
-    in
-        Encode.object
-            [ ( "x", Encode.float record.x )
-            , ( "y", Encode.float record.y )
-            , ( "z", Encode.float record.z )
-            ]
-
-
-encodeCanControl : { x : Bool, y : Bool, z : Bool } -> Encode.Value
-encodeCanControl canControl =
-    Encode.object
-        [ ( "x", Encode.bool canControl.x )
-        , ( "y", Encode.bool canControl.y )
-        , ( "z", Encode.bool canControl.z )
-        ]
-
-
-viewportSide : Float -> Float -> Float -> Float -> Color -> Viewport
-viewportSide left top width height background =
-    Viewport "Side" left top width height background (vec3 0 1000 0) { x = True, y = False, z = True }
-
-
-viewportTop : Float -> Float -> Float -> Float -> Color -> Viewport
-viewportTop left top width height background =
-    Viewport "Top" left top width height background (vec3 0 0 -1000) { x = True, y = True, z = False }
-
-
-topHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-topHalfViewport background viewport =
-    viewport 0 0 1 0.5 background
-
-
-bottomHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-bottomHalfViewport background viewport =
-    viewport 0 0.5 1 0.5 background
-
-
-leftHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-leftHalfViewport background viewport =
-    viewport 0 0 0.5 1 background
-
-
-rightHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-rightHalfViewport background viewport =
-    viewport 0.5 0 0.5 1 background
-
-
-topLeftCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-topLeftCornerViewport background viewport =
-    viewport 0 0 0.5 0.5 background
-
-
-topRightCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-topRightCornerViewport background viewport =
-    viewport 0.5 0 0.5 0.5 background
-
-
-bottomLeftCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-bottomLeftCornerViewport background viewport =
-    viewport 0 0.5 0.5 0.5 background
-
-
-bottomRightCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-bottomRightCornerViewport background viewport =
-    viewport 0.5 0.5 0.5 0.5 background
-
-
 
 -- UPDATE
-
-
-type Msg
-    = NoOp
-    | ChangeBlockColor Block Color
-    | SwitchViewMode ViewMode
-    | AddBlock String
-    | FromJs JsMsg
-    | KeyDown (FloatInput -> Block) FloatInput (Block -> Cmd Msg) KeyEvent
-    | OpenSaveFile
-    | UpdatePositionX Block String
-    | UpdatePositionY Block String
-    | UpdatePositionZ Block String
-    | UpdateLength Block String
-    | UpdateHeight Block String
-    | UpdateWidth Block String
-    | RemoveBlock Block
-    | SelectBlock Block
-    | SelectHullReference HullReference
-    | SyncPositionInput Block
-    | SyncSizeInput Block
-    | RenameBlock Block String
 
 
 encodeAddBlockCommand : String -> Encode.Value
@@ -720,17 +533,30 @@ encodeUpdateSizeCommand block =
 
 updateBlockInModel : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
 updateBlockInModel block model =
-    { model | blocks = addBlockTo model.blocks block }
+    { model | blocks = updateBlockInBlocks block model.blocks }
 
 
-asValueInFloatValue : FloatInput -> Float -> FloatInput
-asValueInFloatValue floatInput value =
+asValueInFloatInput : FloatInput -> Float -> FloatInput
+asValueInFloatInput floatInput value =
     { floatInput | value = value }
 
 
-asStringInFloatValue : FloatInput -> String -> FloatInput
-asStringInFloatValue floatInput string =
+asStringInFloatInput : FloatInput -> String -> FloatInput
+asStringInFloatInput floatInput string =
     { floatInput | string = string }
+
+
+asAxisInPosition : Axis -> (Position -> FloatInput -> Position)
+asAxisInPosition axis =
+    case axis of
+        X ->
+            asXInPosition
+
+        Y ->
+            asYInPosition
+
+        Z ->
+            asZInPosition
 
 
 asXInPosition : Position -> FloatInput -> Position
@@ -758,6 +584,19 @@ asWidthInSize size width =
     { size | width = width }
 
 
+asDimensionInSize : Dimension -> Size -> FloatInput -> Size
+asDimensionInSize dimension =
+    case dimension of
+        Length ->
+            asLengthInSize
+
+        Width ->
+            asWidthInSize
+
+        Height ->
+            asHeightInSize
+
+
 asHeightInSize : Size -> FloatInput -> Size
 asHeightInSize size height =
     { size | height = height }
@@ -773,329 +612,113 @@ asSizeInBlock block size =
     { block | size = size }
 
 
-getSelectedBlock : Model -> Maybe Block
-getSelectedBlock model =
-    case model.selectedBlock of
-        Just uuid ->
-            getBlockByUUID uuid model.blocks
-
-        Nothing ->
-            Nothing
-
-
-selectBlock : Block -> Model -> Model
-selectBlock block model =
-    { model | selectedBlock = Just block.uuid }
-
-
-unselectBlockIfSelected : Block -> Model -> Model
-unselectBlockIfSelected block model =
-    { model
-        | selectedBlock =
-            if model.selectedBlock == Just block.uuid then
-                Nothing
-            else
-                model.selectedBlock
-    }
-
-
-unselectBlock : Model -> Model
-unselectBlock model =
-    { model | selectedBlock = Nothing }
-
-
-addBlock : String -> Model -> ( Model, Cmd Msg )
-addBlock label model =
-    model ! [ sendToJs "add-block" (encodeAddBlockCommand label) ]
-
-
-keyDown : (FloatInput -> Block) -> FloatInput -> (Block -> Cmd Msg) -> KeyEvent -> Model -> ( Model, Cmd Msg )
-keyDown updateFloatInput floatInput command keyEvent model =
-    let
-        increment =
-            if keyEvent.shift && not keyEvent.alt then
-                10
-            else if keyEvent.alt && not keyEvent.shift then
-                0.1
-            else
-                1
-    in
-        case keyEvent.key of
-            38 ->
-                -- Arrow up
-                let
-                    newFloatInput : FloatInput
-                    newFloatInput =
-                        addToFloatInput increment floatInput
-
-                    updatedBlock =
-                        updateFloatInput newFloatInput
-                in
-                    (updateBlockInModel updatedBlock model) ! [ command updatedBlock ]
-
-            40 ->
-                -- Arrow downlet
-                let
-                    newFloatInput : FloatInput
-                    newFloatInput =
-                        addToFloatInput (-increment) floatInput
-
-                    updatedBlock =
-                        updateFloatInput newFloatInput
-                in
-                    (updateBlockInModel updatedBlock model) ! [ command updatedBlock ]
-
-            _ ->
-                model ! []
-
-
-removeBlock : Block -> Model -> ( Model, Cmd Msg )
-removeBlock block model =
-    let
-        blocks =
-            removeBlockFrom model.blocks block
-    in
-        ({ model | blocks = blocks } |> unselectBlockIfSelected block) ! [ sendToJs "remove-block" (encodeBlock block) ]
-
-
-updateBlockLabel : Block -> String -> Model -> ( Model, Cmd Msg )
-updateBlockLabel blockToRename label model =
-    let
-        renamed =
-            renameBlock label blockToRename
-    in
-        updateBlockInModel renamed model
-            ! []
-
-
-updateSelectedBlock : Block -> Model -> ( Model, Cmd Msg )
-updateSelectedBlock block model =
-    (selectBlock block model) ! [ sendToJs "select-block" (encodeBlock block) ]
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        NoOp ->
-            model ! []
-
-        ChangeBlockColor block newColor ->
-            let
-                updatedBlock =
-                    { block | color = newColor }
-
-                updatedModel =
-                    updateBlockInModel updatedBlock model
-            in
-                updatedModel
-                    ! [ sendToJs "update-color" (encodeChangeColorCommand updatedBlock) ]
-
-        AddBlock label ->
-            addBlock label model
-
-        KeyDown updateFloatInput floatInput command keyEvent ->
-            keyDown updateFloatInput floatInput command keyEvent model
-
-        OpenSaveFile ->
-            model ! [ openSaveFileCmd ]
-
-        RemoveBlock block ->
-            removeBlock block model
-
-        RenameBlock blockToRename label ->
-            updateBlockLabel blockToRename label model
-
-        SelectBlock block ->
-            updateSelectedBlock block model
-
-        SelectHullReference hullReference ->
-            { model | selectedHullReference = Just hullReference.path } ! [ sendToJs "load-hull" <| Encode.string hullReference.path ]
-
-        SwitchViewMode newViewMode ->
-            { model | viewMode = newViewMode } ! [ sendToJs "switch-mode" <| encodeViewMode newViewMode ]
-
-        SyncPositionInput block ->
-            let
-                updatedModel : Model
-                updatedModel =
-                    syncFloatInput block.position.x
-                        |> asXInPosition block.position
-                        |> flip asYInPosition (syncFloatInput block.position.y)
-                        |> flip asZInPosition (syncFloatInput block.position.z)
-                        |> asPositionInBlock block
-                        |> flip updateBlockInModel model
-            in
-                updatedModel ! []
-
-        SyncSizeInput block ->
-            let
-                updatedModel : Model
-                updatedModel =
-                    syncFloatInput block.size.height
-                        |> asHeightInSize block.size
-                        |> flip asWidthInSize (syncFloatInput block.size.width)
-                        |> flip asLengthInSize (syncFloatInput block.size.length)
-                        |> asSizeInBlock block
-                        |> flip updateBlockInModel model
-            in
-                updatedModel ! []
-
-        UpdatePositionX block input ->
-            updateOnePosition block input .x asXInPosition model
-
-        UpdatePositionY block input ->
-            updateOnePosition block input .y asYInPosition model
-
-        UpdatePositionZ block input ->
-            updateOnePosition block input .z asZInPosition model
-
-        UpdateLength block input ->
-            let
-                updatedBlock =
-                    updateLength block input
-            in
-                (updateBlockInModel updatedBlock model)
-                    ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
-
-        UpdateHeight block input ->
-            let
-                updatedBlock =
-                    updateHeight block input
-            in
-                (updateBlockInModel updatedBlock model)
-                    ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
-
-        UpdateWidth block input ->
-            let
-                updatedBlock =
-                    updateWidth block input
-            in
-                (updateBlockInModel updatedBlock model)
-                    ! [ sendToJs "update-size" (encodeUpdateSizeCommand updatedBlock) ]
-
-        FromJs jsmsg ->
-            updateFromJs jsmsg model
-
-
-updateOnePosition : Block -> String -> (Position -> FloatInput) -> (Position -> FloatInput -> Position) -> Model -> ( Model, Cmd msg )
-updateOnePosition block input accessor updateFunction model =
-    case String.toFloat input of
-        Ok value ->
-            let
-                updatedBlock : Block
-                updatedBlock =
-                    value
-                        |> asValueInFloatValue (accessor block.position)
-                        |> flip asStringInFloatValue input
-                        |> updateFunction block.position
-                        |> asPositionInBlock block
-            in
-                updateBlockInModel updatedBlock model
-                    ! [ sendToJs "update-position" (encodeUpdatePositionCommand updatedBlock) ]
-
-        Err error ->
-            (input
-                |> asStringInFloatValue (accessor block.position)
-                |> updateFunction block.position
-                |> asPositionInBlock block
-                |> flip updateBlockInModel model
-            )
-                ! []
-
-
-updateHeight : Block -> String -> Block
-updateHeight block input =
-    case String.toFloat input of
-        Ok value ->
-            let
-                newValue =
-                    if value == 0 then
-                        0.1
-                    else
-                        (abs value)
-            in
-                newValue
-                    |> asValueInFloatValue block.size.height
-                    |> flip asStringInFloatValue input
-                    |> asHeightInSize block.size
-                    |> asSizeInBlock block
-
-        Err message ->
-            input
-                |> asStringInFloatValue block.size.height
-                |> asHeightInSize block.size
-                |> asSizeInBlock block
-
-
-updateWidth : Block -> String -> Block
-updateWidth block input =
-    case String.toFloat input of
-        Ok value ->
-            let
-                newValue =
-                    if value == 0 then
-                        0.1
-                    else
-                        (abs value)
-            in
-                newValue
-                    |> asValueInFloatValue block.size.width
-                    |> flip asStringInFloatValue input
-                    |> asWidthInSize block.size
-                    |> asSizeInBlock block
-
-        Err message ->
-            input
-                |> asStringInFloatValue block.size.width
-                |> asWidthInSize block.size
-                |> asSizeInBlock block
-
-
-updateLength : Block -> String -> Block
-updateLength block input =
-    case String.toFloat input of
-        Ok value ->
-            let
-                newValue =
-                    if value == 0 then
-                        0.1
-                    else
-                        (abs value)
-            in
-                newValue
-                    |> asValueInFloatValue block.size.length
-                    |> flip asStringInFloatValue input
-                    |> asLengthInSize block.size
-                    |> asSizeInBlock block
-
-        Err message ->
-            input
-                |> asStringInFloatValue block.size.length
-                |> asLengthInSize block.size
-                |> asSizeInBlock block
-
-
 syncFloatInput : FloatInput -> FloatInput
 syncFloatInput input =
     { input | string = toString input.value }
 
 
-updateFromJs : JsMsg -> Model -> ( Model, Cmd Msg )
+type Msg
+    = FromJs FromJsMsg
+    | NoJs NoJsMsg
+    | ToJs ToJsMsg
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        FromJs fromJsMsg ->
+            updateFromJs fromJsMsg model
+
+        NoJs noJsMsg ->
+            updateNoJs noJsMsg model
+
+        ToJs toJsMsg ->
+            updateToJs toJsMsg model
+
+
+type ToJsMsg
+    = AddBlock String
+    | ChangeBlockColor Block Color
+    | KeyDownOnPositionInput Axis Block KeyEvent
+    | KeyDownOnSizeInput Dimension Block KeyEvent
+    | OpenSaveFile
+    | RemoveBlock Block
+    | SelectBlock Block
+    | SelectHullReference HullReference
+    | SwitchViewMode ViewMode
+    | UpdatePosition Axis Block String
+    | UpdateDimension Dimension Block String
+
+
+type NoJsMsg
+    = NoOp
+    | SyncPositionInput Block
+    | SyncSizeInput Block
+    | RenameBlock Block String
+
+
+updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
+updateNoJs msg model =
+    case msg of
+        NoOp ->
+            model ! []
+
+        SyncPositionInput block ->
+            (syncFloatInput block.position.x
+                |> asXInPosition block.position
+                |> flip asYInPosition (syncFloatInput block.position.y)
+                |> flip asZInPosition (syncFloatInput block.position.z)
+                |> asPositionInBlock block
+                |> flip updateBlockInModel model
+            )
+                ! []
+
+        SyncSizeInput blockToSync ->
+            (syncFloatInput blockToSync.size.height
+                |> asHeightInSize blockToSync.size
+                |> flip asWidthInSize (syncFloatInput blockToSync.size.width)
+                |> flip asLengthInSize (syncFloatInput blockToSync.size.length)
+                |> asSizeInBlock blockToSync
+                |> flip updateBlockInModel model
+            )
+                ! []
+
+        RenameBlock blockToRename newLabel ->
+            updateBlockInModel (renameBlock newLabel blockToRename) model ! []
+
+
+updateToJs : ToJsMsg -> Model -> ( Model, Cmd Msg )
+updateToJs msg model =
+    let
+        updatedModel =
+            updateModelToJs msg model
+
+        toJsCmd : Cmd msg
+        toJsCmd =
+            sendCmdToJs updatedModel msg
+    in
+        ( updatedModel, sendCmdToJs model msg )
+
+
+updateFromJs : FromJsMsg -> Model -> ( Model, Cmd Msg )
 updateFromJs jsmsg model =
     case jsmsg of
         NewBlock block ->
             let
+                blocks : Blocks
                 blocks =
                     addBlockTo model.blocks block
             in
-                { model | blocks = blocks } ! [ Task.attempt (\_ -> NoOp) (Dom.focus block.uuid) ]
+                { model | blocks = blocks } ! [ Task.attempt (\_ -> NoJs NoOp) (Dom.focus block.uuid) ]
 
         RestoreSave saveFile ->
             let
+                newModel : Model
                 newModel =
                     restoreSaveInModel model saveFile
             in
-                newModel ! [ restoreSaveCmd newModel ]
+                -- TODO: split and move in ToJs ?
+                newModel ! [ toJs <| restoreSaveCmd newModel ]
 
         Select uuid ->
             let
@@ -1106,7 +729,8 @@ updateFromJs jsmsg model =
                 { model | selectedBlock = Maybe.map .uuid maybeBlock } ! []
 
         Unselect ->
-            (unselectBlock model) ! []
+            { model | selectedBlock = Nothing }
+                ! []
 
         SynchronizePosition uuid position ->
             (case getBlockByUUID uuid model.blocks of
@@ -1140,6 +764,297 @@ updateFromJs jsmsg model =
                 model ! []
 
 
+updateModelToJs : ToJsMsg -> Model -> Model
+updateModelToJs msg model =
+    case msg of
+        OpenSaveFile ->
+            model
+
+        ChangeBlockColor block newColor ->
+            case getBlockByUUID block.uuid model.blocks of
+                Just recoveredBlock ->
+                    let
+                        updatedBlock : Block
+                        updatedBlock =
+                            { block | color = newColor }
+                    in
+                        updateBlockInModel updatedBlock model
+
+                Nothing ->
+                    model
+
+        AddBlock label ->
+            model
+
+        KeyDownOnPositionInput axis block keyEvent ->
+            case toIncrement keyEvent of
+                Just increment ->
+                    let
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (block.position |> axisAccessor axis)
+
+                        updatedBlock : Block
+                        updatedBlock =
+                            updateBlockPositionOnAxis axis block newFloatInput
+                    in
+                        updateBlockInModel updatedBlock model
+
+                Nothing ->
+                    model
+
+        KeyDownOnSizeInput dimension block keyEvent ->
+            case toIncrement keyEvent of
+                Just increment ->
+                    let
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (block.size |> dimensionAccessor dimension)
+
+                        updatedBlock : Block
+                        updatedBlock =
+                            updateBlockSizeForDimension dimension block newFloatInput
+                    in
+                        updateBlockInModel updatedBlock model
+
+                Nothing ->
+                    model
+
+        RemoveBlock block ->
+            let
+                blocks : Blocks
+                blocks =
+                    removeBlockFrom model.blocks block
+            in
+                { model | blocks = blocks }
+
+        SelectBlock block ->
+            { model | selectedBlock = Just block.uuid }
+
+        SelectHullReference hullReference ->
+            { model | selectedHullReference = Just hullReference.path }
+
+        SwitchViewMode newViewMode ->
+            { model | viewMode = newViewMode }
+
+        UpdatePosition axis block input ->
+            let
+                axisFloatInput : FloatInput
+                axisFloatInput =
+                    block.position |> axisAccessor axis
+            in
+                case String.toFloat input of
+                    Ok value ->
+                        let
+                            updatedBlock : Block
+                            updatedBlock =
+                                value
+                                    |> asValueInFloatInput axisFloatInput
+                                    |> flip asStringInFloatInput input
+                                    |> (asAxisInPosition axis) block.position
+                                    |> asPositionInBlock block
+                        in
+                            updateBlockInModel updatedBlock model
+
+                    Err error ->
+                        input
+                            |> asStringInFloatInput axisFloatInput
+                            |> (asAxisInPosition axis) block.position
+                            |> asPositionInBlock block
+                            |> flip updateBlockInModel model
+
+        UpdateDimension dimension block input ->
+            let
+                dimensionFloatInput =
+                    block.size |> dimensionAccessor dimension
+            in
+                case String.toFloat input of
+                    Ok value ->
+                        let
+                            newValue : Float
+                            newValue =
+                                if value == 0 then
+                                    0.1
+                                else
+                                    (abs value)
+
+                            updatedBlock : Block
+                            updatedBlock =
+                                newValue
+                                    |> asValueInFloatInput dimensionFloatInput
+                                    |> flip asStringInFloatInput input
+                                    |> (asDimensionInSize dimension) block.size
+                                    |> asSizeInBlock block
+                        in
+                            updateBlockInModel updatedBlock model
+
+                    Err message ->
+                        input
+                            |> asStringInFloatInput dimensionFloatInput
+                            |> (asDimensionInSize dimension) block.size
+                            |> asSizeInBlock block
+                            |> flip updateBlockInModel model
+
+
+sendCmdToJs : Model -> ToJsMsg -> Cmd msg
+sendCmdToJs model msg =
+    case msg2json model msg of
+        Just jsCmd ->
+            toJs jsCmd
+
+        Nothing ->
+            Cmd.none
+
+
+msg2json : Model -> ToJsMsg -> Maybe JsData
+msg2json model action =
+    case action of
+        ChangeBlockColor block newColor ->
+            Maybe.map
+                (\recoveredBlock ->
+                    let
+                        updatedBlock =
+                            { block | color = newColor }
+                    in
+                        { tag = "update-color", data = (encodeChangeColorCommand updatedBlock) }
+                )
+            <|
+                getBlockByUUID block.uuid model.blocks
+
+        AddBlock label ->
+            Just { tag = "add-block", data = (encodeAddBlockCommand label) }
+
+        KeyDownOnPositionInput axis block keyEvent ->
+            Maybe.map
+                (\increment ->
+                    let
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (block.position |> axisAccessor axis)
+
+                        updatedBlock : Block
+                        updatedBlock =
+                            updateBlockPositionOnAxis axis block newFloatInput
+                    in
+                        sendPositionUpdate updatedBlock
+                )
+            <|
+                toIncrement keyEvent
+
+        KeyDownOnSizeInput dimension block keyEvent ->
+            Maybe.map
+                (\increment ->
+                    let
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (block.size |> dimensionAccessor dimension)
+
+                        updatedBlock : Block
+                        updatedBlock =
+                            updateBlockSizeForDimension dimension block newFloatInput
+                    in
+                        sendSizeUpdate updatedBlock
+                )
+            <|
+                toIncrement keyEvent
+
+        OpenSaveFile ->
+            Just { tag = "read-json-file", data = Encode.string "open-save-file" }
+
+        RemoveBlock block ->
+            Just { tag = "remove-block", data = encodeBlock block }
+
+        SelectBlock block ->
+            Just { tag = "select-block", data = encodeBlock block }
+
+        SelectHullReference hullReference ->
+            Just { tag = "load-hull", data = Encode.string hullReference.path }
+
+        SwitchViewMode newViewMode ->
+            Just { tag = "switch-mode", data = encodeViewMode newViewMode }
+
+        UpdatePosition axis block input ->
+            Maybe.map
+                (\value ->
+                    let
+                        axisFloatInput : FloatInput
+                        axisFloatInput =
+                            block.position |> axisAccessor axis
+
+                        updatedBlock : Block
+                        updatedBlock =
+                            value
+                                |> asValueInFloatInput axisFloatInput
+                                |> flip asStringInFloatInput input
+                                |> (asAxisInPosition axis) block.position
+                                |> asPositionInBlock block
+                    in
+                        { tag = "update-position", data = encodeUpdatePositionCommand updatedBlock }
+                )
+            <|
+                Result.toMaybe <|
+                    String.toFloat input
+
+        UpdateDimension dimension block input ->
+            Maybe.map
+                (\value ->
+                    let
+                        dimensionFloatInput : FloatInput
+                        dimensionFloatInput =
+                            block.size |> dimensionAccessor dimension
+
+                        newValue : Float
+                        newValue =
+                            if value == 0 then
+                                0.1
+                            else
+                                (abs value)
+
+                        updatedBlock : Block
+                        updatedBlock =
+                            newValue
+                                |> asValueInFloatInput dimensionFloatInput
+                                |> flip asStringInFloatInput input
+                                |> (asDimensionInSize dimension) block.size
+                                |> asSizeInBlock block
+                    in
+                        { tag = "update-size", data = (encodeUpdateSizeCommand updatedBlock) }
+                )
+            <|
+                Result.toMaybe <|
+                    String.toFloat input
+
+
+isKeyArrowUp : KeyEvent -> Bool
+isKeyArrowUp keyEvent =
+    keyEvent.key == 38
+
+
+isKeyArrowDown : KeyEvent -> Bool
+isKeyArrowDown keyEvent =
+    keyEvent.key == 40
+
+
+toIncrement : KeyEvent -> Maybe Float
+toIncrement keyEvent =
+    let
+        magnitude : Float
+        magnitude =
+            if keyEvent.shift && not keyEvent.alt then
+                10
+            else if keyEvent.alt && not keyEvent.shift then
+                0.1
+            else
+                1
+    in
+        if isKeyArrowUp keyEvent then
+            Just magnitude
+        else if isKeyArrowDown keyEvent then
+            Just <| -1 * magnitude
+        else
+            Nothing
+
+
 
 -- VIEW
 
@@ -1150,6 +1065,87 @@ type alias MenuItem =
 
 type alias MenuItems =
     List MenuItem
+
+
+type alias Tab =
+    { title : String
+    , icon : Html Msg
+    , viewMode : ViewMode
+    }
+
+
+type alias Tabs =
+    List Tab
+
+
+tabItems : Tabs
+tabItems =
+    [ { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
+    , { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
+    ]
+
+
+type alias HullReference =
+    { label : String
+    , path : String
+    }
+
+
+hullReferences : HullReferences
+hullReferences =
+    [ { label = "Anthineas", path = "assets/anthineas.stl" }
+    ]
+
+
+sendSizeUpdate : Block -> JsData
+sendSizeUpdate block =
+    { tag = "update-size", data = encodeUpdateSizeCommand block }
+
+
+sendPositionUpdate : Block -> JsData
+sendPositionUpdate block =
+    { tag = "update-position", data = encodeUpdatePositionCommand block }
+
+
+onKeyDown : (KeyEvent -> msg) -> Attribute msg
+onKeyDown tagger =
+    on "keydown" (Decode.map tagger keyEventDecoder)
+
+
+type alias KeyEvent =
+    { key : Int
+    , shift : Bool
+    , alt : Bool
+    , ctrl : Bool
+    }
+
+
+updateBlockSizeForDimension : Dimension -> Block -> FloatInput -> Block
+updateBlockSizeForDimension dimension block floatInput =
+    let
+        validFloatInput =
+            if floatInput.value <= 0.1 then
+                { value = 0.1, string = "0.1" }
+            else
+                floatInput
+    in
+        validFloatInput
+            |> (asDimensionInSize dimension) block.size
+            |> asSizeInBlock block
+
+
+updateBlockLength : Block -> FloatInput -> Block
+updateBlockLength block floatInput =
+    let
+        validFloatInput =
+            if floatInput.value <= 0.1 then
+                { value = 0.1, string = "0.1" }
+            else
+                floatInput
+    in
+        validFloatInput
+            |> asLengthInSize block.size
+            |> asSizeInBlock block
 
 
 view : Model -> Html Msg
@@ -1163,10 +1159,15 @@ view model =
 viewHeader : Model -> Html Msg
 viewHeader model =
     Html.header []
-        [ div [ class "header-left" ]
+        [ div
+            [ class "header-left" ]
             -- groups img and title together for flexbox
-            [ img [ src "assets/SIREHNA_R.png" ] []
-            , h1 [] [ text "ShipBuilder" ]
+            [ img
+                [ src "assets/SIREHNA_R.png" ]
+                []
+            , h1
+                []
+                [ text "ShipBuilder" ]
             ]
         , viewHeaderMenu model
         ]
@@ -1201,7 +1202,12 @@ viewSaveMenuItem model =
         ]
         [ a
             [ type_ "button"
-            , href <| "data:application/json;charset=utf-8," ++ encodeUri (stringifyEncodeValue (encodeModelForSave model))
+            , href <|
+                "data:application/json;charset=utf-8,"
+                    ++ (encodeUri <|
+                            stringifyEncodeValue <|
+                                encodeModelForSave model
+                       )
             , downloadAs "shipbuilder.json"
             ]
             [ FASolid.download ]
@@ -1231,7 +1237,7 @@ viewOpenMenuItem =
             , id "open-save-file"
             , name "open-save-file"
             , class "hidden-input"
-            , on "change" (Decode.succeed OpenSaveFile)
+            , on "change" <| Decode.succeed <| ToJs OpenSaveFile
             ]
             []
         ]
@@ -1261,24 +1267,6 @@ viewTabs : Model -> Html Msg
 viewTabs model =
     div [ class "tabs" ] <|
         List.map (viewTab model) tabItems
-
-
-type alias Tab =
-    { title : String
-    , icon : Html Msg
-    , viewMode : ViewMode
-    }
-
-
-type alias Tabs =
-    List Tab
-
-
-tabItems : Tabs
-tabItems =
-    [ { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
-    , { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
-    ]
 
 
 viewModesMatch : ViewMode -> ViewMode -> Bool
@@ -1312,7 +1300,7 @@ viewTab model tab =
     in
         div
             [ class classes
-            , onClick (SwitchViewMode tab.viewMode)
+            , onClick <| ToJs <| SwitchViewMode tab.viewMode
             ]
             [ tab.icon
             , p [] [ text tab.title ]
@@ -1344,85 +1332,25 @@ viewSpaceReservationPanel spaceReservationView model =
             viewWholeList model
 
 
-type alias HullReference =
-    { label : String
-    , path : String
-    }
-
-
-hullReferences : List HullReference
-hullReferences =
-    [ { label = "Anthineas", path = "assets/anthineas.stl" }
-    ]
-
-
 viewHullStudioPanel : Model -> Html Msg
 viewHullStudioPanel model =
-    div
-        [ class "panel hull-panel"
-        ]
-    <|
-        case model.selectedHullReference of
-            Just pathOfHullReference ->
-                [ h2 [] [ text "Hull Studio" ]
-                , viewHullReferencesWithSelection model pathOfHullReference
-                ]
+    case model.selectedHullReference of
+        Just selectedHullReferencePath ->
+            HullReferences.viewHullStudioPanelWithSelection
+                hullReferences
+                (ToJs << SelectHullReference)
+                selectedHullReferencePath
 
-            Nothing ->
-                [ h2 [] [ text "Hull Studio" ]
-                , viewHullReferences model
-                ]
-
-
-viewHullReferences : Model -> Html Msg
-viewHullReferences model =
-    ul [ class "hull-references" ] <|
-        List.map
-            viewHullReference
-            hullReferences
-
-
-viewHullReferencesWithSelection : Model -> String -> Html Msg
-viewHullReferencesWithSelection model pathOfSelectedHullReference =
-    ul [ class "hull-references" ] <|
-        List.map (viewHullReferenceWithSelection pathOfSelectedHullReference) hullReferences
-
-
-viewHullReference : HullReference -> Html Msg
-viewHullReference ref =
-    li [ class "hull-reference", onClick (SelectHullReference ref) ]
-        [ div [ class "hull-info-wrapper" ]
-            [ p [ class "hull-label" ] [ text ref.label ]
-            , p [ class "hull-path" ] [ text ref.path ]
-            ]
-        ]
-
-
-viewHullReferenceWithSelection : String -> HullReference -> Html Msg
-viewHullReferenceWithSelection pathOfSelectedHullReference ref =
-    li
-        (if ref.path == pathOfSelectedHullReference then
-            [ class "hull-reference hull-reference__selected" ]
-         else
-            [ class "hull-reference"
-            , onClick (SelectHullReference ref)
-            ]
-        )
-        [ div
-            []
-            []
-        , div [ class "hull-info-wrapper" ]
-            [ p [ class "hull-label" ] [ text ref.label ]
-            , p [ class "hull-path" ] [ text ref.path ]
-            ]
-        ]
+        Nothing ->
+            HullReferences.viewHullStudioPanel
+                hullReferences
+                (ToJs << SelectHullReference)
 
 
 viewWholeList : Model -> Html Msg
 viewWholeList model =
     div
-        [ class "panel blocks-panel"
-        ]
+        [ class "panel blocks-panel" ]
         [ h2 [] [ text "Blocks" ]
         , viewBlockList model
         ]
@@ -1435,17 +1363,25 @@ viewDetailedBlock uuid model =
     <|
         case getBlockByUUID uuid model.blocks of
             Just block ->
-                [ div [ class "focus-title" ]
+                [ div
+                    [ class "focus-title" ]
                     [ text "Properties of block:" ]
                 , div
                     [ class "focus-header" ]
                     [ viewBackToWholeList
-                    , div [ class "focus-label" ] [ viewEditableBlockName block ]
+                    , div
+                        [ class "focus-label" ]
+                        [ viewEditableBlockName block ]
                     ]
-                , div [ class "focus-sub-header" ]
-                    [ div [ class "focus-uuid" ] [ text block.uuid ]
+                , div
+                    [ class "focus-sub-header" ]
+                    [ div
+                        [ class "focus-uuid" ]
+                        [ text block.uuid ]
                     ]
-                , div [ class "focus-properties" ] <|
+                , div
+                    [ class "focus-properties" ]
+                  <|
                     viewBlockProperties block model
                 ]
 
@@ -1455,129 +1391,83 @@ viewDetailedBlock uuid model =
 
 viewBackToWholeList : Html Msg
 viewBackToWholeList =
-    div [ class "focus-back", onClick (SwitchViewMode (SpaceReservation WholeList)) ] [ FASolid.arrow_left ]
+    div
+        [ class "focus-back"
+        , onClick <| ToJs <| SwitchViewMode <| SpaceReservation WholeList
+        ]
+        [ FASolid.arrow_left ]
 
 
 viewBlockProperties : Block -> Model -> List (Html Msg)
 viewBlockProperties block model =
-    [ SIRColorPicker.view block.color block ChangeBlockColor
+    [ SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
     , div
         [ class "block-position" ]
-        [ viewPositionInput "x" block.position.x (UpdatePositionX block) block (updateBlockPositionXInModel block)
-        , viewPositionInput "y" block.position.y (UpdatePositionY block) block (updateBlockPositionYInModel block)
-        , viewPositionInput "z" block.position.z (UpdatePositionZ block) block (updateBlockPositionZInModel block)
-        ]
-    , div [ class "block-size" ]
-        [ viewSizeInput "length" block.size.length (UpdateLength block) block (updateBlockLengthInModel block)
-        , viewSizeInput "height" block.size.height (UpdateHeight block) block (updateBlockHeightInModel block)
-        , viewSizeInput "width" block.size.width (UpdateWidth block) block (updateBlockWidthInModel block)
-        ]
+      <|
+        List.map (flip viewPositionInput block) [ X, Y, Z ]
+    , div
+        [ class "block-size" ]
+      <|
+        List.map (flip viewSizeInput block) [ Length, Width, Height ]
     ]
 
 
-sendSizeUpdate : Block -> Cmd Msg
-sendSizeUpdate block =
-    sendToJs "update-size" (encodeUpdateSizeCommand block)
+type Axis
+    = X
+    | Y
+    | Z
 
 
-updateBlockPositionXInModel : Block -> FloatInput -> Block
-updateBlockPositionXInModel block floatInput =
-    floatInput
-        |> asXInPosition block.position
-        |> asPositionInBlock block
+axisAccessor : Axis -> { a | x : b, y : b, z : b } -> b
+axisAccessor axis =
+    case axis of
+        X ->
+            .x
+
+        Y ->
+            .y
+
+        Z ->
+            .z
 
 
-updateBlockPositionYInModel : Block -> FloatInput -> Block
-updateBlockPositionYInModel block floatInput =
-    floatInput
-        |> asYInPosition block.position
-        |> asPositionInBlock block
-
-
-updateBlockPositionZInModel : Block -> FloatInput -> Block
-updateBlockPositionZInModel block floatInput =
-    floatInput
-        |> asZInPosition block.position
-        |> asPositionInBlock block
-
-
-updateBlockHeightInModel : Block -> FloatInput -> Block
-updateBlockHeightInModel block floatInput =
+viewPositionInput : Axis -> Block -> Html Msg
+viewPositionInput axis block =
     let
-        validFloatInput =
-            if floatInput.value <= 0.1 then
-                { value = 0.1, string = "0.1" }
-            else
-                floatInput
+        axisLabel =
+            String.toLower <| toString axis
     in
-        validFloatInput
-            |> asHeightInSize block.size
-            |> asSizeInBlock block
-
-
-updateBlockWidthInModel : Block -> FloatInput -> Block
-updateBlockWidthInModel block floatInput =
-    let
-        validFloatInput =
-            if floatInput.value <= 0.1 then
-                { value = 0.1, string = "0.1" }
-            else
-                floatInput
-    in
-        validFloatInput
-            |> asWidthInSize block.size
-            |> asSizeInBlock block
-
-
-updateBlockLengthInModel : Block -> FloatInput -> Block
-updateBlockLengthInModel block floatInput =
-    let
-        validFloatInput =
-            if floatInput.value <= 0.1 then
-                { value = 0.1, string = "0.1" }
-            else
-                floatInput
-    in
-        validFloatInput
-            |> asLengthInSize block.size
-            |> asSizeInBlock block
-
-
-viewPositionInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> Html Msg
-viewPositionInput inputLabel position inputMsg block updatePosition =
-    div [ class "input-group" ]
-        [ label [ for ("position-" ++ inputLabel) ]
-            [ text inputLabel ]
-        , input
-            [ class "block-position-input"
-            , name ("position-" ++ inputLabel)
-            , id ("position-" ++ inputLabel)
-            , type_ "text"
-            , value (.string position)
-            , onInput inputMsg
-            , onBlur (SyncPositionInput block)
-            , onKeyDown (KeyDown updatePosition position sendPositionUpdate)
+        div [ class "input-group" ]
+            [ viewPositionInputLabel axisLabel
+            , viewPositionInputInput axis block axisLabel
             ]
-            []
+
+
+viewPositionInputLabel : String -> Html Msg
+viewPositionInputLabel axisLabel =
+    label [ for <| "position-" ++ axisLabel ]
+        [ text axisLabel ]
+
+
+viewPositionInputInput : Axis -> Block -> String -> Html Msg
+viewPositionInputInput axis block axisLabel =
+    input
+        [ class "block-position-input"
+        , id <| "position-" ++ axisLabel
+        , type_ "text"
+        , value <| .string <| axisAccessor axis <| .position block
+        , onInput <| ToJs << UpdatePosition axis block
+        , onBlur <| NoJs <| SyncPositionInput block
+        , onKeyDown <| ToJs << KeyDownOnPositionInput axis block
         ]
+        []
 
 
-sendPositionUpdate : Block -> Cmd Msg
-sendPositionUpdate block =
-    sendToJs "update-position" <| encodeUpdatePositionCommand block
-
-
-onKeyDown : (KeyEvent -> msg) -> Attribute msg
-onKeyDown tagger =
-    on "keydown" (Decode.map tagger keyEventDecoder)
-
-
-type alias KeyEvent =
-    { key : Int
-    , shift : Bool
-    , alt : Bool
-    , ctrl : Bool
-    }
+updateBlockPositionOnAxis : Axis -> Block -> FloatInput -> Block
+updateBlockPositionOnAxis axis block floatInput =
+    floatInput
+        |> (asAxisInPosition axis) block.position
+        |> asPositionInBlock block
 
 
 keyEventDecoder : Decode.Decoder KeyEvent
@@ -1589,23 +1479,55 @@ keyEventDecoder =
         |> Pipeline.required "ctrlKey" Decode.bool
 
 
-viewSizeInput : String -> FloatInput -> (String -> Msg) -> Block -> (FloatInput -> Block) -> Html Msg
-viewSizeInput inputLabel size inputMsg block updateSize =
-    div [ class "input-group" ]
-        [ label [ for ("size-" ++ inputLabel) ]
-            [ text inputLabel ]
-        , input
-            [ class "block-size-input"
-            , name ("size-" ++ inputLabel)
-            , id ("size-" ++ inputLabel)
-            , type_ "text"
-            , value (.string size)
-            , onInput inputMsg
-            , onBlur (SyncSizeInput block)
-            , onKeyDown (KeyDown updateSize size sendSizeUpdate)
+type Dimension
+    = Length
+    | Width
+    | Height
+
+
+dimensionAccessor : Dimension -> { a | length : b, width : b, height : b } -> b
+dimensionAccessor dimension =
+    case dimension of
+        Length ->
+            .length
+
+        Width ->
+            .width
+
+        Height ->
+            .height
+
+
+viewSizeInput : Dimension -> Block -> Html Msg
+viewSizeInput dimension block =
+    let
+        dimensionLabel =
+            String.toLower <| toString dimension
+    in
+        div [ class "input-group" ]
+            [ viewSizeInputLabel dimensionLabel
+            , viewSizeInputInput dimension block dimensionLabel
             ]
-            []
+
+
+viewSizeInputLabel : String -> Html Msg
+viewSizeInputLabel dimensionLabel =
+    label [ for ("size-" ++ dimensionLabel) ]
+        [ text dimensionLabel ]
+
+
+viewSizeInputInput : Dimension -> Block -> String -> Html Msg
+viewSizeInputInput dimension block dimensionLabel =
+    input
+        [ class "block-size-input"
+        , id ("size-" ++ dimensionLabel)
+        , type_ "text"
+        , value <| .string <| (dimensionAccessor dimension) <| .size block
+        , onInput <| ToJs << UpdateDimension dimension block
+        , onBlur <| NoJs <| SyncSizeInput block
+        , onKeyDown <| ToJs << KeyDownOnSizeInput dimension block
         ]
+        []
 
 
 type alias FloatInput =
@@ -1616,7 +1538,12 @@ type alias FloatInput =
 
 viewEditableBlockName : Block -> Html Msg
 viewEditableBlockName block =
-    input [ class "block-label", id block.uuid, value block.label, onInput (RenameBlock block) ]
+    input
+        [ class "block-label"
+        , id block.uuid
+        , value block.label
+        , onInput <| NoJs << RenameBlock block
+        ]
         []
 
 
@@ -1624,51 +1551,90 @@ viewBlockList : { a | blocks : Blocks, selectedBlock : Maybe String } -> Html Ms
 viewBlockList blocksModel =
     case blocksModel.selectedBlock of
         Just uuid ->
-            ul [ class "blocks" ] <| (List.map (viewBlockItemWithSelection uuid) <| (toList blocksModel.blocks)) ++ [ viewNewBlockItem ]
+            ul
+                [ class "blocks" ]
+            <|
+                (List.map (viewBlockItemWithSelection uuid) <| toList blocksModel.blocks)
+                    ++ [ viewNewBlockItem ]
 
         Nothing ->
-            ul [ class "blocks" ] <| (List.map viewBlockItem <| (toList blocksModel.blocks)) ++ [ viewNewBlockItem ]
+            ul
+                [ class "blocks" ]
+            <|
+                (List.map viewBlockItem <| (toList blocksModel.blocks))
+                    ++ [ viewNewBlockItem ]
 
 
 viewNewBlockItem : Html Msg
 viewNewBlockItem =
     li [ class "add-block" ]
-        [ input [ class "block-label", type_ "text", placeholder "New block", value "", onInput AddBlock ]
+        [ input
+            [ class "block-label"
+            , type_ "text"
+            , placeholder "New block"
+            , value ""
+            , onInput <| ToJs << AddBlock
+            ]
             []
         ]
 
 
 viewBlockItem : Block -> Html Msg
 viewBlockItem block =
-    li [ class "block-item", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
+    li
+        [ class "block-item"
+        , style [ ( "borderColor", colorToCssRgbString block.color ) ]
+        ]
+    <|
         viewBlockItemContent block
 
 
 viewBlockItemContent : Block -> List (Html Msg)
 viewBlockItemContent block =
-    [ div [ class "block-info-wrapper", onClick (SelectBlock block) ]
+    [ div
+        [ class "block-info-wrapper"
+        , onClick <| ToJs <| SelectBlock block
+        ]
         [ viewEditableBlockName block
         , p
             [ class "block-uuid" ]
             [ text block.uuid ]
         ]
-    , div [ class "block-actions" ]
-        [ div [ class "block-action focus-block", onClick (SwitchViewMode (SpaceReservation (DetailedBlock block.uuid))) ]
-            [ FASolid.arrow_right
-            ]
-        , div
-            [ class "block-action delete-block"
-            , onClick (RemoveBlock block)
-            ]
-            [ FASolid.trash ]
+    , div
+        [ class "block-actions" ]
+        [ viewFocusBlockAction block
+        , viewDeleteBlockAction block
         ]
     ]
+
+
+viewFocusBlockAction : Block -> Html Msg
+viewFocusBlockAction block =
+    div
+        [ class "block-action focus-block"
+        , onClick <| ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock block.uuid
+        ]
+        [ FASolid.arrow_right
+        ]
+
+
+viewDeleteBlockAction : Block -> Html Msg
+viewDeleteBlockAction block =
+    div
+        [ class "block-action delete-block"
+        , onClick <| ToJs <| RemoveBlock block
+        ]
+        [ FASolid.trash ]
 
 
 viewBlockItemWithSelection : String -> Block -> Html Msg
 viewBlockItemWithSelection uuid block =
     if uuid == block.uuid then
-        li [ class "block-item block-item__selected", style [ ( "borderColor", colorToCssRgbString block.color ) ] ] <|
+        li
+            [ class "block-item block-item__selected"
+            , style [ ( "borderColor", colorToCssRgbString block.color ) ]
+            ]
+        <|
             viewBlockItemContent block
     else
         viewBlockItem block
