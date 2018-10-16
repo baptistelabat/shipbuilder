@@ -944,9 +944,9 @@ updateModelToJs msg model =
                         input
                             |> asStringInNumberInput (.number <| getPartition model.partitions)
                 )
-                            |> asNumberInPartition (getPartition model.partitions)
+                    |> asNumberInPartition (getPartition model.partitions)
                     |> asPartitionInPartitions model.partitions
-                            |> asPartitionsInModel model
+                    |> asPartitionsInModel model
 
         UpdatePartitionSpacing partitionType input ->
             let
@@ -970,7 +970,7 @@ updateModelToJs msg model =
                 )
                     |> asSpacingInPartition (getPartition model.partitions)
                     |> asPartitionInPartitions model.partitions
-                            |> asPartitionsInModel model
+                    |> asPartitionsInModel model
 
         UpdatePosition axis block input ->
             let
