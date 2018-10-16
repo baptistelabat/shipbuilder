@@ -703,6 +703,7 @@ type ToJsMsg
     | SelectBlock Block
     | SelectHullReference HullReference
     | SwitchViewMode ViewMode
+    | UpdatePartitionNumber PartitionType String
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
 
@@ -894,6 +895,9 @@ updateModelToJs msg model =
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
 
+        UpdatePartitionNumber partitionType input ->
+                        model
+
         UpdatePosition axis block input ->
             let
                 axisFloatInput : FloatInput
@@ -1029,6 +1033,9 @@ msg2json model action =
 
         SwitchViewMode newViewMode ->
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
+
+        UpdatePartitionNumber partitionType input ->
+            Nothing
 
         UpdatePosition axis block input ->
             Maybe.map
