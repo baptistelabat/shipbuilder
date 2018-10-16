@@ -331,23 +331,23 @@ type PartitionType
 
 
 type alias Decks =
-    { number : Int
+    { number : IntInput
     , spacing : FloatInput
     }
 
 
 type alias Bulkheads =
-    { number : Int
+    { number : IntInput
     , spacing : FloatInput
     }
 
 
-asNumberInPartition : { number : Int, spacing : FloatInput } -> Int -> { number : Int, spacing : FloatInput }
+asNumberInPartition : { number : IntInput, spacing : FloatInput } -> IntInput -> { number : IntInput, spacing : FloatInput }
 asNumberInPartition partition newNumber =
     { partition | number = newNumber }
 
 
-asSpacingInPartition : { number : Int, spacing : FloatInput } -> FloatInput -> { number : Int, spacing : FloatInput }
+asSpacingInPartition : { number : IntInput, spacing : FloatInput } -> FloatInput -> { number : IntInput, spacing : FloatInput }
 asSpacingInPartition partition newSpacing =
     { partition | spacing = newSpacing }
 
@@ -491,8 +491,8 @@ initModel =
         , selectedHullReference = Nothing
         , blocks = DictList.empty
         , partitions =
-            { decks = { number = 0, spacing = { string = "0", value = 0 } }
-            , bulkheads = { number = 0, spacing = { string = "0", value = 0 } }
+            { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
+            , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
             }
         }
 
@@ -1446,7 +1446,7 @@ viewDecks decks =
             [ div
                 [ class "input-group" ]
                 [ label [ for "decks-number" ] [ text "Number of decks" ]
-                , input [ type_ "number", id "decks-number", value <| toString decks.number, onInput <| ToJs << UpdatePartitionNumber Deck ] []
+                , input [ type_ "number", id "decks-number", value decks.number.string, onInput <| ToJs << UpdatePartitionNumber Deck ] []
                 ]
             , div
                 [ class "input-group" ]
@@ -1471,7 +1471,7 @@ viewBulkheads bulkheads =
             [ div
                 [ class "input-group" ]
                 [ label [ for "bulkheads-number" ] [ text "Number of bulkheads" ]
-                , input [ type_ "number", id "bulkheads-number", value <| toString bulkheads.number ] []
+                , input [ type_ "number", id "bulkheads-number", value bulkheads.number.string ] []
                 ]
             , div
                 [ class "input-group" ]
