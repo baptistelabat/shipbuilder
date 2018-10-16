@@ -712,6 +712,7 @@ type NoJsMsg
     = NoOp
     | SyncPositionInput Block
     | SyncSizeInput Block
+    | SyncPartitions
     | RenameBlock Block String
 
 
@@ -720,6 +721,33 @@ updateNoJs msg model =
     case msg of
         NoOp ->
             model ! []
+
+        SyncPartitions ->
+            let
+                syncedDecks : Decks
+                syncedDecks =
+                    { number =
+                        syncNumberInput model.partitions.decks.number
+                    , spacing =
+                        syncNumberInput model.partitions.decks.spacing
+                    }
+
+                syncedBulkheads : Bulkheads
+                syncedBulkheads =
+                    { number =
+                        syncNumberInput model.partitions.bulkheads.number
+                    , spacing =
+                        syncNumberInput model.partitions.bulkheads.spacing
+                    }
+
+                updatedModel : Model
+                updatedModel =
+                    syncedDecks
+                        |> asDecksInPartitions model.partitions
+                        |> flip asBulkheadsInPartitions syncedBulkheads
+                        |> asPartitionsInModel model
+            in
+                updatedModel ! []
 
         SyncPositionInput block ->
             (syncNumberInput block.position.x
@@ -915,6 +943,7 @@ updateModelToJs msg model =
                             |> asPartitionsInModel model
 
                     Err error ->
+                        -- TODO : display
                         input
                             |> asStringInNumberInput (.number <| getPartition model.partitions)
                             |> asNumberInPartition (getPartition model.partitions)
@@ -1476,6 +1505,7 @@ viewDecks decks =
                     , id "decks-number"
                     , value decks.number.string
                     , onInput <| ToJs << UpdatePartitionNumber Deck
+                    , onBlur <| NoJs SyncPartitions
                     ]
                     []
                 ]
@@ -1516,6 +1546,7 @@ viewBulkheads bulkheads =
                     , id "bulkheads-number"
                     , value bulkheads.number.string
                     , onInput <| ToJs << UpdatePartitionNumber Bulkhead
+                    , onBlur <| NoJs SyncPartitions
                     ]
                     []
                 ]
