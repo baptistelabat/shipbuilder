@@ -138,17 +138,17 @@ syncSizeDecoder =
 decodePosition : Decode.Decoder Position
 decodePosition =
     Pipeline.decode Position
-        |> Pipeline.required "x" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "y" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "z" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "x" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "y" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "z" (Decode.map numberToNumberInput Decode.float)
 
 
 decodeSize : Decode.Decoder Size
 decodeSize =
     Pipeline.decode Size
-        |> Pipeline.required "x" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "y" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "z" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "x" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "y" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "z" (Decode.map numberToNumberInput Decode.float)
 
 
 decodeFloatInput : Decode.Decoder FloatInput
@@ -158,9 +158,9 @@ decodeFloatInput =
         |> Pipeline.required "string" Decode.string
 
 
-floatToFloatInput : Float -> FloatInput
-floatToFloatInput float =
-    { value = float, string = toString float }
+numberToNumberInput : a -> { value : a, string : String }
+numberToNumberInput number =
+    { value = number, string = toString number }
 
 
 decodeRgbRecord : Decode.Decoder Color
