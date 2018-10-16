@@ -896,7 +896,30 @@ updateModelToJs msg model =
             { model | viewMode = newViewMode }
 
         UpdatePartitionNumber partitionType input ->
-                        model
+            let
+                ( getPartition, updatePartition ) =
+                    case partitionType of
+                        Deck ->
+                            ( .decks, asDecksInPartitions )
+
+                        Bulkhead ->
+                            ( .bulkheads, asBulkheadsInPartitions )
+            in
+                case String.toInt input of
+                    Ok value ->
+                        abs value
+                            |> asValueInNumberInput (.number <| getPartition model.partitions)
+                            |> flip asStringInNumberInput (toString <| abs value)
+                            |> asNumberInPartition (getPartition model.partitions)
+                            |> updatePartition model.partitions
+                            |> asPartitionsInModel model
+
+                    Err error ->
+                        input
+                            |> asStringInNumberInput (.number <| getPartition model.partitions)
+                            |> asNumberInPartition (getPartition model.partitions)
+                            |> updatePartition model.partitions
+                            |> asPartitionsInModel model
 
         UpdatePosition axis block input ->
             let
