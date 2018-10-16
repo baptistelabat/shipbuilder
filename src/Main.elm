@@ -1445,13 +1445,28 @@ viewDecks decks =
             [ class "stacked-subpanel-content" ]
             [ div
                 [ class "input-group" ]
-                [ label [ for "decks-number" ] [ text "Number of decks" ]
-                , input [ type_ "number", id "decks-number", value decks.number.string, onInput <| ToJs << UpdatePartitionNumber Deck ] []
+                [ label
+                    [ for "decks-number" ]
+                    [ text "Number of decks" ]
+                , input
+                    [ type_ "number"
+                    , id "decks-number"
+                    , value decks.number.string
+                    , onInput <| ToJs << UpdatePartitionNumber Deck
+                    ]
+                    []
                 ]
             , div
                 [ class "input-group" ]
-                [ label [ for "decks-spacing" ] [ text "Spacing of decks" ]
-                , input [ type_ "text", id "decks-spacing", value decks.spacing.string, onInput <| ToJs << UpdatePartitionNumber Bulkhead ] []
+                [ label
+                    [ for "decks-spacing" ]
+                    [ text "Spacing of decks" ]
+                , input
+                    [ type_ "text"
+                    , id "decks-spacing"
+                    , value decks.spacing.string
+                    ]
+                    []
                 ]
             ]
         ]
@@ -1470,8 +1485,16 @@ viewBulkheads bulkheads =
             [ class "stacked-subpanel-content" ]
             [ div
                 [ class "input-group" ]
-                [ label [ for "bulkheads-number" ] [ text "Number of bulkheads" ]
-                , input [ type_ "number", id "bulkheads-number", value bulkheads.number.string ] []
+                [ label
+                    [ for "bulkheads-number" ]
+                    [ text "Number of bulkheads" ]
+                , input
+                    [ type_ "number"
+                    , id "bulkheads-number"
+                    , value bulkheads.number.string
+                    , onInput <| ToJs << UpdatePartitionNumber Bulkhead
+                    ]
+                    []
                 ]
             , div
                 [ class "input-group" ]
