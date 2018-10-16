@@ -943,7 +943,6 @@ updateModelToJs msg model =
                             |> asPartitionsInModel model
 
                     Err error ->
-                        -- TODO : display
                         input
                             |> asStringInNumberInput (.number <| getPartition model.partitions)
                             |> asNumberInPartition (getPartition model.partitions)
