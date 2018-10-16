@@ -337,6 +337,31 @@ type alias Bulkheads =
     }
 
 
+asNumberInPartition : { number : Int, spacing : FloatInput } -> Int -> { number : Int, spacing : FloatInput }
+asNumberInPartition partition newNumber =
+    { partition | number = newNumber }
+
+
+asSpacingInPartition : { number : Int, spacing : FloatInput } -> FloatInput -> { number : Int, spacing : FloatInput }
+asSpacingInPartition partition newSpacing =
+    { partition | spacing = newSpacing }
+
+
+asDecksInPartitions : PartitionsData -> Decks -> PartitionsData
+asDecksInPartitions partitions newDecks =
+    { partitions | decks = newDecks }
+
+
+asBulkheadsInPartitions : PartitionsData -> Bulkheads -> PartitionsData
+asBulkheadsInPartitions partitions newBulkheads =
+    { partitions | bulkheads = newBulkheads }
+
+
+asPartitionsInModel : Model -> PartitionsData -> Model
+asPartitionsInModel model newPartitions =
+    { model | partitions = newPartitions }
+
+
 stringifyEncodeValue : Encode.Value -> String
 stringifyEncodeValue value =
     Encode.encode 4 value
