@@ -294,7 +294,7 @@ type alias Model =
     , selectedBlock : Maybe String
     , selectedHullReference : Maybe String
     , blocks : Blocks
-    , partitions : Partitions
+    , partitions : PartitionsData
     }
 
 
@@ -319,7 +319,7 @@ type alias Blocks =
     DictList String Block
 
 
-type alias Partitions =
+type alias PartitionsData =
     { decks : Decks
     , bulkheads : Bulkheads
     }
