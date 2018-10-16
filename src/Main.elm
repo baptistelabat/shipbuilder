@@ -1671,6 +1671,12 @@ type alias FloatInput =
     }
 
 
+type alias IntInput =
+    { value : Int
+    , string : String
+    }
+
+
 viewEditableBlockName : Block -> Html Msg
 viewEditableBlockName block =
     input
