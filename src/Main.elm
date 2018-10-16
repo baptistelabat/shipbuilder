@@ -1517,6 +1517,7 @@ viewDecks decks =
                     [ type_ "text"
                     , id "decks-spacing"
                     , value decks.spacing.string
+                    , onBlur <| NoJs SyncPartitions
                     ]
                     []
                 ]
@@ -1551,8 +1552,16 @@ viewBulkheads bulkheads =
                 ]
             , div
                 [ class "input-group" ]
-                [ label [ for "bulkheads-spacing" ] [ text "Spacing of bulkheads" ]
-                , input [ type_ "text", id "bulkheads-spacing", value bulkheads.spacing.string ] []
+                [ label
+                    [ for "bulkheads-spacing" ]
+                    [ text "Spacing of bulkheads" ]
+                , input
+                    [ type_ "text"
+                    , id "bulkheads-spacing"
+                    , value bulkheads.spacing.string
+                    , onBlur <| NoJs SyncPartitions
+                    ]
+                    []
                 ]
             ]
         ]
