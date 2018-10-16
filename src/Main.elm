@@ -415,6 +415,30 @@ encodeSize size =
         ]
 
 
+encodeDecks : Decks -> Encode.Value
+encodeDecks decks =
+    Encode.object
+        [ ( "number", Encode.int decks.number.value )
+        , ( "spacing", Encode.float decks.spacing.value )
+        ]
+
+
+encodeBulkheads : Bulkheads -> Encode.Value
+encodeBulkheads bulkheads =
+    Encode.object
+        [ ( "number", Encode.int bulkheads.number.value )
+        , ( "spacing", Encode.float bulkheads.spacing.value )
+        ]
+
+
+encodePartitions : PartitionsData -> Encode.Value
+encodePartitions partitions =
+    Encode.object
+        [ ( "decks", encodeDecks partitions.decks )
+        , ( "bulkheads", encodeBulkheads partitions.bulkheads )
+        ]
+
+
 addBlockTo : Blocks -> Block -> Blocks
 addBlockTo blocks block =
     DictList.insert block.uuid block blocks
