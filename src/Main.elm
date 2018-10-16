@@ -1446,12 +1446,12 @@ viewDecks decks =
             [ div
                 [ class "input-group" ]
                 [ label [ for "decks-number" ] [ text "Number of decks" ]
-                , input [ type_ "number", id "decks-number", value <| toString decks.number ] []
+                , input [ type_ "number", id "decks-number", value <| toString decks.number, onInput <| ToJs << UpdatePartitionNumber Deck ] []
                 ]
             , div
                 [ class "input-group" ]
                 [ label [ for "decks-spacing" ] [ text "Spacing of decks" ]
-                , input [ type_ "text", id "decks-spacing", value decks.spacing.string ] []
+                , input [ type_ "text", id "decks-spacing", value decks.spacing.string, onInput <| ToJs << UpdatePartitionNumber Bulkhead ] []
                 ]
             ]
         ]
