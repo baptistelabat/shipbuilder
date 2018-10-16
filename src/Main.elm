@@ -704,6 +704,7 @@ type ToJsMsg
     | SelectHullReference HullReference
     | SwitchViewMode ViewMode
     | UpdatePartitionNumber PartitionType String
+    | UpdatePartitionSpacing PartitionType String
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
 
@@ -925,7 +926,7 @@ updateModelToJs msg model =
 
         UpdatePartitionNumber partitionType input ->
             let
-                ( getPartition, updatePartition ) =
+                ( getPartition, asPartitionInPartitions ) =
                     case partitionType of
                         Deck ->
                             ( .decks, asDecksInPartitions )
@@ -933,20 +934,42 @@ updateModelToJs msg model =
                         Bulkhead ->
                             ( .bulkheads, asBulkheadsInPartitions )
             in
-                case String.toInt input of
+                (case String.toInt input of
                     Ok value ->
                         abs value
                             |> asValueInNumberInput (.number <| getPartition model.partitions)
-                            |> flip asStringInNumberInput (toString <| abs value)
-                            |> asNumberInPartition (getPartition model.partitions)
-                            |> updatePartition model.partitions
-                            |> asPartitionsInModel model
+                            |> flip asStringInNumberInput input
 
                     Err error ->
                         input
                             |> asStringInNumberInput (.number <| getPartition model.partitions)
+                )
                             |> asNumberInPartition (getPartition model.partitions)
-                            |> updatePartition model.partitions
+                    |> asPartitionInPartitions model.partitions
+                            |> asPartitionsInModel model
+
+        UpdatePartitionSpacing partitionType input ->
+            let
+                ( getPartition, asPartitionInPartitions ) =
+                    case partitionType of
+                        Deck ->
+                            ( .decks, asDecksInPartitions )
+
+                        Bulkhead ->
+                            ( .bulkheads, asBulkheadsInPartitions )
+            in
+                (case String.toFloat input of
+                    Ok value ->
+                        abs value
+                            |> asValueInNumberInput (.spacing <| getPartition model.partitions)
+                            |> flip asStringInNumberInput input
+
+                    Err error ->
+                        input
+                            |> asStringInNumberInput (.spacing <| getPartition model.partitions)
+                )
+                    |> asSpacingInPartition (getPartition model.partitions)
+                    |> asPartitionInPartitions model.partitions
                             |> asPartitionsInModel model
 
         UpdatePosition axis block input ->
@@ -1086,6 +1109,9 @@ msg2json model action =
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
 
         UpdatePartitionNumber partitionType input ->
+            Nothing
+
+        UpdatePartitionSpacing partitionType input ->
             Nothing
 
         UpdatePosition axis block input ->
@@ -1517,6 +1543,7 @@ viewDecks decks =
                     [ type_ "text"
                     , id "decks-spacing"
                     , value decks.spacing.string
+                    , onInput <| ToJs << UpdatePartitionSpacing Deck
                     , onBlur <| NoJs SyncPartitions
                     ]
                     []
@@ -1559,6 +1586,7 @@ viewBulkheads bulkheads =
                     [ type_ "text"
                     , id "bulkheads-spacing"
                     , value bulkheads.spacing.string
+                    , onInput <| ToJs << UpdatePartitionSpacing Bulkhead
                     , onBlur <| NoJs SyncPartitions
                     ]
                     []
