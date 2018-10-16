@@ -593,14 +593,14 @@ updateBlockInModel block model =
     { model | blocks = updateBlockInBlocks block model.blocks }
 
 
-asValueInFloatInput : FloatInput -> Float -> FloatInput
-asValueInFloatInput floatInput value =
-    { floatInput | value = value }
+asValueInNumberInput : { value : a, string : String } -> a -> { value : a, string : String }
+asValueInNumberInput numberInput value =
+    { numberInput | value = value }
 
 
-asStringInFloatInput : FloatInput -> String -> FloatInput
-asStringInFloatInput floatInput string =
-    { floatInput | string = string }
+asStringInNumberInput : { value : a, string : String } -> String -> { value : a, string : String }
+asStringInNumberInput numberInput string =
+    { numberInput | string = string }
 
 
 asAxisInPosition : Axis -> (Position -> FloatInput -> Position)
@@ -669,8 +669,8 @@ asSizeInBlock block size =
     { block | size = size }
 
 
-syncFloatInput : FloatInput -> FloatInput
-syncFloatInput input =
+syncNumberInput : { value : a, string : String } -> { value : a, string : String }
+syncNumberInput input =
     { input | string = toString input.value }
 
 
@@ -722,20 +722,20 @@ updateNoJs msg model =
             model ! []
 
         SyncPositionInput block ->
-            (syncFloatInput block.position.x
+            (syncNumberInput block.position.x
                 |> asXInPosition block.position
-                |> flip asYInPosition (syncFloatInput block.position.y)
-                |> flip asZInPosition (syncFloatInput block.position.z)
+                |> flip asYInPosition (syncNumberInput block.position.y)
+                |> flip asZInPosition (syncNumberInput block.position.z)
                 |> asPositionInBlock block
                 |> flip updateBlockInModel model
             )
                 ! []
 
         SyncSizeInput blockToSync ->
-            (syncFloatInput blockToSync.size.height
+            (syncNumberInput blockToSync.size.height
                 |> asHeightInSize blockToSync.size
-                |> flip asWidthInSize (syncFloatInput blockToSync.size.width)
-                |> flip asLengthInSize (syncFloatInput blockToSync.size.length)
+                |> flip asWidthInSize (syncNumberInput blockToSync.size.width)
+                |> flip asLengthInSize (syncNumberInput blockToSync.size.length)
                 |> asSizeInBlock blockToSync
                 |> flip updateBlockInModel model
             )
@@ -910,8 +910,8 @@ updateModelToJs msg model =
                             updatedBlock : Block
                             updatedBlock =
                                 value
-                                    |> asValueInFloatInput axisFloatInput
-                                    |> flip asStringInFloatInput input
+                                    |> asValueInNumberInput axisFloatInput
+                                    |> flip asStringInNumberInput input
                                     |> (asAxisInPosition axis) block.position
                                     |> asPositionInBlock block
                         in
@@ -919,7 +919,7 @@ updateModelToJs msg model =
 
                     Err error ->
                         input
-                            |> asStringInFloatInput axisFloatInput
+                            |> asStringInNumberInput axisFloatInput
                             |> (asAxisInPosition axis) block.position
                             |> asPositionInBlock block
                             |> flip updateBlockInModel model
@@ -942,8 +942,8 @@ updateModelToJs msg model =
                             updatedBlock : Block
                             updatedBlock =
                                 newValue
-                                    |> asValueInFloatInput dimensionFloatInput
-                                    |> flip asStringInFloatInput input
+                                    |> asValueInNumberInput dimensionFloatInput
+                                    |> flip asStringInNumberInput input
                                     |> (asDimensionInSize dimension) block.size
                                     |> asSizeInBlock block
                         in
@@ -951,7 +951,7 @@ updateModelToJs msg model =
 
                     Err message ->
                         input
-                            |> asStringInFloatInput dimensionFloatInput
+                            |> asStringInNumberInput dimensionFloatInput
                             |> (asDimensionInSize dimension) block.size
                             |> asSizeInBlock block
                             |> flip updateBlockInModel model
@@ -1048,8 +1048,8 @@ msg2json model action =
                         updatedBlock : Block
                         updatedBlock =
                             value
-                                |> asValueInFloatInput axisFloatInput
-                                |> flip asStringInFloatInput input
+                                |> asValueInNumberInput axisFloatInput
+                                |> flip asStringInNumberInput input
                                 |> (asAxisInPosition axis) block.position
                                 |> asPositionInBlock block
                     in
@@ -1077,8 +1077,8 @@ msg2json model action =
                         updatedBlock : Block
                         updatedBlock =
                             newValue
-                                |> asValueInFloatInput dimensionFloatInput
-                                |> flip asStringInFloatInput input
+                                |> asValueInNumberInput dimensionFloatInput
+                                |> flip asStringInNumberInput input
                                 |> (asDimensionInSize dimension) block.size
                                 |> asSizeInBlock block
                     in
