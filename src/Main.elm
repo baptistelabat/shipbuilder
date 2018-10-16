@@ -325,6 +325,11 @@ type alias PartitionsData =
     }
 
 
+type PartitionType
+    = Bulkhead
+    | Deck
+
+
 type alias Decks =
     { number : Int
     , spacing : FloatInput
