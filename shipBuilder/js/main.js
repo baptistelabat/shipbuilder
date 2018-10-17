@@ -242,6 +242,7 @@ let intersectPartitionWithHull = function () {
                         default:
                             break;
                     }
+                    sendToElm("dismiss-toast", "intersections");
                 }
             }
 
@@ -251,7 +252,10 @@ let intersectPartitionWithHull = function () {
                 const lineno = e.lineno;
 
                 console.log(`[WORKER ERROR ${filename}:${lineno}]`, msg);
+                sendToElm("display-toast", { type: "error", message: "Error while computing intersections", key: "intersections" })
             }
+
+            sendToElm("display-toast", { type: "processing", message: "Computing intersections", key: "intersections" })
             intersectionWorker.postMessage({
                 tag: "intersect",
                 data: {
@@ -277,6 +281,7 @@ let intersectPartitionWithHull = function () {
             displayPartitionsIntersection(getIntersectOfPartitionsWithHull(hull, partitions));
         }
     } else if (intersectionWorker) {
+        sendToElm("dismiss-toast", "intersections");
         intersectionWorker.terminate();
     }
 
