@@ -214,7 +214,7 @@ let intersectPartitionWithHull = function () {
     partitions.forEach(partition => partition.visible = true);
     intersects.forEach(intersect => scene.remove(intersect));
 
-    if (hull) {
+    if (hull && partitions.length) {
         hull.geometry.applyMatrix(hull.matrix);
         hull.position.set(0, 0, 0);
         hull.rotation.set(0, 0, 0);
@@ -223,7 +223,10 @@ let intersectPartitionWithHull = function () {
 
         partitions.forEach(partition => partition.updateMatrix());
         if (window.Worker) {
-            if (intersectionWorker) { console.log("terminating previous intersection worker"); intersectionWorker.terminate(); }
+            if (intersectionWorker) {
+                console.log("terminating previous intersection worker");
+                intersectionWorker.terminate();
+            }
             intersectionWorker = new Worker('js/worker.js');
 
             intersectionWorker.onmessage = function (e) {
@@ -273,6 +276,8 @@ let intersectPartitionWithHull = function () {
         } else {
             displayPartitionsIntersection(getIntersectOfPartitionsWithHull(hull, partitions));
         }
+    } else if (intersectionWorker) {
+        intersectionWorker.terminate();
     }
 
 
