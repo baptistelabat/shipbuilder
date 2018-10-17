@@ -1759,6 +1759,7 @@ viewDecks decks =
                     [ type_ "number"
                     , id "decks-number"
                     , value decks.number.string
+                    , Html.Attributes.min "0"
                     , onInput <| ToJs << UpdatePartitionNumber Deck
                     , onBlur <| NoJs SyncPartitions
                     ]
@@ -1802,6 +1803,7 @@ viewBulkheads bulkheads =
                     [ type_ "number"
                     , id "bulkheads-number"
                     , value bulkheads.number.string
+                    , Html.Attributes.min "0"
                     , onInput <| ToJs << UpdatePartitionNumber Bulkhead
                     , onBlur <| NoJs SyncPartitions
                     ]
