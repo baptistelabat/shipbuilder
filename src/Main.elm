@@ -1174,9 +1174,49 @@ msg2json model action =
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
 
         UpdatePartitionNumber partitionType input ->
+            let
+                ( tag, partition, computePartition ) =
+                    case partitionType of
+                        Deck ->
+                            ( "make-decks", model.partitions.decks, computeDecks )
+
+                        Bulkhead ->
+                            ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
+            in
+                case String.toInt input of
+                    Ok value ->
+                        Just
+                            { tag = tag
+                            , data =
+                                encodeComputedPartitions <|
+                                    computePartition
+                                        { partition | number = numberToNumberInput <| abs value }
+                            }
+
+                    Err error ->
             Nothing
 
         UpdatePartitionSpacing partitionType input ->
+            let
+                ( tag, partition, computePartition ) =
+                    case partitionType of
+                        Deck ->
+                            ( "make-decks", model.partitions.decks, computeDecks )
+
+                        Bulkhead ->
+                            ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
+            in
+                case String.toFloat input of
+                    Ok value ->
+                        Just
+                            { tag = tag
+                            , data =
+                                encodeComputedPartitions <|
+                                    computePartition
+                                        { partition | spacing = numberToNumberInput <| abs value }
+                            }
+
+                    Err error ->
             Nothing
 
         UpdatePosition axis block input ->
