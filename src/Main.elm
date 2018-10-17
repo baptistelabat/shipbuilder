@@ -171,9 +171,89 @@ decodeRgbRecord =
         |> Pipeline.required "blue" Decode.int
 
 
+type alias Toasts =
+    DictList String Toast
+
+
+emptyToasts : Toasts
+emptyToasts =
+    DictList.empty
+
+
+addToast : Toast -> Toasts -> Toasts
+addToast newToast toasts =
+    DictList.insert newToast.key newToast toasts
+
+
+removeToast : String -> Toasts -> Toasts
+removeToast keyToRemove toasts =
+    DictList.remove keyToRemove toasts
+
+
+type alias Toast =
+    { key : String
+    , message : String
+    , type_ : ToastType
+    }
+
+
+type ToastType
+    = Error
+    | Info
+    | Processing
+    | Success
+
+
+toastTypeDecoder : Decode.Decoder ToastType
+toastTypeDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "info" ->
+                        Decode.succeed Info
+
+                    "error" ->
+                        Decode.succeed Error
+
+                    "success" ->
+                        Decode.succeed Success
+
+                    "processing" ->
+                        Decode.succeed Processing
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown toast type : " ++ somethingElse
+            )
+
+
+toastDecoder : Decode.Decoder Toast
+toastDecoder =
+    Pipeline.decode Toast
+        |> Pipeline.required "key" Decode.string
+        |> Pipeline.required "message" Decode.string
+        |> Pipeline.required "type" toastTypeDecoder
+
+
 jsMsgToMsg : JsData -> Msg
 jsMsgToMsg js =
     case js.tag of
+        "dismiss-toast" ->
+            case Decode.decodeValue Decode.string js.data of
+                Ok key ->
+                    NoJs <| DismissToast key
+
+                Err message ->
+                    FromJs <| JSError message
+
+        "display-toast" ->
+            case Decode.decodeValue toastDecoder js.data of
+                Ok toast ->
+                    NoJs <| DisplayToast toast
+
+                Err message ->
+                    FromJs <| JSError message
+
         "save-data" ->
             case Decode.decodeValue saveFileDecoder js.data of
                 Ok fileContents ->
@@ -294,6 +374,7 @@ type alias Model =
     , selectedBlock : Maybe String
     , selectedHullReference : Maybe String
     , blocks : Blocks
+    , toasts : Toasts
     , partitions : PartitionsData
     }
 
@@ -555,6 +636,7 @@ initModel =
         , selectedBlock = Nothing
         , selectedHullReference = Nothing
         , blocks = DictList.empty
+        , toasts = emptyToasts
         , partitions =
             { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
             , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
@@ -775,7 +857,9 @@ type ToJsMsg
 
 
 type NoJsMsg
-    = NoOp
+    = DismissToast String
+    | DisplayToast Toast
+    | NoOp
     | SyncPositionInput Block
     | SyncSizeInput Block
     | SyncPartitions
@@ -785,6 +869,12 @@ type NoJsMsg
 updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
 updateNoJs msg model =
     case msg of
+        DismissToast keyToDismiss ->
+            { model | toasts = removeToast keyToDismiss model.toasts } ! []
+
+        DisplayToast toast ->
+            { model | toasts = addToast toast model.toasts } ! []
+
         NoOp ->
             model ! []
 
@@ -1400,6 +1490,7 @@ view model =
     div [ id "elm-root" ]
         [ viewHeader model
         , viewContent model
+        , viewToasts model.toasts
         ]
 
 
@@ -1426,6 +1517,40 @@ viewContent model =
         [ viewSideMenu model
         , viewWorkspace model
         ]
+
+
+viewToasts : Toasts -> Html Msg
+viewToasts toasts =
+    ul [ class "toasts" ] <|
+        List.map viewToast <|
+            DictList.values toasts
+
+
+viewToast : Toast -> Html Msg
+viewToast toast =
+    let
+        icon : Html Msg
+        icon =
+            case toast.type_ of
+                Info ->
+                    FASolid.info
+
+                Success ->
+                    FASolid.check
+
+                Error ->
+                    FASolid.exclamation_triangle
+
+                Processing ->
+                    FASolid.spinner
+    in
+        li
+            [ class <| "toast toast__" ++ (String.toLower <| toString toast.type_)
+            , onClick <| NoJs <| DismissToast toast.key
+            ]
+            [ icon
+            , p [] [ text toast.message ]
+            ]
 
 
 colorToCssRgbString : Color -> String
