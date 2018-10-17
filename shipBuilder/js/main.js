@@ -242,6 +242,13 @@ let intersectPartitionWithHull = function () {
                 }
             }
 
+            intersectionWorker.onerror = function (e) {
+                const msg = e.message;
+                const filename = e.filename;
+                const lineno = e.lineno;
+
+                console.log(`[WORKER ERROR ${filename}:${lineno}]`, msg);
+            }
             intersectionWorker.postMessage({
                 tag: "intersect",
                 data: {
