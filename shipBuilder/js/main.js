@@ -56,6 +56,9 @@ app.ports.toJs.subscribe(function (message) {
         case "load-hull":
             loadHull(data);
             break;
+        case "make-decks":
+            makeDecks(data);
+            break;
         case "remove-block":
             removeObject(data);
             break;
@@ -172,6 +175,34 @@ let absVector3 = function (vector3) {
 }
 
 
+let makeDecks = function (decks) {
+    const oldDecks = scene.children.filter(child =>
+        child.sbType
+        && child.sbType === "partition"
+        && child.partitionType
+        && child.partitionType === "deck"
+    );
+    oldDecks.forEach(oldDeck => removeFromScene(oldDeck));
+
+    const deckColor = new THREE.Color(0.5, 0.5, 1);
+
+    decks.forEach(deck => {
+        const index = deck.index;
+        const zPosition = deck.zPosition;
+        const position = toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform);
+        const geometry = new THREE.BoxGeometry(1000, 1, 1000);
+        var material = new THREE.MeshBasicMaterial({ color: deckColor, side: THREE.DoubleSide });
+
+        var deck = new THREE.Mesh(geometry, material);
+        deck.position.copy(position);
+        deck.sbType = "partition";
+        deck.baseColor = deckColor;
+        deck.partitionType = "deck";
+        deck.partitionIndex = index;
+        scene.add(deck);
+    })
+
+}
 let loadHull = function (path) {
     loader.load(path, (bufferGeometry) => {
         // there can only be one hull in the scene
@@ -634,7 +665,7 @@ let onClick = function (event) {
         case 1: // left click
             if (activeViewport && hovered && !preventSelection) {
                 selectObject(hovered);
-                sendToElm("select", selected.uuid);
+                if (selected) { sendToElm("select", selected.uuid); }
             }
             break;
         case 2: // middle click
