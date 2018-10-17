@@ -202,7 +202,99 @@ let makeDecks = function (decks) {
         scene.add(deck);
     })
 
+    intersectPartitionWithHull();
 }
+
+let intersectionWorker = null;
+
+let intersectPartitionWithHull = function () {
+    const hull = scene.children.find(child => child.sbType && child.sbType === "hull");
+    const partitions = scene.children.filter(child => child.sbType && child.sbType === "partition" && child.partitionType !== "intersect");
+    const intersects = scene.children.filter(child => child.sbType && child.sbType === "partition" && child.partitionType === "intersect");
+    partitions.forEach(partition => partition.visible = true);
+    intersects.forEach(intersect => scene.remove(intersect));
+
+    if (hull) {
+        hull.geometry.applyMatrix(hull.matrix);
+        hull.position.set(0, 0, 0);
+        hull.rotation.set(0, 0, 0);
+        hull.scale.set(1, 1, 1);
+        hull.updateMatrix();
+
+        partitions.forEach(partition => partition.updateMatrix());
+        if (window.Worker) {
+            if (intersectionWorker) { console.log("terminating previous intersection worker"); intersectionWorker.terminate(); }
+            intersectionWorker = new Worker('js/worker.js');
+
+            intersectionWorker.onmessage = function (e) {
+                const msg = e.data;
+                console.log('Message received from worker', msg);
+
+                if (msg.tag && msg.data) {
+                    switch (msg.tag) {
+                        case "intersections":
+                            displayPartitionsIntersection(msg.data);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            intersectionWorker.postMessage({
+                tag: "intersect",
+                data: {
+                    hull: {
+                        matrix: hull.matrix,
+                        geometry: {
+                            faces: hull.geometry.faces,
+                            vertices: hull.geometry.vertices
+                        }
+                    },
+                    partitions: partitions.map(partition => {
+                        return {
+                            matrix: partition.matrix, geometry: {
+                                faces: partition.geometry.faces,
+                                vertices: partition.geometry.vertices
+                            }
+                        }
+                    })
+                }
+            });
+            console.log('Message posted to worker');
+        } else {
+            displayPartitionsIntersection(getIntersectOfPartitionsWithHull(hull, partitions));
+        }
+    }
+
+
+}
+
+let displayPartitionsIntersection = function (intersections) {
+    const intersectionMeshes = intersections.map(intersection => makeIntersectionMesh(intersection));
+    const partitions = scene.children.filter(child => child.sbType && child.sbType === "partition" && child.partitionType !== "intersect");
+    partitions.forEach(partition => partition.visible = false);
+    intersectionMeshes.forEach(intersectionMesh => scene.add(intersectionMesh));
+}
+
+let makeIntersectionMesh = function (intersection) {
+    // intersection : { matrix: _, geometry: {vertices: _, faces: _}}
+    parseObjectForCsg(intersection);
+    const geometry = new THREE.Geometry();
+    geometry.vertices = intersection.geometry.vertices;
+    geometry.faces = intersection.geometry.faces;
+
+    const material = new THREE.MeshBasicMaterial({ color: 0x005588 /*, opacity: 0.7*/ });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.matrix = intersection.matrix;
+    mesh.sbType = "partition";
+    mesh.partitionType = "intersect";
+    mesh.baseColor = new THREE.Color(0x005588);
+    return mesh;
+}
+
 let loadHull = function (path) {
     loader.load(path, (bufferGeometry) => {
         // there can only be one hull in the scene
