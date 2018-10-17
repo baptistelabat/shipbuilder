@@ -439,6 +439,47 @@ encodePartitions partitions =
         ]
 
 
+encodeComputedPartition : { index : Int, zPosition : Float } -> Encode.Value
+encodeComputedPartition computedDeck =
+    Encode.object
+        [ ( "index", Encode.int computedDeck.index )
+        , ( "zPosition", Encode.float computedDeck.zPosition )
+        ]
+
+
+encodeComputedPartitions : List { index : Int, zPosition : Float } -> Encode.Value
+encodeComputedPartitions computedPartitions =
+    Encode.list <| List.map encodeComputedPartition computedPartitions
+
+
+computeDecks : Decks -> List { index : Int, zPosition : Float }
+computeDecks decks =
+    let
+        initialDeckList : List { index : Int, zPosition : Float }
+        initialDeckList =
+            List.repeat decks.number.value ({ index = 0, zPosition = 0.0 })
+
+        computeDeck : Int -> { index : Int, zPosition : Float } -> { index : Int, zPosition : Float }
+        computeDeck index element =
+            { index = index, zPosition = -1 * (toFloat index) * decks.spacing.value }
+    in
+        List.indexedMap computeDeck initialDeckList
+
+
+computeBulkheads : Bulkheads -> List { index : Int, zPosition : Float }
+computeBulkheads bulkheads =
+    let
+        initialBulkheadList : List { index : Int, zPosition : Float }
+        initialBulkheadList =
+            List.repeat bulkheads.number.value ({ index = 0, zPosition = 0.0 })
+
+        computeBulkhead : Int -> { index : Int, zPosition : Float } -> { index : Int, zPosition : Float }
+        computeBulkhead index element =
+            { index = index, zPosition = (toFloat index) * bulkheads.spacing.value }
+    in
+        List.indexedMap computeBulkhead initialBulkheadList
+
+
 addBlockTo : Blocks -> Block -> Blocks
 addBlockTo blocks block =
     DictList.insert block.uuid block blocks
