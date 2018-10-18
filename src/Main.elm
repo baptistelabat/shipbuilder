@@ -1094,6 +1094,7 @@ type alias HullReference =
 hullReferences : HullReferences
 hullReferences =
     [ { label = "Anthineas", path = "assets/anthineas.stl" }
+    , { label = "KCS", path = "assets/KCS.stl" }
     ]
 
 
