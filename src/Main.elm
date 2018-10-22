@@ -104,6 +104,35 @@ saveFileDecoder =
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
 
 
+type alias SelectPartitionData =
+    { partitionType : PartitionType
+    , partitionIndex : Int
+    }
+
+
+selectPartitionDecoder : Decode.Decoder SelectPartitionData
+selectPartitionDecoder =
+    Pipeline.decode SelectPartitionData
+        |> Pipeline.required "partitionType" (Decode.string |> Decode.andThen partitionTypeFromString)
+        |> Pipeline.required "partitionIndex" Decode.int
+
+
+partitionTypeFromString : String -> Decode.Decoder PartitionType
+partitionTypeFromString str =
+    case str of
+        "deck" ->
+            Decode.succeed Deck
+
+        "bulkhead" ->
+            Decode.succeed Bulkhead
+
+        _ ->
+            Decode.fail <|
+                "Trying to decode partitionType, but "
+                    ++ str
+                    ++ " is not supported."
+
+
 decodeBlocks : Decode.Decoder (List Block)
 decodeBlocks =
     Decode.list decodeBlock
@@ -278,6 +307,14 @@ jsMsgToMsg js =
                 Err message ->
                     FromJs <| JSError message
 
+        "select-partition" ->
+            case Decode.decodeValue selectPartitionDecoder js.data of
+                Ok selectionData ->
+                    FromJs <| SelectPartition selectionData.partitionType selectionData.partitionIndex
+
+                Err message ->
+                    FromJs <| JSError message
+
         "sync-position" ->
             case Decode.decodeValue syncPositionDecoder js.data of
                 Ok syncPosition ->
@@ -314,6 +351,7 @@ addToFloatInput toAdd floatInput =
 
 type FromJsMsg
     = Select String
+    | SelectPartition PartitionType Int
     | Unselect
     | JSError String
     | NewBlock Block
@@ -996,6 +1034,37 @@ updateFromJs jsmsg model =
                             otherViewMode
             in
                 { model | selectedBlock = Maybe.map .uuid maybeBlock, viewMode = updatedViewMode } ! []
+
+        SelectPartition partitionType index ->
+            if model.viewMode == (Partitioning <| OriginDefinition partitionType) then
+                let
+                    ( partition, updatePartition, tag, computePartition ) =
+                        case partitionType of
+                            Deck ->
+                                ( .partitions >> .decks, asDecksInPartitions model.partitions, "make-decks", computeDecks )
+
+                            Bulkhead ->
+                                ( .partitions >> .bulkheads, asBulkheadsInPartitions model.partitions, "make-bulkheads", computeBulkheads )
+
+                    updatedModel : Model
+                    updatedModel =
+                        if index < (.value <| .number (partition model)) && index >= 0 then
+                            { model | partitions = updatePartition <| asZeroInPartition (partition model) index, viewMode = Partitioning PropertiesEdition }
+                        else
+                            model
+
+                    jsCmd : Cmd aMsg
+                    jsCmd =
+                        toJs
+                            { tag = tag
+                            , data =
+                                encodeComputedPartitions <|
+                                    computePartition (partition updatedModel)
+                            }
+                in
+                    updatedModel ! [ jsCmd ]
+            else
+                model ! []
 
         Unselect ->
             { model | selectedBlock = Nothing }
@@ -1820,6 +1889,18 @@ viewDecks isDefiningOrigin decks =
                     ]
                     []
                 ]
+            , div
+                [ class "deck-zero" ]
+                [ (if isDefiningOrigin then
+                    p [] [ text "Defining deck n°0..." ]
+                   else
+                    button
+                        [ disabled <| decks.number.value == 0
+                        , onClick <| ToJs << SwitchViewMode <| Partitioning <| OriginDefinition Deck
+                        ]
+                        [ text "Define deck n°0" ]
+                  )
+                ]
             ]
         ]
 
@@ -1863,6 +1944,18 @@ viewBulkheads isDefiningOrigin bulkheads =
                     , onBlur <| NoJs SyncPartitions
                     ]
                     []
+                ]
+            , div
+                [ class "bulkhead-zero" ]
+                [ (if isDefiningOrigin then
+                    p [] [ text "Defining bulkhead n°0..." ]
+                   else
+                    button
+                        [ disabled <| bulkheads.number.value == 0
+                        , onClick <| ToJs << SwitchViewMode <| Partitioning <| OriginDefinition Bulkhead
+                        ]
+                        [ text "Define bulkhead n°0" ]
+                  )
                 ]
             ]
         ]
