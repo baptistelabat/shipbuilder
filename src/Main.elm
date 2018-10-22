@@ -2057,6 +2057,33 @@ viewBlockProperties block =
         [ class "block-size" ]
       <|
         List.map (flip viewSizeInput block) [ Length, Width, Height ]
+    , viewBlockMassInfo block
+    ]
+
+
+viewBlockMassInfo : Block -> Html Msg
+viewBlockMassInfo block =
+    div
+        [ class "block-mass-info" ]
+        [ div
+            [ class "block-volume" ]
+            [ p
+                [ class "block-volume-label" ]
+                [ text "Volume" ]
+            , p
+                [ class "block-volume-value" ]
+                [ text <| toString <| computeVolume block ]
+            ]
+        , div
+            [ class "input-group block-density" ]
+            [ label [ for "block-density-input" ] [ text "density" ]
+            , input [ type_ "text", id "block-density-input", value <| toString block.density ] []
+            ]
+        , div
+            [ class "input-group block-mass" ]
+            [ label [ for "block-mass-input" ] [ text "mass" ]
+            , input [ type_ "text", id "block-mass-input", value <| toString block.mass ] []
+            ]
     ]
 
 
