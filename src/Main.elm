@@ -627,7 +627,7 @@ initModel =
 
         viewMode : ViewMode
         viewMode =
-            SpaceReservation WholeList
+            HullStudio
     in
         { build = "0.0.1"
         , viewMode = viewMode
