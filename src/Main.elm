@@ -893,6 +893,16 @@ syncNumberInput input =
     { input | string = toString input.value }
 
 
+computeVolume : Block -> Float
+computeVolume block =
+    let
+        size : Size
+        size =
+            block.size
+    in
+        size.height.value * size.width.value * size.length.value
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
