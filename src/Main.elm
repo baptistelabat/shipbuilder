@@ -569,43 +569,61 @@ encodePartitions partitions =
         ]
 
 
-encodeComputedPartition : { index : Int, position : Float } -> Encode.Value
+type alias ComputedPartition =
+    { index : Int
+    , position : Float
+    , number : Int
+    }
+
+
+encodeComputedPartition : ComputedPartition -> Encode.Value
 encodeComputedPartition computedDeck =
     Encode.object
         [ ( "index", Encode.int computedDeck.index )
         , ( "position", Encode.float computedDeck.position )
+        , ( "number", Encode.int computedDeck.number )
         ]
 
 
-encodeComputedPartitions : List { index : Int, position : Float } -> Encode.Value
+encodeComputedPartitions : List ComputedPartition -> Encode.Value
 encodeComputedPartitions computedPartitions =
     Encode.list <| List.map encodeComputedPartition computedPartitions
 
 
-computeDecks : Decks -> List { index : Int, position : Float }
+computeDecks : Decks -> List ComputedPartition
 computeDecks decks =
     let
-        initialDeckList : List { index : Int, position : Float }
+        initialDeckList : List ComputedPartition
         initialDeckList =
-            List.repeat decks.number.value ({ index = 0, position = 0.0 })
+            List.repeat decks.number.value ({ index = 0, position = 0.0, number = 0 })
 
-        computeDeck : Int -> { index : Int, position : Float } -> { index : Int, position : Float }
+        computeDeck : Int -> ComputedPartition -> ComputedPartition
         computeDeck index element =
-            { index = index, position = -1 * (toFloat index) * decks.spacing.value }
+            let
+                number : Int
+                number =
+                    index - decks.zero
+            in
+                { index = index, position = -1 * (toFloat number) * decks.spacing.value, number = number }
     in
         List.indexedMap computeDeck initialDeckList
 
 
-computeBulkheads : Bulkheads -> List { index : Int, position : Float }
+computeBulkheads : Bulkheads -> List ComputedPartition
 computeBulkheads bulkheads =
     let
-        initialBulkheadList : List { index : Int, position : Float }
+        initialBulkheadList : List ComputedPartition
         initialBulkheadList =
-            List.repeat bulkheads.number.value ({ index = 0, position = 0.0 })
+            List.repeat bulkheads.number.value { index = 0, position = 0.0, number = 0 }
 
-        computeBulkhead : Int -> { index : Int, position : Float } -> { index : Int, position : Float }
+        computeBulkhead : Int -> ComputedPartition -> ComputedPartition
         computeBulkhead index element =
-            { index = index, position = (toFloat index) * bulkheads.spacing.value }
+            let
+                number : Int
+                number =
+                    index - bulkheads.zero
+            in
+                { index = index, position = (toFloat number) * bulkheads.spacing.value, number = number }
     in
         List.indexedMap computeBulkhead initialBulkheadList
 
@@ -1846,7 +1864,7 @@ viewPartitioning partitioningView model =
             OriginDefinition Bulkhead ->
                 [ viewDecks False model.partitions.decks
                 , viewBulkheads True model.partitions.bulkheads
-        ]
+                ]
 
 
 viewDecks : Bool -> Decks -> Html Msg
