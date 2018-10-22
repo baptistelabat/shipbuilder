@@ -72,6 +72,8 @@ newBlockDecoder =
         |> Pipeline.required "color" decodeRgbRecord
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
+        |> Pipeline.hardcoded 0
+        |> Pipeline.hardcoded 0
 
 
 type alias SyncPosition =
@@ -146,6 +148,8 @@ decodeBlock =
         |> Pipeline.required "color" decodeColor
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
+        |> Pipeline.optional "mass" Decode.float 0
+        |> Pipeline.optional "density" Decode.float 0
 
 
 decodeColor : Decode.Decoder Color
@@ -423,6 +427,8 @@ type alias Block =
     , color : Color
     , position : Position
     , size : Size
+    , mass : Float
+    , density : Float
     }
 
 
