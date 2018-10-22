@@ -414,23 +414,34 @@ type PartitionType
 type alias Decks =
     { number : IntInput
     , spacing : FloatInput
+    , zero :
+        Int
+        -- the index of the deck n° 0
     }
 
 
 type alias Bulkheads =
     { number : IntInput
     , spacing : FloatInput
+    , zero :
+        Int
+        -- the index of the bulkhead n° 0
     }
 
 
-asNumberInPartition : { number : IntInput, spacing : FloatInput } -> IntInput -> { number : IntInput, spacing : FloatInput }
+asNumberInPartition : { a | number : IntInput } -> IntInput -> { a | number : IntInput }
 asNumberInPartition partition newNumber =
     { partition | number = newNumber }
 
 
-asSpacingInPartition : { number : IntInput, spacing : FloatInput } -> FloatInput -> { number : IntInput, spacing : FloatInput }
+asSpacingInPartition : { a | spacing : FloatInput } -> FloatInput -> { a | spacing : FloatInput }
 asSpacingInPartition partition newSpacing =
     { partition | spacing = newSpacing }
+
+
+asZeroInPartition : { a | zero : Int } -> Int -> { a | zero : Int }
+asZeroInPartition partition newZero =
+    { partition | zero = newZero }
 
 
 asDecksInPartitions : PartitionsData -> Decks -> PartitionsData
@@ -638,8 +649,8 @@ initModel =
         , blocks = DictList.empty
         , toasts = emptyToasts
         , partitions =
-            { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
-            , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
+            { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
+            , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
             }
         }
 
@@ -891,6 +902,7 @@ updateNoJs msg model =
                         syncNumberInput model.partitions.decks.number
                     , spacing =
                         syncNumberInput model.partitions.decks.spacing
+                    , zero = model.partitions.decks.zero
                     }
 
                 syncedBulkheads : Bulkheads
@@ -899,6 +911,7 @@ updateNoJs msg model =
                         syncNumberInput model.partitions.bulkheads.number
                     , spacing =
                         syncNumberInput model.partitions.bulkheads.spacing
+                    , zero = model.partitions.bulkheads.zero
                     }
 
                 updatedModel : Model
