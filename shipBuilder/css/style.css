@@ -95,6 +95,69 @@ header .header-menu-item+.header-menu-item {
     margin-left: 16px;
 }
 
+.toasts {
+    margin:0;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    width: 25%;
+    min-width: 280px;
+    cursor: pointer;
+}
+
+.toasts .toast {
+    background-color: hsl(222, 20%, 20%);
+    margin: auto;
+    color: white;
+    padding: 16px;
+    box-shadow: 0px 5px 15px -5px var(--shadow-color);
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.toasts .toast svg {
+    height: 1em;
+}
+
+.toasts .toast p {
+    padding: 0;
+    margin: 0 0 0 12px;
+}
+
+.toasts .toast.toast__info svg {
+    color: #40baff;
+    position: relative;
+    left: 0.333em;
+}
+.toasts .toast.toast__success svg {
+    color: #00d184;
+}
+.toasts .toast.toast__error svg {
+    color: #e11f5b;
+}
+
+ 
+@keyframes rotating {
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+.toasts .toast.toast__processing svg {
+    color: white;
+    animation: rotating 1.5s linear infinite;
+}
+ 
 .content-wrapper {
     display: flex;
     min-height: 0px;
@@ -410,4 +473,32 @@ input.block-label {
 
 .hidden-input {
     display: none;
+}
+
+.partioning-panel {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.stacked-subpanel {
+    flex: 1 1 auto;
+}
+.stacked-subpanel-header {
+    padding: 12px;
+    background-color: var(--secondary-color__accent);
+    border-color: var(--secondary-color__contrast);
+    border-style: solid;
+    border-width: 0;
+    border-bottom-width: 1px;
+}
+.stacked-subpanel + .stacked-subpanel .stacked-subpanel-header {
+    border-top-width: 1px;
+}
+
+.stacked-subpanel-title {
+
+}
+.stacked-subpanel-content {
+    padding: 12px;
 }

@@ -138,17 +138,17 @@ syncSizeDecoder =
 decodePosition : Decode.Decoder Position
 decodePosition =
     Pipeline.decode Position
-        |> Pipeline.required "x" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "y" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "z" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "x" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "y" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "z" (Decode.map numberToNumberInput Decode.float)
 
 
 decodeSize : Decode.Decoder Size
 decodeSize =
     Pipeline.decode Size
-        |> Pipeline.required "x" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "y" (Decode.map floatToFloatInput Decode.float)
-        |> Pipeline.required "z" (Decode.map floatToFloatInput Decode.float)
+        |> Pipeline.required "x" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "y" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "z" (Decode.map numberToNumberInput Decode.float)
 
 
 decodeFloatInput : Decode.Decoder FloatInput
@@ -158,9 +158,9 @@ decodeFloatInput =
         |> Pipeline.required "string" Decode.string
 
 
-floatToFloatInput : Float -> FloatInput
-floatToFloatInput float =
-    { value = float, string = toString float }
+numberToNumberInput : a -> { value : a, string : String }
+numberToNumberInput number =
+    { value = number, string = toString number }
 
 
 decodeRgbRecord : Decode.Decoder Color
@@ -171,9 +171,89 @@ decodeRgbRecord =
         |> Pipeline.required "blue" Decode.int
 
 
+type alias Toasts =
+    DictList String Toast
+
+
+emptyToasts : Toasts
+emptyToasts =
+    DictList.empty
+
+
+addToast : Toast -> Toasts -> Toasts
+addToast newToast toasts =
+    DictList.insert newToast.key newToast toasts
+
+
+removeToast : String -> Toasts -> Toasts
+removeToast keyToRemove toasts =
+    DictList.remove keyToRemove toasts
+
+
+type alias Toast =
+    { key : String
+    , message : String
+    , type_ : ToastType
+    }
+
+
+type ToastType
+    = Error
+    | Info
+    | Processing
+    | Success
+
+
+toastTypeDecoder : Decode.Decoder ToastType
+toastTypeDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "info" ->
+                        Decode.succeed Info
+
+                    "error" ->
+                        Decode.succeed Error
+
+                    "success" ->
+                        Decode.succeed Success
+
+                    "processing" ->
+                        Decode.succeed Processing
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown toast type : " ++ somethingElse
+            )
+
+
+toastDecoder : Decode.Decoder Toast
+toastDecoder =
+    Pipeline.decode Toast
+        |> Pipeline.required "key" Decode.string
+        |> Pipeline.required "message" Decode.string
+        |> Pipeline.required "type" toastTypeDecoder
+
+
 jsMsgToMsg : JsData -> Msg
 jsMsgToMsg js =
     case js.tag of
+        "dismiss-toast" ->
+            case Decode.decodeValue Decode.string js.data of
+                Ok key ->
+                    NoJs <| DismissToast key
+
+                Err message ->
+                    FromJs <| JSError message
+
+        "display-toast" ->
+            case Decode.decodeValue toastDecoder js.data of
+                Ok toast ->
+                    NoJs <| DisplayToast toast
+
+                Err message ->
+                    FromJs <| JSError message
+
         "save-data" ->
             case Decode.decodeValue saveFileDecoder js.data of
                 Ok fileContents ->
@@ -294,6 +374,8 @@ type alias Model =
     , selectedBlock : Maybe String
     , selectedHullReference : Maybe String
     , blocks : Blocks
+    , toasts : Toasts
+    , partitions : PartitionsData
     }
 
 
@@ -316,6 +398,54 @@ type alias Size =
 
 type alias Blocks =
     DictList String Block
+
+
+type alias PartitionsData =
+    { decks : Decks
+    , bulkheads : Bulkheads
+    }
+
+
+type PartitionType
+    = Bulkhead
+    | Deck
+
+
+type alias Decks =
+    { number : IntInput
+    , spacing : FloatInput
+    }
+
+
+type alias Bulkheads =
+    { number : IntInput
+    , spacing : FloatInput
+    }
+
+
+asNumberInPartition : { number : IntInput, spacing : FloatInput } -> IntInput -> { number : IntInput, spacing : FloatInput }
+asNumberInPartition partition newNumber =
+    { partition | number = newNumber }
+
+
+asSpacingInPartition : { number : IntInput, spacing : FloatInput } -> FloatInput -> { number : IntInput, spacing : FloatInput }
+asSpacingInPartition partition newSpacing =
+    { partition | spacing = newSpacing }
+
+
+asDecksInPartitions : PartitionsData -> Decks -> PartitionsData
+asDecksInPartitions partitions newDecks =
+    { partitions | decks = newDecks }
+
+
+asBulkheadsInPartitions : PartitionsData -> Bulkheads -> PartitionsData
+asBulkheadsInPartitions partitions newBulkheads =
+    { partitions | bulkheads = newBulkheads }
+
+
+asPartitionsInModel : Model -> PartitionsData -> Model
+asPartitionsInModel model newPartitions =
+    { model | partitions = newPartitions }
 
 
 stringifyEncodeValue : Encode.Value -> String
@@ -364,6 +494,71 @@ encodeSize size =
         , ( "y", Encode.float size.width.value )
         , ( "z", Encode.float size.height.value )
         ]
+
+
+encodeDecks : Decks -> Encode.Value
+encodeDecks decks =
+    Encode.object
+        [ ( "number", Encode.int decks.number.value )
+        , ( "spacing", Encode.float decks.spacing.value )
+        ]
+
+
+encodeBulkheads : Bulkheads -> Encode.Value
+encodeBulkheads bulkheads =
+    Encode.object
+        [ ( "number", Encode.int bulkheads.number.value )
+        , ( "spacing", Encode.float bulkheads.spacing.value )
+        ]
+
+
+encodePartitions : PartitionsData -> Encode.Value
+encodePartitions partitions =
+    Encode.object
+        [ ( "decks", encodeDecks partitions.decks )
+        , ( "bulkheads", encodeBulkheads partitions.bulkheads )
+        ]
+
+
+encodeComputedPartition : { index : Int, position : Float } -> Encode.Value
+encodeComputedPartition computedDeck =
+    Encode.object
+        [ ( "index", Encode.int computedDeck.index )
+        , ( "position", Encode.float computedDeck.position )
+        ]
+
+
+encodeComputedPartitions : List { index : Int, position : Float } -> Encode.Value
+encodeComputedPartitions computedPartitions =
+    Encode.list <| List.map encodeComputedPartition computedPartitions
+
+
+computeDecks : Decks -> List { index : Int, position : Float }
+computeDecks decks =
+    let
+        initialDeckList : List { index : Int, position : Float }
+        initialDeckList =
+            List.repeat decks.number.value ({ index = 0, position = 0.0 })
+
+        computeDeck : Int -> { index : Int, position : Float } -> { index : Int, position : Float }
+        computeDeck index element =
+            { index = index, position = -1 * (toFloat index) * decks.spacing.value }
+    in
+        List.indexedMap computeDeck initialDeckList
+
+
+computeBulkheads : Bulkheads -> List { index : Int, position : Float }
+computeBulkheads bulkheads =
+    let
+        initialBulkheadList : List { index : Int, position : Float }
+        initialBulkheadList =
+            List.repeat bulkheads.number.value ({ index = 0, position = 0.0 })
+
+        computeBulkhead : Int -> { index : Int, position : Float } -> { index : Int, position : Float }
+        computeBulkhead index element =
+            { index = index, position = (toFloat index) * bulkheads.spacing.value }
+    in
+        List.indexedMap computeBulkhead initialBulkheadList
 
 
 addBlockTo : Blocks -> Block -> Blocks
@@ -441,6 +636,11 @@ initModel =
         , selectedBlock = Nothing
         , selectedHullReference = Nothing
         , blocks = DictList.empty
+        , toasts = emptyToasts
+        , partitions =
+            { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
+            , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
+            }
         }
 
 
@@ -452,6 +652,7 @@ initCmd model =
 type ViewMode
     = SpaceReservation SpaceReservationView
     | HullStudio
+    | Partitioning
 
 
 type SpaceReservationView
@@ -477,6 +678,9 @@ encodeViewMode viewMode =
 
             HullStudio ->
                 "hull"
+
+            Partitioning ->
+                "partition"
 
 
 encodeColor : Color -> Encode.Value
@@ -536,14 +740,14 @@ updateBlockInModel block model =
     { model | blocks = updateBlockInBlocks block model.blocks }
 
 
-asValueInFloatInput : FloatInput -> Float -> FloatInput
-asValueInFloatInput floatInput value =
-    { floatInput | value = value }
+asValueInNumberInput : { value : a, string : String } -> a -> { value : a, string : String }
+asValueInNumberInput numberInput value =
+    { numberInput | value = value }
 
 
-asStringInFloatInput : FloatInput -> String -> FloatInput
-asStringInFloatInput floatInput string =
-    { floatInput | string = string }
+asStringInNumberInput : { value : a, string : String } -> String -> { value : a, string : String }
+asStringInNumberInput numberInput string =
+    { numberInput | string = string }
 
 
 asAxisInPosition : Axis -> (Position -> FloatInput -> Position)
@@ -612,8 +816,8 @@ asSizeInBlock block size =
     { block | size = size }
 
 
-syncFloatInput : FloatInput -> FloatInput
-syncFloatInput input =
+syncNumberInput : { value : a, string : String } -> { value : a, string : String }
+syncNumberInput input =
     { input | string = toString input.value }
 
 
@@ -646,38 +850,76 @@ type ToJsMsg
     | SelectBlock Block
     | SelectHullReference HullReference
     | SwitchViewMode ViewMode
+    | UpdatePartitionNumber PartitionType String
+    | UpdatePartitionSpacing PartitionType String
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
 
 
 type NoJsMsg
-    = NoOp
+    = DismissToast String
+    | DisplayToast Toast
+    | NoOp
     | SyncPositionInput Block
     | SyncSizeInput Block
+    | SyncPartitions
     | RenameBlock Block String
 
 
 updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
 updateNoJs msg model =
     case msg of
+        DismissToast keyToDismiss ->
+            { model | toasts = removeToast keyToDismiss model.toasts } ! []
+
+        DisplayToast toast ->
+            { model | toasts = addToast toast model.toasts } ! []
+
         NoOp ->
             model ! []
 
+        SyncPartitions ->
+            let
+                syncedDecks : Decks
+                syncedDecks =
+                    { number =
+                        syncNumberInput model.partitions.decks.number
+                    , spacing =
+                        syncNumberInput model.partitions.decks.spacing
+                    }
+
+                syncedBulkheads : Bulkheads
+                syncedBulkheads =
+                    { number =
+                        syncNumberInput model.partitions.bulkheads.number
+                    , spacing =
+                        syncNumberInput model.partitions.bulkheads.spacing
+                    }
+
+                updatedModel : Model
+                updatedModel =
+                    syncedDecks
+                        |> asDecksInPartitions model.partitions
+                        |> flip asBulkheadsInPartitions syncedBulkheads
+                        |> asPartitionsInModel model
+            in
+                updatedModel ! []
+
         SyncPositionInput block ->
-            (syncFloatInput block.position.x
+            (syncNumberInput block.position.x
                 |> asXInPosition block.position
-                |> flip asYInPosition (syncFloatInput block.position.y)
-                |> flip asZInPosition (syncFloatInput block.position.z)
+                |> flip asYInPosition (syncNumberInput block.position.y)
+                |> flip asZInPosition (syncNumberInput block.position.z)
                 |> asPositionInBlock block
                 |> flip updateBlockInModel model
             )
                 ! []
 
         SyncSizeInput blockToSync ->
-            (syncFloatInput blockToSync.size.height
+            (syncNumberInput blockToSync.size.height
                 |> asHeightInSize blockToSync.size
-                |> flip asWidthInSize (syncFloatInput blockToSync.size.width)
-                |> flip asLengthInSize (syncFloatInput blockToSync.size.length)
+                |> flip asWidthInSize (syncNumberInput blockToSync.size.width)
+                |> flip asLengthInSize (syncNumberInput blockToSync.size.length)
                 |> asSizeInBlock blockToSync
                 |> flip updateBlockInModel model
             )
@@ -837,6 +1079,54 @@ updateModelToJs msg model =
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
 
+        UpdatePartitionNumber partitionType input ->
+            let
+                ( getPartition, asPartitionInPartitions ) =
+                    case partitionType of
+                        Deck ->
+                            ( .decks, asDecksInPartitions )
+
+                        Bulkhead ->
+                            ( .bulkheads, asBulkheadsInPartitions )
+            in
+                (case String.toInt input of
+                    Ok value ->
+                        abs value
+                            |> asValueInNumberInput (.number <| getPartition model.partitions)
+                            |> flip asStringInNumberInput input
+
+                    Err error ->
+                        input
+                            |> asStringInNumberInput (.number <| getPartition model.partitions)
+                )
+                    |> asNumberInPartition (getPartition model.partitions)
+                    |> asPartitionInPartitions model.partitions
+                    |> asPartitionsInModel model
+
+        UpdatePartitionSpacing partitionType input ->
+            let
+                ( getPartition, asPartitionInPartitions ) =
+                    case partitionType of
+                        Deck ->
+                            ( .decks, asDecksInPartitions )
+
+                        Bulkhead ->
+                            ( .bulkheads, asBulkheadsInPartitions )
+            in
+                (case String.toFloat input of
+                    Ok value ->
+                        abs value
+                            |> asValueInNumberInput (.spacing <| getPartition model.partitions)
+                            |> flip asStringInNumberInput input
+
+                    Err error ->
+                        input
+                            |> asStringInNumberInput (.spacing <| getPartition model.partitions)
+                )
+                    |> asSpacingInPartition (getPartition model.partitions)
+                    |> asPartitionInPartitions model.partitions
+                    |> asPartitionsInModel model
+
         UpdatePosition axis block input ->
             let
                 axisFloatInput : FloatInput
@@ -849,8 +1139,8 @@ updateModelToJs msg model =
                             updatedBlock : Block
                             updatedBlock =
                                 value
-                                    |> asValueInFloatInput axisFloatInput
-                                    |> flip asStringInFloatInput input
+                                    |> asValueInNumberInput axisFloatInput
+                                    |> flip asStringInNumberInput input
                                     |> (asAxisInPosition axis) block.position
                                     |> asPositionInBlock block
                         in
@@ -858,7 +1148,7 @@ updateModelToJs msg model =
 
                     Err error ->
                         input
-                            |> asStringInFloatInput axisFloatInput
+                            |> asStringInNumberInput axisFloatInput
                             |> (asAxisInPosition axis) block.position
                             |> asPositionInBlock block
                             |> flip updateBlockInModel model
@@ -881,8 +1171,8 @@ updateModelToJs msg model =
                             updatedBlock : Block
                             updatedBlock =
                                 newValue
-                                    |> asValueInFloatInput dimensionFloatInput
-                                    |> flip asStringInFloatInput input
+                                    |> asValueInNumberInput dimensionFloatInput
+                                    |> flip asStringInNumberInput input
                                     |> (asDimensionInSize dimension) block.size
                                     |> asSizeInBlock block
                         in
@@ -890,7 +1180,7 @@ updateModelToJs msg model =
 
                     Err message ->
                         input
-                            |> asStringInFloatInput dimensionFloatInput
+                            |> asStringInNumberInput dimensionFloatInput
                             |> (asDimensionInSize dimension) block.size
                             |> asSizeInBlock block
                             |> flip updateBlockInModel model
@@ -973,6 +1263,52 @@ msg2json model action =
         SwitchViewMode newViewMode ->
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
 
+        UpdatePartitionNumber partitionType input ->
+            let
+                ( tag, partition, computePartition ) =
+                    case partitionType of
+                        Deck ->
+                            ( "make-decks", model.partitions.decks, computeDecks )
+
+                        Bulkhead ->
+                            ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
+            in
+                case String.toInt input of
+                    Ok value ->
+                        Just
+                            { tag = tag
+                            , data =
+                                encodeComputedPartitions <|
+                                    computePartition
+                                        { partition | number = numberToNumberInput <| abs value }
+                            }
+
+                    Err error ->
+            Nothing
+
+        UpdatePartitionSpacing partitionType input ->
+            let
+                ( tag, partition, computePartition ) =
+                    case partitionType of
+                        Deck ->
+                            ( "make-decks", model.partitions.decks, computeDecks )
+
+                        Bulkhead ->
+                            ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
+            in
+                case String.toFloat input of
+                    Ok value ->
+                        Just
+                            { tag = tag
+                            , data =
+                                encodeComputedPartitions <|
+                                    computePartition
+                                        { partition | spacing = numberToNumberInput <| abs value }
+                            }
+
+                    Err error ->
+            Nothing
+
         UpdatePosition axis block input ->
             Maybe.map
                 (\value ->
@@ -984,8 +1320,8 @@ msg2json model action =
                         updatedBlock : Block
                         updatedBlock =
                             value
-                                |> asValueInFloatInput axisFloatInput
-                                |> flip asStringInFloatInput input
+                                |> asValueInNumberInput axisFloatInput
+                                |> flip asStringInNumberInput input
                                 |> (asAxisInPosition axis) block.position
                                 |> asPositionInBlock block
                     in
@@ -1013,8 +1349,8 @@ msg2json model action =
                         updatedBlock : Block
                         updatedBlock =
                             newValue
-                                |> asValueInFloatInput dimensionFloatInput
-                                |> flip asStringInFloatInput input
+                                |> asValueInNumberInput dimensionFloatInput
+                                |> flip asStringInNumberInput input
                                 |> (asDimensionInSize dimension) block.size
                                 |> asSizeInBlock block
                     in
@@ -1082,6 +1418,7 @@ tabItems : Tabs
 tabItems =
     [ { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     , { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
+    , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning }
     ]
 
 
@@ -1154,6 +1491,7 @@ view model =
     div [ id "elm-root" ]
         [ viewHeader model
         , viewContent model
+        , viewToasts model.toasts
         ]
 
 
@@ -1180,6 +1518,40 @@ viewContent model =
         [ viewSideMenu model
         , viewWorkspace model
         ]
+
+
+viewToasts : Toasts -> Html Msg
+viewToasts toasts =
+    ul [ class "toasts" ] <|
+        List.map viewToast <|
+            DictList.values toasts
+
+
+viewToast : Toast -> Html Msg
+viewToast toast =
+    let
+        icon : Html Msg
+        icon =
+            case toast.type_ of
+                Info ->
+                    FASolid.info
+
+                Success ->
+                    FASolid.check
+
+                Error ->
+                    FASolid.exclamation_triangle
+
+                Processing ->
+                    FASolid.spinner
+    in
+        li
+            [ class <| "toast toast__" ++ (String.toLower <| toString toast.type_)
+            , onClick <| NoJs <| DismissToast toast.key
+            ]
+            [ icon
+            , p [] [ text toast.message ]
+            ]
 
 
 colorToCssRgbString : Color -> String
@@ -1289,6 +1661,14 @@ viewModesMatch left right =
                 _ ->
                     False
 
+        Partitioning ->
+            case right of
+                Partitioning ->
+                    True
+
+                _ ->
+                    False
+
 
 viewTab : Model -> Tab -> Html Msg
 viewTab model tab =
@@ -1322,6 +1702,9 @@ viewPanel model =
         HullStudio ->
             viewHullStudioPanel model
 
+        Partitioning ->
+            viewPartitioning model
+
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
 viewSpaceReservationPanel spaceReservationView model =
@@ -1346,6 +1729,103 @@ viewHullStudioPanel model =
             HullReferences.viewHullStudioPanel
                 hullReferences
                 (ToJs << SelectHullReference)
+
+
+viewPartitioning : Model -> Html Msg
+viewPartitioning model =
+    div
+        [ class "panel partioning-panel" ]
+        [ viewDecks model.partitions.decks
+        , viewBulkheads model.partitions.bulkheads
+        ]
+
+
+viewDecks : Decks -> Html Msg
+viewDecks decks =
+    div [ class "decks stacked-subpanel" ]
+        [ div
+            [ class "stacked-subpanel-header" ]
+            [ h2
+                [ class "stacked-subpanel-title" ]
+                [ text "Decks" ]
+            ]
+        , div
+            [ class "stacked-subpanel-content" ]
+            [ div
+                [ class "input-group" ]
+                [ label
+                    [ for "decks-number" ]
+                    [ text "Number of decks" ]
+                , input
+                    [ type_ "number"
+                    , id "decks-number"
+                    , value decks.number.string
+                    , Html.Attributes.min "0"
+                    , onInput <| ToJs << UpdatePartitionNumber Deck
+                    , onBlur <| NoJs SyncPartitions
+                    ]
+                    []
+                ]
+            , div
+                [ class "input-group" ]
+                [ label
+                    [ for "decks-spacing" ]
+                    [ text "Spacing of decks" ]
+                , input
+                    [ type_ "text"
+                    , id "decks-spacing"
+                    , value decks.spacing.string
+                    , onInput <| ToJs << UpdatePartitionSpacing Deck
+                    , onBlur <| NoJs SyncPartitions
+                    ]
+                    []
+                ]
+            ]
+        ]
+
+
+viewBulkheads : Bulkheads -> Html Msg
+viewBulkheads bulkheads =
+    div [ class "bulkheads stacked-subpanel" ]
+        [ div
+            [ class "stacked-subpanel-header" ]
+            [ h2
+                [ class "stacked-subpanel-title" ]
+                [ text "Bulkheads" ]
+            ]
+        , div
+            [ class "stacked-subpanel-content" ]
+            [ div
+                [ class "input-group" ]
+                [ label
+                    [ for "bulkheads-number" ]
+                    [ text "Number of bulkheads" ]
+                , input
+                    [ type_ "number"
+                    , id "bulkheads-number"
+                    , value bulkheads.number.string
+                    , Html.Attributes.min "0"
+                    , onInput <| ToJs << UpdatePartitionNumber Bulkhead
+                    , onBlur <| NoJs SyncPartitions
+                    ]
+                    []
+                ]
+            , div
+                [ class "input-group" ]
+                [ label
+                    [ for "bulkheads-spacing" ]
+                    [ text "Spacing of bulkheads" ]
+                , input
+                    [ type_ "text"
+                    , id "bulkheads-spacing"
+                    , value bulkheads.spacing.string
+                    , onInput <| ToJs << UpdatePartitionSpacing Bulkhead
+                    , onBlur <| NoJs SyncPartitions
+                    ]
+                    []
+                ]
+            ]
+        ]
 
 
 viewWholeList : Model -> Html Msg
@@ -1533,6 +2013,12 @@ viewSizeInputInput dimension block dimensionLabel =
 
 type alias FloatInput =
     { value : Float
+    , string : String
+    }
+
+
+type alias IntInput =
+    { value : Int
     , string : String
     }
 
