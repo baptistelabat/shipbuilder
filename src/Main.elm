@@ -2024,7 +2024,7 @@ viewDetailedBlock uuid model =
                 , div
                     [ class "focus-properties" ]
                   <|
-                    viewBlockProperties block model
+                    viewBlockProperties block
                 ]
 
             Nothing ->
@@ -2040,8 +2040,8 @@ viewBackToWholeList =
         [ FASolid.arrow_left ]
 
 
-viewBlockProperties : Block -> Model -> List (Html Msg)
-viewBlockProperties block model =
+viewBlockProperties : Block -> List (Html Msg)
+viewBlockProperties block =
     [ SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
     , div
         [ class "block-position" ]
