@@ -520,43 +520,43 @@ encodePartitions partitions =
         ]
 
 
-encodeComputedPartition : { index : Int, zPosition : Float } -> Encode.Value
+encodeComputedPartition : { index : Int, position : Float } -> Encode.Value
 encodeComputedPartition computedDeck =
     Encode.object
         [ ( "index", Encode.int computedDeck.index )
-        , ( "zPosition", Encode.float computedDeck.zPosition )
+        , ( "position", Encode.float computedDeck.position )
         ]
 
 
-encodeComputedPartitions : List { index : Int, zPosition : Float } -> Encode.Value
+encodeComputedPartitions : List { index : Int, position : Float } -> Encode.Value
 encodeComputedPartitions computedPartitions =
     Encode.list <| List.map encodeComputedPartition computedPartitions
 
 
-computeDecks : Decks -> List { index : Int, zPosition : Float }
+computeDecks : Decks -> List { index : Int, position : Float }
 computeDecks decks =
     let
-        initialDeckList : List { index : Int, zPosition : Float }
+        initialDeckList : List { index : Int, position : Float }
         initialDeckList =
-            List.repeat decks.number.value ({ index = 0, zPosition = 0.0 })
+            List.repeat decks.number.value ({ index = 0, position = 0.0 })
 
-        computeDeck : Int -> { index : Int, zPosition : Float } -> { index : Int, zPosition : Float }
+        computeDeck : Int -> { index : Int, position : Float } -> { index : Int, position : Float }
         computeDeck index element =
-            { index = index, zPosition = -1 * (toFloat index) * decks.spacing.value }
+            { index = index, position = -1 * (toFloat index) * decks.spacing.value }
     in
         List.indexedMap computeDeck initialDeckList
 
 
-computeBulkheads : Bulkheads -> List { index : Int, zPosition : Float }
+computeBulkheads : Bulkheads -> List { index : Int, position : Float }
 computeBulkheads bulkheads =
     let
-        initialBulkheadList : List { index : Int, zPosition : Float }
+        initialBulkheadList : List { index : Int, position : Float }
         initialBulkheadList =
-            List.repeat bulkheads.number.value ({ index = 0, zPosition = 0.0 })
+            List.repeat bulkheads.number.value ({ index = 0, position = 0.0 })
 
-        computeBulkhead : Int -> { index : Int, zPosition : Float } -> { index : Int, zPosition : Float }
+        computeBulkhead : Int -> { index : Int, position : Float } -> { index : Int, position : Float }
         computeBulkhead index element =
-            { index = index, zPosition = (toFloat index) * bulkheads.spacing.value }
+            { index = index, position = (toFloat index) * bulkheads.spacing.value }
     in
         List.indexedMap computeBulkhead initialBulkheadList
 

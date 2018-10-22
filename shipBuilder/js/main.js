@@ -188,12 +188,12 @@ let makeDecks = function (decks) {
 
     decks.forEach(deck => {
         const index = deck.index;
-        const zPosition = deck.zPosition;
+        const zPosition = deck.position;
         const position = toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform);
-        const geometry = new THREE.BoxGeometry(1000, 1, 1000);
+        const geometry = new THREE.BoxGeometry(500, 0, 500);
         var material = new THREE.MeshBasicMaterial({ color: deckColor, side: THREE.DoubleSide });
 
-        var deck = new THREE.Mesh(geometry, material);
+        var deck = new THREE.LineLoop(geometry, material);
         deck.position.copy(position);
         deck.sbType = "partition";
         deck.baseColor = deckColor;
