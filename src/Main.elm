@@ -652,12 +652,17 @@ initCmd model =
 type ViewMode
     = SpaceReservation SpaceReservationView
     | HullStudio
-    | Partitioning
+    | Partitioning PartitioningView
 
 
 type SpaceReservationView
     = WholeList
     | DetailedBlock String
+
+
+type PartitioningView
+    = PropertiesEdition
+    | OriginDefinition PartitionType
 
 
 encodeInitThreeCommand : Model -> Encode.Value
@@ -679,7 +684,7 @@ encodeViewMode viewMode =
             HullStudio ->
                 "hull"
 
-            Partitioning ->
+            Partitioning _ ->
                 "partition"
 
 
@@ -1426,7 +1431,7 @@ type alias Tabs =
 tabItems : Tabs
 tabItems =
     [ { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
-    , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning }
+    , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     ]
 
@@ -1670,9 +1675,9 @@ viewModesMatch left right =
                 _ ->
                     False
 
-        Partitioning ->
+        Partitioning _ ->
             case right of
-                Partitioning ->
+                Partitioning _ ->
                     True
 
                 _ ->
@@ -1711,8 +1716,8 @@ viewPanel model =
         HullStudio ->
             viewHullStudioPanel model
 
-        Partitioning ->
-            viewPartitioning model
+        Partitioning partitioningView ->
+            viewPartitioning partitioningView model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
@@ -1740,17 +1745,30 @@ viewHullStudioPanel model =
                 (ToJs << SelectHullReference)
 
 
-viewPartitioning : Model -> Html Msg
-viewPartitioning model =
+viewPartitioning : PartitioningView -> Model -> Html Msg
+viewPartitioning partitioningView model =
     div
         [ class "panel partioning-panel" ]
-        [ viewDecks model.partitions.decks
-        , viewBulkheads model.partitions.bulkheads
+    <|
+        case partitioningView of
+            PropertiesEdition ->
+                [ viewDecks False model.partitions.decks
+                , viewBulkheads False model.partitions.bulkheads
+                ]
+
+            OriginDefinition Deck ->
+                [ viewDecks True model.partitions.decks
+                , viewBulkheads False model.partitions.bulkheads
+                ]
+
+            OriginDefinition Bulkhead ->
+                [ viewDecks False model.partitions.decks
+                , viewBulkheads True model.partitions.bulkheads
         ]
 
 
-viewDecks : Decks -> Html Msg
-viewDecks decks =
+viewDecks : Bool -> Decks -> Html Msg
+viewDecks isDefiningOrigin decks =
     div [ class "decks stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
@@ -1793,8 +1811,8 @@ viewDecks decks =
         ]
 
 
-viewBulkheads : Bulkheads -> Html Msg
-viewBulkheads bulkheads =
+viewBulkheads : Bool -> Bulkheads -> Html Msg
+viewBulkheads isDefiningOrigin bulkheads =
     div [ class "bulkheads stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
