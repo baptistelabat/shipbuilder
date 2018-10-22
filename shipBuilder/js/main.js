@@ -188,21 +188,26 @@ let makeBulkheads = function (bulkheads) {
     oldBulkheads.forEach(oldBulkhead => removeFromScene(oldBulkhead));
 
     const bulkheadColor = new THREE.Color(0.5, 0.5, 1);
+    const zeroColor = new THREE.Color(1, 0.5, 0.5);
 
     bulkheads.forEach(bulkhead => {
         const index = bulkhead.index;
+        const number = bulkhead.number;
         const xPosition = bulkhead.position;
         const position = toThreeJsCoordinates(xPosition, 0, 0, coordinatesTransform);
         const geometry = new THREE.BoxGeometry(500, 0, 500);
-        var material = new THREE.MeshBasicMaterial({ color: bulkheadColor, side: THREE.DoubleSide });
+
+        const color = number ? bulkheadColor : zeroColor;
+        var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var bulkhead = new THREE.LineLoop(geometry, material);
         bulkhead.position.copy(position);
         bulkhead.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), 0.5 * Math.PI);
         bulkhead.sbType = "partition";
-        bulkhead.baseColor = bulkheadColor;
+        bulkhead.baseColor = color;
         bulkhead.partitionType = "bulkhead";
         bulkhead.partitionIndex = index;
+        bulkhead.partitionNumber = number;
         scene.add(bulkhead);
     })
 }
@@ -217,20 +222,24 @@ let makeDecks = function (decks) {
     oldDecks.forEach(oldDeck => removeFromScene(oldDeck));
 
     const deckColor = new THREE.Color(0.5, 0.5, 1);
-
+    const zeroColor = new THREE.Color(1, 0.5, 0.5);
     decks.forEach(deck => {
         const index = deck.index;
+        const number = deck.number;
         const zPosition = deck.position;
         const position = toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform);
         const geometry = new THREE.BoxGeometry(500, 0, 500);
-        var material = new THREE.MeshBasicMaterial({ color: deckColor, side: THREE.DoubleSide });
+
+        const color = number ? deckColor : zeroColor;
+        var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var deck = new THREE.LineLoop(geometry, material);
         deck.position.copy(position);
         deck.sbType = "partition";
-        deck.baseColor = deckColor;
+        deck.baseColor = color;
         deck.partitionType = "deck";
         deck.partitionIndex = index;
+        deck.partitionNumber = number;
         scene.add(deck);
     })
 }
@@ -427,6 +436,8 @@ let selectObject = function (object) {
             selectHull(object);
             break;
 
+        case "partition":
+            selectPartition(object);
         default:
             break;
     }
@@ -439,6 +450,19 @@ let selectHull = function (hull) {
             selected = objectToSelect;
         }
         attachViewControl(selected);
+    }
+}
+
+
+let selectPartition = function (partition) {
+    if (partition && partition.uuid) {
+        const objectToSelect = findObjectByUUID(partition.uuid);
+        if (objectToSelect && objectToSelect.sbType === mode) {
+            sendToElm("select-partition", {
+                partitionType: objectToSelect.partitionType,
+                partitionIndex: objectToSelect.partitionIndex
+            });
+        }
     }
 }
 

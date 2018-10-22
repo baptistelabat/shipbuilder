@@ -104,6 +104,35 @@ saveFileDecoder =
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
 
 
+type alias SelectPartitionData =
+    { partitionType : PartitionType
+    , partitionIndex : Int
+    }
+
+
+selectPartitionDecoder : Decode.Decoder SelectPartitionData
+selectPartitionDecoder =
+    Pipeline.decode SelectPartitionData
+        |> Pipeline.required "partitionType" (Decode.string |> Decode.andThen partitionTypeFromString)
+        |> Pipeline.required "partitionIndex" Decode.int
+
+
+partitionTypeFromString : String -> Decode.Decoder PartitionType
+partitionTypeFromString str =
+    case str of
+        "deck" ->
+            Decode.succeed Deck
+
+        "bulkhead" ->
+            Decode.succeed Bulkhead
+
+        _ ->
+            Decode.fail <|
+                "Trying to decode partitionType, but "
+                    ++ str
+                    ++ " is not supported."
+
+
 decodeBlocks : Decode.Decoder (List Block)
 decodeBlocks =
     Decode.list decodeBlock
@@ -278,6 +307,14 @@ jsMsgToMsg js =
                 Err message ->
                     FromJs <| JSError message
 
+        "select-partition" ->
+            case Decode.decodeValue selectPartitionDecoder js.data of
+                Ok selectionData ->
+                    FromJs <| SelectPartition selectionData.partitionType selectionData.partitionIndex
+
+                Err message ->
+                    FromJs <| JSError message
+
         "sync-position" ->
             case Decode.decodeValue syncPositionDecoder js.data of
                 Ok syncPosition ->
@@ -314,6 +351,7 @@ addToFloatInput toAdd floatInput =
 
 type FromJsMsg
     = Select String
+    | SelectPartition PartitionType Int
     | Unselect
     | JSError String
     | NewBlock Block
@@ -414,23 +452,34 @@ type PartitionType
 type alias Decks =
     { number : IntInput
     , spacing : FloatInput
+    , zero :
+        Int
+        -- the index of the deck n° 0
     }
 
 
 type alias Bulkheads =
     { number : IntInput
     , spacing : FloatInput
+    , zero :
+        Int
+        -- the index of the bulkhead n° 0
     }
 
 
-asNumberInPartition : { number : IntInput, spacing : FloatInput } -> IntInput -> { number : IntInput, spacing : FloatInput }
+asNumberInPartition : { a | number : IntInput } -> IntInput -> { a | number : IntInput }
 asNumberInPartition partition newNumber =
     { partition | number = newNumber }
 
 
-asSpacingInPartition : { number : IntInput, spacing : FloatInput } -> FloatInput -> { number : IntInput, spacing : FloatInput }
+asSpacingInPartition : { a | spacing : FloatInput } -> FloatInput -> { a | spacing : FloatInput }
 asSpacingInPartition partition newSpacing =
     { partition | spacing = newSpacing }
+
+
+asZeroInPartition : { a | zero : Int } -> Int -> { a | zero : Int }
+asZeroInPartition partition newZero =
+    { partition | zero = newZero }
 
 
 asDecksInPartitions : PartitionsData -> Decks -> PartitionsData
@@ -520,43 +569,61 @@ encodePartitions partitions =
         ]
 
 
-encodeComputedPartition : { index : Int, position : Float } -> Encode.Value
+type alias ComputedPartition =
+    { index : Int
+    , position : Float
+    , number : Int
+    }
+
+
+encodeComputedPartition : ComputedPartition -> Encode.Value
 encodeComputedPartition computedDeck =
     Encode.object
         [ ( "index", Encode.int computedDeck.index )
         , ( "position", Encode.float computedDeck.position )
+        , ( "number", Encode.int computedDeck.number )
         ]
 
 
-encodeComputedPartitions : List { index : Int, position : Float } -> Encode.Value
+encodeComputedPartitions : List ComputedPartition -> Encode.Value
 encodeComputedPartitions computedPartitions =
     Encode.list <| List.map encodeComputedPartition computedPartitions
 
 
-computeDecks : Decks -> List { index : Int, position : Float }
+computeDecks : Decks -> List ComputedPartition
 computeDecks decks =
     let
-        initialDeckList : List { index : Int, position : Float }
+        initialDeckList : List ComputedPartition
         initialDeckList =
-            List.repeat decks.number.value ({ index = 0, position = 0.0 })
+            List.repeat decks.number.value ({ index = 0, position = 0.0, number = 0 })
 
-        computeDeck : Int -> { index : Int, position : Float } -> { index : Int, position : Float }
+        computeDeck : Int -> ComputedPartition -> ComputedPartition
         computeDeck index element =
-            { index = index, position = -1 * (toFloat index) * decks.spacing.value }
+            let
+                number : Int
+                number =
+                    index - decks.zero
+            in
+                { index = index, position = -1 * (toFloat number) * decks.spacing.value, number = number }
     in
         List.indexedMap computeDeck initialDeckList
 
 
-computeBulkheads : Bulkheads -> List { index : Int, position : Float }
+computeBulkheads : Bulkheads -> List ComputedPartition
 computeBulkheads bulkheads =
     let
-        initialBulkheadList : List { index : Int, position : Float }
+        initialBulkheadList : List ComputedPartition
         initialBulkheadList =
-            List.repeat bulkheads.number.value ({ index = 0, position = 0.0 })
+            List.repeat bulkheads.number.value { index = 0, position = 0.0, number = 0 }
 
-        computeBulkhead : Int -> { index : Int, position : Float } -> { index : Int, position : Float }
+        computeBulkhead : Int -> ComputedPartition -> ComputedPartition
         computeBulkhead index element =
-            { index = index, position = (toFloat index) * bulkheads.spacing.value }
+            let
+                number : Int
+                number =
+                    index - bulkheads.zero
+            in
+                { index = index, position = (toFloat number) * bulkheads.spacing.value, number = number }
     in
         List.indexedMap computeBulkhead initialBulkheadList
 
@@ -638,8 +705,8 @@ initModel =
         , blocks = DictList.empty
         , toasts = emptyToasts
         , partitions =
-            { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
-            , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 } }
+            { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
+            , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
             }
         }
 
@@ -652,12 +719,17 @@ initCmd model =
 type ViewMode
     = SpaceReservation SpaceReservationView
     | HullStudio
-    | Partitioning
+    | Partitioning PartitioningView
 
 
 type SpaceReservationView
     = WholeList
     | DetailedBlock String
+
+
+type PartitioningView
+    = PropertiesEdition
+    | OriginDefinition PartitionType
 
 
 encodeInitThreeCommand : Model -> Encode.Value
@@ -679,7 +751,7 @@ encodeViewMode viewMode =
             HullStudio ->
                 "hull"
 
-            Partitioning ->
+            Partitioning _ ->
                 "partition"
 
 
@@ -886,6 +958,7 @@ updateNoJs msg model =
                         syncNumberInput model.partitions.decks.number
                     , spacing =
                         syncNumberInput model.partitions.decks.spacing
+                    , zero = model.partitions.decks.zero
                     }
 
                 syncedBulkheads : Bulkheads
@@ -894,6 +967,7 @@ updateNoJs msg model =
                         syncNumberInput model.partitions.bulkheads.number
                     , spacing =
                         syncNumberInput model.partitions.bulkheads.spacing
+                    , zero = model.partitions.bulkheads.zero
                     }
 
                 updatedModel : Model
@@ -978,6 +1052,37 @@ updateFromJs jsmsg model =
                             otherViewMode
             in
                 { model | selectedBlock = Maybe.map .uuid maybeBlock, viewMode = updatedViewMode } ! []
+
+        SelectPartition partitionType index ->
+            if model.viewMode == (Partitioning <| OriginDefinition partitionType) then
+                let
+                    ( partition, updatePartition, tag, computePartition ) =
+                        case partitionType of
+                            Deck ->
+                                ( .partitions >> .decks, asDecksInPartitions model.partitions, "make-decks", computeDecks )
+
+                            Bulkhead ->
+                                ( .partitions >> .bulkheads, asBulkheadsInPartitions model.partitions, "make-bulkheads", computeBulkheads )
+
+                    updatedModel : Model
+                    updatedModel =
+                        if index < (.value <| .number (partition model)) && index >= 0 then
+                            { model | partitions = updatePartition <| asZeroInPartition (partition model) index, viewMode = Partitioning PropertiesEdition }
+                        else
+                            model
+
+                    jsCmd : Cmd aMsg
+                    jsCmd =
+                        toJs
+                            { tag = tag
+                            , data =
+                                encodeComputedPartitions <|
+                                    computePartition (partition updatedModel)
+                            }
+                in
+                    updatedModel ! [ jsCmd ]
+            else
+                model ! []
 
         Unselect ->
             { model | selectedBlock = Nothing }
@@ -1426,7 +1531,7 @@ type alias Tabs =
 tabItems : Tabs
 tabItems =
     [ { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
-    , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning }
+    , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     ]
 
@@ -1670,9 +1775,9 @@ viewModesMatch left right =
                 _ ->
                     False
 
-        Partitioning ->
+        Partitioning _ ->
             case right of
-                Partitioning ->
+                Partitioning _ ->
                     True
 
                 _ ->
@@ -1711,8 +1816,8 @@ viewPanel model =
         HullStudio ->
             viewHullStudioPanel model
 
-        Partitioning ->
-            viewPartitioning model
+        Partitioning partitioningView ->
+            viewPartitioning partitioningView model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
@@ -1740,17 +1845,30 @@ viewHullStudioPanel model =
                 (ToJs << SelectHullReference)
 
 
-viewPartitioning : Model -> Html Msg
-viewPartitioning model =
+viewPartitioning : PartitioningView -> Model -> Html Msg
+viewPartitioning partitioningView model =
     div
         [ class "panel partioning-panel" ]
-        [ viewDecks model.partitions.decks
-        , viewBulkheads model.partitions.bulkheads
-        ]
+    <|
+        case partitioningView of
+            PropertiesEdition ->
+                [ viewDecks False model.partitions.decks
+                , viewBulkheads False model.partitions.bulkheads
+                ]
+
+            OriginDefinition Deck ->
+                [ viewDecks True model.partitions.decks
+                , viewBulkheads False model.partitions.bulkheads
+                ]
+
+            OriginDefinition Bulkhead ->
+                [ viewDecks False model.partitions.decks
+                , viewBulkheads True model.partitions.bulkheads
+                ]
 
 
-viewDecks : Decks -> Html Msg
-viewDecks decks =
+viewDecks : Bool -> Decks -> Html Msg
+viewDecks isDefiningOrigin decks =
     div [ class "decks stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
@@ -1789,12 +1907,24 @@ viewDecks decks =
                     ]
                     []
                 ]
+            , div
+                [ class "deck-zero" ]
+                [ (if isDefiningOrigin then
+                    p [] [ text "Defining deck n°0..." ]
+                   else
+                    button
+                        [ disabled <| decks.number.value == 0
+                        , onClick <| ToJs << SwitchViewMode <| Partitioning <| OriginDefinition Deck
+                        ]
+                        [ text "Define deck n°0" ]
+                  )
+                ]
             ]
         ]
 
 
-viewBulkheads : Bulkheads -> Html Msg
-viewBulkheads bulkheads =
+viewBulkheads : Bool -> Bulkheads -> Html Msg
+viewBulkheads isDefiningOrigin bulkheads =
     div [ class "bulkheads stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
@@ -1832,6 +1962,18 @@ viewBulkheads bulkheads =
                     , onBlur <| NoJs SyncPartitions
                     ]
                     []
+                ]
+            , div
+                [ class "bulkhead-zero" ]
+                [ (if isDefiningOrigin then
+                    p [] [ text "Defining bulkhead n°0..." ]
+                   else
+                    button
+                        [ disabled <| bulkheads.number.value == 0
+                        , onClick <| ToJs << SwitchViewMode <| Partitioning <| OriginDefinition Bulkhead
+                        ]
+                        [ text "Define bulkhead n°0" ]
+                  )
                 ]
             ]
         ]
