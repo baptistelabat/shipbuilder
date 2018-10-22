@@ -1284,7 +1284,7 @@ msg2json model action =
                             }
 
                     Err error ->
-            Nothing
+                        Nothing
 
         UpdatePartitionSpacing partitionType input ->
             let
@@ -1307,7 +1307,7 @@ msg2json model action =
                             }
 
                     Err error ->
-            Nothing
+                        Nothing
 
         UpdatePosition axis block input ->
             Maybe.map
@@ -1416,9 +1416,9 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
-    , { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
+    [ { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
     , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning }
+    , { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     ]
 
 
