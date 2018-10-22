@@ -56,6 +56,9 @@ app.ports.toJs.subscribe(function (message) {
         case "load-hull":
             loadHull(data);
             break;
+        case "make-bulkheads":
+            makeBulkheads(data);
+            break;
         case "make-decks":
             makeDecks(data);
             break;
@@ -174,6 +177,35 @@ let absVector3 = function (vector3) {
     return new THREE.Vector3(Math.abs(vector3.x), Math.abs(vector3.y), Math.abs(vector3.z));
 }
 
+
+let makeBulkheads = function (bulkheads) {
+    const oldBulkheads = scene.children.filter(child =>
+        child.sbType
+        && child.sbType === "partition"
+        && child.partitionType
+        && child.partitionType === "bulkhead"
+    );
+    oldBulkheads.forEach(oldBulkhead => removeFromScene(oldBulkhead));
+
+    const bulkheadColor = new THREE.Color(0.5, 0.5, 1);
+
+    bulkheads.forEach(bulkhead => {
+        const index = bulkhead.index;
+        const xPosition = bulkhead.position;
+        const position = toThreeJsCoordinates(xPosition, 0, 0, coordinatesTransform);
+        const geometry = new THREE.BoxGeometry(500, 0, 500);
+        var material = new THREE.MeshBasicMaterial({ color: bulkheadColor, side: THREE.DoubleSide });
+
+        var bulkhead = new THREE.LineLoop(geometry, material);
+        bulkhead.position.copy(position);
+        bulkhead.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), 0.5 * Math.PI);
+        bulkhead.sbType = "partition";
+        bulkhead.baseColor = bulkheadColor;
+        bulkhead.partitionType = "bulkhead";
+        bulkhead.partitionIndex = index;
+        scene.add(bulkhead);
+    })
+}
 
 let makeDecks = function (decks) {
     const oldDecks = scene.children.filter(child =>
