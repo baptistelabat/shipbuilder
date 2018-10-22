@@ -967,8 +967,17 @@ updateFromJs jsmsg model =
                 maybeBlock : Maybe Block
                 maybeBlock =
                     getBlockByUUID uuid model.blocks
+
+                updatedViewMode : ViewMode
+                updatedViewMode =
+                    case model.viewMode of
+                        SpaceReservation (DetailedBlock _) ->
+                            SpaceReservation <| DetailedBlock uuid
+
+                        otherViewMode ->
+                            otherViewMode
             in
-                { model | selectedBlock = Maybe.map .uuid maybeBlock } ! []
+                { model | selectedBlock = Maybe.map .uuid maybeBlock, viewMode = updatedViewMode } ! []
 
         Unselect ->
             { model | selectedBlock = Nothing }
