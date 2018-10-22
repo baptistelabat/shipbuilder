@@ -427,6 +427,8 @@ let selectObject = function (object) {
             selectHull(object);
             break;
 
+        case "partition":
+            selectPartition(object);
         default:
             break;
     }
@@ -439,6 +441,19 @@ let selectHull = function (hull) {
             selected = objectToSelect;
         }
         attachViewControl(selected);
+    }
+}
+
+
+let selectPartition = function (partition) {
+    if (partition && partition.uuid) {
+        const objectToSelect = findObjectByUUID(partition.uuid);
+        if (objectToSelect && objectToSelect.sbType === mode) {
+            sendToElm("select-partition", {
+                partitionType: objectToSelect.partitionType,
+                partitionIndex: objectToSelect.partitionIndex
+            });
+        }
     }
 }
 
