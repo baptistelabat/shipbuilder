@@ -496,9 +496,30 @@ input.block-label {
     border-top-width: 1px;
 }
 
-.stacked-subpanel-title {
-
-}
 .stacked-subpanel-content {
     padding: 12px;
+}
+
+.block-volume {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 12px 0 12px 4px;
+}
+
+p.block-volume-label, p.block-volume-value {
+    margin: 0;
+}
+.block-volume .block-volume-label {
+    margin-right: 4px;
+}
+
+
+.block-volume-label::after {
+    content: ':';
+    margin-left: 4px;
+}
+
+
+.block-volume .block-volume-value {
+    font-weight: bold;
 }

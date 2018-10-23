@@ -72,6 +72,8 @@ newBlockDecoder =
         |> Pipeline.required "color" decodeRgbRecord
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
+        |> Pipeline.hardcoded { value = 0, string = "0" }
+        |> Pipeline.hardcoded { value = 0, string = "0" }
 
 
 type alias SyncPosition =
@@ -146,6 +148,8 @@ decodeBlock =
         |> Pipeline.required "color" decodeColor
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
+        |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
+        |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
 
 
 decodeColor : Decode.Decoder Color
@@ -164,20 +168,25 @@ syncSizeDecoder =
         |> Pipeline.required "size" decodeSize
 
 
+floatInputDecoder : Decode.Decoder FloatInput
+floatInputDecoder =
+    Decode.map numberToNumberInput Decode.float
+
+
 decodePosition : Decode.Decoder Position
 decodePosition =
     Pipeline.decode Position
-        |> Pipeline.required "x" (Decode.map numberToNumberInput Decode.float)
-        |> Pipeline.required "y" (Decode.map numberToNumberInput Decode.float)
-        |> Pipeline.required "z" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "x" floatInputDecoder
+        |> Pipeline.required "y" floatInputDecoder
+        |> Pipeline.required "z" floatInputDecoder
 
 
 decodeSize : Decode.Decoder Size
 decodeSize =
     Pipeline.decode Size
-        |> Pipeline.required "x" (Decode.map numberToNumberInput Decode.float)
-        |> Pipeline.required "y" (Decode.map numberToNumberInput Decode.float)
-        |> Pipeline.required "z" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "x" floatInputDecoder
+        |> Pipeline.required "y" floatInputDecoder
+        |> Pipeline.required "z" floatInputDecoder
 
 
 decodeFloatInput : Decode.Decoder FloatInput
@@ -423,6 +432,8 @@ type alias Block =
     , color : Color
     , position : Position
     , size : Size
+    , mass : FloatInput
+    , density : FloatInput
     }
 
 
@@ -893,6 +904,16 @@ syncNumberInput input =
     { input | string = toString input.value }
 
 
+computeVolume : Block -> Float
+computeVolume block =
+    let
+        size : Size
+        size =
+            block.size
+    in
+        size.height.value * size.width.value * size.length.value
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
@@ -932,10 +953,11 @@ type NoJsMsg
     = DismissToast String
     | DisplayToast Toast
     | NoOp
-    | SyncPositionInput Block
-    | SyncSizeInput Block
+    | SyncBlockInputs Block
     | SyncPartitions
     | RenameBlock Block String
+    | UpdateDensity Block String
+    | UpdateMass Block String
 
 
 updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
@@ -949,6 +971,36 @@ updateNoJs msg model =
 
         NoOp ->
             model ! []
+
+        SyncBlockInputs block ->
+            let
+                syncedSize : Size
+                syncedSize =
+                    { length = syncNumberInput block.size.length
+                    , width = syncNumberInput block.size.width
+                    , height = syncNumberInput block.size.height
+                    }
+
+                syncedPosition : Position
+                syncedPosition =
+                    { x = syncNumberInput block.position.x
+                    , y = syncNumberInput block.position.y
+                    , z = syncNumberInput block.position.z
+                    }
+
+                syncedMass : FloatInput
+                syncedMass =
+                    syncNumberInput block.mass
+
+                syncedDensity : FloatInput
+                syncedDensity =
+                    syncNumberInput block.density
+
+                syncedBlock : Block
+                syncedBlock =
+                    { block | size = syncedSize, position = syncedPosition, mass = syncedMass, density = syncedDensity }
+            in
+                { model | blocks = updateBlockInBlocks syncedBlock model.blocks } ! []
 
         SyncPartitions ->
             let
@@ -979,28 +1031,52 @@ updateNoJs msg model =
             in
                 updatedModel ! []
 
-        SyncPositionInput block ->
-            (syncNumberInput block.position.x
-                |> asXInPosition block.position
-                |> flip asYInPosition (syncNumberInput block.position.y)
-                |> flip asZInPosition (syncNumberInput block.position.z)
-                |> asPositionInBlock block
-                |> flip updateBlockInModel model
-            )
-                ! []
-
-        SyncSizeInput blockToSync ->
-            (syncNumberInput blockToSync.size.height
-                |> asHeightInSize blockToSync.size
-                |> flip asWidthInSize (syncNumberInput blockToSync.size.width)
-                |> flip asLengthInSize (syncNumberInput blockToSync.size.length)
-                |> asSizeInBlock blockToSync
-                |> flip updateBlockInModel model
-            )
-                ! []
-
         RenameBlock blockToRename newLabel ->
             updateBlockInModel (renameBlock newLabel blockToRename) model ! []
+
+        UpdateMass block input ->
+            let
+                newMass : Float
+                newMass =
+                    abs <| Result.withDefault block.mass.value <| String.toFloat input
+
+                newDensity : Float
+                newDensity =
+                    newMass / (computeVolume block)
+
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | mass = { value = newMass, string = input }
+                        , density = numberToNumberInput newDensity
+                    }
+
+                updatedModel =
+                    { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
+            in
+                updatedModel ! []
+
+        UpdateDensity block input ->
+            let
+                newDensity : Float
+                newDensity =
+                    abs <| Result.withDefault block.density.value <| String.toFloat input
+
+                newMass : Float
+                newMass =
+                    newDensity * (computeVolume block)
+
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | density = { value = newDensity, string = input }
+                        , mass = numberToNumberInput newMass
+                    }
+
+                updatedModel =
+                    { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
+            in
+                updatedModel ! []
 
 
 updateToJs : ToJsMsg -> Model -> ( Model, Cmd Msg )
@@ -2014,7 +2090,7 @@ viewDetailedBlock uuid model =
                 , div
                     [ class "focus-properties" ]
                   <|
-                    viewBlockProperties block model
+                    viewBlockProperties block
                 ]
 
             Nothing ->
@@ -2030,8 +2106,8 @@ viewBackToWholeList =
         [ FASolid.arrow_left ]
 
 
-viewBlockProperties : Block -> Model -> List (Html Msg)
-viewBlockProperties block model =
+viewBlockProperties : Block -> List (Html Msg)
+viewBlockProperties block =
     [ SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
     , div
         [ class "block-position" ]
@@ -2041,7 +2117,52 @@ viewBlockProperties block model =
         [ class "block-size" ]
       <|
         List.map (flip viewSizeInput block) [ Length, Width, Height ]
+    , viewBlockMassInfo block
     ]
+
+
+viewBlockMassInfo : Block -> Html Msg
+viewBlockMassInfo block =
+    div
+        [ class "block-mass-info" ]
+        [ div
+            [ class "block-volume" ]
+            [ p
+                [ class "block-volume-label" ]
+                [ text "volume" ]
+            , p
+                [ class "block-volume-value" ]
+                [ text <| toString <| computeVolume block ]
+            ]
+        , div
+            [ class "input-group block-density" ]
+            [ label
+                [ for "block-density-input" ]
+                [ text "density" ]
+            , input
+                [ type_ "text"
+                , id "block-density-input"
+                , value block.density.string
+                , onBlur <| NoJs <| SyncBlockInputs block
+                , onInput <| NoJs << UpdateDensity block
+                ]
+                []
+            ]
+        , div
+            [ class "input-group block-mass" ]
+            [ label
+                [ for "block-mass-input" ]
+                [ text "mass" ]
+            , input
+                [ type_ "text"
+                , id "block-mass-input"
+                , value block.mass.string
+                , onBlur <| NoJs <| SyncBlockInputs block
+                , onInput <| NoJs << UpdateMass block
+                ]
+                []
+            ]
+        ]
 
 
 type Axis
@@ -2089,7 +2210,7 @@ viewPositionInputInput axis block axisLabel =
         , type_ "text"
         , value <| .string <| axisAccessor axis <| .position block
         , onInput <| ToJs << UpdatePosition axis block
-        , onBlur <| NoJs <| SyncPositionInput block
+        , onBlur <| NoJs <| SyncBlockInputs block
         , onKeyDown <| ToJs << KeyDownOnPositionInput axis block
         ]
         []
@@ -2156,7 +2277,7 @@ viewSizeInputInput dimension block dimensionLabel =
         , type_ "text"
         , value <| .string <| (dimensionAccessor dimension) <| .size block
         , onInput <| ToJs << UpdateDimension dimension block
-        , onBlur <| NoJs <| SyncSizeInput block
+        , onBlur <| NoJs <| SyncBlockInputs block
         , onKeyDown <| ToJs << KeyDownOnSizeInput dimension block
         ]
         []
