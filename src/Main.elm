@@ -427,6 +427,9 @@ restoreSaveInModel model saveFile =
 
         savedBlocks =
             listOfBlocksToBlocks saveFile.blocks
+
+        partitions =
+            saveFile.partitions
     in
         case maybeCoordinatesTransform of
             Just savedCoordinatesTransform ->
@@ -434,6 +437,7 @@ restoreSaveInModel model saveFile =
                   -- resets focused block and selections
                     | blocks = savedBlocks
                     , coordinatesTransform = savedCoordinatesTransform
+                    , partitions = partitions
                 }
 
             Nothing ->
