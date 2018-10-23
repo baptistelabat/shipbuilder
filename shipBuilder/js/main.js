@@ -100,13 +100,13 @@ let switchMode = function (newMode) {
 }
 
 let setObjectOpacityForCurrentMode = function (object) {
-        if (object.sbType === mode) {
-            object.material.opacity = 1;
-            object.material.transparent = false;
-        } else {
-            object.material.opacity = 0.2;
-            object.material.transparent = true;
-        }
+    if (object.sbType === mode) {
+        object.material.opacity = 1;
+        object.material.transparent = false;
+    } else {
+        object.material.opacity = 0.2;
+        object.material.transparent = true;
+    }
 }
 
 let readFile = function (inputId) {
@@ -142,7 +142,6 @@ let restoreSave = function (savedData) {
     restoreBlocks(savedBlocks);
     makeDecks(decks);
     makeBulkheads(bulkheads);
-    // TODO: restore viewmode dependent opacity
 }
 
 let resetScene = function (views, scene) {
@@ -212,6 +211,7 @@ let makeBulkheads = function (bulkheads) {
         var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var bulkhead = new THREE.LineLoop(geometry, material);
+        setObjectOpacityForCurrentMode(bulkhead);
         bulkhead.position.copy(position);
         bulkhead.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), 0.5 * Math.PI);
         bulkhead.sbType = "partition";
@@ -245,6 +245,7 @@ let makeDecks = function (decks) {
         var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var deck = new THREE.LineLoop(geometry, material);
+        setObjectOpacityForCurrentMode(deck);
         deck.position.copy(position);
         deck.sbType = "partition";
         deck.baseColor = color;
@@ -352,6 +353,7 @@ let restoreBlock = function (uuid, color, position, size) {
     const material = restoreMaterial(threeJsColor);
 
     const block = new THREE.Mesh(geometry, material);
+    setObjectOpacityForCurrentMode(block);
     block.uuid = uuid;
     block.position.fromArray([threeJsPosition.x, threeJsPosition.y, threeJsPosition.z]);
     block.baseColor = threeJsColor;
