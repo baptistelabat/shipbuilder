@@ -459,6 +459,8 @@ encodeRestoreSaveCmd model =
     Encode.object
         [ ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "blocks", encodeBlocks model.blocks )
+        , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
+        , ( "bulkheads", encodeComputedPartitions <| computeBulkheads model.partitions.bulkheads )
         ]
 
 
