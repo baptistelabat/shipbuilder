@@ -95,6 +95,11 @@ let switchMode = function (newMode) {
 
     const sbObjects = scene.children.filter(child => child.sbType);
     sbObjects.forEach(object => {
+        setObjectOpacityForCurrentMode(object);
+    })
+}
+
+let setObjectOpacityForCurrentMode = function (object) {
         if (object.sbType === mode) {
             object.material.opacity = 1;
             object.material.transparent = false;
@@ -102,7 +107,6 @@ let switchMode = function (newMode) {
             object.material.opacity = 0.2;
             object.material.transparent = true;
         }
-    })
 }
 
 let readFile = function (inputId) {
