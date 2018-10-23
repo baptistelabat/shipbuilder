@@ -128,10 +128,15 @@ let readFile = function (inputId) {
 let restoreSave = function (savedData) {
     const savedBlocks = savedData.blocks;
     const savedCoordinatesTransform = savedData.coordinatesTransform;
+    const decks = savedData.decks;
+    const bulkheads = savedData.bulkheads;
 
     resetScene(views, scene);
     setCoordinatesTransformFromElm(savedCoordinatesTransform);
     restoreBlocks(savedBlocks);
+    makeDecks(decks);
+    makeBulkheads(bulkheads);
+    // TODO: restore viewmode dependent opacity
 }
 
 let resetScene = function (views, scene) {
