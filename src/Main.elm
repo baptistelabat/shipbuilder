@@ -720,11 +720,15 @@ initModel =
         , selectedHullReference = Nothing
         , blocks = DictList.empty
         , toasts = emptyToasts
-        , partitions =
+        , partitions = initPartitions
+        }
+
+
+initPartitions : PartitionsData
+initPartitions =
             { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
             , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
             }
-        }
 
 
 initCmd : Model -> JsData
