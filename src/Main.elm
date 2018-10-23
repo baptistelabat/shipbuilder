@@ -2129,7 +2129,7 @@ viewBlockMassInfo block =
             [ class "block-volume" ]
             [ p
                 [ class "block-volume-label" ]
-                [ text "Volume" ]
+                [ text "volume" ]
             , p
                 [ class "block-volume-value" ]
                 [ text <| toString <| computeVolume block ]
