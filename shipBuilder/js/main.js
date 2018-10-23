@@ -276,6 +276,8 @@ let loadHull = function (path) {
         const material = new THREE.MeshBasicMaterial({ color: hullColor });
         const hull = new THREE.Mesh(geometry, material);
 
+        const hullSize = getObjectSize(hull);
+        hull.geometry.translate(-(hullSize.x / 2), -(hullSize.y / 2), 0);
         hull.baseColor = hullColor;
         hull.sbType = "hull";
         scene.add(hull);
