@@ -782,9 +782,9 @@ initModel =
 
 initPartitions : PartitionsData
 initPartitions =
-            { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
-            , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
-            }
+    { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
+    , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
+    }
 
 
 initCmd : Model -> JsData
@@ -1826,7 +1826,7 @@ viewSaveMenuItem : Model -> Html Msg
 viewSaveMenuItem model =
     div
         [ class "header-menu-item"
-        , title "Open"
+        , title "Save"
         ]
         [ a
             [ type_ "button"
