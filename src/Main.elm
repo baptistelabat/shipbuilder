@@ -953,6 +953,7 @@ type NoJsMsg
     = DismissToast String
     | DisplayToast Toast
     | NoOp
+    | SyncBlockInputs Block
     | SyncPositionInput Block
     | SyncSizeInput Block
     | SyncPartitions
@@ -972,6 +973,36 @@ updateNoJs msg model =
 
         NoOp ->
             model ! []
+
+        SyncBlockInputs block ->
+            let
+                syncedSize : Size
+                syncedSize =
+                    { length = syncNumberInput block.size.length
+                    , width = syncNumberInput block.size.width
+                    , height = syncNumberInput block.size.height
+                    }
+
+                syncedPosition : Position
+                syncedPosition =
+                    { x = syncNumberInput block.position.x
+                    , y = syncNumberInput block.position.y
+                    , z = syncNumberInput block.position.z
+                    }
+
+                syncedMass : FloatInput
+                syncedMass =
+                    syncNumberInput block.mass
+
+                syncedDensity : FloatInput
+                syncedDensity =
+                    syncNumberInput block.density
+
+                syncedBlock : Block
+                syncedBlock =
+                    { block | size = syncedSize, position = syncedPosition, mass = syncedMass, density = syncedDensity }
+            in
+                { model | blocks = updateBlockInBlocks syncedBlock model.blocks } ! []
 
         SyncPartitions ->
             let
@@ -1026,6 +1057,7 @@ updateNoJs msg model =
             updateBlockInModel (renameBlock newLabel blockToRename) model ! []
 
         UpdateMass block input ->
+            -- TODO: parse input, save valid input, save invalid string, calc density on valid
             let
                 newMass : Float
                 newMass =
@@ -1048,6 +1080,7 @@ updateNoJs msg model =
                 updatedModel ! []
 
         UpdateDensity block input ->
+            -- TODO: parse input, save valid input, save invalid string, calc density on valid
             let
                 newDensity : Float
                 newDensity =
@@ -2134,6 +2167,7 @@ viewBlockMassInfo block =
                 [ type_ "text"
                 , id "block-density-input"
                 , value block.density.string
+                , onBlur <| NoJs <| SyncBlockInputs block
                 , onInput <| NoJs << UpdateDensity block
                 ]
                 []
@@ -2147,6 +2181,7 @@ viewBlockMassInfo block =
                 [ type_ "text"
                 , id "block-mass-input"
                 , value block.mass.string
+                , onBlur <| NoJs <| SyncBlockInputs block
                 , onInput <| NoJs << UpdateMass block
                 ]
                 []
