@@ -276,6 +276,8 @@ let loadHull = function (path) {
         const material = new THREE.MeshBasicMaterial({ color: hullColor });
         const hull = new THREE.Mesh(geometry, material);
 
+        const hullSize = getObjectSize(hull);
+        hull.geometry.translate(-(hullSize.x / 2), -(hullSize.y / 2), 0);
         hull.baseColor = hullColor;
         hull.sbType = "hull";
         scene.add(hull);
@@ -331,7 +333,7 @@ let getObjectSize = function (object) {
     }
 }
 
-let addCube = function (label, color = 0x5078ff, sizeX = 80, sizeY = 50, sizeZ = 70, x = 0, y = 0, z = 0) {
+let addCube = function (label, color = 0x5078ff, sizeX = 10, sizeY = 5, sizeZ = 5, x = 0, y = 0, z = 0) {
     var cube = makeCube(sizeX, sizeY, sizeZ, x, y, z, color);
     scene.add(cube);
     sendToElm("new-block", {
@@ -497,6 +499,7 @@ let findObjectByUUID = function (uuid) {
 let initThree = function (data) {
     window.addEventListener('resize', (window, event) => onResize(), false);
     document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
+    document.addEventListener('wheel', (document, event) => onWheel(document), false)
 
     const initViewports = data.viewports;
     const initMode = data.mode;
@@ -532,6 +535,18 @@ let initThree = function (data) {
 
     animate();
 };
+
+let onWheel = function (event) {
+    const orthographicViews = views.filter(view => view.cameraType === "Orthographic");
+    orthographicViews.forEach(orthoView => {
+        orthoView.camera.zoom -= event.deltaY * 0.2;
+        if (orthoView.camera.zoom < 0.5) {
+            orthoView.camera.zoom = 0.5
+        }
+
+        orthoView.control.size = 120 / orthoView.camera.zoom;
+    });
+}
 
 let displayLabels = function () {
     var labels = document.getElementsByClassName("viewport-label");
