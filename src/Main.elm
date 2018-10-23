@@ -457,7 +457,8 @@ restoreSaveCmd model =
 encodeRestoreSaveCmd : Model -> Encode.Value
 encodeRestoreSaveCmd model =
     Encode.object
-        [ ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
+        [ ( "viewMode", encodeViewMode model.viewMode )
+        , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "blocks", encodeBlocks model.blocks )
         , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
         , ( "bulkheads", encodeComputedPartitions <| computeBulkheads model.partitions.bulkheads )
