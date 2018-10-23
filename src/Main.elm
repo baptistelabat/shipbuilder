@@ -92,18 +92,44 @@ type alias SyncSize =
 
 
 type alias SaveFile =
-    { version : Int
-    , blocks : List Block
+    { blocks : List Block
     , coordinatesTransform : List Float
+    , partitions : PartitionsData
     }
 
 
-saveFileDecoder : Decode.Decoder SaveFile
-saveFileDecoder =
+saveFileDecoderV1 : Decode.Decoder SaveFile
+saveFileDecoderV1 =
     Pipeline.decode SaveFile
-        |> Pipeline.required "version" Decode.int
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
+        |> Pipeline.hardcoded initPartitions
+
+
+saveFileDecoderV2 : Decode.Decoder SaveFile
+saveFileDecoderV2 =
+    Pipeline.decode SaveFile
+        |> Pipeline.required "blocks" decodeBlocks
+        |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
+        |> Pipeline.required "partitions" decodePartitions
+
+
+decodeSaveFile : Int -> Decode.Decoder SaveFile
+decodeSaveFile version =
+    case version of
+        1 ->
+            saveFileDecoderV1
+
+        2 ->
+            saveFileDecoderV2
+
+        _ ->
+            Decode.fail <| "Unknown version " ++ toString version
+
+
+decodeVersion : Decode.Decoder Int
+decodeVersion =
+    Decode.field "version" Decode.int
 
 
 type alias SelectPartitionData =
@@ -293,7 +319,7 @@ jsMsgToMsg js =
                     FromJs <| JSError message
 
         "save-data" ->
-            case Decode.decodeValue saveFileDecoder js.data of
+            case Decode.decodeValue (decodeVersion |> Decode.andThen decodeSaveFile) js.data of
                 Ok fileContents ->
                     FromJs <| RestoreSave fileContents
 
