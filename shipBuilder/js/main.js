@@ -457,13 +457,7 @@ let selectObject = function (object) {
 }
 
 let selectHull = function (hull) {
-    if (hull && hull.uuid) {
-        const objectToSelect = findObjectByUUID(hull.uuid);
-        if (objectToSelect && objectToSelect.sbType === mode) {
-            selected = objectToSelect;
-        }
-        attachViewControl(selected);
-    }
+    // manipulating the hull in 3D is no allowed for now
 }
 
 
