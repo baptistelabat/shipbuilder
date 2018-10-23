@@ -204,21 +204,23 @@ let makeBulkheads = function (bulkheads) {
         const index = bulkhead.index;
         const number = bulkhead.number;
         const xPosition = bulkhead.position;
-        const position = toThreeJsCoordinates(xPosition, 0, 0, coordinatesTransform);
-        const geometry = new THREE.BoxGeometry(500, 0, 500);
+        const size = 500;
+        const geometry = new THREE.Geometry();
 
+        geometry.vertices.push(toThreeJsCoordinates(xPosition, -size / 2, -size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(xPosition, -size / 2, size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(xPosition, size / 2, size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(xPosition, size / 2, -size / 2, coordinatesTransform));
         const color = number ? bulkheadColor : zeroColor;
         var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var bulkhead = new THREE.LineLoop(geometry, material);
-        setObjectOpacityForCurrentMode(bulkhead);
-        bulkhead.position.copy(position);
-        bulkhead.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), 0.5 * Math.PI);
         bulkhead.sbType = "partition";
         bulkhead.baseColor = color;
         bulkhead.partitionType = "bulkhead";
         bulkhead.partitionIndex = index;
         bulkhead.partitionNumber = number;
+        setObjectOpacityForCurrentMode(bulkhead);
         scene.add(bulkhead);
     })
 }
@@ -238,20 +240,23 @@ let makeDecks = function (decks) {
         const index = deck.index;
         const number = deck.number;
         const zPosition = deck.position;
-        const position = toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform);
-        const geometry = new THREE.BoxGeometry(500, 0, 500);
+        const size = 500;
+        const geometry = new THREE.Geometry();
 
+        geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, zPosition, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, zPosition, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, zPosition, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, zPosition, coordinatesTransform));
         const color = number ? deckColor : zeroColor;
         var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var deck = new THREE.LineLoop(geometry, material);
-        setObjectOpacityForCurrentMode(deck);
-        deck.position.copy(position);
         deck.sbType = "partition";
         deck.baseColor = color;
         deck.partitionType = "deck";
         deck.partitionIndex = index;
         deck.partitionNumber = number;
+        setObjectOpacityForCurrentMode(deck);
         scene.add(deck);
     })
 }
