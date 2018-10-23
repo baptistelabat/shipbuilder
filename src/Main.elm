@@ -1057,7 +1057,6 @@ updateNoJs msg model =
             updateBlockInModel (renameBlock newLabel blockToRename) model ! []
 
         UpdateMass block input ->
-            -- TODO: parse input, save valid input, save invalid string, calc density on valid
             let
                 newMass : Float
                 newMass =
@@ -1080,7 +1079,6 @@ updateNoJs msg model =
                 updatedModel ! []
 
         UpdateDensity block input ->
-            -- TODO: parse input, save valid input, save invalid string, calc density on valid
             let
                 newDensity : Float
                 newDensity =
@@ -2234,7 +2232,7 @@ viewPositionInputInput axis block axisLabel =
         , type_ "text"
         , value <| .string <| axisAccessor axis <| .position block
         , onInput <| ToJs << UpdatePosition axis block
-        , onBlur <| NoJs <| SyncPositionInput block
+        , onBlur <| NoJs <| SyncBlockInputs block
         , onKeyDown <| ToJs << KeyDownOnPositionInput axis block
         ]
         []
@@ -2301,7 +2299,7 @@ viewSizeInputInput dimension block dimensionLabel =
         , type_ "text"
         , value <| .string <| (dimensionAccessor dimension) <| .size block
         , onInput <| ToJs << UpdateDimension dimension block
-        , onBlur <| NoJs <| SyncSizeInput block
+        , onBlur <| NoJs <| SyncBlockInputs block
         , onKeyDown <| ToJs << KeyDownOnSizeInput dimension block
         ]
         []
