@@ -1023,6 +1023,27 @@ updateNoJs msg model =
         RenameBlock blockToRename newLabel ->
             updateBlockInModel (renameBlock newLabel blockToRename) model ! []
 
+        UpdateMass block input ->
+            let
+                newMass : Float
+                newMass =
+                    abs <| Result.withDefault block.mass.value <| String.toFloat input
+
+                newDensity : Float
+                newDensity =
+                    newMass / (computeVolume block)
+
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | mass = { value = newMass, string = input }
+                        , density = numberToNumberInput newDensity
+                    }
+
+                updatedModel =
+                    { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
+            in
+                updatedModel ! []
 
 updateToJs : ToJsMsg -> Model -> ( Model, Cmd Msg )
 updateToJs msg model =
@@ -2086,8 +2107,16 @@ viewBlockMassInfo block =
             ]
         , div
             [ class "input-group block-mass" ]
-            [ label [ for "block-mass-input" ] [ text "mass" ]
-            , input [ type_ "text", id "block-mass-input", value block.mass.string ] []
+            [ label
+                [ for "block-mass-input" ]
+                [ text "mass" ]
+            , input
+                [ type_ "text"
+                , id "block-mass-input"
+                , value block.mass.string
+                , onInput <| NoJs << UpdateMass block
+                ]
+                []
             ]
         ]
 
