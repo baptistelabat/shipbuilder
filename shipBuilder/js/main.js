@@ -499,6 +499,7 @@ let findObjectByUUID = function (uuid) {
 let initThree = function (data) {
     window.addEventListener('resize', (window, event) => onResize(), false);
     document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
+    document.addEventListener('wheel', (document, event) => onWheel(document), false)
 
     const initViewports = data.viewports;
     const initMode = data.mode;
@@ -534,6 +535,18 @@ let initThree = function (data) {
 
     animate();
 };
+
+let onWheel = function (event) {
+    const orthographicViews = views.filter(view => view.cameraType === "Orthographic");
+    orthographicViews.forEach(orthoView => {
+        orthoView.camera.zoom -= event.deltaY * 0.2;
+        if (orthoView.camera.zoom < 0.5) {
+            orthoView.camera.zoom = 0.5
+        }
+
+        orthoView.control.size = 120 / orthoView.camera.zoom;
+    });
+}
 
 let displayLabels = function () {
     var labels = document.getElementsByClassName("viewport-label");
