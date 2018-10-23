@@ -72,8 +72,8 @@ newBlockDecoder =
         |> Pipeline.required "color" decodeRgbRecord
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
-        |> Pipeline.hardcoded 0
-        |> Pipeline.hardcoded 0
+        |> Pipeline.hardcoded { value = 0, string = "0" }
+        |> Pipeline.hardcoded { value = 0, string = "0" }
 
 
 type alias SyncPosition =
@@ -148,8 +148,8 @@ decodeBlock =
         |> Pipeline.required "color" decodeColor
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
-        |> Pipeline.optional "mass" Decode.float 0
-        |> Pipeline.optional "density" Decode.float 0
+        |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
+        |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
 
 
 decodeColor : Decode.Decoder Color
@@ -432,8 +432,8 @@ type alias Block =
     , color : Color
     , position : Position
     , size : Size
-    , mass : Float
-    , density : Float
+    , mass : FloatInput
+    , density : FloatInput
     }
 
 
@@ -2082,14 +2082,14 @@ viewBlockMassInfo block =
         , div
             [ class "input-group block-density" ]
             [ label [ for "block-density-input" ] [ text "density" ]
-            , input [ type_ "text", id "block-density-input", value <| toString block.density ] []
+            , input [ type_ "text", id "block-density-input", value block.density.string ] []
             ]
         , div
             [ class "input-group block-mass" ]
             [ label [ for "block-mass-input" ] [ text "mass" ]
-            , input [ type_ "text", id "block-mass-input", value <| toString block.mass ] []
+            , input [ type_ "text", id "block-mass-input", value block.mass.string ] []
             ]
-    ]
+        ]
 
 
 type Axis
