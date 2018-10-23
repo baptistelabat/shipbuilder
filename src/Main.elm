@@ -564,6 +564,7 @@ encodeDecks decks =
     Encode.object
         [ ( "number", Encode.int decks.number.value )
         , ( "spacing", Encode.float decks.spacing.value )
+        , ( "zero", Encode.int decks.zero )
         ]
 
 
@@ -572,6 +573,7 @@ encodeBulkheads bulkheads =
     Encode.object
         [ ( "number", Encode.int bulkheads.number.value )
         , ( "spacing", Encode.float bulkheads.spacing.value )
+        , ( "zero", Encode.int bulkheads.zero )
         ]
 
 
