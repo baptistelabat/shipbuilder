@@ -521,7 +521,7 @@ encodeBlocks blocks =
 encodeModelForSave : Model -> Encode.Value
 encodeModelForSave model =
     Encode.object
-        [ ( "version", Encode.int 1 )
+        [ ( "version", Encode.int 2 )
         , ( "blocks", encodeBlocks model.blocks )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         ]
