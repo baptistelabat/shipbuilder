@@ -957,6 +957,8 @@ type NoJsMsg
     | SyncSizeInput Block
     | SyncPartitions
     | RenameBlock Block String
+    | UpdateDensity Block String
+    | UpdateMass Block String
 
 
 updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
@@ -1044,6 +1046,29 @@ updateNoJs msg model =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
             in
                 updatedModel ! []
+
+        UpdateDensity block input ->
+            let
+                newDensity : Float
+                newDensity =
+                    abs <| Result.withDefault block.density.value <| String.toFloat input
+
+                newMass : Float
+                newMass =
+                    newDensity * (computeVolume block)
+
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | density = { value = newDensity, string = input }
+                        , mass = numberToNumberInput newMass
+                    }
+
+                updatedModel =
+                    { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
+            in
+                updatedModel ! []
+
 
 updateToJs : ToJsMsg -> Model -> ( Model, Cmd Msg )
 updateToJs msg model =
@@ -2102,8 +2127,16 @@ viewBlockMassInfo block =
             ]
         , div
             [ class "input-group block-density" ]
-            [ label [ for "block-density-input" ] [ text "density" ]
-            , input [ type_ "text", id "block-density-input", value block.density.string ] []
+            [ label
+                [ for "block-density-input" ]
+                [ text "density" ]
+            , input
+                [ type_ "text"
+                , id "block-density-input"
+                , value block.density.string
+                , onInput <| NoJs << UpdateDensity block
+                ]
+                []
             ]
         , div
             [ class "input-group block-mass" ]
