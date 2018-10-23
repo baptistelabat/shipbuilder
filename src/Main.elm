@@ -168,20 +168,25 @@ syncSizeDecoder =
         |> Pipeline.required "size" decodeSize
 
 
+floatInputDecoder : Decode.Decoder FloatInput
+floatInputDecoder =
+    Decode.map numberToNumberInput Decode.float
+
+
 decodePosition : Decode.Decoder Position
 decodePosition =
     Pipeline.decode Position
-        |> Pipeline.required "x" (Decode.map numberToNumberInput Decode.float)
-        |> Pipeline.required "y" (Decode.map numberToNumberInput Decode.float)
-        |> Pipeline.required "z" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "x" floatInputDecoder
+        |> Pipeline.required "y" floatInputDecoder
+        |> Pipeline.required "z" floatInputDecoder
 
 
 decodeSize : Decode.Decoder Size
 decodeSize =
     Pipeline.decode Size
-        |> Pipeline.required "x" (Decode.map numberToNumberInput Decode.float)
-        |> Pipeline.required "y" (Decode.map numberToNumberInput Decode.float)
-        |> Pipeline.required "z" (Decode.map numberToNumberInput Decode.float)
+        |> Pipeline.required "x" floatInputDecoder
+        |> Pipeline.required "y" floatInputDecoder
+        |> Pipeline.required "z" floatInputDecoder
 
 
 decodeFloatInput : Decode.Decoder FloatInput
