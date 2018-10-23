@@ -333,7 +333,7 @@ let getObjectSize = function (object) {
     }
 }
 
-let addCube = function (label, color = 0x5078ff, sizeX = 80, sizeY = 50, sizeZ = 70, x = 0, y = 0, z = 0) {
+let addCube = function (label, color = 0x5078ff, sizeX = 10, sizeY = 5, sizeZ = 5, x = 0, y = 0, z = 0) {
     var cube = makeCube(sizeX, sizeY, sizeZ, x, y, z, color);
     scene.add(cube);
     sendToElm("new-block", {
