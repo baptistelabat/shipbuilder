@@ -954,8 +954,6 @@ type NoJsMsg
     | DisplayToast Toast
     | NoOp
     | SyncBlockInputs Block
-    | SyncPositionInput Block
-    | SyncSizeInput Block
     | SyncPartitions
     | RenameBlock Block String
     | UpdateDensity Block String
@@ -1032,26 +1030,6 @@ updateNoJs msg model =
                         |> asPartitionsInModel model
             in
                 updatedModel ! []
-
-        SyncPositionInput block ->
-            (syncNumberInput block.position.x
-                |> asXInPosition block.position
-                |> flip asYInPosition (syncNumberInput block.position.y)
-                |> flip asZInPosition (syncNumberInput block.position.z)
-                |> asPositionInBlock block
-                |> flip updateBlockInModel model
-            )
-                ! []
-
-        SyncSizeInput blockToSync ->
-            (syncNumberInput blockToSync.size.height
-                |> asHeightInSize blockToSync.size
-                |> flip asWidthInSize (syncNumberInput blockToSync.size.width)
-                |> flip asLengthInSize (syncNumberInput blockToSync.size.length)
-                |> asSizeInBlock blockToSync
-                |> flip updateBlockInModel model
-            )
-                ! []
 
         RenameBlock blockToRename newLabel ->
             updateBlockInModel (renameBlock newLabel blockToRename) model ! []
