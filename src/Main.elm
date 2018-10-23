@@ -235,6 +235,29 @@ decodeRgbRecord =
         |> Pipeline.required "blue" Decode.int
 
 
+decodePartitions : Decode.Decoder PartitionsData
+decodePartitions =
+    Pipeline.decode PartitionsData
+        |> Pipeline.required "decks" decodeDecks
+        |> Pipeline.required "bulkheads" decodeBulkheads
+
+
+decodeDecks : Decode.Decoder Decks
+decodeDecks =
+    Pipeline.decode Decks
+        |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
+        |> Pipeline.required "spacing" floatInputDecoder
+        |> Pipeline.required "zero" Decode.int
+
+
+decodeBulkheads : Decode.Decoder Bulkheads
+decodeBulkheads =
+    Pipeline.decode Bulkheads
+        |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
+        |> Pipeline.required "spacing" floatInputDecoder
+        |> Pipeline.required "zero" Decode.int
+
+
 type alias Toasts =
     DictList String Toast
 
