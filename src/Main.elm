@@ -535,6 +535,8 @@ encodeBlock block =
         , ( "color", encodeColor block.color )
         , ( "position", encodePosition block.position )
         , ( "size", encodeSize block.size )
+        , ( "mass", Encode.float block.mass.value )
+        , ( "density", Encode.float block.density.value )
         ]
 
 
