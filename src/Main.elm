@@ -524,6 +524,7 @@ encodeModelForSave model =
         [ ( "version", Encode.int 2 )
         , ( "blocks", encodeBlocks model.blocks )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
+        , ( "partitions", encodePartitions model.partitions )
         ]
 
 
