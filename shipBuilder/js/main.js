@@ -6,6 +6,9 @@ const app = Elm.Main.embed(div);
 const mouse = new THREE.Vector2();
 const wrapperId = "three-wrapper"; // defined in elm
 
+let canPan = false;
+let panning = false;
+
 let views = [];
 let mode = null;
 
@@ -281,8 +284,6 @@ let loadHull = function (path) {
         const material = new THREE.MeshBasicMaterial({ color: hullColor });
         const hull = new THREE.Mesh(geometry, material);
 
-        const hullSize = getObjectSize(hull);
-        hull.geometry.translate(-(hullSize.x / 2), -(hullSize.y / 2), 0);
         hull.baseColor = hullColor;
         hull.sbType = "hull";
         scene.add(hull);
@@ -501,10 +502,35 @@ let findObjectByUUID = function (uuid) {
     return scene.children.find(child => child.uuid === uuid);
 }
 
+let onKeyUp = function (event) {
+    if (event.key === "AltGraph") { canPan = false; preventSelection = false; }
+}
+
+let onKeyDown = function (event) {
+    if (event.key === "AltGraph") { canPan = true; preventSelection = true; }
+}
+
+let onMouseUp = function (event) {
+    if (panning) {
+        panning = null;
+    }
+}
+
+let onMouseDown = function (event) {
+    const currentView = getActiveViewport(views);
+    if (canPan && currentView) {
+        panning = currentView;
+    }
+}
+
 let initThree = function (data) {
-    window.addEventListener('resize', (window, event) => onResize(), false);
-    document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
-    document.addEventListener('wheel', (document, event) => onWheel(document), false)
+    window.addEventListener('resize', (event) => onResize(), false);
+    document.addEventListener('mousemove', (event) => onMouseMove(event), false)
+    document.addEventListener('keydown', (event) => onKeyDown(event), false)
+    document.addEventListener('keyup', (event) => onKeyUp(event), false)
+    document.addEventListener('mousedown', (event) => onMouseDown(event), false)
+    document.addEventListener('mouseup', (event) => onMouseUp(event), false)
+    document.addEventListener('wheel', (event) => onWheel(event), false)
 
     const initViewports = data.viewports;
     const initMode = data.mode;
@@ -606,6 +632,35 @@ let onResize = function (window, event) {
 let onMouseMove = function (event) {
     mouse.x = event.clientX;
     mouse.y = event.clientY;
+
+    // if can control 2 axis and is orthographic
+    if (panning && panning.cameraType === "Orthographic" && panning.getCanControl().reduce((prev, current) => prev + (current ? 1 : 0)) === 2) {
+        const camera = panning.camera;
+        const canControl = panning.getCanControl();
+
+        // we weight the movement of the camera with the zoom to keep a constant speed across all zoom levels
+        const movementX = event.movementX / camera.zoom;
+        // -event.movementY because in the browser, Y = 0 is at the bottom of the screen
+        const movementY = -event.movementY / camera.zoom;
+
+        views
+            .filter(view => view.cameraType === "Orthographic")
+            .forEach(view => {
+                const camera = view.camera;
+                if (canControl[0]) { // can control the X axis (threejs)
+                    camera.position.x -= movementX;
+                    if (canControl[2]) {
+                        camera.position.z += movementY;
+                    }
+                }
+                if (canControl[1]) { // can control the Y axis (threejs)
+                    camera.position.y -= movementY;
+                    if (canControl[2]) {
+                        camera.position.z += movementX;
+                    }
+                }
+            });
+    }
 }
 
 let updateViewports = function (views, canvas) {
@@ -655,7 +710,7 @@ let initCameras = function () {
                 );
                 camera.position.fromArray(view.getEye());
             }
-
+            camera.lookAt(scene.position);
             view.camera = camera;
         });
     }
@@ -809,7 +864,6 @@ let updateCamera = function (view, scene) {
             renderer.setScissor(view.clientLeft, view.clientTop, view.clientWidth, view.clientHeight);
             renderer.setScissorTest(true);
             renderer.setClearColor(view.getBackground());
-            camera.lookAt(scene.position);
 
             camera.aspect = view.clientWidth / view.clientHeight;
             camera.updateProjectionMatrix();
