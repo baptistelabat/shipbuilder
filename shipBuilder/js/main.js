@@ -508,9 +508,25 @@ let onKeyUp = function (event) {
 let onKeyDown = function (event) {
     if (event.key === "AltGraph") { canPan = true; preventSelection = true; }
 }
+
+let onMouseUp = function (event) {
+    if (panning) {
+        panning = null;
+    }
+}
+
+let onMouseDown = function (event) {
+    const currentView = getActiveViewport(views);
+    if (canPan && currentView) {
+        panning = currentView;
+    }
+}
+
 let initThree = function (data) {
     document.addEventListener('keydown', (event) => onKeyDown(event), false)
     document.addEventListener('keyup', (event) => onKeyUp(event), false)
+    document.addEventListener('mousedown', (event) => onMouseDown(event), false)
+    document.addEventListener('mouseup', (event) => onMouseUp(event), false)
 
     const initViewports = data.viewports;
     const initMode = data.mode;
