@@ -634,6 +634,35 @@ let onResize = function (window, event) {
 let onMouseMove = function (event) {
     mouse.x = event.clientX;
     mouse.y = event.clientY;
+
+    // if can control 2 axis and is orthographic
+    if (panning && panning.cameraType === "Orthographic" && panning.getCanControl().reduce((prev, current) => prev + (current ? 1 : 0)) === 2) {
+        const camera = panning.camera;
+        const canControl = panning.getCanControl();
+
+        // we weight the movement of the camera with the zoom to keep a constant speed across all zoom levels
+        const movementX = event.movementX / camera.zoom;
+        // -event.movementY because in the browser, Y = 0 is at the bottom of the screen
+        const movementY = -event.movementY / camera.zoom;
+
+        views
+            .filter(view => view.cameraType === "Orthographic")
+            .forEach(view => {
+                const camera = view.camera;
+                if (canControl[0]) { // can control the X axis (threejs)
+                    camera.position.x -= movementX;
+                    if (canControl[2]) {
+                        camera.position.z += movementY;
+                    }
+                }
+                if (canControl[1]) { // can control the Y axis (threejs)
+                    camera.position.y -= movementY;
+                    if (canControl[2]) {
+                        camera.position.z += movementX;
+                    }
+                }
+            });
+    }
 }
 
 let updateViewports = function (views, canvas) {
