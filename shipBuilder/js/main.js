@@ -712,7 +712,7 @@ let initCameras = function () {
                 );
                 camera.position.fromArray(view.getEye());
             }
-
+            camera.lookAt(scene.position);
             view.camera = camera;
         });
     }
@@ -866,7 +866,6 @@ let updateCamera = function (view, scene) {
             renderer.setScissor(view.clientLeft, view.clientTop, view.clientWidth, view.clientHeight);
             renderer.setScissorTest(true);
             renderer.setClearColor(view.getBackground());
-            camera.lookAt(scene.position);
 
             camera.aspect = view.clientWidth / view.clientHeight;
             camera.updateProjectionMatrix();
