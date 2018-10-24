@@ -8,6 +8,7 @@ const wrapperId = "three-wrapper"; // defined in elm
 
 let canPan = false;
 let panning = false;
+let multipleSelect = false;
 
 let views = [];
 let mode = null;
@@ -504,10 +505,12 @@ let findObjectByUUID = function (uuid) {
 
 let onKeyUp = function (event) {
     if (event.key === "AltGraph") { canPan = false; preventSelection = false; }
+    if (event.key === "Ctrl") { multipleSelect = false; }
 }
 
 let onKeyDown = function (event) {
     if (event.key === "AltGraph") { canPan = true; preventSelection = true; }
+    if (event.key === "Ctrl") { multipleSelect = true; }
 }
 
 let onMouseUp = function (event) {
