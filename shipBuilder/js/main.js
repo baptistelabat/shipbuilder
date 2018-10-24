@@ -523,10 +523,13 @@ let onMouseDown = function (event) {
 }
 
 let initThree = function (data) {
+    window.addEventListener('resize', (event) => onResize(), false);
+    document.addEventListener('mousemove', (event) => onMouseMove(event), false)
     document.addEventListener('keydown', (event) => onKeyDown(event), false)
     document.addEventListener('keyup', (event) => onKeyUp(event), false)
     document.addEventListener('mousedown', (event) => onMouseDown(event), false)
     document.addEventListener('mouseup', (event) => onMouseUp(event), false)
+    document.addEventListener('wheel', (event) => onWheel(event), false)
 
     const initViewports = data.viewports;
     const initMode = data.mode;
