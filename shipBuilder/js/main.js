@@ -501,10 +501,16 @@ let findObjectByUUID = function (uuid) {
     return scene.children.find(child => child.uuid === uuid);
 }
 
+let onKeyUp = function (event) {
+    if (event.key === "AltGraph") { canPan = false; preventSelection = false; }
+}
+
+let onKeyDown = function (event) {
+    if (event.key === "AltGraph") { canPan = true; preventSelection = true; }
+}
 let initThree = function (data) {
-    window.addEventListener('resize', (window, event) => onResize(), false);
-    document.addEventListener('mousemove', (document, event) => onMouseMove(document), false)
-    document.addEventListener('wheel', (document, event) => onWheel(document), false)
+    document.addEventListener('keydown', (event) => onKeyDown(event), false)
+    document.addEventListener('keyup', (event) => onKeyUp(event), false)
 
     const initViewports = data.viewports;
     const initMode = data.mode;
