@@ -6,6 +6,9 @@ const app = Elm.Main.embed(div);
 const mouse = new THREE.Vector2();
 const wrapperId = "three-wrapper"; // defined in elm
 
+let canPan = false;
+let panning = false;
+
 let views = [];
 let mode = null;
 
