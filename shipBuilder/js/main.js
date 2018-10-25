@@ -553,8 +553,8 @@ let selectHull = function (hull) {
 let selectPartition = function (partition) {
     if (isPartition(partition)) {
         sendToElm("select-partition", {
-            partitionType: objectToSelect.partitionType,
-            partitionIndex: objectToSelect.partitionIndex
+            partitionType: partition.partitionType,
+            partitionIndex: partition.partitionIndex
         });
     }
 }
