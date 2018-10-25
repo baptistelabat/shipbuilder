@@ -472,6 +472,11 @@ let resetSelection = function () {
     detachControls();
     }
 
+let getBlockByUuid = function (uuid) {
+    const block = scene.children.find(child => child.sbType && child.sbType === "block" && child.uuid === uuid);
+    return block;
+}
+
 let selectObject = function (object) {
     if (object.sbType && object.sbType === mode) {
     switch (mode) {
