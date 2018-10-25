@@ -642,10 +642,7 @@ let initThree = function (data) {
     initCameras();
     displayLabels();
     initGizmos();
-    /**
-     * var gridHelper = new THREE.GridHelper(100, 10);
-     * scene.add(gridHelper);
-     */
+    initOrbitControls();
 
     animate();
 };
@@ -747,6 +744,17 @@ let onMouseMove = function (event) {
                     }
                 }
             });
+    }
+
+    views.forEach(view => {
+        if (view.orbitControls && view.orbitControls.enabled) {
+            view.orbitControls.enabled = false;
+        }
+    });
+
+    const currentView = getActiveViewport(views);
+    if (currentView && currentView.orbitControls && !currentView.orbitControls.enabled) {
+        currentView.orbitControls.enabled = true;
     }
 }
 
@@ -870,8 +878,16 @@ let initGizmos = function () {
             view.control = control;
             scene.add(control);
         }
-
     });
+}
+
+let initOrbitControls = function () {
+    views
+        .filter(view => view.cameraType === "Perspective")
+        .forEach(view => {
+            const control = new THREE.OrbitControls(view.camera);
+            view.orbitControls = control;
+        });
 }
 
 let initCanvas = function (parent) {
