@@ -689,7 +689,7 @@ encodeDecks decks =
         , ( "zero"
           , Encode.object
                 [ ( "index", Encode.int decks.zero.index )
-                , ( "zPosition", Encode.float decks.zero.position.value )
+                , ( "position", Encode.float decks.zero.position.value )
                 ]
           )
         ]
@@ -703,7 +703,7 @@ encodeBulkheads bulkheads =
         , ( "zero"
           , Encode.object
                 [ ( "index", Encode.int bulkheads.zero.index )
-                , ( "xPosition", Encode.float bulkheads.zero.position.value )
+                , ( "position", Encode.float bulkheads.zero.position.value )
                 ]
           )
         ]
