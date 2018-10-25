@@ -252,7 +252,7 @@ decodeDecks =
     Pipeline.decode Decks
         |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
         |> Pipeline.required "spacing" floatInputDecoder
-        |> Pipeline.required "zero" Decode.int
+        |> Pipeline.required "zero" decodePartitionZero
 
 
 decodeBulkheads : Decode.Decoder Bulkheads
@@ -260,7 +260,14 @@ decodeBulkheads =
     Pipeline.decode Bulkheads
         |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
         |> Pipeline.required "spacing" floatInputDecoder
-        |> Pipeline.required "zero" Decode.int
+        |> Pipeline.required "zero" decodePartitionZero
+
+
+decodePartitionZero : Decode.Decoder PartitionZero
+decodePartitionZero =
+    Pipeline.decode PartitionZero
+        |> Pipeline.required "index" Decode.int
+        |> Pipeline.required "position" floatInputDecoder
 
 
 type alias Toasts =
@@ -565,18 +572,21 @@ type PartitionType
 type alias Decks =
     { number : IntInput
     , spacing : FloatInput
-    , zero :
-        Int
-        -- the index of the deck n° 0
+    , zero : PartitionZero
+    }
+
+
+type alias PartitionZero =
+    { -- the index of the partition n° 0
+      index : Int
+    , position : FloatInput
     }
 
 
 type alias Bulkheads =
     { number : IntInput
     , spacing : FloatInput
-    , zero :
-        Int
-        -- the index of the bulkhead n° 0
+    , zero : PartitionZero
     }
 
 
@@ -590,7 +600,17 @@ asSpacingInPartition partition newSpacing =
     { partition | spacing = newSpacing }
 
 
-asZeroInPartition : { a | zero : Int } -> Int -> { a | zero : Int }
+asIndexInPartitionZero : { a | index : Int } -> Int -> { a | index : Int }
+asIndexInPartitionZero zero newIndex =
+    { zero | index = newIndex }
+
+
+asPositionInPartitionZero : { a | position : FloatInput } -> FloatInput -> { a | position : FloatInput }
+asPositionInPartitionZero zero newPosition =
+    { zero | position = newPosition }
+
+
+asZeroInPartition : { a | zero : PartitionZero } -> PartitionZero -> { a | zero : PartitionZero }
 asZeroInPartition partition newZero =
     { partition | zero = newZero }
 
@@ -666,7 +686,12 @@ encodeDecks decks =
     Encode.object
         [ ( "number", Encode.int decks.number.value )
         , ( "spacing", Encode.float decks.spacing.value )
-        , ( "zero", Encode.int decks.zero )
+        , ( "zero"
+          , Encode.object
+                [ ( "index", Encode.int decks.zero.index )
+                , ( "zPosition", Encode.float decks.zero.position.value )
+                ]
+          )
         ]
 
 
@@ -675,7 +700,12 @@ encodeBulkheads bulkheads =
     Encode.object
         [ ( "number", Encode.int bulkheads.number.value )
         , ( "spacing", Encode.float bulkheads.spacing.value )
-        , ( "zero", Encode.int bulkheads.zero )
+        , ( "zero"
+          , Encode.object
+                [ ( "index", Encode.int bulkheads.zero.index )
+                , ( "xPosition", Encode.float bulkheads.zero.position.value )
+                ]
+          )
         ]
 
 
@@ -720,7 +750,7 @@ computeDecks decks =
             let
                 number : Int
                 number =
-                    index - decks.zero
+                    index - decks.zero.index
             in
                 { index = index, position = -1 * (toFloat number) * decks.spacing.value, number = number }
     in
@@ -739,7 +769,7 @@ computeBulkheads bulkheads =
             let
                 number : Int
                 number =
-                    index - bulkheads.zero
+                    index - bulkheads.zero.index
             in
                 { index = index, position = (toFloat number) * bulkheads.spacing.value, number = number }
     in
@@ -829,8 +859,22 @@ initModel =
 
 initPartitions : PartitionsData
 initPartitions =
-    { decks = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
-    , bulkheads = { number = { string = "0", value = 0 }, spacing = { string = "0", value = 0 }, zero = 0 }
+    { decks =
+        { number = numberToNumberInput 0
+        , spacing = numberToNumberInput 0.0
+        , zero =
+            { index = 0
+            , position = numberToNumberInput 0.0
+            }
+        }
+    , bulkheads =
+        { number = numberToNumberInput 0
+        , spacing = numberToNumberInput 0.0
+        , zero =
+            { index = 0
+            , position = numberToNumberInput 0.0
+            }
+        }
     }
 
 
@@ -1261,7 +1305,13 @@ updateFromJs jsmsg model =
                     updatedModel : Model
                     updatedModel =
                         if index < (.value <| .number (partition model)) && index >= 0 then
-                            { model | partitions = updatePartition <| asZeroInPartition (partition model) index, viewMode = Partitioning PropertiesEdition }
+                            { model
+                                | partitions =
+                                    updatePartition <|
+                                        asZeroInPartition (partition model) <|
+                                            asIndexInPartitionZero (.zero <| partition model) index
+                                , viewMode = Partitioning PropertiesEdition
+                            }
                         else
                             model
 
