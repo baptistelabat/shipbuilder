@@ -651,15 +651,19 @@ let initThree = function (data) {
 };
 
 let onWheel = function (event) {
-    const orthographicViews = views.filter(view => view.cameraType === "Orthographic");
-    orthographicViews.forEach(orthoView => {
-        orthoView.camera.zoom -= event.deltaY * 0.2;
-        if (orthoView.camera.zoom < 0.5) {
-            orthoView.camera.zoom = 0.5
-        }
+    const activeView = getActiveViewport(views);
+    if (activeView && activeView.cameraType === "Orthographic") {
+        const orthographicViews = views.filter(view => view.cameraType === "Orthographic");
+        orthographicViews.forEach(orthoView => {
+            orthoView.camera.zoom -= event.deltaY * 0.2;
+            if (orthoView.camera.zoom < 0.5) {
+                orthoView.camera.zoom = 0.5
+            }
 
-        orthoView.control.size = 120 / orthoView.camera.zoom;
-    });
+            orthoView.control.size = 120 / orthoView.camera.zoom;
+        });
+    }
+
 }
 
 let displayLabels = function () {
