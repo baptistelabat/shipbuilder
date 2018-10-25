@@ -520,6 +520,7 @@ type alias Model =
     , viewports : Viewports
     , coordinatesTransform : CoordinatesTransform
     , selectedBlocks : List String
+    , multipleSelect : Bool
     , selectedHullReference : Maybe String
     , blocks : Blocks
     , toasts : Toasts
@@ -818,6 +819,7 @@ initModel =
         , viewports = viewports
         , coordinatesTransform = CoordinatesTransform.default
         , selectedBlocks = []
+        , multipleSelect = False
         , selectedHullReference = Nothing
         , blocks = DictList.empty
         , toasts = emptyToasts
