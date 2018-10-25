@@ -448,6 +448,22 @@ let canChangeInMode = function (object, mode) {
 }
 
 let selectBlock = function (block) {
+    if (isBlock(block)) {
+
+        resetSelection();
+        setSelection(block);
+
+        attachViewControl(selected);
+
+        sendToElm("select", block.uuid);
+    }
+}
+
+let setSelection = function (object) {
+    highlightObject(object);
+    selected = object;
+}
+
 let resetSelection = function () {
             if (selected) {
                 resetElementColor(selected);
@@ -457,6 +473,7 @@ let resetSelection = function () {
     }
 
 let selectObject = function (object) {
+    if (object.sbType && object.sbType === mode) {
     switch (mode) {
         case "block":
             selectBlock(object);
@@ -468,9 +485,12 @@ let selectObject = function (object) {
 
         case "partition":
             selectPartition(object);
+                break;
+
         default:
             break;
     }
+}
 }
 
 let selectHull = function (hull) {
@@ -816,7 +836,6 @@ let onClick = function (event) {
         case 1: // left click
             if (activeViewport && hovered && !preventSelection) {
                 selectObject(hovered);
-                if (selected) { sendToElm("select", selected.uuid); }
             }
             break;
         case 2: // middle click
