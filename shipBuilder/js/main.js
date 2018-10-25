@@ -9,12 +9,12 @@ const wrapperId = "three-wrapper"; // defined in elm
 let canPan = false;
 let panning = false;
 let multipleSelect = false;
+let selection = [];
 
 let views = [];
 let mode = null;
 
 let hovered = null; // the first object under the cursor in the scene
-let selected = null; // the selected object in the scene
 let wrapper = null; // parent of canvas, used for resizing
 let canvas = null;
 let renderer = null;
@@ -451,26 +451,48 @@ let selectBlock = function (block) {
     if (isBlock(block)) {
 
         resetSelection();
-        setSelection(block);
 
-        attachViewControl(selected);
+        addToSelection(block);
+
+
+        attachViewControl(block);
 
         sendToElm("select", block.uuid);
     }
 }
 
-let setSelection = function (object) {
+let toggleBlockSelection = function (block) {
+    if (isBlock(block)) {
+        if (isObjectSelected(block)) {
+            removeFromSelection(block);
+            sendToElm("remove-from-selection", block.uuid);
+        } else {
+            addToSelection(block);
+            sendToElm("add-to-selection", block.uuid);
+        }
+    }
+}
+
+let addToSelection = function (object) {
     highlightObject(object);
-    selected = object;
+    selection.push(object.uuid);
+}
+
+let removeFromSelection = function (object) {
+    resetElementColor(object);
+    selection = selection.filter(uuid => uuid !== object.uuid);
 }
 
 let resetSelection = function () {
-            if (selected) {
-                resetElementColor(selected);
-        selected = null;
-        }
-    detachControls();
+    if (selection.length) {
+        selection.forEach(uuid => {
+            const selectedBlock = getBlockByUuid(uuid);
+            resetElementColor(selectedBlock);
+        });
+        selection = [];
     }
+    detachControls();
+}
 
 let getBlockByUuid = function (uuid) {
     const block = scene.children.find(child => child.sbType && child.sbType === "block" && child.uuid === uuid);
@@ -479,23 +501,23 @@ let getBlockByUuid = function (uuid) {
 
 let selectObject = function (object) {
     if (object.sbType && object.sbType === mode) {
-    switch (mode) {
-        case "block":
-            selectBlock(object);
-            break;
-
-        case "hull":
-            selectHull(object);
-            break;
-
-        case "partition":
-            selectPartition(object);
+        switch (mode) {
+            case "block":
+                selectBlock(object);
                 break;
 
-        default:
-            break;
+            case "hull":
+                selectHull(object);
+                break;
+
+            case "partition":
+                selectPartition(object);
+                break;
+
+            default:
+                break;
+        }
     }
-}
 }
 
 let selectHull = function (hull) {
@@ -505,12 +527,12 @@ let selectHull = function (hull) {
 
 let selectPartition = function (partition) {
     if (isPartition(partition)) {
-            sendToElm("select-partition", {
-                partitionType: objectToSelect.partitionType,
-                partitionIndex: objectToSelect.partitionIndex
-            });
-        }
+        sendToElm("select-partition", {
+            partitionType: objectToSelect.partitionType,
+            partitionIndex: objectToSelect.partitionIndex
+        });
     }
+}
 
 
 let attachViewControl = function (block) {
@@ -840,7 +862,11 @@ let onClick = function (event) {
     switch (event.which) {
         case 1: // left click
             if (activeViewport && hovered && !preventSelection) {
-                selectObject(hovered);
+                if (multipleSelect) {
+                    toggleBlockSelection(hovered);
+                } else {
+                    selectObject(hovered);
+                }
             }
             break;
         case 2: // middle click
@@ -853,7 +879,7 @@ let onClick = function (event) {
 }
 
 let isObjectSelected = function (object) {
-    return selected && (selected.uuid === object.uuid);
+    return selection.length && (selection.includes(object.uuid));
 }
 let isObjectHovered = function (object) {
     return hovered && (hovered.uuid === object.uuid);
