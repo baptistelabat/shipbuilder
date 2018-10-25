@@ -70,7 +70,7 @@ app.ports.toJs.subscribe(function (message) {
             removeObject(data);
             break;
         case "select-block":
-            selectBlock(data);
+            selectBlockFromElm(data);
             break;
         case "switch-mode":
             switchMode(data);
@@ -459,6 +459,11 @@ let selectBlock = function (block) {
 
         sendToElm("select", block.uuid);
     }
+}
+
+let selectBlockFromElm = function (elmBlock) {
+    const block = getBlockByUuid(elmBlock.uuid);
+    selectBlock(block);
 }
 
 let toggleBlockSelection = function (block) {
