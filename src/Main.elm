@@ -325,6 +325,14 @@ toastDecoder =
 jsMsgToMsg : JsData -> Msg
 jsMsgToMsg js =
     case js.tag of
+        "add-to-selection" ->
+            case Decode.decodeValue Decode.string js.data of
+                Ok uuid ->
+                    FromJs <| AddToSelection uuid
+
+                Err message ->
+                    FromJs <| JSError message
+
         "dismiss-toast" ->
             case Decode.decodeValue Decode.string js.data of
                 Ok key ->
@@ -408,7 +416,8 @@ addToFloatInput toAdd floatInput =
 
 
 type FromJsMsg
-    = Select String
+    = AddToSelection String
+    | Select String
     | SelectPartition PartitionType Int
     | Unselect
     | JSError String
@@ -1160,6 +1169,9 @@ updateToJs msg model =
 updateFromJs : FromJsMsg -> Model -> ( Model, Cmd Msg )
 updateFromJs jsmsg model =
     case jsmsg of
+        AddToSelection uuid ->
+            { model | selectedBlocks = model.selectedBlocks ++ [ uuid ] } ! []
+
         NewBlock block ->
             let
                 blocks : Blocks
