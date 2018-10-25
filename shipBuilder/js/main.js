@@ -513,12 +513,12 @@ let findObjectByUUID = function (uuid) {
 
 let onKeyUp = function (event) {
     if (event.key === "AltGraph") { canPan = false; preventSelection = false; }
-    if (event.key === "Ctrl") { multipleSelect = false; }
+    if (event.key === "Control") { multipleSelect = false; }
 }
 
 let onKeyDown = function (event) {
     if (event.key === "AltGraph") { canPan = true; preventSelection = true; }
-    if (event.key === "Ctrl") { multipleSelect = true; }
+    if (event.key === "Control") { multipleSelect = true; }
 }
 
 let onMouseUp = function (event) {
