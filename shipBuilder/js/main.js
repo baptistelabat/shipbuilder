@@ -642,10 +642,7 @@ let initThree = function (data) {
     initCameras();
     displayLabels();
     initGizmos();
-    /**
-     * var gridHelper = new THREE.GridHelper(100, 10);
-     * scene.add(gridHelper);
-     */
+    initOrbitControls();
 
     animate();
 };
@@ -870,7 +867,15 @@ let initGizmos = function () {
             view.control = control;
             scene.add(control);
         }
+    });
+}
 
+let initOrbitControls = function () {
+    views
+        .filter(view => view.cameraType === "Perspective")
+        .forEach(view => {
+            const control = new THREE.OrbitControls(view.camera);
+            view.orbitControls = control;
     });
 }
 
