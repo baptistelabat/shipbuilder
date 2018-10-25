@@ -474,7 +474,7 @@ type alias Model =
     , viewMode : ViewMode
     , viewports : Viewports
     , coordinatesTransform : CoordinatesTransform
-    , selectedBlock : Maybe String
+    , selectedBlocks : List String
     , selectedHullReference : Maybe String
     , blocks : Blocks
     , toasts : Toasts
@@ -772,7 +772,7 @@ initModel =
         , viewMode = viewMode
         , viewports = viewports
         , coordinatesTransform = CoordinatesTransform.default
-        , selectedBlock = Nothing
+        , selectedBlocks = []
         , selectedHullReference = Nothing
         , blocks = DictList.empty
         , toasts = emptyToasts
@@ -1179,10 +1179,6 @@ updateFromJs jsmsg model =
 
         Select uuid ->
             let
-                maybeBlock : Maybe Block
-                maybeBlock =
-                    getBlockByUUID uuid model.blocks
-
                 updatedViewMode : ViewMode
                 updatedViewMode =
                     case model.viewMode of
@@ -1192,7 +1188,7 @@ updateFromJs jsmsg model =
                         otherViewMode ->
                             otherViewMode
             in
-                { model | selectedBlock = Maybe.map .uuid maybeBlock, viewMode = updatedViewMode } ! []
+                { model | selectedBlocks = [ uuid ], viewMode = updatedViewMode } ! []
 
         SelectPartition partitionType index ->
             if model.viewMode == (Partitioning <| OriginDefinition partitionType) then
@@ -1226,7 +1222,7 @@ updateFromJs jsmsg model =
                 model ! []
 
         Unselect ->
-            { model | selectedBlock = Nothing }
+            { model | selectedBlocks = [] }
                 ! []
 
         SynchronizePosition uuid position ->
@@ -1326,7 +1322,7 @@ updateModelToJs msg model =
                 { model | blocks = blocks }
 
         SelectBlock block ->
-            { model | selectedBlock = Just block.uuid }
+            { model | selectedBlocks = [ block.uuid ] }
 
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference.path }
@@ -2371,20 +2367,15 @@ viewEditableBlockName block =
         []
 
 
-viewBlockList : { a | blocks : Blocks, selectedBlock : Maybe String } -> Html Msg
+viewBlockList : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
 viewBlockList blocksModel =
-    case blocksModel.selectedBlock of
-        Just uuid ->
             ul
                 [ class "blocks" ]
             <|
-                (List.map (viewBlockItemWithSelection uuid) <| toList blocksModel.blocks)
+        if List.length blocksModel.selectedBlocks > 0 then
+            (List.map (viewBlockItemWithSelection blocksModel.selectedBlocks) <| toList blocksModel.blocks)
                     ++ [ viewNewBlockItem ]
-
-        Nothing ->
-            ul
-                [ class "blocks" ]
-            <|
+        else
                 (List.map viewBlockItem <| (toList blocksModel.blocks))
                     ++ [ viewNewBlockItem ]
 
@@ -2451,9 +2442,9 @@ viewDeleteBlockAction block =
         [ FASolid.trash ]
 
 
-viewBlockItemWithSelection : String -> Block -> Html Msg
-viewBlockItemWithSelection uuid block =
-    if uuid == block.uuid then
+viewBlockItemWithSelection : List String -> Block -> Html Msg
+viewBlockItemWithSelection selectedBlocks block =
+    if List.member block.uuid selectedBlocks then
         li
             [ class "block-item block-item__selected"
             , style [ ( "borderColor", colorToCssRgbString block.color ) ]
