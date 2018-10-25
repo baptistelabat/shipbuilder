@@ -1170,7 +1170,10 @@ updateNoJs msg model =
                         syncNumberInput model.partitions.decks.number
                     , spacing =
                         syncNumberInput model.partitions.decks.spacing
-                    , zero = model.partitions.decks.zero
+                    , zero =
+                        { index = model.partitions.decks.zero.index
+                        , position = syncNumberInput model.partitions.decks.zero.position
+                    }
                     }
 
                 syncedBulkheads : Bulkheads
@@ -1179,7 +1182,10 @@ updateNoJs msg model =
                         syncNumberInput model.partitions.bulkheads.number
                     , spacing =
                         syncNumberInput model.partitions.bulkheads.spacing
-                    , zero = model.partitions.bulkheads.zero
+                    , zero =
+                        { index = model.partitions.bulkheads.zero.index
+                        , position = syncNumberInput model.partitions.bulkheads.zero.position
+                        }
                     }
 
                 updatedModel : Model
