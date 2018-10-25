@@ -8,12 +8,13 @@ const wrapperId = "three-wrapper"; // defined in elm
 
 let canPan = false;
 let panning = false;
+let multipleSelect = false;
+let selection = [];
 
 let views = [];
 let mode = null;
 
 let hovered = null; // the first object under the cursor in the scene
-let selected = null; // the selected object in the scene
 let wrapper = null; // parent of canvas, used for resizing
 let canvas = null;
 let renderer = null;
@@ -44,6 +45,9 @@ let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
 app.ports.toJs.subscribe(function (message) {
     const data = message.data;
     switch (message.tag) {
+        case "add-block-to-selection":
+            addBlockToSelectionFromElm(data);
+            break;
         case "init-three":
             initThree(data);
             break;
@@ -68,8 +72,11 @@ app.ports.toJs.subscribe(function (message) {
         case "remove-block":
             removeObject(data);
             break;
+        case "remove-block-from-selection":
+            removeBlockFromSelectionFromElm(data);
+            break;
         case "select-block":
-            selectBlock(data);
+            selectBlockFromElm(data);
             break;
         case "switch-mode":
             switchMode(data);
@@ -93,7 +100,7 @@ let sendToElm = function (tag, data) {
 }
 
 let switchMode = function (newMode) {
-    unselectObject();
+    resetSelection();
     mode = newMode;
 
     const sbObjects = scene.children.filter(child => child.sbType);
@@ -153,7 +160,8 @@ let resetScene = function (views, scene) {
             view.control.detach();
         }
     })
-    const sbObjectsToDelete = scene.children.filter(child => child.sbType && (child.sbType === "block" || child.sbType === "hull"));
+    resetSelection();
+    const sbObjectsToDelete = scene.children.filter(child => child.sbType);
     sbObjectsToDelete.forEach(toDelete => removeFromScene(toDelete));
 }
 
@@ -269,9 +277,6 @@ let loadHull = function (path) {
         // there can only be one hull in the scene
         const previousHull = scene.children.find(child => child.sbType && child.sbType === "hull");
         if (previousHull) {
-            if (isObjectSelected(previousHull)) {
-                unselectObject();
-            }
             removeFromScene(previousHull);
         }
 
@@ -418,7 +423,7 @@ let removeObject = function (block) {
             hovered = null;
         }
         if (isObjectSelected(objectToRemove)) {
-            unselectObject();
+            resetSelection();
         }
 
         removeFromScene(objectToRemove);
@@ -432,35 +437,111 @@ let removeFromScene = function (objectToRemove) {
     objectToRemove.material.dispose();
 }
 
+let isBlock = function (object) {
+    return object && object.uuid && object.sbType === "block";
+}
+
+let isHull = function (object) {
+    return object && object.uuid && object.sbType === "hull";
+}
+
+let isPartition = function (object) {
+    return object && object.uuid && object.sbType === "partition";
+}
+
+let canChangeInMode = function (object, mode) {
+    return object && object.sbType === mode;
+}
 
 let selectBlock = function (block) {
-    if (block && block.uuid) {
-        const objectToSelect = findObjectByUUID(block.uuid);
-        if (objectToSelect && objectToSelect.sbType === mode) {
-            if (selected) {
-                resetElementColor(selected);
-            }
-            highlightObject(objectToSelect);
-            selected = objectToSelect;
-        }
-        attachViewControl(selected);
+    if (isBlock(block)) {
+
+        resetSelection();
+
+        addToSelection(block);
+
+
+        attachViewControl(block);
+
+        sendToElm("select", block.uuid);
     }
 }
 
+let selectBlockFromElm = function (elmBlock) {
+    const block = getBlockByUuid(elmBlock.uuid);
+    selectBlock(block);
+}
+
+
+let addBlockToSelectionFromElm = function (elmBlock) {
+    const block = getBlockByUuid(elmBlock.uuid);
+    addToSelection(block);
+}
+
+
+let removeBlockFromSelectionFromElm = function (elmBlock) {
+    const block = getBlockByUuid(elmBlock.uuid);
+    removeFromSelection(block);
+}
+
+
+
+let toggleBlockSelection = function (block) {
+    if (isBlock(block)) {
+        if (isObjectSelected(block)) {
+            removeFromSelection(block);
+            sendToElm("remove-from-selection", block.uuid);
+        } else {
+            addToSelection(block);
+            sendToElm("add-to-selection", block.uuid);
+        }
+    }
+}
+
+let addToSelection = function (object) {
+    highlightObject(object);
+    selection.push(object.uuid);
+}
+
+let removeFromSelection = function (object) {
+    resetElementColor(object);
+    selection = selection.filter(uuid => uuid !== object.uuid);
+}
+
+let resetSelection = function () {
+    if (selection.length) {
+        selection.forEach(uuid => {
+            const selectedBlock = getBlockByUuid(uuid);
+            resetElementColor(selectedBlock);
+        });
+        selection = [];
+    }
+    detachControls();
+}
+
+let getBlockByUuid = function (uuid) {
+    const block = scene.children.find(child => child.sbType && child.sbType === "block" && child.uuid === uuid);
+    return block;
+}
+
 let selectObject = function (object) {
-    switch (mode) {
-        case "block":
-            selectBlock(object);
-            break;
+    if (object.sbType && object.sbType === mode) {
+        switch (mode) {
+            case "block":
+                selectBlock(object);
+                break;
 
-        case "hull":
-            selectHull(object);
-            break;
+            case "hull":
+                selectHull(object);
+                break;
 
-        case "partition":
-            selectPartition(object);
-        default:
-            break;
+            case "partition":
+                selectPartition(object);
+                break;
+
+            default:
+                break;
+        }
     }
 }
 
@@ -470,14 +551,11 @@ let selectHull = function (hull) {
 
 
 let selectPartition = function (partition) {
-    if (partition && partition.uuid) {
-        const objectToSelect = findObjectByUUID(partition.uuid);
-        if (objectToSelect && objectToSelect.sbType === mode) {
-            sendToElm("select-partition", {
-                partitionType: objectToSelect.partitionType,
-                partitionIndex: objectToSelect.partitionIndex
-            });
-        }
+    if (isPartition(partition)) {
+        sendToElm("select-partition", {
+            partitionType: objectToSelect.partitionType,
+            partitionIndex: objectToSelect.partitionIndex
+        });
     }
 }
 
@@ -488,10 +566,13 @@ let attachViewControl = function (block) {
         currentView = views[0];
     }
     if (currentView && currentView.control) {
+        detachControls();
         currentView.control.attach(block);
     }
-    var otherViews = views.filter(view => view.camera.uuid !== currentView.camera.uuid);
-    otherViews.forEach(view => {
+}
+
+let detachControls = function () {
+    views.forEach(view => {
         if (view.control) {
             view.control.detach();
         }
@@ -504,10 +585,12 @@ let findObjectByUUID = function (uuid) {
 
 let onKeyUp = function (event) {
     if (event.key === "AltGraph") { canPan = false; preventSelection = false; }
+    if (event.key === "Control") { multipleSelect = false; }
 }
 
 let onKeyDown = function (event) {
     if (event.key === "AltGraph") { canPan = true; preventSelection = true; }
+    if (event.key === "Control") { multipleSelect = true; }
 }
 
 let onMouseUp = function (event) {
@@ -603,7 +686,7 @@ let shadeThreeColor = function (threeColor, percent) {
 
 let animate = function () {
     updateCameras(views, scene);
-    if (hovered && (!selected || selected && (hovered.uuid !== selected.uuid))) { // remove highlight from the previous "hovered" element
+    if (hovered && !isObjectSelected(hovered)) { // remove highlight from the previous "hovered" element
         resetElementColor(hovered);
     }
     hovered = getFirstElementUnderCursor(mouse, views, scene);
@@ -804,12 +887,15 @@ let onClick = function (event) {
     switch (event.which) {
         case 1: // left click
             if (activeViewport && hovered && !preventSelection) {
-                selectObject(hovered);
-                if (selected) { sendToElm("select", selected.uuid); }
+                if (multipleSelect) {
+                    toggleBlockSelection(hovered);
+                } else {
+                    selectObject(hovered);
+                }
             }
             break;
         case 2: // middle click
-            unselectObject();
+            resetSelection();
             sendToElm("unselect", null);
             break;
         default: // right click
@@ -818,7 +904,7 @@ let onClick = function (event) {
 }
 
 let isObjectSelected = function (object) {
-    return selected && (selected.uuid === object.uuid);
+    return selection.length && (selection.includes(object.uuid));
 }
 let isObjectHovered = function (object) {
     return hovered && (hovered.uuid === object.uuid);
@@ -835,21 +921,6 @@ let onDoubleClick = function (event) { // cycle through the transform modes
             }
         })
     }
-}
-
-let unselectObject = function () {
-    if (selected) {
-        if (!hovered || hovered && (selected.uuid !== hovered.uuid)) {
-            resetElementColor(selected);
-        }
-        // detach gizmo
-        views.forEach(view => {
-            if (view.control) {
-                view.control.detach();
-            }
-        })
-    }
-    selected = null;
 }
 
 let updateCameras = function (views, scene) {
@@ -961,354 +1032,3 @@ let normalizeMouseCoordinatesForView = function (mouse, view) {
     const normalizedY = - (offsetY / view.clientHeight) * 2 - 1;
     return new THREE.Vector2(normalizedX, normalizedY);
 }
-
-/** TODO: rewrite
-let scene;
-let renderer;
-let meshes = [];
-let mouse = new THREE.Vector2();
-let raycaster = new THREE.Raycaster();
-let selectedMesh = null;
-
-
-document.addEventListener('mousemove', onMouseMove, false)
-document.addEventListener('click', onClick, false)
-document.addEventListener('keypress', onKeyPress, false)
-
-
-initScene();
-addCube(100, 140, 50);
-addCube(100, 100, 100, -20, -140, -100, 0xE68833);
-addPyramid(120, 100, 80, -100, -80);
-animate();
-
-var cellSize = 20;
-var size = 2000;
-var divisions = size / cellSize;
-
-var colorCenterLines = 0xE6E6E6;
-var colorGrid = 0xE6E6E6;
-// bottom grid
-var gridHelper = new THREE.GridHelper(size, divisions, colorCenterLines, colorGrid);
-gridHelper.position.y = -500;
-scene.add(gridHelper);
-// background side grid
-var gridHelper2 = new THREE.GridHelper(size, divisions, colorCenterLines, colorGrid);
-gridHelper2.rotation.x = (0.5 * Math.PI);
-gridHelper2.position.z = 0;
-gridHelper2.color = 0x676767;
-scene.add(gridHelper2);
-
-
-function onKeyPress(event) {
-    console.log(event);
-    switch (event.key) {
-        case "Delete":
-        case "Backspace":
-            if (selectedMesh) { // remove mesh
-                views.forEach(view => view.control.detach());
-                scene.remove(selectedMesh);
-                selectedMesh.geometry.dispose();
-                selectedMesh.material.dispose();
-                meshes = meshes.filter(mesh => mesh.uuid !== selectedMesh.uuid);
-                selectedMesh = null;
-            }
-        case "ArrowRight":
-            if (selectedMesh) {
-                selectedMesh.position.x += cellSize;
-            }
-            break;
-        case "ArrowUp":
-            if (selectedMesh && event.shiftKey) {
-                selectedMesh.position.y % cellSize
-                    ? selectedMesh.position.y += (cellSize - selectedMesh.position.y % cellSize)
-                    : selectedMesh.position.y += cellSize;
-            } else {
-                selectedMesh.position.y += 1;
-            }
-            break;
-        case "ArrowLeft":
-            if (selectedMesh && event.shiftKey) {
-                selectedMesh.position.x % cellSize ? selectedMesh.position.x -= selectedMesh.position.x % cellSize : selectedMesh.position.x -= cellSize;
-            } else {
-                selectedMesh.position.x -= 1;
-            }
-            break;
-        case "ArrowDown":
-            if (selectedMesh) {
-                selectedMesh.position.y -= cellSize;
-            }
-            break;
-        default:
-            break;
-    }
-}
-function onClick(event) {
-    switch (event.which) {
-        case 1: // left click
-            mouse.x = event.clientX;
-            mouse.y = event.clientY;
-            var intersectedMeshes = getMeshesUnder();
-            if (intersectedMeshes.length) {
-                selectedMesh = intersectedMeshes[0];
-                document.getElementById("color").value = selectedMesh.material.color.getHexString();
-            }
-            console.log(selectedMesh);
-            break;
-        case 2: // middle click
-            if (selectedMesh) {
-                views.forEach(view => {
-                    if (view.control.mode === "translate") {
-                        view.control.setMode("scale")
-                    } else {
-                        view.control.setMode("translate");
-                    }
-                });
-            }
-            break;
-        default: // right click
-            selectedMesh = null;
-
-    }
-
-}
-
-
-function normalizeMouseCoordinates(view) {
-    const viewBoundingBox = getViewportBounds(view);
-    const normalized = new THREE.Vector2();
-    let boxWidth = viewBoundingBox.bottomRight.x - viewBoundingBox.topLeft.x;
-    let boxHeight = viewBoundingBox.bottomRight.y - viewBoundingBox.topLeft.y;
-    let mouseOffset = new THREE.Vector2(mouse.x - viewBoundingBox.topLeft.x, mouse.y - viewBoundingBox.bottomRight.y);
-    normalized.x = (mouseOffset.x / boxWidth) * 2 - 1;
-    normalized.y = - (mouseOffset.y / boxHeight) * 2 - 1;
-    return normalized;
-}
-
-function onWindowResize() {
-    displayLabels();
-    const wrapper = document.getElementById("canvas-wrapper");
-    canvas.width = wrapper.clientWidth;
-    canvas.height = wrapper.clientHeight;
-    views.forEach(view => {
-        var camera = view.camera;
-        camera.left = view.width * canvas.width / - 2;
-        camera.right = view.width * canvas.width / 2;
-        camera.top = view.height * canvas.height / 2;
-        camera.bottom = view.height * canvas.height / - 2
-
-        camera.updateProjectionMatrix();
-    })
-
-    renderer.setSize(canvas.width, canvas.height);
-
-}
-
-function initCameras() {
-    views.forEach(view => {
-        var camera = new THREE.OrthographicCamera(view.width * canvas.width / - 2, view.width * canvas.width / 2, view.height * canvas.height / 2, view.height * canvas.height / - 2, 0, 2000);
-        camera.position.fromArray(view.eye);
-        view.camera = camera;
-
-        var control = new THREE.TransformControls(view, canvas);
-        control.addEventListener("objectChange", event => {
-            console.log(event);
-            console.log(selectedMesh);
-        })
-
-        control.size = 120;
-        control.setMode("translate");
-        control.showX = view.canControl[0];
-        control.showY = view.canControl[1];
-        control.showZ = view.canControl[2];
-
-        view.control = control;
-        scene.add(control);
-    });
-}
-
-function displayLabels() {
-    var labels = document.getElementsByClassName("viewport-label");
-    for (var i = labels.length - 1; i >= 0; --i) {
-        labels[i].remove();
-    }
-
-    views.forEach(view => {
-
-        var label = document.createElement('div');
-        label.innerText = view.label;
-        label.classList.add("viewport-label");
-        label.style.top = 20 + view.top * wrapper.clientHeight + "px";
-        label.style.right = "20px";
-        wrapper.appendChild(label);
-    })
-}
-
-function initScene() {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-    renderer.setSize(canvas.width, canvas.height);
-
-    scene = new THREE.Scene();
-    initCameras();
-    displayLabels();
-
-
-    //var axesHelper = new THREE.AxesHelper(500);
-    //scene.add(axesHelper);
-}
-
-
-function addCube(width, height, depth, x = 0, y = 0, z = 0, color = 0x5078ff) {
-    var cube = makeCube(width, height, depth, x, y, z, color);
-    meshes.push(cube);
-    scene.add(cube);
-}
-
-function addPyramid(width, height, depth, x = 0, y = 0, z = 0, color = 0xff66A2) {
-    var pyramid = makePyramid(width, height, depth, x, y, z, color);
-    meshes.push(pyramid);
-    scene.add(pyramid);
-}
-
-function makePyramid(width, height, depth, x, y, z, color) {
-    var geometry = new THREE.Geometry();
-
-    geometry.vertices = [
-        new THREE.Vector3(0, 0, 1),
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(1, 0, 0),
-        new THREE.Vector3(1, 0, 1),
-        new THREE.Vector3(0.5, 1, 0.5)
-    ];
-
-    geometry.faces = [
-        new THREE.Face3(0, 1, 2),
-        new THREE.Face3(0, 2, 3),
-        new THREE.Face3(1, 0, 4),
-        new THREE.Face3(2, 1, 4),
-        new THREE.Face3(3, 2, 4),
-        new THREE.Face3(0, 3, 4)
-    ];
-
-    var transformation = new THREE.Matrix4().makeScale(width, depth, height);
-
-    geometry.applyMatrix(transformation);
-
-    var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.7 });
-    material.transparent = true;
-    var pyramid = new THREE.Mesh(geometry, material);
-    pyramid.position.fromArray([x, y, z]);
-    pyramid.baseColor = color;
-    pyramid.geometryType = "pyramid";
-    return pyramid;
-}
-
-function getMouseIntersectionForCurrentView() {
-    const currentView = views.find(view => mouseIsOver(view));
-    if (currentView) {
-        const normalizedMouse = normalizeMouseCoordinates(currentView);
-        raycaster.setFromCamera(normalizedMouse, currentView.camera);
-        return raycaster.intersectObjects(scene.children);
-    } else {
-        return [];
-    }
-
-}
-
-function animate() {
-    // better than setTimeout because it pauses when the tab is inactive
-    views.forEach(view => {
-        var camera = view.camera;
-        var left = Math.floor(canvas.width * view.left);
-        var top = Math.floor(canvas.height * view.top);
-        var width = Math.floor(canvas.width * view.width);
-        var height = Math.floor(canvas.height * view.height);
-        renderer.setViewport(left, top, width, height);
-        renderer.setScissor(left, top, width, height);
-        renderer.setScissorTest(true);
-        renderer.setClearColor(view.background);
-        camera.lookAt(scene.position);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-        renderer.render(scene, camera);
-    });
-
-    attachCurrentViewControl();
-
-    meshes.forEach(mesh => {
-        mesh.material.color.set(mesh.baseColor);
-    });
-
-    const intersectMeshes = getMeshesUnder();
-
-    if (intersectMeshes.length) {
-        let mesh = intersectMeshes[0];
-        mesh.material.color.set(shadeThreeColor(mesh.baseColor, 0.2));
-    }
-
-    requestAnimationFrame(animate);
-    //rotate();
-}
-
-function getMeshesUnder() {
-    const intersects = getMouseIntersectionForCurrentView();
-    const intersectObjects = intersects.map(intersect => intersect.object);
-    const intersectMeshes = intersectObjects.filter(intersect =>
-        meshes.some(mesh => mesh.uuid === intersect.uuid));
-    return intersectMeshes;
-
-}
-
-function shadeThreeColor(color, percent) {
-    var t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = color >> 16, G = color >> 8 & 0x00FF, B = color & 0x0000FF;
-    return 0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B);
-}
-
-function rotate() {
-    meshes.forEach(mesh => {
-        //mesh.rotation.x += 0.01;
-        mesh.rotation.y += 0.01;
-    })
-}
-
-function attachCurrentViewControl() {
-    var currentView = views.find(view => mouseIsOver(view));
-    var otherViews = views.filter(view => !mouseIsOver(view));
-    otherViews.forEach(view => {
-        view.control.detach();
-    })
-
-    if (currentView && selectedMesh) {
-        currentView.control.attach(selectedMesh);
-    } else if (currentView) {
-        currentView.control.detach();
-    }
-}
-
-function addObject(type, hexcolor) {
-    switch (type) {
-        case "pyramid":
-            addPyramid(100, 100, 100, 0, 0, 0, hexcolor);
-            break;
-
-        default:
-            addCube(100, 100, 100, 0, 0, 0, hexcolor);
-    }
-}
-
-function onSubmit() {
-    var type = document.getElementById("type").value;
-    var color = document.getElementById("color").value;
-    var hexcolor = parseInt(color, 16);
-    addObject(type, hexcolor);
-}
-
-function updateSelectedMeshFromForm() {
-    var color = document.getElementById("color").value;
-    var hexcolor = parseInt(color, 16);
-    if (selectedMesh && color.length === 6) {
-        selectedMesh.material.color.set(hexcolor);
-        selectedMesh.baseColor = hexcolor;
-    }
-}
-*/

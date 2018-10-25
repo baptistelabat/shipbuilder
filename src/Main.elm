@@ -30,6 +30,7 @@ import Html.Events exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
+import Keyboard exposing (KeyCode)
 import Task
 import Debug
 import Viewports exposing (Viewports, encodeViewports)
@@ -61,7 +62,11 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    fromJs jsMsgToMsg
+    Sub.batch
+        [ fromJs jsMsgToMsg
+        , Keyboard.downs keydownToMsg
+        , Keyboard.ups keyupToMsg
+        ]
 
 
 newBlockDecoder : Decode.Decoder Block
@@ -322,9 +327,39 @@ toastDecoder =
         |> Pipeline.required "type" toastTypeDecoder
 
 
+keydownToMsg : KeyCode -> Msg
+keydownToMsg keyCode =
+    case keyCode of
+        17 ->
+            -- Control
+            NoJs <| SetMultipleSelect True
+
+        _ ->
+            NoJs NoOp
+
+
+keyupToMsg : KeyCode -> Msg
+keyupToMsg keyCode =
+    case keyCode of
+        17 ->
+            -- Control
+            NoJs <| SetMultipleSelect False
+
+        _ ->
+            NoJs NoOp
+
+
 jsMsgToMsg : JsData -> Msg
 jsMsgToMsg js =
     case js.tag of
+        "add-to-selection" ->
+            case Decode.decodeValue Decode.string js.data of
+                Ok uuid ->
+                    FromJs <| AddToSelection uuid
+
+                Err message ->
+                    FromJs <| JSError message
+
         "dismiss-toast" ->
             case Decode.decodeValue Decode.string js.data of
                 Ok key ->
@@ -353,6 +388,14 @@ jsMsgToMsg js =
             case Decode.decodeValue newBlockDecoder js.data of
                 Ok block ->
                     FromJs <| NewBlock block
+
+                Err message ->
+                    FromJs <| JSError message
+
+        "remove-from-selection" ->
+            case Decode.decodeValue Decode.string js.data of
+                Ok uuid ->
+                    FromJs <| RemoveFromSelection uuid
 
                 Err message ->
                     FromJs <| JSError message
@@ -408,7 +451,9 @@ addToFloatInput toAdd floatInput =
 
 
 type FromJsMsg
-    = Select String
+    = AddToSelection String
+    | RemoveFromSelection String
+    | Select String
     | SelectPartition PartitionType Int
     | Unselect
     | JSError String
@@ -474,7 +519,8 @@ type alias Model =
     , viewMode : ViewMode
     , viewports : Viewports
     , coordinatesTransform : CoordinatesTransform
-    , selectedBlock : Maybe String
+    , selectedBlocks : List String
+    , multipleSelect : Bool
     , selectedHullReference : Maybe String
     , blocks : Blocks
     , toasts : Toasts
@@ -772,7 +818,8 @@ initModel =
         , viewMode = viewMode
         , viewports = viewports
         , coordinatesTransform = CoordinatesTransform.default
-        , selectedBlock = Nothing
+        , selectedBlocks = []
+        , multipleSelect = False
         , selectedHullReference = Nothing
         , blocks = DictList.empty
         , toasts = emptyToasts
@@ -1018,6 +1065,7 @@ type NoJsMsg
     = DismissToast String
     | DisplayToast Toast
     | NoOp
+    | SetMultipleSelect Bool
     | SyncBlockInputs Block
     | SyncPartitions
     | RenameBlock Block String
@@ -1036,6 +1084,9 @@ updateNoJs msg model =
 
         NoOp ->
             model ! []
+
+        SetMultipleSelect boolean ->
+            { model | multipleSelect = boolean } ! []
 
         SyncBlockInputs block ->
             let
@@ -1160,6 +1211,12 @@ updateToJs msg model =
 updateFromJs : FromJsMsg -> Model -> ( Model, Cmd Msg )
 updateFromJs jsmsg model =
     case jsmsg of
+        AddToSelection uuid ->
+            { model | selectedBlocks = model.selectedBlocks ++ [ uuid ] } ! []
+
+        RemoveFromSelection uuid ->
+            { model | selectedBlocks = List.filter ((/=) uuid) model.selectedBlocks } ! []
+
         NewBlock block ->
             let
                 blocks : Blocks
@@ -1179,10 +1236,6 @@ updateFromJs jsmsg model =
 
         Select uuid ->
             let
-                maybeBlock : Maybe Block
-                maybeBlock =
-                    getBlockByUUID uuid model.blocks
-
                 updatedViewMode : ViewMode
                 updatedViewMode =
                     case model.viewMode of
@@ -1192,7 +1245,7 @@ updateFromJs jsmsg model =
                         otherViewMode ->
                             otherViewMode
             in
-                { model | selectedBlock = Maybe.map .uuid maybeBlock, viewMode = updatedViewMode } ! []
+                { model | selectedBlocks = [ uuid ], viewMode = updatedViewMode } ! []
 
         SelectPartition partitionType index ->
             if model.viewMode == (Partitioning <| OriginDefinition partitionType) then
@@ -1226,7 +1279,7 @@ updateFromJs jsmsg model =
                 model ! []
 
         Unselect ->
-            { model | selectedBlock = Nothing }
+            { model | selectedBlocks = [] }
                 ! []
 
         SynchronizePosition uuid position ->
@@ -1326,7 +1379,15 @@ updateModelToJs msg model =
                 { model | blocks = blocks }
 
         SelectBlock block ->
-            { model | selectedBlock = Just block.uuid }
+            if model.multipleSelect == False then
+                -- set selection as only this block
+                { model | selectedBlocks = [ block.uuid ] }
+            else if List.member block.uuid model.selectedBlocks then
+                -- remove from selection
+                { model | selectedBlocks = List.filter ((/=) block.uuid) model.selectedBlocks }
+            else
+                -- add to selection
+                { model | selectedBlocks = model.selectedBlocks ++ [ block.uuid ] }
 
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference.path }
@@ -1510,7 +1571,16 @@ msg2json model action =
             Just { tag = "remove-block", data = encodeBlock block }
 
         SelectBlock block ->
-            Just { tag = "select-block", data = encodeBlock block }
+            Just <|
+                if model.multipleSelect == False then
+                    -- set selection as only this block
+                    { tag = "select-block", data = encodeBlock block }
+                else if List.member block.uuid model.selectedBlocks then
+                    -- remove from selection
+                    { tag = "remove-block-from-selection", data = encodeBlock block }
+                else
+                    -- add to selection
+                    { tag = "add-block-to-selection", data = encodeBlock block }
 
         SelectHullReference hullReference ->
             Just { tag = "load-hull", data = Encode.string hullReference.path }
@@ -2371,22 +2441,17 @@ viewEditableBlockName block =
         []
 
 
-viewBlockList : { a | blocks : Blocks, selectedBlock : Maybe String } -> Html Msg
+viewBlockList : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
 viewBlockList blocksModel =
-    case blocksModel.selectedBlock of
-        Just uuid ->
-            ul
-                [ class "blocks" ]
-            <|
-                (List.map (viewBlockItemWithSelection uuid) <| toList blocksModel.blocks)
-                    ++ [ viewNewBlockItem ]
-
-        Nothing ->
-            ul
-                [ class "blocks" ]
-            <|
-                (List.map viewBlockItem <| (toList blocksModel.blocks))
-                    ++ [ viewNewBlockItem ]
+    ul
+        [ class "blocks" ]
+    <|
+        if List.length blocksModel.selectedBlocks > 0 then
+            (List.map (viewBlockItemWithSelection blocksModel.selectedBlocks) <| toList blocksModel.blocks)
+                ++ [ viewNewBlockItem ]
+        else
+            (List.map viewBlockItem <| (toList blocksModel.blocks))
+                ++ [ viewNewBlockItem ]
 
 
 viewNewBlockItem : Html Msg
@@ -2451,9 +2516,9 @@ viewDeleteBlockAction block =
         [ FASolid.trash ]
 
 
-viewBlockItemWithSelection : String -> Block -> Html Msg
-viewBlockItemWithSelection uuid block =
-    if uuid == block.uuid then
+viewBlockItemWithSelection : List String -> Block -> Html Msg
+viewBlockItemWithSelection selectedBlocks block =
+    if List.member block.uuid selectedBlocks then
         li
             [ class "block-item block-item__selected"
             , style [ ( "borderColor", colorToCssRgbString block.color ) ]
