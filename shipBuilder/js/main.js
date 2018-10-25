@@ -745,6 +745,17 @@ let onMouseMove = function (event) {
                 }
             });
     }
+
+    views.forEach(view => {
+        if (view.orbitControls && view.orbitControls.enabled) {
+            view.orbitControls.enabled = false;
+        }
+    });
+
+    const currentView = getActiveViewport(views);
+    if (currentView && currentView.orbitControls && !currentView.orbitControls.enabled) {
+        currentView.orbitControls.enabled = true;
+    }
 }
 
 let updateViewports = function (views, canvas) {
@@ -876,7 +887,7 @@ let initOrbitControls = function () {
         .forEach(view => {
             const control = new THREE.OrbitControls(view.camera);
             view.orbitControls = control;
-    });
+        });
 }
 
 let initCanvas = function (parent) {
