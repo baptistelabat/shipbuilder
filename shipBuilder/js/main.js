@@ -94,7 +94,7 @@ let sendToElm = function (tag, data) {
 }
 
 let switchMode = function (newMode) {
-    unselectObject();
+    resetSelection();
     mode = newMode;
 
     const sbObjects = scene.children.filter(child => child.sbType);
@@ -154,7 +154,8 @@ let resetScene = function (views, scene) {
             view.control.detach();
         }
     })
-    const sbObjectsToDelete = scene.children.filter(child => child.sbType && (child.sbType === "block" || child.sbType === "hull"));
+    resetSelection();
+    const sbObjectsToDelete = scene.children.filter(child => child.sbType);
     sbObjectsToDelete.forEach(toDelete => removeFromScene(toDelete));
 }
 
@@ -270,9 +271,6 @@ let loadHull = function (path) {
         // there can only be one hull in the scene
         const previousHull = scene.children.find(child => child.sbType && child.sbType === "hull");
         if (previousHull) {
-            if (isObjectSelected(previousHull)) {
-                unselectObject();
-            }
             removeFromScene(previousHull);
         }
 
@@ -419,7 +417,7 @@ let removeObject = function (block) {
             hovered = null;
         }
         if (isObjectSelected(objectToRemove)) {
-            unselectObject();
+            resetSelection();
         }
 
         removeFromScene(objectToRemove);
@@ -435,18 +433,13 @@ let removeFromScene = function (objectToRemove) {
 
 
 let selectBlock = function (block) {
-    if (block && block.uuid) {
-        const objectToSelect = findObjectByUUID(block.uuid);
-        if (objectToSelect && objectToSelect.sbType === mode) {
+let resetSelection = function () {
             if (selected) {
                 resetElementColor(selected);
-            }
-            highlightObject(objectToSelect);
-            selected = objectToSelect;
+        selected = null;
         }
-        attachViewControl(selected);
+    detachControls();
     }
-}
 
 let selectObject = function (object) {
     switch (mode) {
@@ -489,10 +482,13 @@ let attachViewControl = function (block) {
         currentView = views[0];
     }
     if (currentView && currentView.control) {
+        detachControls();
         currentView.control.attach(block);
     }
-    var otherViews = views.filter(view => view.camera.uuid !== currentView.camera.uuid);
-    otherViews.forEach(view => {
+}
+
+let detachControls = function () {
+    views.forEach(view => {
         if (view.control) {
             view.control.detach();
         }
@@ -812,7 +808,7 @@ let onClick = function (event) {
             }
             break;
         case 2: // middle click
-            unselectObject();
+            resetSelection();
             sendToElm("unselect", null);
             break;
         default: // right click
@@ -838,21 +834,6 @@ let onDoubleClick = function (event) { // cycle through the transform modes
             }
         })
     }
-}
-
-let unselectObject = function () {
-    if (selected) {
-        if (!hovered || hovered && (selected.uuid !== hovered.uuid)) {
-            resetElementColor(selected);
-        }
-        // detach gizmo
-        views.forEach(view => {
-            if (view.control) {
-                view.control.detach();
-            }
-        })
-    }
-    selected = null;
 }
 
 let updateCameras = function (views, scene) {
