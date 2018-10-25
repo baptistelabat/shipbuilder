@@ -584,25 +584,25 @@ let findObjectByUUID = function (uuid) {
 }
 
 let onKeyUp = function (event) {
-    if (event.key === "AltGraph") { canPan = false; preventSelection = false; }
     if (event.key === "Control") { multipleSelect = false; }
 }
 
 let onKeyDown = function (event) {
-    if (event.key === "AltGraph") { canPan = true; preventSelection = true; }
     if (event.key === "Control") { multipleSelect = true; }
 }
 
 let onMouseUp = function (event) {
-    if (panning) {
+    if (panning && event.which === 3) { // right click
         panning = null;
+        preventSelection = false;
     }
 }
 
 let onMouseDown = function (event) {
     const currentView = getActiveViewport(views);
-    if (canPan && currentView) {
+    if (!preventSelection && currentView && event.which === 3) { // right click
         panning = currentView;
+        preventSelection = true;
     }
 }
 
