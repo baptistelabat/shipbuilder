@@ -752,7 +752,7 @@ computeDecks decks =
                 number =
                     index - decks.zero.index
             in
-                { index = index, position = -1 * (toFloat number) * decks.spacing.value, number = number }
+                { index = index, position = decks.zero.position.value - 1 * (toFloat number) * decks.spacing.value, number = number }
     in
         List.indexedMap computeDeck initialDeckList
 
@@ -771,7 +771,7 @@ computeBulkheads bulkheads =
                 number =
                     index - bulkheads.zero.index
             in
-                { index = index, position = (toFloat number) * bulkheads.spacing.value, number = number }
+                { index = index, position = bulkheads.zero.position.value + (toFloat number) * bulkheads.spacing.value, number = number }
     in
         List.indexedMap computeBulkhead initialBulkheadList
 
