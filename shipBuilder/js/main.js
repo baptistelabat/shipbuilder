@@ -431,6 +431,21 @@ let removeFromScene = function (objectToRemove) {
     objectToRemove.material.dispose();
 }
 
+let isBlock = function (object) {
+    return object && object.uuid && object.sbType === "block";
+}
+
+let isHull = function (object) {
+    return object && object.uuid && object.sbType === "hull";
+}
+
+let isPartition = function (object) {
+    return object && object.uuid && object.sbType === "partition";
+}
+
+let canChangeInMode = function (object, mode) {
+    return object && object.sbType === mode;
+}
 
 let selectBlock = function (block) {
 let resetSelection = function () {
