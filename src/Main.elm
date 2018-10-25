@@ -1101,6 +1101,7 @@ type ToJsMsg
     | SwitchViewMode ViewMode
     | UpdatePartitionNumber PartitionType String
     | UpdatePartitionSpacing PartitionType String
+    | UpdatePartitionZeroPosition PartitionType String
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
 
@@ -1173,7 +1174,7 @@ updateNoJs msg model =
                     , zero =
                         { index = model.partitions.decks.zero.index
                         , position = syncNumberInput model.partitions.decks.zero.position
-                    }
+                        }
                     }
 
                 syncedBulkheads : Bulkheads
@@ -1499,6 +1500,31 @@ updateModelToJs msg model =
                     |> asPartitionInPartitions model.partitions
                     |> asPartitionsInModel model
 
+        UpdatePartitionZeroPosition partitionType input ->
+            let
+                ( getPartition, asPartitionInPartitions ) =
+                    case partitionType of
+                        Deck ->
+                            ( .decks, asDecksInPartitions )
+
+                        Bulkhead ->
+                            ( .bulkheads, asBulkheadsInPartitions )
+            in
+                (case String.toFloat input of
+                    Ok value ->
+                        value
+                            |> asValueInNumberInput (.spacing <| getPartition model.partitions)
+                            |> flip asStringInNumberInput input
+
+                    Err error ->
+                        input
+                            |> asStringInNumberInput (.spacing <| getPartition model.partitions)
+                )
+                    |> asPositionInPartitionZero (.zero <| getPartition model.partitions)
+                    |> asZeroInPartition (getPartition model.partitions)
+                    |> asPartitionInPartitions model.partitions
+                    |> asPartitionsInModel model
+
         UpdatePosition axis block input ->
             let
                 axisFloatInput : FloatInput
@@ -1685,6 +1711,31 @@ msg2json model action =
                                 encodeComputedPartitions <|
                                     computePartition
                                         { partition | spacing = numberToNumberInput <| abs value }
+                            }
+
+                    Err error ->
+                        Nothing
+
+        UpdatePartitionZeroPosition partitionType input ->
+            let
+                ( tag, partition, computePartition ) =
+                    case partitionType of
+                        Deck ->
+                            ( "make-decks", model.partitions.decks, computeDecks )
+
+                        Bulkhead ->
+                            ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
+            in
+                case String.toFloat input of
+                    Ok value ->
+                        Just
+                            { tag = tag
+                            , data =
+                                encodeComputedPartitions <|
+                                    computePartition <|
+                                        asZeroInPartition partition <|
+                                            asPositionInPartitionZero partition.zero <|
+                                                numberToNumberInput value
                             }
 
                     Err error ->
@@ -2186,6 +2237,20 @@ viewDecks isDefiningOrigin decks =
                         [ text "Define deck n°0" ]
                   )
                 ]
+            , div
+                [ class "input-group" ]
+                [ label
+                    [ for "deck-zero-position" ]
+                    [ text "Position of deck n°0 (z axis)" ]
+                , input
+                    [ type_ "text"
+                    , id "deck-zero-position"
+                    , value decks.zero.position.string
+                    , onInput <| ToJs << UpdatePartitionZeroPosition Deck
+                    , onBlur <| NoJs SyncPartitions
+                    ]
+                    []
+                ]
             ]
         ]
 
@@ -2241,6 +2306,20 @@ viewBulkheads isDefiningOrigin bulkheads =
                         ]
                         [ text "Define bulkhead n°0" ]
                   )
+                ]
+            , div
+                [ class "input-group" ]
+                [ label
+                    [ for "bulkhead-zero-position" ]
+                    [ text "Position of bulkhead n°0 (z axis)" ]
+                , input
+                    [ type_ "text"
+                    , id "bulkhead-zero-position"
+                    , value bulkheads.zero.position.string
+                    , onInput <| ToJs << UpdatePartitionZeroPosition Bulkhead
+                    , onBlur <| NoJs SyncPartitions
+                    ]
+                    []
                 ]
             ]
         ]
