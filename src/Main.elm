@@ -365,6 +365,14 @@ jsMsgToMsg js =
                 Err message ->
                     FromJs <| JSError message
 
+        "remove-from-selection" ->
+            case Decode.decodeValue Decode.string js.data of
+                Ok uuid ->
+                    FromJs <| RemoveFromSelection uuid
+
+                Err message ->
+                    FromJs <| JSError message
+
         "select" ->
             case Decode.decodeValue Decode.string js.data of
                 Ok uuid ->
@@ -417,6 +425,7 @@ addToFloatInput toAdd floatInput =
 
 type FromJsMsg
     = AddToSelection String
+    | RemoveFromSelection String
     | Select String
     | SelectPartition PartitionType Int
     | Unselect
@@ -1171,6 +1180,9 @@ updateFromJs jsmsg model =
     case jsmsg of
         AddToSelection uuid ->
             { model | selectedBlocks = model.selectedBlocks ++ [ uuid ] } ! []
+
+        RemoveFromSelection uuid ->
+            { model | selectedBlocks = List.filter ((/=) uuid) model.selectedBlocks } ! []
 
         NewBlock block ->
             let
@@ -2381,15 +2393,15 @@ viewEditableBlockName block =
 
 viewBlockList : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
 viewBlockList blocksModel =
-            ul
-                [ class "blocks" ]
-            <|
+    ul
+        [ class "blocks" ]
+    <|
         if List.length blocksModel.selectedBlocks > 0 then
             (List.map (viewBlockItemWithSelection blocksModel.selectedBlocks) <| toList blocksModel.blocks)
-                    ++ [ viewNewBlockItem ]
+                ++ [ viewNewBlockItem ]
         else
-                (List.map viewBlockItem <| (toList blocksModel.blocks))
-                    ++ [ viewNewBlockItem ]
+            (List.map viewBlockItem <| (toList blocksModel.blocks))
+                ++ [ viewNewBlockItem ]
 
 
 viewNewBlockItem : Html Msg
