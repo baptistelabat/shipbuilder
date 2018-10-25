@@ -30,6 +30,7 @@ import Html.Events exposing (..)
 import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
+import Keyboard exposing (KeyCode)
 import Task
 import Debug
 import Viewports exposing (Viewports, encodeViewports)
@@ -61,7 +62,11 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    fromJs jsMsgToMsg
+    Sub.batch
+        [ fromJs jsMsgToMsg
+        , Keyboard.downs keydownToMsg
+        , Keyboard.ups keyupToMsg
+        ]
 
 
 newBlockDecoder : Decode.Decoder Block
@@ -320,6 +325,28 @@ toastDecoder =
         |> Pipeline.required "key" Decode.string
         |> Pipeline.required "message" Decode.string
         |> Pipeline.required "type" toastTypeDecoder
+
+
+keydownToMsg : KeyCode -> Msg
+keydownToMsg keyCode =
+    case keyCode of
+        17 ->
+            -- Control
+            NoJs NoOp
+
+        _ ->
+            NoJs NoOp
+
+
+keyupToMsg : KeyCode -> Msg
+keyupToMsg keyCode =
+    case keyCode of
+        17 ->
+            -- Control
+            NoJs NoOp
+
+        _ ->
+            NoJs NoOp
 
 
 jsMsgToMsg : JsData -> Msg
