@@ -614,7 +614,7 @@ let shadeThreeColor = function (threeColor, percent) {
 
 let animate = function () {
     updateCameras(views, scene);
-    if (hovered && (!selected || selected && (hovered.uuid !== selected.uuid))) { // remove highlight from the previous "hovered" element
+    if (hovered && !isObjectSelected(hovered)) { // remove highlight from the previous "hovered" element
         resetElementColor(hovered);
     }
     hovered = getFirstElementUnderCursor(mouse, views, scene);
