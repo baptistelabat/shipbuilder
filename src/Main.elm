@@ -332,7 +332,7 @@ keydownToMsg keyCode =
     case keyCode of
         17 ->
             -- Control
-            NoJs NoOp
+            NoJs <| SetMultipleSelect True
 
         _ ->
             NoJs NoOp
@@ -343,7 +343,7 @@ keyupToMsg keyCode =
     case keyCode of
         17 ->
             -- Control
-            NoJs NoOp
+            NoJs <| SetMultipleSelect False
 
         _ ->
             NoJs NoOp
@@ -1065,6 +1065,7 @@ type NoJsMsg
     = DismissToast String
     | DisplayToast Toast
     | NoOp
+    | SetMultipleSelect Bool
     | SyncBlockInputs Block
     | SyncPartitions
     | RenameBlock Block String
@@ -1083,6 +1084,9 @@ updateNoJs msg model =
 
         NoOp ->
             model ! []
+
+        SetMultipleSelect boolean ->
+            { model | multipleSelect = boolean } ! []
 
         SyncBlockInputs block ->
             let
