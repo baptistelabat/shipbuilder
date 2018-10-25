@@ -45,6 +45,9 @@ let toThreeJsCoordinates = function (x, y, z, coordinatesTransform) {
 app.ports.toJs.subscribe(function (message) {
     const data = message.data;
     switch (message.tag) {
+        case "add-block-to-selection":
+            addBlockToSelectionFromElm(data);
+            break;
         case "init-three":
             initThree(data);
             break;
@@ -68,6 +71,9 @@ app.ports.toJs.subscribe(function (message) {
             break;
         case "remove-block":
             removeObject(data);
+            break;
+        case "remove-block-from-selection":
+            removeBlockFromSelectionFromElm(data);
             break;
         case "select-block":
             selectBlockFromElm(data);
@@ -465,6 +471,20 @@ let selectBlockFromElm = function (elmBlock) {
     const block = getBlockByUuid(elmBlock.uuid);
     selectBlock(block);
 }
+
+
+let addBlockToSelectionFromElm = function (elmBlock) {
+    const block = getBlockByUuid(elmBlock.uuid);
+    addToSelection(block);
+}
+
+
+let removeBlockFromSelectionFromElm = function (elmBlock) {
+    const block = getBlockByUuid(elmBlock.uuid);
+    removeFromSelection(block);
+}
+
+
 
 let toggleBlockSelection = function (block) {
     if (isBlock(block)) {
