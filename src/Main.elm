@@ -1379,7 +1379,15 @@ updateModelToJs msg model =
                 { model | blocks = blocks }
 
         SelectBlock block ->
-            { model | selectedBlocks = [ block.uuid ] }
+            if model.multipleSelect == False then
+                -- set selection as only this block
+                { model | selectedBlocks = [ block.uuid ] }
+            else if List.member block.uuid model.selectedBlocks then
+                -- remove from selection
+                { model | selectedBlocks = List.filter ((/=) block.uuid) model.selectedBlocks }
+            else
+                -- add to selection
+                { model | selectedBlocks = model.selectedBlocks ++ [ block.uuid ] }
 
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference.path }
@@ -1563,7 +1571,16 @@ msg2json model action =
             Just { tag = "remove-block", data = encodeBlock block }
 
         SelectBlock block ->
-            Just { tag = "select-block", data = encodeBlock block }
+            Just <|
+                if model.multipleSelect == False then
+                    -- set selection as only this block
+                    { tag = "select-block", data = encodeBlock block }
+                else if List.member block.uuid model.selectedBlocks then
+                    -- remove from selection
+                    { tag = "remove-block-from-selection", data = encodeBlock block }
+                else
+                    -- add to selection
+                    { tag = "add-block-to-selection", data = encodeBlock block }
 
         SelectHullReference hullReference ->
             Just { tag = "load-hull", data = Encode.string hullReference.path }
