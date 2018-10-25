@@ -479,16 +479,13 @@ let selectHull = function (hull) {
 
 
 let selectPartition = function (partition) {
-    if (partition && partition.uuid) {
-        const objectToSelect = findObjectByUUID(partition.uuid);
-        if (objectToSelect && objectToSelect.sbType === mode) {
+    if (isPartition(partition)) {
             sendToElm("select-partition", {
                 partitionType: objectToSelect.partitionType,
                 partitionIndex: objectToSelect.partitionIndex
             });
         }
     }
-}
 
 
 let attachViewControl = function (block) {
