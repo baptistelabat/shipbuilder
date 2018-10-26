@@ -594,6 +594,7 @@ let attachViewControl = function (block) {
     if (currentView && currentView.control) {
         detachControls();
         currentView.control.attach(block);
+        setTransformControlsBasis(block);
     }
 }
 
@@ -604,6 +605,8 @@ let detachControls = function () {
         }
     })
 
+    setTransformControlsBasis();
+}
 
 let setTransformControlsBasis = function (object) {
     if (object) {
@@ -814,7 +817,7 @@ let onMouseMove = function (event) {
             const currentViewCanControl = currentView.getCanControl().some(canControl => canControl);
             if (currentView && currentViewCanControl && currentView.control && !currentView.control.object && selection.length) {
                 const activeObject = getBlockByUuid(selection[0]);
-                if (activeObject) { currentView.control.attach(activeObject); }
+                if (activeObject) {
             }
         }
 
@@ -928,6 +931,7 @@ let initGizmos = function () {
                     default:
                         break;
                 }
+                setTransformControlsBasis(object);
             });
             control.addEventListener("mouseDown", event => {
                 preventSelection = true; // prevents selecting another block while transforming one with the gizmo
