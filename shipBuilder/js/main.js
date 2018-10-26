@@ -11,7 +11,7 @@ let panning = false;
 let multipleSelect = false;
 let selection = [];
 
-let transformControlsBasis = {
+let transformControlsBasis = { // is used to calculate the transformations applied by a transformControls and apply them to other elements
     position: null
 }
 
