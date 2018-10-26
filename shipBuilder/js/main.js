@@ -108,14 +108,14 @@ let sendToElm = function (tag, data) {
 
 let switchMode = function (newMode) {
     if (newMode !== mode) {
-    resetSelection();
-    mode = newMode;
+        resetSelection();
+        mode = newMode;
 
-    const sbObjects = scene.children.filter(child => child.sbType);
-    sbObjects.forEach(object => {
-        setObjectOpacityForCurrentMode(object);
-    })
-}
+        const sbObjects = scene.children.filter(child => child.sbType);
+        sbObjects.forEach(object => {
+            setObjectOpacityForCurrentMode(object);
+        })
+    }
 }
 
 let setObjectOpacityForCurrentMode = function (object) {
@@ -628,6 +628,19 @@ let applyTranslationToObjects = function (objects, translation) {
     })
 }
 
+let applyTranslationToSelection = function (translation) {
+    const selectedBlocks = getBlocksByUuids(selection)
+    const blocksToTransform = selectedBlocks.slice(1); // we don't want to transform the first object, which is the active object already transformed by the gizmo
+    applyTranslationToObjects(blocksToTransform, translation);
+
+    sendToElm("sync-positions",
+        selectedBlocks.map(block => {
+            return {
+                uuid: block.uuid, position: toShipCoordinates(block.position.x, block.position.y, block.position.z, coordinatesTransform)
+            };
+        })
+    );
+}
 let findObjectByUUID = function (uuid) {
     return scene.children.find(child => child.uuid === uuid);
 }
@@ -820,8 +833,8 @@ let onMouseMove = function (event) {
                 if (activeObject) {
                     currentView.control.attach(activeObject);
                     setTransformControlsBasis(activeObject);
+                }
             }
-        }
         }
 
         if (currentView && currentView.orbitControls && !currentView.orbitControls.enabled) {
@@ -897,15 +910,22 @@ let initGizmos = function () {
                     case "translate":
                         // Round position to .2f
                         const position = object.position;
-                        const roundedPosition = {
-                            x: Math.round(position.x * 100) / 100,
-                            y: Math.round(position.y * 100) / 100,
-                            z: Math.round(position.z * 100) / 100
-                        };
+                        const roundedPosition = new THREE.Vector3(
+                            Math.round(position.x * 100) / 100,
+                            Math.round(position.y * 100) / 100,
+                            Math.round(position.z * 100) / 100
+                        );
                         object.position.set(roundedPosition.x, roundedPosition.y, roundedPosition.z);
-                        sendToElm("sync-position", {
-                            uuid: object.uuid, position: toShipCoordinates(roundedPosition.x, roundedPosition.y, roundedPosition.z, coordinatesTransform)
-                        });
+
+                        const translation = getTranslationBetween(transformControlsBasis.position, roundedPosition);
+                        if (selection.length > 1) { // multi select
+                            applyTranslationToSelection(translation);
+                        } else {
+                            sendToElm("sync-position", {
+                                uuid: object.uuid, position: toShipCoordinates(roundedPosition.x, roundedPosition.y, roundedPosition.z, coordinatesTransform)
+                            });
+                        }
+
                         break;
 
                     case "scale":
