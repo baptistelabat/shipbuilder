@@ -2409,7 +2409,7 @@ viewDecks isDefiningOrigin decks =
                 [ class "input-group" ]
                 [ label
                     [ for "decks-spacing" ]
-                    [ text "Spacing of decks" ]
+                    [ text "Default spacing of decks" ]
                 , input
                     [ type_ "text"
                     , id "decks-spacing"
@@ -2422,15 +2422,14 @@ viewDecks isDefiningOrigin decks =
                 ]
             , div
                 [ class "deck-zero" ]
-                [ (if isDefiningOrigin then
+                [ if isDefiningOrigin then
                     p [] [ text "Defining deck n°0..." ]
-                   else
+                  else
                     button
                         [ disabled <| decks.number.value == 0
                         , onClick <| ToJs << SwitchViewMode <| Partitioning <| OriginDefinition Deck
                         ]
                         [ text "Define deck n°0" ]
-                  )
                 ]
             , div
                 [ class "input-group" ]
@@ -2447,7 +2446,53 @@ viewDecks isDefiningOrigin decks =
                     ]
                     []
                 ]
+            , viewPartitionSpacingDetails Deck decks
             ]
+        ]
+
+
+viewPartitionSpacingDetails : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero } -> Html Msg
+viewPartitionSpacingDetails partitionType partitionSummary =
+    let
+        rootClass : String
+        rootClass =
+            "spacing-details"
+    in
+        div
+            [ class rootClass ]
+            [ p [ class <| rootClass ++ "-title" ] [ text "Spacing details" ]
+            , if partitionSummary.number.value > 0 then
+                viewPartitionSpacingList partitionSummary
+              else
+                p [ class "text-muted" ] [ text <| "There's no " ++ (String.toLower <| toString partitionType) ++ " yet" ]
+            ]
+
+
+viewPartitionSpacingList : { a | number : IntInput, spacing : FloatInput, zero : PartitionZero } -> Html Msg
+viewPartitionSpacingList partitionSummary =
+    let
+        getPartitionSpacingData : Int -> { number : Int, spacing : Float }
+        getPartitionSpacingData index =
+            { number = index - partitionSummary.zero.index, spacing = partitionSummary.spacing.value }
+
+        partitionList =
+            List.range 0 (partitionSummary.number.value - 1)
+                |> List.map getPartitionSpacingData
+                |> List.reverse
+    in
+        ul [ class "spacing-list" ] <| List.map viewPartitionSpacingListItem partitionList
+
+
+viewPartitionSpacingListItem : { number : Int, spacing : Float } -> Html Msg
+viewPartitionSpacingListItem partitionSpacingData =
+    li
+        [ class "spacing-item input-group" ]
+        [ label
+            []
+            [ text <| toString partitionSpacingData.number ]
+        , input
+            [ type_ "text", placeholder <| toString partitionSpacingData.spacing ]
+            []
         ]
 
 
@@ -2481,7 +2526,7 @@ viewBulkheads isDefiningOrigin bulkheads =
                 [ class "input-group" ]
                 [ label
                     [ for "bulkheads-spacing" ]
-                    [ text "Spacing of bulkheads" ]
+                    [ text "Default spacing of bulkheads" ]
                 , input
                     [ type_ "text"
                     , id "bulkheads-spacing"
@@ -2494,15 +2539,14 @@ viewBulkheads isDefiningOrigin bulkheads =
                 ]
             , div
                 [ class "bulkhead-zero" ]
-                [ (if isDefiningOrigin then
+                [ if isDefiningOrigin then
                     p [] [ text "Defining bulkhead n°0..." ]
-                   else
+                  else
                     button
                         [ disabled <| bulkheads.number.value == 0
                         , onClick <| ToJs << SwitchViewMode <| Partitioning <| OriginDefinition Bulkhead
                         ]
                         [ text "Define bulkhead n°0" ]
-                  )
                 ]
             , div
                 [ class "input-group" ]
@@ -2519,6 +2563,7 @@ viewBulkheads isDefiningOrigin bulkheads =
                     ]
                     []
                 ]
+            , viewPartitionSpacingDetails Bulkhead bulkheads
             ]
         ]
 

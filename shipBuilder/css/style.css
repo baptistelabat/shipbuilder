@@ -464,14 +464,68 @@ input.block-label {
     font-size: 1.05em;
 }
 
+button:disabled, button:disabled:hover, button:disabled:active {
+    background: var(--secondary-color__contrast);
+    color: var(--on-secondary-color__contrast);
+    transform: scale(0.98);
+    box-shadow: none;
+}
+
+button {
+    background: var(--primary-color);
+    color: var(--on-primary-color);
+    width: 100%;
+    border: 0;
+    border-radius: 4px;
+    padding: 6px;
+    box-shadow: 0 4px 8px -6px var(--shadow-color);
+    transform: scale(0.98);
+}
+
+button:hover {
+    background: var(--primary-color__contrast);
+    color: var(--on-primary-color__contrast);
+    transform: scale(1);
+}
+
+button:active {
+    background: var(--primary-color__accent);
+    color: var(--on-primary-color__accent);
+    box-shadow: 0 2px 8px -6px var(--shadow-color);
+    transform: scale(0.98);
+}
+
+p.text-muted {
+    margin: 0;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
 .input-group {
     margin: 8px 0;
 }
 
-.input-group label {
+.input-group label,
+p.block-volume-label {
     margin-bottom: 4px;
     display: inline-block;
     padding-left: 4px;
+    color: var(--on-secondary-color);
+    font-style: italic;
+    font-size: 0.9em;
+}
+.input-group label::first-letter,
+p.block-volume-label::first-letter {
+    text-transform: uppercase;
+}
+
+.input-group input, 
+p.block-volume-value {
+    width: 100%;
+    border: none;
+    box-shadow: 0 0 5px -3px var(--shadow-color);
+    border-radius: 4px;
+    padding: 8px;
 }
 
 .hidden-input {
@@ -506,25 +560,34 @@ input.block-label {
 .block-volume {
     display: flex;
     flex-wrap: wrap;
-    margin: 12px 0 12px 4px;
+    margin: 12px 0;
+    flex-direction: column;
 }
 
 p.block-volume-label, p.block-volume-value {
     margin: 0;
 }
-.block-volume .block-volume-label {
-    margin-right: 4px;
+
+p.block-volume-label {
+    margin-bottom: 4px;
 }
 
-
-.block-volume-label::after {
-    content: ':';
-    margin-left: 4px;
+p.block-volume-value {
+    background: var(--secondary-color__contrast);
+    font-size: 0.9em;
+    color: var(--on-secondary-color);
+    box-shadow: none;
 }
 
-
-.block-volume .block-volume-value {
-    font-weight: bold;
+.deck-zero > p,
+.bulkhead-zero > p {
+    font-size: 0.9em;
+    padding: 7px;
+    margin: 0;
+    color: var(--on-primary-color);
+    background: hsl(345, 100%, 34%);
+    border-radius: 4px;
+    text-align: center;
 }
 
 .showing-partitions {
@@ -538,7 +601,13 @@ p.block-volume-label, p.block-volume-value {
     font-style: italic;
     box-shadow: inset 0 0 8px var(--shadow-color);
 }
+
 .showing-partitions label {
     margin: 0;
     margin-right: 8px;
+    color: var(--on-contrast-color);
+}
+.showing-partitions input {
+    width: auto;
+
 }
