@@ -1255,10 +1255,6 @@ updateToJs msg model =
     let
         updatedModel =
             updateModelToJs msg model
-
-        toJsCmd : Cmd msg
-        toJsCmd =
-            sendCmdToJs updatedModel msg
     in
         ( updatedModel, sendCmdToJs model msg )
 
@@ -2191,20 +2187,20 @@ viewPartitioning partitioningView model =
     <|
         viewShowingPartitions model.partitions.showing
             :: (case partitioningView of
-            PropertiesEdition ->
-                [ viewDecks False model.partitions.decks
-                , viewBulkheads False model.partitions.bulkheads
-                ]
+                    PropertiesEdition ->
+                        [ viewDecks False model.partitions.decks
+                        , viewBulkheads False model.partitions.bulkheads
+                        ]
 
-            OriginDefinition Deck ->
-                [ viewDecks True model.partitions.decks
-                , viewBulkheads False model.partitions.bulkheads
-                ]
+                    OriginDefinition Deck ->
+                        [ viewDecks True model.partitions.decks
+                        , viewBulkheads False model.partitions.bulkheads
+                        ]
 
-            OriginDefinition Bulkhead ->
-                [ viewDecks False model.partitions.decks
-                , viewBulkheads True model.partitions.bulkheads
-                ]
+                    OriginDefinition Bulkhead ->
+                        [ viewDecks False model.partitions.decks
+                        , viewBulkheads True model.partitions.bulkheads
+                        ]
                )
 
 
