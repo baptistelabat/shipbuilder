@@ -103,6 +103,7 @@ let sendToElm = function (tag, data) {
 }
 
 let switchMode = function (newMode) {
+    if (newMode !== mode) {
     resetSelection();
     mode = newMode;
 
@@ -110,6 +111,7 @@ let switchMode = function (newMode) {
     sbObjects.forEach(object => {
         setObjectOpacityForCurrentMode(object);
     })
+}
 }
 
 let setObjectOpacityForCurrentMode = function (object) {
