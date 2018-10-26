@@ -618,7 +618,7 @@ let setTransformControlsBasis = function (object) {
 
 let getTranslationBetween = function (positionStart, positionEnd) {
     // both arguments must be THREE.Vector3
-    return positionEnd.sub(positionStart);
+    return positionEnd.clone().sub(positionStart);
 }
 
 let applyTranslationToObjects = function (objects, translation) {
