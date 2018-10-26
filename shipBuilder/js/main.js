@@ -541,6 +541,10 @@ let getBlockByUuid = function (uuid) {
     const block = scene.children.find(child => child.sbType && child.sbType === "block" && child.uuid === uuid);
     return block;
 }
+let getBlocksByUuids = function (uuids) {
+    const blocks = uuids.map(uuid => getBlockByUuid(uuid));
+    return blocks;
+}
 
 let selectObject = function (object) {
     if (object.sbType && object.sbType === mode) {
