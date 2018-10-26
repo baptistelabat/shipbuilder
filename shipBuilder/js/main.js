@@ -605,6 +605,11 @@ let getTranslationBetween = function (positionStart, positionEnd) {
     return positionEnd.sub(positionStart);
 }
 
+let applyTranslationToObjects = function (objects, translation) {
+    // translation must be THREE.Vector3
+    objects.forEach(object => {
+        object.position.add(translation.clone());
+    })
 }
 
 let findObjectByUUID = function (uuid) {
