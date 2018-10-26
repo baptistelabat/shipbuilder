@@ -245,6 +245,7 @@ decodePartitions =
     Pipeline.decode PartitionsData
         |> Pipeline.required "decks" decodeDecks
         |> Pipeline.required "bulkheads" decodeBulkheads
+        |> Pipeline.hardcoded True
 
 
 decodeDecks : Decode.Decoder Decks
@@ -561,6 +562,7 @@ type alias Blocks =
 type alias PartitionsData =
     { decks : Decks
     , bulkheads : Bulkheads
+    , showing : Bool
     }
 
 
@@ -875,6 +877,7 @@ initPartitions =
             , position = numberToNumberInput 0.0
             }
         }
+    , showing = True
     }
 
 
