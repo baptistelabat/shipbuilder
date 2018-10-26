@@ -11,6 +11,10 @@ let panning = false;
 let multipleSelect = false;
 let selection = [];
 
+let transformControlsBasis = {
+    position: null
+}
+
 let views = [];
 let mode = null;
 
