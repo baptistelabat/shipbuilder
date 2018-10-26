@@ -245,6 +245,7 @@ decodePartitions =
     Pipeline.decode PartitionsData
         |> Pipeline.required "decks" decodeDecks
         |> Pipeline.required "bulkheads" decodeBulkheads
+        |> Pipeline.hardcoded True
 
 
 decodeDecks : Decode.Decoder Decks
@@ -561,6 +562,7 @@ type alias Blocks =
 type alias PartitionsData =
     { decks : Decks
     , bulkheads : Bulkheads
+    , showing : Bool
     }
 
 
@@ -875,6 +877,7 @@ initPartitions =
             , position = numberToNumberInput 0.0
             }
         }
+    , showing = True
     }
 
 
@@ -1099,6 +1102,7 @@ type ToJsMsg
     | SelectBlock Block
     | SelectHullReference HullReference
     | SwitchViewMode ViewMode
+    | TogglePartitions
     | UpdatePartitionNumber PartitionType String
     | UpdatePartitionSpacing PartitionType String
     | UpdatePartitionZeroPosition PartitionType String
@@ -1251,10 +1255,6 @@ updateToJs msg model =
     let
         updatedModel =
             updateModelToJs msg model
-
-        toJsCmd : Cmd msg
-        toJsCmd =
-            sendCmdToJs updatedModel msg
     in
         ( updatedModel, sendCmdToJs model msg )
 
@@ -1451,6 +1451,20 @@ updateModelToJs msg model =
 
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
+
+        TogglePartitions ->
+            let
+                partitions : PartitionsData
+                partitions =
+                    model.partitions
+
+                _ =
+                    Debug.log "toggle!" <| not partitions.showing
+
+                updatedPartitions =
+                    { partitions | showing = not partitions.showing }
+            in
+                { model | partitions = updatedPartitions }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -1669,6 +1683,9 @@ msg2json model action =
 
         SwitchViewMode newViewMode ->
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
+
+        TogglePartitions ->
+            Just { tag = "showing-partitions", data = Encode.bool <| not model.partitions.showing }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -2168,21 +2185,39 @@ viewPartitioning partitioningView model =
     div
         [ class "panel partioning-panel" ]
     <|
-        case partitioningView of
-            PropertiesEdition ->
-                [ viewDecks False model.partitions.decks
-                , viewBulkheads False model.partitions.bulkheads
-                ]
+        viewShowingPartitions model.partitions.showing
+            :: (case partitioningView of
+                    PropertiesEdition ->
+                        [ viewDecks False model.partitions.decks
+                        , viewBulkheads False model.partitions.bulkheads
+                        ]
 
-            OriginDefinition Deck ->
-                [ viewDecks True model.partitions.decks
-                , viewBulkheads False model.partitions.bulkheads
-                ]
+                    OriginDefinition Deck ->
+                        [ viewDecks True model.partitions.decks
+                        , viewBulkheads False model.partitions.bulkheads
+                        ]
 
-            OriginDefinition Bulkhead ->
-                [ viewDecks False model.partitions.decks
-                , viewBulkheads True model.partitions.bulkheads
-                ]
+                    OriginDefinition Bulkhead ->
+                        [ viewDecks False model.partitions.decks
+                        , viewBulkheads True model.partitions.bulkheads
+                        ]
+               )
+
+
+viewShowingPartitions : Bool -> Html Msg
+viewShowingPartitions showing =
+    div [ class "showing-partitions input-group" ]
+        [ label
+            [ for "showing-partitions-checkbox" ]
+            [ text "Show partitions" ]
+        , input
+            [ type_ "checkbox"
+            , id "showing-partitions-checkbox"
+            , checked showing
+            , onClick <| ToJs TogglePartitions
+            ]
+            []
+        ]
 
 
 viewDecks : Bool -> Decks -> Html Msg
@@ -2241,7 +2276,7 @@ viewDecks isDefiningOrigin decks =
                 [ class "input-group" ]
                 [ label
                     [ for "deck-zero-position" ]
-                    [ text "Position of deck n°0 (z axis)" ]
+                    [ text "Position of deck n°0" ]
                 , input
                     [ type_ "text"
                     , id "deck-zero-position"
@@ -2311,7 +2346,7 @@ viewBulkheads isDefiningOrigin bulkheads =
                 [ class "input-group" ]
                 [ label
                     [ for "bulkhead-zero-position" ]
-                    [ text "Position of bulkhead n°0 (z axis)" ]
+                    [ text "Position of bulkhead n°0" ]
                 , input
                     [ type_ "text"
                     , id "bulkhead-zero-position"
