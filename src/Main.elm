@@ -2241,7 +2241,7 @@ viewDecks isDefiningOrigin decks =
                 [ class "input-group" ]
                 [ label
                     [ for "deck-zero-position" ]
-                    [ text "Position of deck n°0 (z axis)" ]
+                    [ text "Position of deck n°0" ]
                 , input
                     [ type_ "text"
                     , id "deck-zero-position"
@@ -2311,7 +2311,7 @@ viewBulkheads isDefiningOrigin bulkheads =
                 [ class "input-group" ]
                 [ label
                     [ for "bulkhead-zero-position" ]
-                    [ text "Position of bulkhead n°0 (z axis)" ]
+                    [ text "Position of bulkhead n°0" ]
                 , input
                     [ type_ "text"
                     , id "bulkhead-zero-position"
