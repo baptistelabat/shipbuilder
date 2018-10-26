@@ -11,6 +11,10 @@ let panning = false;
 let multipleSelect = false;
 let selection = [];
 
+let transformControlsBasis = { // is used to calculate the transformations applied by a transformControls and apply them to other elements
+    position: null
+}
+
 let views = [];
 let mode = null;
 
@@ -103,13 +107,15 @@ let sendToElm = function (tag, data) {
 }
 
 let switchMode = function (newMode) {
-    resetSelection();
-    mode = newMode;
+    if (newMode !== mode) {
+        resetSelection();
+        mode = newMode;
 
-    const sbObjects = scene.children.filter(child => child.sbType);
-    sbObjects.forEach(object => {
-        setObjectOpacityForCurrentMode(object);
-    })
+        const sbObjects = scene.children.filter(child => child.sbType);
+        sbObjects.forEach(object => {
+            setObjectOpacityForCurrentMode(object);
+        })
+    }
 }
 
 let setObjectOpacityForCurrentMode = function (object) {
@@ -539,6 +545,10 @@ let getBlockByUuid = function (uuid) {
     const block = scene.children.find(child => child.sbType && child.sbType === "block" && child.uuid === uuid);
     return block;
 }
+let getBlocksByUuids = function (uuids) {
+    const blocks = uuids.map(uuid => getBlockByUuid(uuid));
+    return blocks;
+}
 
 let selectObject = function (object) {
     if (object.sbType && object.sbType === mode) {
@@ -584,6 +594,7 @@ let attachViewControl = function (block) {
     if (currentView && currentView.control) {
         detachControls();
         currentView.control.attach(block);
+        setTransformControlsBasis(block);
     }
 }
 
@@ -593,8 +604,43 @@ let detachControls = function () {
             view.control.detach();
         }
     })
+
+    setTransformControlsBasis();
 }
 
+let setTransformControlsBasis = function (object) {
+    if (object) {
+        transformControlsBasis.position = object.position.clone();
+    } else {
+        transformControlsBasis.position = null;
+    }
+}
+
+let getTranslationBetween = function (positionStart, positionEnd) {
+    // both arguments must be THREE.Vector3
+    return positionEnd.sub(positionStart);
+}
+
+let applyTranslationToObjects = function (objects, translation) {
+    // translation must be THREE.Vector3
+    objects.forEach(object => {
+        object.position.add(translation.clone());
+    })
+}
+
+let applyTranslationToSelection = function (translation) {
+    const selectedBlocks = getBlocksByUuids(selection)
+    const blocksToTransform = selectedBlocks.slice(1); // we don't want to transform the first object, which is the active object already transformed by the gizmo
+    applyTranslationToObjects(blocksToTransform, translation);
+
+    sendToElm("sync-positions",
+        selectedBlocks.map(block => {
+            return {
+                uuid: block.uuid, position: toShipCoordinates(block.position.x, block.position.y, block.position.z, coordinatesTransform)
+            };
+        })
+    );
+}
 let findObjectByUUID = function (uuid) {
     return scene.children.find(child => child.uuid === uuid);
 }
@@ -784,7 +830,10 @@ let onMouseMove = function (event) {
             const currentViewCanControl = currentView.getCanControl().some(canControl => canControl);
             if (currentView && currentViewCanControl && currentView.control && !currentView.control.object && selection.length) {
                 const activeObject = getBlockByUuid(selection[0]);
-                if (activeObject) { currentView.control.attach(activeObject); }
+                if (activeObject) {
+                    currentView.control.attach(activeObject);
+                    setTransformControlsBasis(activeObject);
+                }
             }
         }
 
@@ -861,15 +910,22 @@ let initGizmos = function () {
                     case "translate":
                         // Round position to .2f
                         const position = object.position;
-                        const roundedPosition = {
-                            x: Math.round(position.x * 100) / 100,
-                            y: Math.round(position.y * 100) / 100,
-                            z: Math.round(position.z * 100) / 100
-                        };
+                        const roundedPosition = new THREE.Vector3(
+                            Math.round(position.x * 100) / 100,
+                            Math.round(position.y * 100) / 100,
+                            Math.round(position.z * 100) / 100
+                        );
                         object.position.set(roundedPosition.x, roundedPosition.y, roundedPosition.z);
-                        sendToElm("sync-position", {
-                            uuid: object.uuid, position: toShipCoordinates(roundedPosition.x, roundedPosition.y, roundedPosition.z, coordinatesTransform)
-                        });
+
+                        const translation = getTranslationBetween(transformControlsBasis.position, roundedPosition);
+                        if (selection.length > 1) { // multi select
+                            applyTranslationToSelection(translation);
+                        } else {
+                            sendToElm("sync-position", {
+                                uuid: object.uuid, position: toShipCoordinates(roundedPosition.x, roundedPosition.y, roundedPosition.z, coordinatesTransform)
+                            });
+                        }
+
                         break;
 
                     case "scale":
@@ -898,6 +954,7 @@ let initGizmos = function () {
                     default:
                         break;
                 }
+                setTransformControlsBasis(object);
             });
             control.addEventListener("mouseDown", event => {
                 preventSelection = true; // prevents selecting another block while transforming one with the gizmo
