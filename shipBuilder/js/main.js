@@ -752,10 +752,31 @@ let onMouseMove = function (event) {
         }
     });
 
+    // Switch the active gizmo to the new active view if it changed
+    const viewWithGizmo = views.find(view => view.control && view.control.object);
     const currentView = getActiveViewport(views);
-    if (currentView && currentView.orbitControls && !currentView.orbitControls.enabled) {
-        currentView.orbitControls.enabled = true;
+
+    if (currentView) {
+        if (!preventSelection) {
+            // when using a control, preventSelection is set to true. It allows the user to move the cursor past the viewport when performing a transform
+            if (viewWithGizmo && currentView.camera.uuid !== viewWithGizmo.camera.uuid) {
+                // detach the last active transformControl if the active view is different from the view that owns it
+                detachControls();
+            }
+
+            // true if the view can control at least one axis
+            const currentViewCanControl = currentView.getCanControl().some(canControl => canControl);
+            if (currentView && currentViewCanControl && currentView.control && !currentView.control.object && selection.length) {
+                const activeObject = getBlockByUuid(selection[0]);
+                if (activeObject) { currentView.control.attach(activeObject); }
+            }
+        }
+
+        if (currentView && currentView.orbitControls && !currentView.orbitControls.enabled) {
+            currentView.orbitControls.enabled = true;
+        }
     }
+
 }
 
 let updateViewports = function (views, canvas) {
@@ -932,7 +953,7 @@ let isObjectHovered = function (object) {
 
 let onDoubleClick = function (event) { // cycle through the transform modes
     const activeViewport = getActiveViewport(views);
-    if (activeViewport && hovered) {
+    if (activeViewport) {
         views.forEach(view => {
             if (view.control && view.control.getMode() === "translate") {
                 view.control.setMode("scale");
