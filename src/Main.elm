@@ -1097,6 +1097,7 @@ type ToJsMsg
     | ChangeBlockColor Block Color
     | KeyDownOnPositionInput Axis Block KeyEvent
     | KeyDownOnSizeInput Dimension Block KeyEvent
+    | KeyDownOnPartitionPositionInput PartitionType KeyEvent
     | OpenSaveFile
     | RemoveBlock Block
     | SelectBlock Block
@@ -1393,6 +1394,34 @@ updateModelToJs msg model =
         AddBlock label ->
             model
 
+        KeyDownOnPartitionPositionInput partitionType keyEvent ->
+            case toIncrement keyEvent of
+                Just increment ->
+                    let
+                        ( partition, asPartition ) =
+                            case partitionType of
+                                Deck ->
+                                    ( model.partitions.decks, asDecksInPartitions )
+
+                                Bulkhead ->
+                                    ( model.partitions.bulkheads, asBulkheadsInPartitions )
+
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (partition.zero.position)
+
+                        updatedPartitions : PartitionsData
+                        updatedPartitions =
+                            newFloatInput
+                                |> asPositionInPartitionZero partition.zero
+                                |> asZeroInPartition partition
+                                |> asPartition model.partitions
+                    in
+                        { model | partitions = updatedPartitions }
+
+                Nothing ->
+                    model
+
         KeyDownOnPositionInput axis block keyEvent ->
             case toIncrement keyEvent of
                 Just increment ->
@@ -1625,6 +1654,36 @@ msg2json model action =
 
         AddBlock label ->
             Just { tag = "add-block", data = (encodeAddBlockCommand label) }
+
+        KeyDownOnPartitionPositionInput partitionType keyEvent ->
+            Maybe.map
+                (\increment ->
+                    let
+                        ( partition, asPartition, tag, computePartition ) =
+                            case partitionType of
+                                Deck ->
+                                    ( .partitions >> .decks, asDecksInPartitions, "make-decks", computeDecks )
+
+                                Bulkhead ->
+                                    ( .partitions >> .bulkheads, asBulkheadsInPartitions, "make-bulkheads", computeBulkheads )
+
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (partition model |> .zero >> .position)
+
+                        updatedPartition =
+                            newFloatInput
+                                |> asPositionInPartitionZero (partition model |> .zero)
+                                |> asZeroInPartition (partition model)
+                    in
+                        { tag = tag
+                        , data =
+                            encodeComputedPartitions <|
+                                computePartition updatedPartition
+                        }
+                )
+            <|
+                toIncrement keyEvent
 
         KeyDownOnPositionInput axis block keyEvent ->
             Maybe.map
@@ -2283,6 +2342,7 @@ viewDecks isDefiningOrigin decks =
                     , value decks.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Deck
                     , onBlur <| NoJs SyncPartitions
+                    , onKeyDown <| ToJs << KeyDownOnPartitionPositionInput Deck
                     ]
                     []
                 ]
@@ -2353,6 +2413,7 @@ viewBulkheads isDefiningOrigin bulkheads =
                     , value bulkheads.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Bulkhead
                     , onBlur <| NoJs SyncPartitions
+                    , onKeyDown <| ToJs << KeyDownOnPartitionPositionInput Bulkhead
                     ]
                     []
                 ]
