@@ -495,6 +495,12 @@ button:active {
     transform: scale(0.98);
 }
 
+p.text-muted {
+    margin: 0;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
 .input-group {
     margin: 8px 0;
 }
