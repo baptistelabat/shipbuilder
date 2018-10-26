@@ -818,7 +818,10 @@ let onMouseMove = function (event) {
             if (currentView && currentViewCanControl && currentView.control && !currentView.control.object && selection.length) {
                 const activeObject = getBlockByUuid(selection[0]);
                 if (activeObject) {
+                    currentView.control.attach(activeObject);
+                    setTransformControlsBasis(activeObject);
             }
+        }
         }
 
         if (currentView && currentView.orbitControls && !currentView.orbitControls.enabled) {
