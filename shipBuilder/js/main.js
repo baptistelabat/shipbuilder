@@ -604,6 +604,15 @@ let detachControls = function () {
         }
     })
 
+
+let setTransformControlsBasis = function (object) {
+    if (object) {
+        transformControlsBasis.position = object.position.clone();
+    } else {
+        transformControlsBasis.position = null;
+    }
+}
+
 let getTranslationBetween = function (positionStart, positionEnd) {
     // both arguments must be THREE.Vector3
     return positionEnd.sub(positionStart);
