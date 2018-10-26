@@ -599,6 +599,12 @@ let detachControls = function () {
             view.control.detach();
         }
     })
+
+let getTranslationBetween = function (positionStart, positionEnd) {
+    // both arguments must be THREE.Vector3
+    return positionEnd.sub(positionStart);
+}
+
 }
 
 let findObjectByUUID = function (uuid) {
