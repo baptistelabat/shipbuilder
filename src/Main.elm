@@ -2171,7 +2171,8 @@ viewPartitioning partitioningView model =
     div
         [ class "panel partioning-panel" ]
     <|
-        case partitioningView of
+        viewShowingPartitions model.partitions.showing
+            :: (case partitioningView of
             PropertiesEdition ->
                 [ viewDecks False model.partitions.decks
                 , viewBulkheads False model.partitions.bulkheads
@@ -2186,6 +2187,22 @@ viewPartitioning partitioningView model =
                 [ viewDecks False model.partitions.decks
                 , viewBulkheads True model.partitions.bulkheads
                 ]
+               )
+
+
+viewShowingPartitions : Bool -> Html Msg
+viewShowingPartitions showing =
+    div [ class "showing-partitions input-group" ]
+        [ label
+            [ for "showing-partitions-checkbox" ]
+            [ text "Show partitions" ]
+        , input
+            [ type_ "checkbox"
+            , id "showing-partitions-checkbox"
+            , checked showing
+            ]
+            []
+        ]
 
 
 viewDecks : Bool -> Decks -> Html Msg
