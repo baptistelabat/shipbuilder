@@ -19,6 +19,7 @@ port module Main
 
 import Color exposing (Color)
 import SIRColorPicker
+import Dict exposing (Dict)
 import DictList exposing (DictList)
 import Dom
 import FontAwesome.Regular as FARegular
@@ -432,6 +433,17 @@ jsMsgToMsg js =
                 Err message ->
                     FromJs <| JSError message
 
+        "sync-positions" ->
+            case Decode.decodeValue (Decode.list syncPositionDecoder) js.data of
+                Ok syncPositions ->
+                    FromJs <|
+                        SynchronizePositions <|
+                            Dict.fromList <|
+                                List.map (\syncPos -> ( syncPos.uuid, syncPos )) syncPositions
+
+                Err message ->
+                    FromJs <| JSError message
+
         "sync-size" ->
             case Decode.decodeValue syncSizeDecoder js.data of
                 Ok syncSize ->
@@ -468,6 +480,7 @@ type FromJsMsg
     | NewBlock Block
     | RestoreSave SaveFile
     | SynchronizePosition String Position
+    | SynchronizePositions (Dict String SyncPosition)
     | SynchronizeSize String Size
 
 
@@ -1352,6 +1365,23 @@ updateFromJs jsmsg model =
                     model
             )
                 ! []
+
+        SynchronizePositions syncDict ->
+            let
+                updatedBlocks : Blocks
+                updatedBlocks =
+                    DictList.map
+                        (\uuid block ->
+                            case Dict.get uuid syncDict of
+                                Just syncPosition ->
+                                    syncPosition.position |> asPositionInBlock block
+
+                                Nothing ->
+                                    block
+                        )
+                        model.blocks
+            in
+                { model | blocks = updatedBlocks } ! []
 
         SynchronizeSize uuid size ->
             (case getBlockByUUID uuid model.blocks of
