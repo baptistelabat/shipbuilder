@@ -23,7 +23,7 @@ let raycaster = new THREE.Raycaster(); // used to find the objects under the cur
 let loader = new THREE.STLLoader();
 
 let preventSelection = false;
-
+let showingPartitions = true;
 // ThreeJs to ship
 let coordinatesTransform = new THREE.Matrix3();
 
@@ -77,6 +77,9 @@ app.ports.toJs.subscribe(function (message) {
             break;
         case "select-block":
             selectBlockFromElm(data);
+            break;
+        case "showing-partitions":
+            toggleShowingPartitions(data);
             break;
         case "switch-mode":
             switchMode(data);
@@ -228,12 +231,24 @@ let makeBulkheads = function (bulkheads) {
         var bulkhead = new THREE.LineLoop(geometry, material);
         bulkhead.sbType = "partition";
         bulkhead.baseColor = color;
+        bulkhead.visible = showingPartitions;
         bulkhead.partitionType = "bulkhead";
         bulkhead.partitionIndex = index;
         bulkhead.partitionNumber = number;
         setObjectOpacityForCurrentMode(bulkhead);
         scene.add(bulkhead);
     })
+}
+
+let toggleShowingPartitions = function (showing) {
+    showingPartitions = showing;
+    scene.children
+        .filter(child =>
+            child.sbType && child.sbType === "partition"
+        )
+        .forEach(partition => {
+            partition.visible = showing;
+        });
 }
 
 let makeDecks = function (decks) {
@@ -264,6 +279,7 @@ let makeDecks = function (decks) {
         var deck = new THREE.LineLoop(geometry, material);
         deck.sbType = "partition";
         deck.baseColor = color;
+        deck.visible = showingPartitions;
         deck.partitionType = "deck";
         deck.partitionIndex = index;
         deck.partitionNumber = number;
