@@ -6,6 +6,7 @@
     --on-primary-color: white;
     --on-primary-color__accent: hsl(222, 100%, 74%);
     --on-primary-color__muted: hsl(222, 55%, 70%);
+    --on-primary-color__contrast: white;
 
     --secondary-color: hsl(222, 53%, 95%);
     --secondary-color__accent: white;
@@ -540,7 +541,11 @@ p.block-volume-value {
 
 .stacked-subpanel {
     flex: 1 1 auto;
+    height: 0;
+    display: flex;
+    flex-direction: column;
 }
+
 .stacked-subpanel-header {
     padding: 12px;
     background-color: var(--secondary-color__accent);
@@ -555,6 +560,9 @@ p.block-volume-value {
 
 .stacked-subpanel-content {
     padding: 12px;
+    flex: 1 1 auto;
+    height: 0;
+    overflow: auto;
 }
 
 .block-volume {
@@ -609,5 +617,32 @@ p.block-volume-value {
 }
 .showing-partitions input {
     width: auto;
+}
 
+.spacing-details-title {
+    margin-bottom: 8px;
+}
+
+.spacing-list {
+    padding: 0;
+    list-style: none;
+    margin: 4px 0 12px;
+}
+
+.spacing-item { 
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.spacing-item + .spacing-item {
+    border-top: 1px solid #ffffff88;
+    margin-top: 4px;
+    padding-top: 4px;
+}
+
+.spacing-item input {
+    width: 100px;
+    text-align: right;
 }
