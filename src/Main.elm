@@ -1102,6 +1102,7 @@ type ToJsMsg
     | SelectBlock Block
     | SelectHullReference HullReference
     | SwitchViewMode ViewMode
+    | TogglePartitions
     | UpdatePartitionNumber PartitionType String
     | UpdatePartitionSpacing PartitionType String
     | UpdatePartitionZeroPosition PartitionType String
@@ -1455,6 +1456,20 @@ updateModelToJs msg model =
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
 
+        TogglePartitions ->
+            let
+                partitions : PartitionsData
+                partitions =
+                    model.partitions
+
+                _ =
+                    Debug.log "toggle!" <| not partitions.showing
+
+                updatedPartitions =
+                    { partitions | showing = not partitions.showing }
+            in
+                { model | partitions = updatedPartitions }
+
         UpdatePartitionNumber partitionType input ->
             let
                 ( getPartition, asPartitionInPartitions ) =
@@ -1672,6 +1687,9 @@ msg2json model action =
 
         SwitchViewMode newViewMode ->
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
+
+        TogglePartitions ->
+            Just { tag = "showing-partitions", data = Encode.bool <| not model.partitions.showing }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -2200,6 +2218,7 @@ viewShowingPartitions showing =
             [ type_ "checkbox"
             , id "showing-partitions-checkbox"
             , checked showing
+            , onClick <| ToJs TogglePartitions
             ]
             []
         ]
