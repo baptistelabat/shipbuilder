@@ -1097,6 +1097,8 @@ type ToJsMsg
     | ChangeBlockColor Block Color
     | KeyDownOnPositionInput Axis Block KeyEvent
     | KeyDownOnSizeInput Dimension Block KeyEvent
+    | KeyDownOnPartitionPositionInput PartitionType KeyEvent
+    | KeyDownOnPartitionSpacingInput PartitionType KeyEvent
     | OpenSaveFile
     | RemoveBlock Block
     | SelectBlock Block
@@ -1393,6 +1395,61 @@ updateModelToJs msg model =
         AddBlock label ->
             model
 
+        KeyDownOnPartitionPositionInput partitionType keyEvent ->
+            case toIncrement keyEvent of
+                Just increment ->
+                    let
+                        ( partition, asPartition ) =
+                            case partitionType of
+                                Deck ->
+                                    ( model.partitions.decks, asDecksInPartitions )
+
+                                Bulkhead ->
+                                    ( model.partitions.bulkheads, asBulkheadsInPartitions )
+
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (partition.zero.position)
+
+                        updatedPartitions : PartitionsData
+                        updatedPartitions =
+                            newFloatInput
+                                |> asPositionInPartitionZero partition.zero
+                                |> asZeroInPartition partition
+                                |> asPartition model.partitions
+                    in
+                        { model | partitions = updatedPartitions }
+
+                Nothing ->
+                    model
+
+        KeyDownOnPartitionSpacingInput partitionType keyEvent ->
+            case toIncrement keyEvent of
+                Just increment ->
+                    let
+                        ( partition, asPartition ) =
+                            case partitionType of
+                                Deck ->
+                                    ( model.partitions.decks, asDecksInPartitions )
+
+                                Bulkhead ->
+                                    ( model.partitions.bulkheads, asBulkheadsInPartitions )
+
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (partition.spacing)
+
+                        updatedPartitions : PartitionsData
+                        updatedPartitions =
+                            newFloatInput
+                                |> updateSpacingOfPartition partition
+                                |> asPartition model.partitions
+                    in
+                        { model | partitions = updatedPartitions }
+
+                Nothing ->
+                    model
+
         KeyDownOnPositionInput axis block keyEvent ->
             case toIncrement keyEvent of
                 Just increment ->
@@ -1625,6 +1682,65 @@ msg2json model action =
 
         AddBlock label ->
             Just { tag = "add-block", data = (encodeAddBlockCommand label) }
+
+        KeyDownOnPartitionPositionInput partitionType keyEvent ->
+            Maybe.map
+                (\increment ->
+                    let
+                        ( partition, asPartition, tag, computePartition ) =
+                            case partitionType of
+                                Deck ->
+                                    ( .partitions >> .decks, asDecksInPartitions, "make-decks", computeDecks )
+
+                                Bulkhead ->
+                                    ( .partitions >> .bulkheads, asBulkheadsInPartitions, "make-bulkheads", computeBulkheads )
+
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (partition model |> .zero >> .position)
+
+                        updatedPartition =
+                            newFloatInput
+                                |> asPositionInPartitionZero (partition model |> .zero)
+                                |> asZeroInPartition (partition model)
+                    in
+                        { tag = tag
+                        , data =
+                            encodeComputedPartitions <|
+                                computePartition updatedPartition
+                        }
+                )
+            <|
+                toIncrement keyEvent
+
+        KeyDownOnPartitionSpacingInput partitionType keyEvent ->
+            Maybe.map
+                (\increment ->
+                    let
+                        ( partition, asPartition, tag, computePartition ) =
+                            case partitionType of
+                                Deck ->
+                                    ( model.partitions.decks, asDecksInPartitions, "make-decks", computeDecks )
+
+                                Bulkhead ->
+                                    ( model.partitions.bulkheads, asBulkheadsInPartitions, "make-bulkheads", computeBulkheads )
+
+                        newFloatInput : FloatInput
+                        newFloatInput =
+                            addToFloatInput increment (partition.spacing)
+
+                        updatedPartition =
+                            newFloatInput
+                                |> updateSpacingOfPartition partition
+                    in
+                        { tag = tag
+                        , data =
+                            encodeComputedPartitions <|
+                                computePartition updatedPartition
+                        }
+                )
+            <|
+                toIncrement keyEvent
 
         KeyDownOnPositionInput axis block keyEvent ->
             Maybe.map
@@ -1919,6 +2035,19 @@ updateBlockSizeForDimension dimension block floatInput =
         validFloatInput
             |> (asDimensionInSize dimension) block.size
             |> asSizeInBlock block
+
+
+updateSpacingOfPartition : { a | spacing : FloatInput } -> FloatInput -> { a | spacing : FloatInput }
+updateSpacingOfPartition partition floatInput =
+    let
+        validFloatInput =
+            if floatInput.value < 0 then
+                { value = 0, string = "0" }
+            else
+                floatInput
+    in
+        validFloatInput
+            |> asSpacingInPartition partition
 
 
 updateBlockLength : Block -> FloatInput -> Block
@@ -2257,6 +2386,7 @@ viewDecks isDefiningOrigin decks =
                     , value decks.spacing.string
                     , onInput <| ToJs << UpdatePartitionSpacing Deck
                     , onBlur <| NoJs SyncPartitions
+                    , onKeyDown <| ToJs << KeyDownOnPartitionSpacingInput Deck
                     ]
                     []
                 ]
@@ -2283,6 +2413,7 @@ viewDecks isDefiningOrigin decks =
                     , value decks.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Deck
                     , onBlur <| NoJs SyncPartitions
+                    , onKeyDown <| ToJs << KeyDownOnPartitionPositionInput Deck
                     ]
                     []
                 ]
@@ -2327,6 +2458,7 @@ viewBulkheads isDefiningOrigin bulkheads =
                     , value bulkheads.spacing.string
                     , onInput <| ToJs << UpdatePartitionSpacing Bulkhead
                     , onBlur <| NoJs SyncPartitions
+                    , onKeyDown <| ToJs << KeyDownOnPartitionSpacingInput Bulkhead
                     ]
                     []
                 ]
@@ -2353,6 +2485,7 @@ viewBulkheads isDefiningOrigin bulkheads =
                     , value bulkheads.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Bulkhead
                     , onBlur <| NoJs SyncPartitions
+                    , onKeyDown <| ToJs << KeyDownOnPartitionPositionInput Bulkhead
                     ]
                     []
                 ]
