@@ -15,6 +15,9 @@
     --on-secondary-color__accent: hsl(222, 20%, 20%);
     --on-secondary-color__muted: hsl(222, 20%, 60%);
 
+    --contrast-color: hsl(222, 20%, 20%);
+    --on-contrast-color: white;
+
     --shadow-color: hsla(205, 100%, 7%, 0.315)
 }
 
@@ -112,9 +115,9 @@ header .header-menu-item+.header-menu-item {
 }
 
 .toasts .toast {
-    background-color: hsl(222, 20%, 20%);
+    background-color: var(--contrast-color);
     margin: auto;
-    color: white;
+    color: var(--on-contrast-color);
     padding: 16px;
     box-shadow: 0px 5px 15px -5px var(--shadow-color);
     display: flex;
