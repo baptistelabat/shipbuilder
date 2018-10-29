@@ -249,17 +249,33 @@ decodePartitions =
         |> Pipeline.hardcoded True
 
 
-
--- TODO: Decode spacingExceptions
-
-
 decodeDecks : Decode.Decoder Decks
 decodeDecks =
     Pipeline.decode Decks
         |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
         |> Pipeline.required "spacing" floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
-        |> Pipeline.hardcoded Dict.empty
+        |> Pipeline.optional "spacingExceptions" decodeSpacingExceptions Dict.empty
+
+
+decodeSpacingExceptions : Decode.Decoder (Dict Int FloatInput)
+decodeSpacingExceptions =
+    let
+        makeException : String -> Float -> Dict Int FloatInput -> Dict Int FloatInput
+        makeException key value dict =
+            case String.toInt key of
+                Ok intKey ->
+                    Dict.insert intKey (numberToNumberInput value) dict
+
+                Err message ->
+                    -- TODO: handle failure or only ignore ?
+                    dict
+
+        parse : Dict String Float -> Dict Int FloatInput
+        parse dict =
+            Dict.foldl makeException Dict.empty dict
+    in
+        Decode.map parse (Decode.dict Decode.float)
 
 
 decodeBulkheads : Decode.Decoder Bulkheads
@@ -268,7 +284,7 @@ decodeBulkheads =
         |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
         |> Pipeline.required "spacing" floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
-        |> Pipeline.hardcoded Dict.empty
+        |> Pipeline.optional "spacingExceptions" decodeSpacingExceptions Dict.empty
 
 
 decodePartitionZero : Decode.Decoder PartitionZero
