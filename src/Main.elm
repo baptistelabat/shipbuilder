@@ -629,6 +629,11 @@ type alias Bulkheads =
     }
 
 
+asSpacingExceptionsInPartition : { a | spacingExceptions : Dict Int FloatInput } -> Dict Int FloatInput -> { a | spacingExceptions : Dict Int FloatInput }
+asSpacingExceptionsInPartition partition newSpacingExceptions =
+    { partition | spacingExceptions = newSpacingExceptions }
+
+
 asNumberInPartition : { a | number : IntInput } -> IntInput -> { a | number : IntInput }
 asNumberInPartition partition newNumber =
     { partition | number = newNumber }
