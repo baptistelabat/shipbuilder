@@ -682,6 +682,10 @@ let initThree = function (data) {
     const initViewports = data.viewports;
     const initMode = data.mode;
     const initCoordinatesTransform = data.coordinatesTransform;
+    const initDecks = data.decks;
+    const initBulkheads = data.bulkheads;
+    const showing = data.showingPartitions;
+
     views = initViewports.map(view => {
         view.getEye = () => {
             const converted = toThreeJsCoordinates(view.eye.x, view.eye.y, view.eye.z, coordinatesTransform);
@@ -707,6 +711,9 @@ let initThree = function (data) {
     displayLabels();
     initGizmos();
     initOrbitControls();
+
+    makeDecks(initDecks);
+    makeBulkheads(initBulkheads);
 
     animate();
 };

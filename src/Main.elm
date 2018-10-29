@@ -1004,6 +1004,9 @@ encodeInitThreeCommand model =
         [ ( "viewports", encodeViewports model.viewports )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "mode", encodeViewMode model.viewMode )
+        , ( "showingPartitions", Encode.bool model.partitions.showing )
+        , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
+        , ( "bulkheads", encodeComputedPartitions <| computeBulkheads model.partitions.decks )
         ]
 
 
