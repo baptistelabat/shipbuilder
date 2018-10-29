@@ -548,6 +548,7 @@ encodeRestoreSaveCmd model =
         [ ( "viewMode", encodeViewMode model.viewMode )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "blocks", encodeBlocks model.blocks )
+        , ( "showingPartitions", Encode.bool model.partitions.showing )
         , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
         , ( "bulkheads", encodeComputedPartitions <| computeBulkheads model.partitions.bulkheads )
         ]

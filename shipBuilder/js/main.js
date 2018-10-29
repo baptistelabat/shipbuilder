@@ -154,8 +154,10 @@ let restoreSave = function (savedData) {
     const decks = savedData.decks;
     const bulkheads = savedData.bulkheads;
     const viewMode = savedData.viewMode;
+    const showing = savedData.showingPartitions;
 
     mode = viewMode;
+    showingPartitions = showing;
     resetScene(views, scene);
     setCoordinatesTransformFromElm(savedCoordinatesTransform);
     restoreBlocks(savedBlocks);
