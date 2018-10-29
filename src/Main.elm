@@ -2617,7 +2617,7 @@ viewDecks isDefiningOrigin decks =
         ]
 
 
-viewPartitionSpacingDetails : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero } -> Html Msg
+viewPartitionSpacingDetails : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
 viewPartitionSpacingDetails partitionType partitionSummary =
     let
         rootClass : String
@@ -2628,36 +2628,50 @@ viewPartitionSpacingDetails partitionType partitionSummary =
             [ class rootClass ]
             [ p [ class <| rootClass ++ "-title" ] [ text "Spacing details" ]
             , if partitionSummary.number.value > 0 then
-                viewPartitionSpacingList partitionSummary
+                viewPartitionSpacingList partitionType partitionSummary
               else
                 p [ class "text-muted" ] [ text <| "There's no " ++ (String.toLower <| toString partitionType) ++ " yet" ]
             ]
 
 
-viewPartitionSpacingList : { a | number : IntInput, spacing : FloatInput, zero : PartitionZero } -> Html Msg
-viewPartitionSpacingList partitionSummary =
+viewPartitionSpacingList : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
+viewPartitionSpacingList partitionType partitionSummary =
     let
-        getPartitionSpacingData : Int -> { number : Int, spacing : Float }
+        getPartitionSpacingData : Int -> { number : Int, index : Int, maybeSpacing : Maybe FloatInput }
         getPartitionSpacingData index =
-            { number = index - partitionSummary.zero.index, spacing = partitionSummary.spacing.value }
+            { number = index - partitionSummary.zero.index
+            , index = index
+            , maybeSpacing = Dict.get index partitionSummary.spacingExceptions
+            }
 
         partitionList =
             List.range 0 (partitionSummary.number.value - 1)
                 |> List.map getPartitionSpacingData
                 |> List.reverse
     in
-        ul [ class "spacing-list" ] <| List.map viewPartitionSpacingListItem partitionList
+        ul [ class "spacing-list" ] <| List.map (viewPartitionSpacingListItem partitionType partitionSummary.spacing.value) partitionList
 
 
-viewPartitionSpacingListItem : { number : Int, spacing : Float } -> Html Msg
-viewPartitionSpacingListItem partitionSpacingData =
+viewPartitionSpacingListItem : PartitionType -> Float -> { number : Int, index : Int, maybeSpacing : Maybe FloatInput } -> Html Msg
+viewPartitionSpacingListItem partitionType defaultSpacing partitionSpacingData =
     li
         [ class "spacing-item input-group" ]
         [ label
             []
             [ text <| toString partitionSpacingData.number ]
         , input
-            [ type_ "text", placeholder <| toString partitionSpacingData.spacing ]
+            [ type_ "text"
+            , placeholder <| toString defaultSpacing
+            , value <|
+                case partitionSpacingData.maybeSpacing of
+                    Just spacing ->
+                        spacing.string
+
+                    Nothing ->
+                        ""
+            , onInput <| ToJs << SetSpacingException partitionType partitionSpacingData.index
+            , onBlur <| NoJs SyncPartitions
+            ]
             []
         ]
 
