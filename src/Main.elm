@@ -1193,6 +1193,7 @@ type ToJsMsg
     | RemoveBlock Block
     | SelectBlock Block
     | SelectHullReference HullReference
+    | SetSpacingException PartitionType Int String
     | SwitchViewMode ViewMode
     | TogglePartitions
     | UpdatePartitionNumber PartitionType String
@@ -1616,6 +1617,43 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference.path }
 
+        SetSpacingException partitionType index input ->
+            let
+                ( partition, asPartitionInPartitions ) =
+                    case partitionType of
+                        Deck ->
+                            ( model.partitions.decks, asDecksInPartitions )
+
+                        Bulkhead ->
+                            ( model.partitions.bulkheads, asBulkheadsInPartitions )
+
+                previousException : FloatInput
+                previousException =
+                    Maybe.withDefault (.spacing partition) <| Dict.get index <| .spacingExceptions partition
+
+                parsedInput : Result String Float
+                parsedInput =
+                    if input == "" then
+                        -- an empty input should result in the default spacing
+                        Ok <| .value <| .spacing partition
+                    else
+                        String.toFloat input
+            in
+                (case parsedInput of
+                    Ok value ->
+                        abs value
+                            |> asValueInNumberInput previousException
+                            |> flip asStringInNumberInput input
+
+                    Err error ->
+                        input
+                            |> asStringInNumberInput previousException
+                )
+                    |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
+                    |> asSpacingExceptionsInPartition partition
+                    |> asPartitionInPartitions model.partitions
+                    |> asPartitionsInModel model
+
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
 
@@ -1906,6 +1944,45 @@ msg2json model action =
 
         SelectHullReference hullReference ->
             Just { tag = "load-hull", data = Encode.string hullReference.path }
+
+        SetSpacingException partitionType index input ->
+            let
+                ( tag, partition, computePartition ) =
+                    case partitionType of
+                        Deck ->
+                            ( "make-decks", model.partitions.decks, computeDecks )
+
+                        Bulkhead ->
+                            ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
+
+                previousException : FloatInput
+                previousException =
+                    Maybe.withDefault (.spacing partition) <| Dict.get index <| .spacingExceptions partition
+
+                parsedInput : Result String Float
+                parsedInput =
+                    if input == "" then
+                        -- an empty input should result in the default spacing
+                        Ok (.value <| .spacing partition)
+                    else
+                        String.toFloat input
+            in
+                case parsedInput of
+                    Ok value ->
+                        Just
+                            { tag = tag
+                            , data =
+                                abs value
+                                    |> asValueInNumberInput previousException
+                                    |> flip asStringInNumberInput input
+                                    |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
+                                    |> asSpacingExceptionsInPartition partition
+                                    |> computePartition
+                                    |> encodeComputedPartitions
+                            }
+
+                    Err error ->
+                        Nothing
 
         SwitchViewMode newViewMode ->
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
