@@ -731,6 +731,11 @@ encodeDecks decks =
                 , ( "position", Encode.float decks.zero.position.value )
                 ]
           )
+        , ( "spacingExceptions"
+          , Dict.toList decks.spacingExceptions
+                |> List.map (\( index, input ) -> ( toString index, Encode.float input.value ))
+                |> Encode.object
+          )
         ]
 
 
@@ -744,6 +749,11 @@ encodeBulkheads bulkheads =
                 [ ( "index", Encode.int bulkheads.zero.index )
                 , ( "position", Encode.float bulkheads.zero.position.value )
                 ]
+          )
+        , ( "spacingExceptions"
+          , Dict.toList bulkheads.spacingExceptions
+                |> List.map (\( index, input ) -> ( toString index, Encode.float input.value ))
+                |> Encode.object
           )
         ]
 
