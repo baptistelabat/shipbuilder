@@ -1006,7 +1006,7 @@ encodeInitThreeCommand model =
         , ( "mode", encodeViewMode model.viewMode )
         , ( "showingPartitions", Encode.bool model.partitions.showing )
         , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
-        , ( "bulkheads", encodeComputedPartitions <| computeBulkheads model.partitions.decks )
+        , ( "bulkheads", encodeComputedPartitions <| computeBulkheads model.partitions.bulkheads )
         ]
 
 
