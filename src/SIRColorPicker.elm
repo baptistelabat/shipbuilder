@@ -24,7 +24,7 @@ module SIRColorPicker
 
 import Color exposing (Color, hsl)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class, style, title)
 import Html exposing (Html, div)
 
 
@@ -62,6 +62,7 @@ viewColorItem msg selectedColor sirColor =
                 [ class "sir-color-item"
                 , style [ ( "background-color", cssColor ) ]
                 , onClick (msg <| getColor sirColor)
+                , title <| getName sirColor
                 ]
             )
             []
@@ -153,6 +154,11 @@ getColor sirColor =
 
         Black ->
             black
+
+
+getName : SirColor -> String
+getName sirColor =
+    toString sirColor
 
 
 palette : List SirColor
