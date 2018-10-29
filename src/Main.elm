@@ -249,12 +249,17 @@ decodePartitions =
         |> Pipeline.hardcoded True
 
 
+
+-- TODO: Decode spacingExceptions
+
+
 decodeDecks : Decode.Decoder Decks
 decodeDecks =
     Pipeline.decode Decks
         |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
         |> Pipeline.required "spacing" floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
+        |> Pipeline.hardcoded Dict.empty
 
 
 decodeBulkheads : Decode.Decoder Bulkheads
@@ -263,6 +268,7 @@ decodeBulkheads =
         |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
         |> Pipeline.required "spacing" floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
+        |> Pipeline.hardcoded Dict.empty
 
 
 decodePartitionZero : Decode.Decoder PartitionZero
@@ -588,6 +594,7 @@ type alias Decks =
     { number : IntInput
     , spacing : FloatInput
     , zero : PartitionZero
+    , spacingExceptions : Dict Int FloatInput
     }
 
 
@@ -602,6 +609,7 @@ type alias Bulkheads =
     { number : IntInput
     , spacing : FloatInput
     , zero : PartitionZero
+    , spacingExceptions : Dict Int FloatInput
     }
 
 
@@ -881,6 +889,7 @@ initPartitions =
             { index = 0
             , position = numberToNumberInput 0.0
             }
+        , spacingExceptions = Dict.empty
         }
     , bulkheads =
         { number = numberToNumberInput 0
@@ -889,6 +898,7 @@ initPartitions =
             { index = 0
             , position = numberToNumberInput 0.0
             }
+        , spacingExceptions = Dict.empty
         }
     , showing = True
     }
@@ -1184,6 +1194,7 @@ updateNoJs msg model =
 
         SyncPartitions ->
             let
+                -- TODO: Sync spacingExceptions
                 syncedDecks : Decks
                 syncedDecks =
                     { number =
@@ -1194,6 +1205,7 @@ updateNoJs msg model =
                         { index = model.partitions.decks.zero.index
                         , position = syncNumberInput model.partitions.decks.zero.position
                         }
+                    , spacingExceptions = model.partitions.decks.spacingExceptions
                     }
 
                 syncedBulkheads : Bulkheads
@@ -1206,6 +1218,7 @@ updateNoJs msg model =
                         { index = model.partitions.bulkheads.zero.index
                         , position = syncNumberInput model.partitions.bulkheads.zero.position
                         }
+                    , spacingExceptions = model.partitions.bulkheads.spacingExceptions
                     }
 
                 updatedModel : Model
