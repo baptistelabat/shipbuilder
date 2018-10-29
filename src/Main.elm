@@ -1267,7 +1267,6 @@ updateNoJs msg model =
 
         SyncPartitions ->
             let
-                -- TODO: Sync spacingExceptions
                 syncedDecks : Decks
                 syncedDecks =
                     { number =
@@ -1278,7 +1277,10 @@ updateNoJs msg model =
                         { index = model.partitions.decks.zero.index
                         , position = syncNumberInput model.partitions.decks.zero.position
                         }
-                    , spacingExceptions = model.partitions.decks.spacingExceptions
+                    , spacingExceptions =
+                        -- we want to remove useless exceptions => those equal to the default value
+                        Dict.map (\key input -> syncNumberInput input) model.partitions.decks.spacingExceptions
+                            |> Dict.filter (\key input -> input.value /= model.partitions.decks.spacing.value)
                     }
 
                 syncedBulkheads : Bulkheads
@@ -1291,7 +1293,9 @@ updateNoJs msg model =
                         { index = model.partitions.bulkheads.zero.index
                         , position = syncNumberInput model.partitions.bulkheads.zero.position
                         }
-                    , spacingExceptions = model.partitions.bulkheads.spacingExceptions
+                    , spacingExceptions =
+                        Dict.map (\key input -> syncNumberInput input) model.partitions.bulkheads.spacingExceptions
+                            |> Dict.filter (\key input -> input.value /= model.partitions.bulkheads.spacing.value)
                     }
 
                 updatedModel : Model
