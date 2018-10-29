@@ -24,7 +24,7 @@ module SIRColorPicker
 
 import Color exposing (Color, hsl)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class, style, title)
 import Html exposing (Html, div)
 
 
@@ -45,22 +45,24 @@ toCssColor color =
             ++ ")"
 
 
-viewColorItem : (Color -> msg) -> Color -> Color -> Html msg
-viewColorItem msg selectedColor color =
+viewColorItem : (Color -> msg) -> Color -> SirColor -> Html msg
+viewColorItem msg selectedColor sirColor =
     let
         cssColor : String
         cssColor =
-            toCssColor color
+            toCssColor <| getColor sirColor
     in
         div
-            (if selectedColor == color then
+            (if selectedColor == (getColor sirColor) then
                 [ class "sir-color-item sir-color-item__selected"
                 , style [ ( "background-color", cssColor ) ]
+                , title <| getName sirColor
                 ]
              else
                 [ class "sir-color-item"
                 , style [ ( "background-color", cssColor ) ]
-                , onClick (msg color)
+                , onClick (msg <| getColor sirColor)
+                , title <| getName sirColor
                 ]
             )
             []
@@ -75,26 +77,110 @@ view selectedColor msg =
         )
 
 
-palette : List Color
+type SirColor
+    = Red
+    | Pink
+    | Purple
+    | DeepPurple
+    | Indigo
+    | Blue
+    | Lightblue
+    | Cyan
+    | Teal
+    | Green
+    | LightGreen
+    | Lime
+    | Yellow
+    | Amber
+    | Orange
+    | DeepOrange
+    | Brown
+    | Black
+
+
+getColor : SirColor -> Color
+getColor sirColor =
+    case sirColor of
+        Red ->
+            red
+
+        Pink ->
+            pink
+
+        Purple ->
+            purple
+
+        DeepPurple ->
+            deepPurple
+
+        Indigo ->
+            indigo
+
+        Blue ->
+            blue
+
+        Lightblue ->
+            lightBlue
+
+        Cyan ->
+            cyan
+
+        Teal ->
+            teal
+
+        Green ->
+            green
+
+        LightGreen ->
+            lightGreen
+
+        Lime ->
+            lime
+
+        Yellow ->
+            yellow
+
+        Amber ->
+            amber
+
+        Orange ->
+            orange
+
+        DeepOrange ->
+            deepOrange
+
+        Brown ->
+            brown
+
+        Black ->
+            black
+
+
+getName : SirColor -> String
+getName sirColor =
+    toString sirColor
+
+
+palette : List SirColor
 palette =
-    [ red
-    , pink
-    , purple
-    , deepPurple
-    , indigo
-    , blue
-    , lightBlue
-    , cyan
-    , teal
-    , green
-    , lightGreen
-    , lime
-    , yellow
-    , amber
-    , orange
-    , deepOrange
-    , brown
-    , black
+    [ Red
+    , Pink
+    , Purple
+    , DeepPurple
+    , Indigo
+    , Blue
+    , Lightblue
+    , Cyan
+    , Teal
+    , Green
+    , LightGreen
+    , Lime
+    , Yellow
+    , Amber
+    , Orange
+    , DeepOrange
+    , Brown
+    , Black
     ]
 
 
