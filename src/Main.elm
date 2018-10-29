@@ -801,9 +801,50 @@ computeDecks decks =
                 number =
                     index - decks.zero.index
             in
-                { index = index, position = decks.zero.position.value - 1 * (toFloat number) * decks.spacing.value, number = number }
+                { index = index, position = decks.zero.position.value - 1 * (getPartitionOffset decks index), number = number }
     in
         List.indexedMap computeDeck initialDeckList
+
+
+getPartitionOffset : { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Int -> Float
+getPartitionOffset partitionSummary index =
+    let
+        number : Int
+        number =
+            index - partitionSummary.zero.index
+
+        exceptionsToAccountFor : Int -> Int -> Dict Int FloatInput
+        exceptionsToAccountFor minKey maxKey =
+            Dict.filter (\key value -> key < (maxKey + partitionSummary.zero.index) && key >= (minKey + partitionSummary.zero.index)) partitionSummary.spacingExceptions
+
+        total : Dict Int FloatInput -> Float
+        total exceptions =
+            Dict.foldl (\key value currentTotal -> currentTotal + value.value) 0.0 exceptions
+
+        exceptions : Dict Int FloatInput
+        exceptions =
+            if number > 0 then
+                exceptionsToAccountFor 0 number
+            else
+                exceptionsToAccountFor number 0
+    in
+        if number > 0 then
+            exceptions
+                |> Dict.size
+                |> (-) number
+                |> toFloat
+                |> (*) partitionSummary.spacing.value
+                |> (+) (total exceptions)
+        else if number < 0 then
+            exceptions
+                |> Dict.size
+                |> (-) (-1 * number)
+                |> toFloat
+                |> (*) partitionSummary.spacing.value
+                |> (+) (total exceptions)
+                |> (*) -1
+        else
+            0
 
 
 computeBulkheads : Bulkheads -> List ComputedPartition
@@ -820,7 +861,7 @@ computeBulkheads bulkheads =
                 number =
                     index - bulkheads.zero.index
             in
-                { index = index, position = bulkheads.zero.position.value + (toFloat number) * bulkheads.spacing.value, number = number }
+                { index = index, position = bulkheads.zero.position.value + (getPartitionOffset bulkheads index), number = number }
     in
         List.indexedMap computeBulkhead initialBulkheadList
 
