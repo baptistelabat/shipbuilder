@@ -255,6 +255,27 @@ decodeDecks =
         |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
         |> Pipeline.required "spacing" floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
+        |> Pipeline.optional "spacingExceptions" decodeSpacingExceptions Dict.empty
+
+
+decodeSpacingExceptions : Decode.Decoder (Dict Int FloatInput)
+decodeSpacingExceptions =
+    let
+        makeException : String -> Float -> Dict Int FloatInput -> Dict Int FloatInput
+        makeException key value dict =
+            case String.toInt key of
+                Ok intKey ->
+                    Dict.insert intKey (numberToNumberInput value) dict
+
+                Err message ->
+                    -- TODO: handle failure or only ignore ?
+                    dict
+
+        parse : Dict String Float -> Dict Int FloatInput
+        parse dict =
+            Dict.foldl makeException Dict.empty dict
+    in
+        Decode.map parse (Decode.dict Decode.float)
 
 
 decodeBulkheads : Decode.Decoder Bulkheads
@@ -263,6 +284,7 @@ decodeBulkheads =
         |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
         |> Pipeline.required "spacing" floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
+        |> Pipeline.optional "spacingExceptions" decodeSpacingExceptions Dict.empty
 
 
 decodePartitionZero : Decode.Decoder PartitionZero
@@ -526,6 +548,7 @@ encodeRestoreSaveCmd model =
         [ ( "viewMode", encodeViewMode model.viewMode )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "blocks", encodeBlocks model.blocks )
+        , ( "showingPartitions", Encode.bool model.partitions.showing )
         , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
         , ( "bulkheads", encodeComputedPartitions <| computeBulkheads model.partitions.bulkheads )
         ]
@@ -588,6 +611,7 @@ type alias Decks =
     { number : IntInput
     , spacing : FloatInput
     , zero : PartitionZero
+    , spacingExceptions : Dict Int FloatInput
     }
 
 
@@ -602,7 +626,13 @@ type alias Bulkheads =
     { number : IntInput
     , spacing : FloatInput
     , zero : PartitionZero
+    , spacingExceptions : Dict Int FloatInput
     }
+
+
+asSpacingExceptionsInPartition : { a | spacingExceptions : Dict Int FloatInput } -> Dict Int FloatInput -> { a | spacingExceptions : Dict Int FloatInput }
+asSpacingExceptionsInPartition partition newSpacingExceptions =
+    { partition | spacingExceptions = newSpacingExceptions }
 
 
 asNumberInPartition : { a | number : IntInput } -> IntInput -> { a | number : IntInput }
@@ -707,6 +737,11 @@ encodeDecks decks =
                 , ( "position", Encode.float decks.zero.position.value )
                 ]
           )
+        , ( "spacingExceptions"
+          , Dict.toList decks.spacingExceptions
+                |> List.map (\( index, input ) -> ( toString index, Encode.float input.value ))
+                |> Encode.object
+          )
         ]
 
 
@@ -720,6 +755,11 @@ encodeBulkheads bulkheads =
                 [ ( "index", Encode.int bulkheads.zero.index )
                 , ( "position", Encode.float bulkheads.zero.position.value )
                 ]
+          )
+        , ( "spacingExceptions"
+          , Dict.toList bulkheads.spacingExceptions
+                |> List.map (\( index, input ) -> ( toString index, Encode.float input.value ))
+                |> Encode.object
           )
         ]
 
@@ -767,9 +807,50 @@ computeDecks decks =
                 number =
                     index - decks.zero.index
             in
-                { index = index, position = decks.zero.position.value - 1 * (toFloat number) * decks.spacing.value, number = number }
+                { index = index, position = decks.zero.position.value - 1 * (getPartitionOffset decks index), number = number }
     in
         List.indexedMap computeDeck initialDeckList
+
+
+getPartitionOffset : { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Int -> Float
+getPartitionOffset partitionSummary index =
+    let
+        number : Int
+        number =
+            index - partitionSummary.zero.index
+
+        exceptionsToAccountFor : Int -> Int -> Dict Int FloatInput
+        exceptionsToAccountFor minKey maxKey =
+            Dict.filter (\key value -> key < (maxKey + partitionSummary.zero.index) && key >= (minKey + partitionSummary.zero.index)) partitionSummary.spacingExceptions
+
+        total : Dict Int FloatInput -> Float
+        total exceptions =
+            Dict.foldl (\key value currentTotal -> currentTotal + value.value) 0.0 exceptions
+
+        exceptions : Dict Int FloatInput
+        exceptions =
+            if number > 0 then
+                exceptionsToAccountFor 0 number
+            else
+                exceptionsToAccountFor number 0
+    in
+        if number > 0 then
+            exceptions
+                |> Dict.size
+                |> (-) number
+                |> toFloat
+                |> (*) partitionSummary.spacing.value
+                |> (+) (total exceptions)
+        else if number < 0 then
+            exceptions
+                |> Dict.size
+                |> (-) (-1 * number)
+                |> toFloat
+                |> (*) partitionSummary.spacing.value
+                |> (+) (total exceptions)
+                |> (*) -1
+        else
+            0
 
 
 computeBulkheads : Bulkheads -> List ComputedPartition
@@ -786,7 +867,7 @@ computeBulkheads bulkheads =
                 number =
                     index - bulkheads.zero.index
             in
-                { index = index, position = bulkheads.zero.position.value + (toFloat number) * bulkheads.spacing.value, number = number }
+                { index = index, position = bulkheads.zero.position.value + (getPartitionOffset bulkheads index), number = number }
     in
         List.indexedMap computeBulkhead initialBulkheadList
 
@@ -875,20 +956,22 @@ initModel =
 initPartitions : PartitionsData
 initPartitions =
     { decks =
-        { number = numberToNumberInput 0
-        , spacing = numberToNumberInput 0.0
+        { number = numberToNumberInput 15
+        , spacing = numberToNumberInput 3.0
         , zero =
             { index = 0
             , position = numberToNumberInput 0.0
             }
+        , spacingExceptions = Dict.empty
         }
     , bulkheads =
-        { number = numberToNumberInput 0
-        , spacing = numberToNumberInput 0.0
+        { number = numberToNumberInput 15
+        , spacing = numberToNumberInput 5.0
         , zero =
             { index = 0
             , position = numberToNumberInput 0.0
             }
+        , spacingExceptions = Dict.empty
         }
     , showing = True
     }
@@ -921,6 +1004,9 @@ encodeInitThreeCommand model =
         [ ( "viewports", encodeViewports model.viewports )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "mode", encodeViewMode model.viewMode )
+        , ( "showingPartitions", Encode.bool model.partitions.showing )
+        , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
+        , ( "bulkheads", encodeComputedPartitions <| computeBulkheads model.partitions.bulkheads )
         ]
 
 
@@ -1116,6 +1202,7 @@ type ToJsMsg
     | RemoveBlock Block
     | SelectBlock Block
     | SelectHullReference HullReference
+    | SetSpacingException PartitionType Int String
     | SwitchViewMode ViewMode
     | TogglePartitions
     | UpdatePartitionNumber PartitionType String
@@ -1194,6 +1281,10 @@ updateNoJs msg model =
                         { index = model.partitions.decks.zero.index
                         , position = syncNumberInput model.partitions.decks.zero.position
                         }
+                    , spacingExceptions =
+                        -- we want to remove useless exceptions => those equal to the default value
+                        Dict.map (\key input -> syncNumberInput input) model.partitions.decks.spacingExceptions
+                            |> Dict.filter (\key input -> input.value /= model.partitions.decks.spacing.value)
                     }
 
                 syncedBulkheads : Bulkheads
@@ -1206,6 +1297,9 @@ updateNoJs msg model =
                         { index = model.partitions.bulkheads.zero.index
                         , position = syncNumberInput model.partitions.bulkheads.zero.position
                         }
+                    , spacingExceptions =
+                        Dict.map (\key input -> syncNumberInput input) model.partitions.bulkheads.spacingExceptions
+                            |> Dict.filter (\key input -> input.value /= model.partitions.bulkheads.spacing.value)
                     }
 
                 updatedModel : Model
@@ -1536,6 +1630,43 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference.path }
 
+        SetSpacingException partitionType index input ->
+            let
+                ( partition, asPartitionInPartitions ) =
+                    case partitionType of
+                        Deck ->
+                            ( model.partitions.decks, asDecksInPartitions )
+
+                        Bulkhead ->
+                            ( model.partitions.bulkheads, asBulkheadsInPartitions )
+
+                previousException : FloatInput
+                previousException =
+                    Maybe.withDefault (.spacing partition) <| Dict.get index <| .spacingExceptions partition
+
+                parsedInput : Result String Float
+                parsedInput =
+                    if input == "" then
+                        -- an empty input should result in the default spacing
+                        Ok <| .value <| .spacing partition
+                    else
+                        String.toFloat input
+            in
+                (case parsedInput of
+                    Ok value ->
+                        abs value
+                            |> asValueInNumberInput previousException
+                            |> flip asStringInNumberInput input
+
+                    Err error ->
+                        input
+                            |> asStringInNumberInput previousException
+                )
+                    |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
+                    |> asSpacingExceptionsInPartition partition
+                    |> asPartitionInPartitions model.partitions
+                    |> asPartitionsInModel model
+
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
 
@@ -1826,6 +1957,45 @@ msg2json model action =
 
         SelectHullReference hullReference ->
             Just { tag = "load-hull", data = Encode.string hullReference.path }
+
+        SetSpacingException partitionType index input ->
+            let
+                ( tag, partition, computePartition ) =
+                    case partitionType of
+                        Deck ->
+                            ( "make-decks", model.partitions.decks, computeDecks )
+
+                        Bulkhead ->
+                            ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
+
+                previousException : FloatInput
+                previousException =
+                    Maybe.withDefault (.spacing partition) <| Dict.get index <| .spacingExceptions partition
+
+                parsedInput : Result String Float
+                parsedInput =
+                    if input == "" then
+                        -- an empty input should result in the default spacing
+                        Ok (.value <| .spacing partition)
+                    else
+                        String.toFloat input
+            in
+                case parsedInput of
+                    Ok value ->
+                        Just
+                            { tag = tag
+                            , data =
+                                abs value
+                                    |> asValueInNumberInput previousException
+                                    |> flip asStringInNumberInput input
+                                    |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
+                                    |> asSpacingExceptionsInPartition partition
+                                    |> computePartition
+                                    |> encodeComputedPartitions
+                            }
+
+                    Err error ->
+                        Nothing
 
         SwitchViewMode newViewMode ->
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
@@ -2451,7 +2621,7 @@ viewDecks isDefiningOrigin decks =
         ]
 
 
-viewPartitionSpacingDetails : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero } -> Html Msg
+viewPartitionSpacingDetails : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
 viewPartitionSpacingDetails partitionType partitionSummary =
     let
         rootClass : String
@@ -2462,36 +2632,50 @@ viewPartitionSpacingDetails partitionType partitionSummary =
             [ class rootClass ]
             [ p [ class <| rootClass ++ "-title" ] [ text "Spacing details" ]
             , if partitionSummary.number.value > 0 then
-                viewPartitionSpacingList partitionSummary
+                viewPartitionSpacingList partitionType partitionSummary
               else
                 p [ class "text-muted" ] [ text <| "There's no " ++ (String.toLower <| toString partitionType) ++ " yet" ]
             ]
 
 
-viewPartitionSpacingList : { a | number : IntInput, spacing : FloatInput, zero : PartitionZero } -> Html Msg
-viewPartitionSpacingList partitionSummary =
+viewPartitionSpacingList : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
+viewPartitionSpacingList partitionType partitionSummary =
     let
-        getPartitionSpacingData : Int -> { number : Int, spacing : Float }
+        getPartitionSpacingData : Int -> { number : Int, index : Int, maybeSpacing : Maybe FloatInput }
         getPartitionSpacingData index =
-            { number = index - partitionSummary.zero.index, spacing = partitionSummary.spacing.value }
+            { number = index - partitionSummary.zero.index
+            , index = index
+            , maybeSpacing = Dict.get index partitionSummary.spacingExceptions
+            }
 
         partitionList =
             List.range 0 (partitionSummary.number.value - 1)
                 |> List.map getPartitionSpacingData
                 |> List.reverse
     in
-        ul [ class "spacing-list" ] <| List.map viewPartitionSpacingListItem partitionList
+        ul [ class "spacing-list" ] <| List.map (viewPartitionSpacingListItem partitionType partitionSummary.spacing.value) partitionList
 
 
-viewPartitionSpacingListItem : { number : Int, spacing : Float } -> Html Msg
-viewPartitionSpacingListItem partitionSpacingData =
+viewPartitionSpacingListItem : PartitionType -> Float -> { number : Int, index : Int, maybeSpacing : Maybe FloatInput } -> Html Msg
+viewPartitionSpacingListItem partitionType defaultSpacing partitionSpacingData =
     li
         [ class "spacing-item input-group" ]
         [ label
             []
             [ text <| toString partitionSpacingData.number ]
         , input
-            [ type_ "text", placeholder <| toString partitionSpacingData.spacing ]
+            [ type_ "text"
+            , placeholder <| toString defaultSpacing
+            , value <|
+                case partitionSpacingData.maybeSpacing of
+                    Just spacing ->
+                        spacing.string
+
+                    Nothing ->
+                        ""
+            , onInput <| ToJs << SetSpacingException partitionType partitionSpacingData.index
+            , onBlur <| NoJs SyncPartitions
+            ]
             []
         ]
 
