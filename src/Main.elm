@@ -955,8 +955,8 @@ initModel =
 initPartitions : PartitionsData
 initPartitions =
     { decks =
-        { number = numberToNumberInput 0
-        , spacing = numberToNumberInput 0.0
+        { number = numberToNumberInput 15
+        , spacing = numberToNumberInput 3.0
         , zero =
             { index = 0
             , position = numberToNumberInput 0.0
@@ -964,8 +964,8 @@ initPartitions =
         , spacingExceptions = Dict.empty
         }
     , bulkheads =
-        { number = numberToNumberInput 0
-        , spacing = numberToNumberInput 0.0
+        { number = numberToNumberInput 15
+        , spacing = numberToNumberInput 5.0
         , zero =
             { index = 0
             , position = numberToNumberInput 0.0
