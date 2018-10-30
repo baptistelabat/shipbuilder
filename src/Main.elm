@@ -2596,6 +2596,7 @@ viewKpiStudio model =
             [ class "kpi-panel-title" ]
             [ text "KPIs" ]
         , viewMassKpi model.blocks
+        , viewVolumeKpi model.blocks
         ]
 
 
@@ -2612,6 +2613,22 @@ viewMassKpi blocks =
                     viewKpiByColor "mass" (SIRColorPicker.getColor sirColor) (0.001 * (getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor))
                 )
                 SIRColorPicker.palette
+
+
+viewVolumeKpi : Blocks -> Html Msg
+viewVolumeKpi blocks =
+    div [ class "kpi volume" ] <|
+        (div [ class "kpi-total kpi-group" ]
+            [ h3 [ class "kpi-label" ] [ text "Σ Volume (m³)" ]
+            , p [ class "kpi-value" ] [ text <| toString <| getSumOfVolumes blocks ]
+            ]
+        )
+            :: List.map
+                (\sirColor ->
+                    viewKpiByColor "volume" (SIRColorPicker.getColor sirColor) (getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
+                )
+                SIRColorPicker.palette
+
 
 viewKpiByColor : String -> Color -> number -> Html Msg
 viewKpiByColor kpiClass color kpiValue =
