@@ -916,6 +916,12 @@ getSumOfMassesForColor blocks color =
     filterBlocksByColor color blocks
         |> getSumOfMasses
 
+
+getSumOfVolumes : Blocks -> Float
+getSumOfVolumes blocks =
+    toVolumeList blocks
+        |> List.sum
+
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
