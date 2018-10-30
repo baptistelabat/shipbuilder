@@ -646,3 +646,51 @@ p.block-volume-value {
     width: 100px;
     text-align: right;
 }
+
+.kpi-panel {
+    overflow: auto;
+}
+
+.kpi-panel h3, .kpi-panel p {
+    margin: 0;
+}
+
+.kpi-panel h3 {
+    font-size: 1em;
+}
+
+.kpi-panel .kpi {
+    margin: 12px 0;
+}
+
+.kpi-group.kpi-total {
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--secondary-color__contrast);
+}
+
+.kpi-panel .kpi .kpi-group + .kpi-group {
+    margin-left: 52px;
+    padding: 4px 0 0;
+
+}
+
+.kpi-panel .kpi .kpi-group:not(.kpi-total) + .kpi-group {
+    border-top: 1px solid #ffffff88;
+}
+
+.kpi-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0;
+}
+
+.kpi-color-label {
+    width: 22px;
+    height: 22px;
+}
+
+.kpi-value {
+    margin: 0 8px;
+}
+
