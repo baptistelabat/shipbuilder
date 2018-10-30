@@ -904,6 +904,12 @@ toVolumeList : Blocks -> List Float
 toVolumeList blocks =
     List.map computeVolume <| toList blocks
 
+
+getSumOfMasses : Blocks -> Float
+getSumOfMasses blocks =
+    toMassList blocks
+        |> List.sum
+
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
