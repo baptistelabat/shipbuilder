@@ -2595,6 +2595,37 @@ viewKpiStudio model =
         [ h2
             [ class "kpi-panel-title" ]
             [ text "KPIs" ]
+        , viewMassKpi model.blocks
+        ]
+
+
+viewMassKpi : Blocks -> Html Msg
+viewMassKpi blocks =
+    div [ class "kpi mass" ] <|
+        (div [ class "kpi-total kpi-group" ]
+            [ h3 [ class "kpi-label" ] [ text "Σ Mass (T)" ]
+            , p [ class "kpi-value" ] [ text <| toString <| 0.001 * (getSumOfMasses blocks) ]
+            ]
+        )
+            :: List.map
+                (\sirColor ->
+                    viewKpiByColor "mass" (SIRColorPicker.getColor sirColor) (0.001 * (getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor))
+                )
+                SIRColorPicker.palette
+
+viewKpiByColor : String -> Color -> number -> Html Msg
+viewKpiByColor kpiClass color kpiValue =
+    div [ class <| "kpi-group " ++ kpiClass ]
+        [ div
+            [ class "kpi-color-label"
+            , style
+                [ ( "background-color", colorToCssRgbString color )
+                ]
+            ]
+            []
+        , p
+            [ class "kpi-value" ]
+            [ text <| toString kpiValue ]
         ]
 
 
