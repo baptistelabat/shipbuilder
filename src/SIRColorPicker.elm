@@ -2,6 +2,7 @@ module SIRColorPicker
     exposing
         ( view
         , palette
+        , getColor
         , red
         , pink
         , purple
