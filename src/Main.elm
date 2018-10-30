@@ -890,6 +890,11 @@ toList blocks =
     DictList.values blocks
 
 
+filterBlocksByColor : Color -> Blocks -> Blocks
+filterBlocksByColor color blocks =
+    DictList.filter (\uuid block -> block.color == color) blocks
+
+
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
