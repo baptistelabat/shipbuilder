@@ -890,6 +890,45 @@ toList blocks =
     DictList.values blocks
 
 
+filterBlocksByColor : Color -> Blocks -> Blocks
+filterBlocksByColor color blocks =
+    DictList.filter (\uuid block -> block.color == color) blocks
+
+
+toMassList : Blocks -> List Float
+toMassList blocks =
+    List.map (.value << .mass) <| toList blocks
+
+
+toVolumeList : Blocks -> List Float
+toVolumeList blocks =
+    List.map computeVolume <| toList blocks
+
+
+getSumOfMasses : Blocks -> Float
+getSumOfMasses blocks =
+    toMassList blocks
+        |> List.sum
+
+
+getSumOfMassesForColor : Blocks -> Color -> Float
+getSumOfMassesForColor blocks color =
+    filterBlocksByColor color blocks
+        |> getSumOfMasses
+
+
+getSumOfVolumes : Blocks -> Float
+getSumOfVolumes blocks =
+    toVolumeList blocks
+        |> List.sum
+
+
+getSumOfVolumesForColor : Blocks -> Color -> Float
+getSumOfVolumesForColor blocks color =
+    filterBlocksByColor color blocks
+        |> getSumOfVolumes
+
+
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
@@ -986,6 +1025,7 @@ type ViewMode
     = SpaceReservation SpaceReservationView
     | HullStudio
     | Partitioning PartitioningView
+    | KpiStudio
 
 
 type SpaceReservationView
@@ -1022,6 +1062,9 @@ encodeViewMode viewMode =
 
             Partitioning _ ->
                 "partition"
+
+            KpiStudio ->
+                "kpi"
 
 
 encodeColor : Color -> Encode.Value
@@ -2184,6 +2227,7 @@ tabItems =
     [ { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
     , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
+    , { title = "KPIs", icon = FASolid.tachometer_alt, viewMode = KpiStudio }
     ]
 
 
@@ -2447,6 +2491,14 @@ viewModesMatch left right =
                 _ ->
                     False
 
+        KpiStudio ->
+            case right of
+                KpiStudio ->
+                    True
+
+                _ ->
+                    False
+
 
 viewTab : Model -> Tab -> Html Msg
 viewTab model tab =
@@ -2482,6 +2534,9 @@ viewPanel model =
 
         Partitioning partitioningView ->
             viewPartitioning partitioningView model
+
+        KpiStudio ->
+            viewKpiStudio model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
@@ -2531,6 +2586,64 @@ viewPartitioning partitioningView model =
                         , viewBulkheads True model.partitions.bulkheads
                         ]
                )
+
+
+viewKpiStudio : Model -> Html Msg
+viewKpiStudio model =
+    div
+        [ class "panel kpi-panel" ]
+        [ h2
+            [ class "kpi-panel-title" ]
+            [ text "KPIs" ]
+        , viewMassKpi model.blocks
+        , viewVolumeKpi model.blocks
+        ]
+
+
+viewMassKpi : Blocks -> Html Msg
+viewMassKpi blocks =
+    div [ class "kpi mass" ] <|
+        (div [ class "kpi-total kpi-group" ]
+            [ h3 [ class "kpi-label" ] [ text "Σ Mass (T)" ]
+            , p [ class "kpi-value" ] [ text <| toString <| 0.001 * (getSumOfMasses blocks) ]
+            ]
+        )
+            :: List.map
+                (\sirColor ->
+                    viewKpiByColor "mass" (SIRColorPicker.getColor sirColor) (0.001 * (getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor))
+                )
+                SIRColorPicker.palette
+
+
+viewVolumeKpi : Blocks -> Html Msg
+viewVolumeKpi blocks =
+    div [ class "kpi volume" ] <|
+        (div [ class "kpi-total kpi-group" ]
+            [ h3 [ class "kpi-label" ] [ text "Σ Volume (m³)" ]
+            , p [ class "kpi-value" ] [ text <| toString <| getSumOfVolumes blocks ]
+            ]
+        )
+            :: List.map
+                (\sirColor ->
+                    viewKpiByColor "volume" (SIRColorPicker.getColor sirColor) (getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
+                )
+                SIRColorPicker.palette
+
+
+viewKpiByColor : String -> Color -> number -> Html Msg
+viewKpiByColor kpiClass color kpiValue =
+    div [ class <| "kpi-group " ++ kpiClass ]
+        [ div
+            [ class "kpi-color-label"
+            , style
+                [ ( "background-color", colorToCssRgbString color )
+                ]
+            ]
+            []
+        , p
+            [ class "kpi-value" ]
+            [ text <| toString kpiValue ]
+        ]
 
 
 viewShowingPartitions : Bool -> Html Msg
