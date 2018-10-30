@@ -900,6 +900,10 @@ toMassList blocks =
     List.map (.value << .mass) <| toList blocks
 
 
+toVolumeList : Blocks -> List Float
+toVolumeList blocks =
+    List.map computeVolume <| toList blocks
+
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
