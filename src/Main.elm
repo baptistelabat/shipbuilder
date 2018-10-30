@@ -922,6 +922,13 @@ getSumOfVolumes blocks =
     toVolumeList blocks
         |> List.sum
 
+
+getSumOfVolumesForColor : Blocks -> Color -> Float
+getSumOfVolumesForColor blocks color =
+    filterBlocksByColor color blocks
+        |> getSumOfVolumes
+
+
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
