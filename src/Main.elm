@@ -910,6 +910,12 @@ getSumOfMasses blocks =
     toMassList blocks
         |> List.sum
 
+
+getSumOfMassesForColor : Blocks -> Color -> Float
+getSumOfMassesForColor blocks color =
+    filterBlocksByColor color blocks
+        |> getSumOfMasses
+
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
