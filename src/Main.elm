@@ -986,6 +986,7 @@ type ViewMode
     = SpaceReservation SpaceReservationView
     | HullStudio
     | Partitioning PartitioningView
+    | KpiStudio
 
 
 type SpaceReservationView
@@ -1022,6 +1023,9 @@ encodeViewMode viewMode =
 
             Partitioning _ ->
                 "partition"
+
+            KpiStudio ->
+                "kpi"
 
 
 encodeColor : Color -> Encode.Value
@@ -2184,6 +2188,7 @@ tabItems =
     [ { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
     , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
+    , { title = "KPIs", icon = FASolid.tachometer_alt, viewMode = KpiStudio }
     ]
 
 
@@ -2447,6 +2452,14 @@ viewModesMatch left right =
                 _ ->
                     False
 
+        KpiStudio ->
+            case right of
+                KpiStudio ->
+                    True
+
+                _ ->
+                    False
+
 
 viewTab : Model -> Tab -> Html Msg
 viewTab model tab =
@@ -2482,6 +2495,9 @@ viewPanel model =
 
         Partitioning partitioningView ->
             viewPartitioning partitioningView model
+
+        KpiStudio ->
+            viewKpiStudio model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
@@ -2531,6 +2547,16 @@ viewPartitioning partitioningView model =
                         , viewBulkheads True model.partitions.bulkheads
                         ]
                )
+
+
+viewKpiStudio : Model -> Html Msg
+viewKpiStudio model =
+    div
+        [ class "panel kpi-panel" ]
+        [ h2
+            [ class "kpi-panel-title" ]
+            [ text "KPIs" ]
+        ]
 
 
 viewShowingPartitions : Bool -> Html Msg
