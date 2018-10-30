@@ -895,6 +895,11 @@ filterBlocksByColor color blocks =
     DictList.filter (\uuid block -> block.color == color) blocks
 
 
+toMassList : Blocks -> List Float
+toMassList blocks =
+    List.map (.value << .mass) <| toList blocks
+
+
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
