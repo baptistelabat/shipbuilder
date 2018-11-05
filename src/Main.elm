@@ -2670,6 +2670,12 @@ viewVolumeKpi blocks =
                 SIRColorPicker.palette
 
 
+getFullKpiSummary : Blocks -> List KpiSummary
+getFullKpiSummary blocks =
+    computeKpisForAll blocks
+        :: (List.map (computeKpisForColor blocks) SIRColorPicker.palette)
+
+
 viewKpiByColor : String -> Color -> number -> Html Msg
 viewKpiByColor kpiClass color kpiValue =
     div [ class <| "kpi-group " ++ kpiClass ]
