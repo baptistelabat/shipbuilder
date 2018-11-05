@@ -1508,7 +1508,7 @@ updateFromJs jsmsg model =
                                     updatePartition <|
                                         asZeroInPartition (partition model) <|
                                             flip asPositionInPartitionZero (numberToNumberInput position) <|
-                                            asIndexInPartitionZero (.zero <| partition model) index
+                                                asIndexInPartitionZero (.zero <| partition model) index
                                 , viewMode = Partitioning PropertiesEdition
                             }
                         else
@@ -2635,6 +2635,17 @@ viewKpiStudio model =
         [ h2
             [ class "kpi-panel-title" ]
             [ text "KPIs" ]
+        , a
+            [ class "download-kpis"
+            , type_ "button"
+            , href <|
+                "data:text/csv;charset=utf-8,"
+                    ++ (encodeUri <|
+                            kpisAsCsv model.blocks
+                       )
+            , downloadAs "kpis.csv"
+            ]
+            [ FASolid.download, text "Download as CSV" ]
         , viewMassKpi model.blocks
         , viewVolumeKpi model.blocks
         ]
@@ -2674,6 +2685,7 @@ listToCsvLine items =
     items
         |> List.map (\item -> "\"" ++ item ++ "\"")
         |> String.join ","
+
 
 viewMassKpi : Blocks -> Html Msg
 viewMassKpi blocks =

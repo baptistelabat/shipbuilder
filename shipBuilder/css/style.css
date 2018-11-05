@@ -694,3 +694,26 @@ p.block-volume-value {
     margin: 0 8px;
 }
 
+a.download-kpis {
+    margin-top: 12px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    text-decoration: unset;
+    color: var(--on-primary-color);
+    background-color: var(--primary-color);
+    justify-content: center;
+    border-radius: 4px;
+    transform: scale(0.98);
+}
+
+a.download-kpis:hover {
+    color: var(--on-primary-color__contrast);
+    background-color: var(--primary-color__contrast);
+    transform: scale(1);
+}
+
+a.download-kpis svg {
+    height: 16px;
+    margin-right: 8px;
+}
