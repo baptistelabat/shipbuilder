@@ -619,6 +619,15 @@ computeKpisForColor blocks color =
     , mass = getSumOfMassesForColor blocks <| SIRColorPicker.getColor color
     }
 
+
+computeKpisForAll : Blocks -> KpiSummary
+computeKpisForAll blocks =
+    { target = WholeShip
+    , volume = getSumOfVolumes blocks
+    , mass = getSumOfMasses blocks
+    }
+
+
 type KpiTarget
     = WholeShip
     | SingleBlock String
