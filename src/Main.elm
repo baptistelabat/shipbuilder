@@ -2640,6 +2640,18 @@ viewKpiStudio model =
         ]
 
 
+kpisAsCsv : Blocks -> String
+kpisAsCsv blocks =
+    let
+        summaryList : List KpiSummary
+        summaryList =
+            getFullKpiSummary blocks
+    in
+        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)" ]
+            :: List.map kpiSummaryToCsvLine summaryList
+            |> String.join "\n"
+
+
 kpiSummaryToCsvLine : KpiSummary -> String
 kpiSummaryToCsvLine summary =
     listToCsvLine
