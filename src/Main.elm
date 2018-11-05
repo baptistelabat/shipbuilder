@@ -2623,12 +2623,12 @@ viewVolumeKpi blocks =
     div [ class "kpi volume" ] <|
         (div [ class "kpi-total kpi-group" ]
             [ h3 [ class "kpi-label" ] [ text "Σ Volume (m³)" ]
-            , p [ class "kpi-value" ] [ text <| toString <| getSumOfVolumes blocks ]
+            , p [ class "kpi-value" ] [ text <| toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumes blocks ]
             ]
         )
             :: List.map
                 (\sirColor ->
-                    viewKpiByColor "volume" (SIRColorPicker.getColor sirColor) (getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
+                    viewKpiByColor "volume" (SIRColorPicker.getColor sirColor) (flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
                 )
                 SIRColorPicker.palette
 
