@@ -585,9 +585,19 @@ let selectHull = function (hull) {
 
 let selectPartition = function (partition) {
     if (isPartition(partition)) {
+        let positionToSend = 0;
+        const positionInShipCoordinates = toShipCoordinates(partition.position.x, partition.position.y, partition.position.z, coordinatesTransform)
+
+        if (partition.partitionType === "deck") {
+            positionToSend = positionInShipCoordinates.z;
+        } else if (partition.partitionType === "bulkhead") {
+            positionToSend = positionInShipCoordinates.x;
+        }
+
         sendToElm("select-partition", {
             partitionType: partition.partitionType,
-            partitionIndex: partition.partitionIndex
+            partitionIndex: partition.partitionIndex,
+            partitionPosition: positionToSend
         });
     }
 }
