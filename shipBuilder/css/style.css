@@ -233,7 +233,7 @@ header .header-menu-item+.header-menu-item {
     display: flex;
     flex-direction: column;
     z-index: 1;
-    width: 224px;
+    width: 256px;
     padding: 12px;
     background-color: var(--secondary-color);
     border-right: 1px solid var(--secondary-color__contrast);
