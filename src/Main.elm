@@ -597,6 +597,43 @@ type alias Blocks =
     DictList String Block
 
 
+type alias KpiSummary =
+    { target : KpiTarget
+    , volume : Float
+    , mass : Float
+    }
+
+
+computeKpisForBlock : Block -> KpiSummary
+computeKpisForBlock block =
+    { target = SingleBlock block.uuid
+    , volume = computeVolume block
+    , mass = block.mass.value
+    }
+
+
+computeKpisForColor : Blocks -> SIRColorPicker.SirColor -> KpiSummary
+computeKpisForColor blocks color =
+    { target = ColorGroup color
+    , volume = getSumOfVolumesForColor blocks <| SIRColorPicker.getColor color
+    , mass = getSumOfMassesForColor blocks <| SIRColorPicker.getColor color
+    }
+
+
+computeKpisForAll : Blocks -> KpiSummary
+computeKpisForAll blocks =
+    { target = WholeShip
+    , volume = getSumOfVolumes blocks
+    , mass = getSumOfMasses blocks
+    }
+
+
+type KpiTarget
+    = WholeShip
+    | SingleBlock String
+    | ColorGroup SIRColorPicker.SirColor
+
+
 type alias PartitionsData =
     { decks : Decks
     , bulkheads : Bulkheads
@@ -1471,7 +1508,7 @@ updateFromJs jsmsg model =
                                     updatePartition <|
                                         asZeroInPartition (partition model) <|
                                             flip asPositionInPartitionZero (numberToNumberInput position) <|
-                                            asIndexInPartitionZero (.zero <| partition model) index
+                                                asIndexInPartitionZero (.zero <| partition model) index
                                 , viewMode = Partitioning PropertiesEdition
                             }
                         else
@@ -2598,9 +2635,56 @@ viewKpiStudio model =
         [ h2
             [ class "kpi-panel-title" ]
             [ text "KPIs" ]
+        , a
+            [ class "download-kpis"
+            , type_ "button"
+            , href <|
+                "data:text/csv;charset=utf-8,"
+                    ++ (encodeUri <|
+                            kpisAsCsv model.blocks
+                       )
+            , downloadAs "kpis.csv"
+            ]
+            [ FASolid.download, text "Download as CSV" ]
         , viewMassKpi model.blocks
         , viewVolumeKpi model.blocks
         ]
+
+
+kpisAsCsv : Blocks -> String
+kpisAsCsv blocks =
+    let
+        summaryList : List KpiSummary
+        summaryList =
+            getFullKpiSummary blocks
+    in
+        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)" ]
+            :: List.map kpiSummaryToCsvLine summaryList
+            |> String.join "\n"
+
+
+kpiSummaryToCsvLine : KpiSummary -> String
+kpiSummaryToCsvLine summary =
+    listToCsvLine
+        [ case summary.target of
+            WholeShip ->
+                "Total"
+
+            ColorGroup color ->
+                SIRColorPicker.getName color
+
+            SingleBlock uuid ->
+                uuid
+        , toString <| round <| summary.mass
+        , toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| summary.volume
+        ]
+
+
+listToCsvLine : List String -> String
+listToCsvLine items =
+    items
+        |> List.map (\item -> "\"" ++ item ++ "\"")
+        |> String.join ","
 
 
 viewMassKpi : Blocks -> Html Msg
@@ -2631,6 +2715,12 @@ viewVolumeKpi blocks =
                     viewKpiByColor "volume" (SIRColorPicker.getColor sirColor) (flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
                 )
                 SIRColorPicker.palette
+
+
+getFullKpiSummary : Blocks -> List KpiSummary
+getFullKpiSummary blocks =
+    computeKpisForAll blocks
+        :: (List.map (computeKpisForColor blocks) SIRColorPicker.palette)
 
 
 viewKpiByColor : String -> Color -> number -> Html Msg
