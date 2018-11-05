@@ -2640,6 +2640,13 @@ viewKpiStudio model =
         ]
 
 
+
+listToCsvLine : List String -> String
+listToCsvLine items =
+    items
+        |> List.map (\item -> "\"" ++ item ++ "\"")
+        |> String.join ","
+
 viewMassKpi : Blocks -> Html Msg
 viewMassKpi blocks =
     div [ class "kpi mass" ] <|
