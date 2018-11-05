@@ -3,6 +3,8 @@ module SIRColorPicker
         ( view
         , palette
         , getColor
+        , getName
+        , SirColor
         , red
         , pink
         , purple
