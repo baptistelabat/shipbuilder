@@ -229,14 +229,16 @@ let makeBulkheads = function (bulkheads) {
         const size = 500;
         const geometry = new THREE.Geometry();
 
-        geometry.vertices.push(toThreeJsCoordinates(xPosition, -size / 2, -size / 2, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(xPosition, -size / 2, size / 2, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(xPosition, size / 2, size / 2, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(xPosition, size / 2, -size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(0, -size / 2, -size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(0, -size / 2, size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(0, size / 2, size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(0, size / 2, -size / 2, coordinatesTransform));
         const color = number ? bulkheadColor : zeroColor;
         var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var bulkhead = new THREE.LineLoop(geometry, material);
+        bulkhead.position.copy(toThreeJsCoordinates(xPosition, 0, 0, coordinatesTransform));
+
         bulkhead.sbType = "partition";
         bulkhead.baseColor = color;
         bulkhead.visible = showingPartitions;
