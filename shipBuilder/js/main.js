@@ -229,14 +229,16 @@ let makeBulkheads = function (bulkheads) {
         const size = 500;
         const geometry = new THREE.Geometry();
 
-        geometry.vertices.push(toThreeJsCoordinates(xPosition, -size / 2, -size / 2, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(xPosition, -size / 2, size / 2, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(xPosition, size / 2, size / 2, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(xPosition, size / 2, -size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(0, -size / 2, -size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(0, -size / 2, size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(0, size / 2, size / 2, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(0, size / 2, -size / 2, coordinatesTransform));
         const color = number ? bulkheadColor : zeroColor;
         var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var bulkhead = new THREE.LineLoop(geometry, material);
+        bulkhead.position.copy(toThreeJsCoordinates(xPosition, 0, 0, coordinatesTransform));
+
         bulkhead.sbType = "partition";
         bulkhead.baseColor = color;
         bulkhead.visible = showingPartitions;
@@ -277,14 +279,17 @@ let makeDecks = function (decks) {
         const size = 500;
         const geometry = new THREE.Geometry();
 
-        geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, zPosition, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, zPosition, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, zPosition, coordinatesTransform));
-        geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, zPosition, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, 0, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, 0, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, 0, coordinatesTransform));
+        geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, 0, coordinatesTransform));
         const color = number ? deckColor : zeroColor;
         var material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
 
         var deck = new THREE.LineLoop(geometry, material);
+
+        deck.position.copy(toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform));
+
         deck.sbType = "partition";
         deck.baseColor = color;
         deck.visible = showingPartitions;
@@ -580,9 +585,19 @@ let selectHull = function (hull) {
 
 let selectPartition = function (partition) {
     if (isPartition(partition)) {
+        let positionToSend = 0;
+        const positionInShipCoordinates = toShipCoordinates(partition.position.x, partition.position.y, partition.position.z, coordinatesTransform)
+
+        if (partition.partitionType === "deck") {
+            positionToSend = positionInShipCoordinates.z;
+        } else if (partition.partitionType === "bulkhead") {
+            positionToSend = positionInShipCoordinates.x;
+        }
+
         sendToElm("select-partition", {
             partitionType: partition.partitionType,
-            partitionIndex: partition.partitionIndex
+            partitionIndex: partition.partitionIndex,
+            partitionPosition: positionToSend
         });
     }
 }

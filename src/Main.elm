@@ -141,6 +141,7 @@ decodeVersion =
 type alias SelectPartitionData =
     { partitionType : PartitionType
     , partitionIndex : Int
+    , partitionPosition : Float
     }
 
 
@@ -149,6 +150,7 @@ selectPartitionDecoder =
     Pipeline.decode SelectPartitionData
         |> Pipeline.required "partitionType" (Decode.string |> Decode.andThen partitionTypeFromString)
         |> Pipeline.required "partitionIndex" Decode.int
+        |> Pipeline.required "partitionPosition" Decode.float
 
 
 partitionTypeFromString : String -> Decode.Decoder PartitionType
@@ -442,7 +444,7 @@ jsMsgToMsg js =
         "select-partition" ->
             case Decode.decodeValue selectPartitionDecoder js.data of
                 Ok selectionData ->
-                    FromJs <| SelectPartition selectionData.partitionType selectionData.partitionIndex
+                    FromJs <| SelectPartition selectionData.partitionType selectionData.partitionIndex selectionData.partitionPosition
 
                 Err message ->
                     FromJs <| JSError message
@@ -496,7 +498,7 @@ type FromJsMsg
     = AddToSelection String
     | RemoveFromSelection String
     | Select String
-    | SelectPartition PartitionType Int
+    | SelectPartition PartitionType Int Float
     | Unselect
     | JSError String
     | NewBlock Block
@@ -1450,7 +1452,7 @@ updateFromJs jsmsg model =
             in
                 { model | selectedBlocks = [ uuid ], viewMode = updatedViewMode } ! []
 
-        SelectPartition partitionType index ->
+        SelectPartition partitionType index position ->
             if model.viewMode == (Partitioning <| OriginDefinition partitionType) then
                 let
                     ( partition, updatePartition, tag, computePartition ) =
@@ -1468,6 +1470,7 @@ updateFromJs jsmsg model =
                                 | partitions =
                                     updatePartition <|
                                         asZeroInPartition (partition model) <|
+                                            flip asPositionInPartitionZero (numberToNumberInput position) <|
                                             asIndexInPartitionZero (.zero <| partition model) index
                                 , viewMode = Partitioning PropertiesEdition
                             }
