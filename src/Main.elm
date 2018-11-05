@@ -2640,6 +2640,22 @@ viewKpiStudio model =
         ]
 
 
+kpiSummaryToCsvLine : KpiSummary -> String
+kpiSummaryToCsvLine summary =
+    listToCsvLine
+        [ case summary.target of
+            WholeShip ->
+                "Total"
+
+            ColorGroup color ->
+                SIRColorPicker.getName color
+
+            SingleBlock uuid ->
+                uuid
+        , toString <| round <| summary.mass
+        , toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| summary.volume
+        ]
+
 
 listToCsvLine : List String -> String
 listToCsvLine items =
