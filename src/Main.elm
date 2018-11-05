@@ -2608,12 +2608,12 @@ viewMassKpi blocks =
     div [ class "kpi mass" ] <|
         (div [ class "kpi-total kpi-group" ]
             [ h3 [ class "kpi-label" ] [ text "Σ Mass (T)" ]
-            , p [ class "kpi-value" ] [ text <| toString <| 0.001 * (getSumOfMasses blocks) ]
+            , p [ class "kpi-value" ] [ text <| toString <| round <| (getSumOfMasses blocks) ]
             ]
         )
             :: List.map
                 (\sirColor ->
-                    viewKpiByColor "mass" (SIRColorPicker.getColor sirColor) (0.001 * (getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor))
+                    viewKpiByColor "mass" (SIRColorPicker.getColor sirColor) (round <| getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor)
                 )
                 SIRColorPicker.palette
 
