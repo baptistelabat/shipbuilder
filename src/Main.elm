@@ -604,6 +604,13 @@ type alias KpiSummary =
     }
 
 
+computeKpisForBlock : Block -> KpiSummary
+computeKpisForBlock block =
+    { target = SingleBlock block.uuid
+    , volume = computeVolume block
+    , mass = block.mass.value
+    }
+
 type KpiTarget
     = WholeShip
     | SingleBlock String
