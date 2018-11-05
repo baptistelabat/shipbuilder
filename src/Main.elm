@@ -141,6 +141,7 @@ decodeVersion =
 type alias SelectPartitionData =
     { partitionType : PartitionType
     , partitionIndex : Int
+    , partitionPosition : Float
     }
 
 
@@ -149,6 +150,7 @@ selectPartitionDecoder =
     Pipeline.decode SelectPartitionData
         |> Pipeline.required "partitionType" (Decode.string |> Decode.andThen partitionTypeFromString)
         |> Pipeline.required "partitionIndex" Decode.int
+        |> Pipeline.required "partitionPosition" Decode.float
 
 
 partitionTypeFromString : String -> Decode.Decoder PartitionType
