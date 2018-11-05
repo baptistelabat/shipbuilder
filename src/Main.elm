@@ -597,6 +597,19 @@ type alias Blocks =
     DictList String Block
 
 
+type alias KpiSummary =
+    { target : KpiTarget
+    , volume : Float
+    , mass : Float
+    }
+
+
+type KpiTarget
+    = WholeShip
+    | SingleBlock String
+    | ColorGroup SIRColorPicker.SirColor
+
+
 type alias PartitionsData =
     { decks : Decks
     , bulkheads : Bulkheads
