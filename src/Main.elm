@@ -2838,13 +2838,13 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
                     ]
                     []
                 ]
-            , viewPartitionSpacingDetails Deck decks
+            , viewPartitionSpacingDetails Deck isDetailsOpen decks
             ]
         ]
 
 
-viewPartitionSpacingDetails : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
-viewPartitionSpacingDetails partitionType partitionSummary =
+viewPartitionSpacingDetails : PartitionType -> Bool -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
+viewPartitionSpacingDetails partitionType isDetailsOpen partitionSummary =
     let
         rootClass : String
         rootClass =
@@ -2969,7 +2969,7 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
                     ]
                     []
                 ]
-            , viewPartitionSpacingDetails Bulkhead bulkheads
+            , viewPartitionSpacingDetails Bulkhead isDetailsOpen bulkheads
             ]
         ]
 
