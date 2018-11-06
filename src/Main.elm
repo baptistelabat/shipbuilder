@@ -1321,6 +1321,7 @@ type NoJsMsg
     | DisplayToast Toast
     | NoOp
     | RenameBlock Block String
+    | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetMultipleSelect Bool
     | SyncBlockInputs Block
@@ -1341,6 +1342,18 @@ updateNoJs msg model =
 
         NoOp ->
             model ! []
+
+        SetBlockContextualMenu uuid ->
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState | blockContextualMenu = Just uuid }
+            in
+                { model | uiState = newUiState } ! []
 
         SetMultipleSelect boolean ->
             { model | multipleSelect = boolean } ! []
