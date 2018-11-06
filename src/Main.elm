@@ -1321,6 +1321,7 @@ type NoJsMsg
     | DisplayToast Toast
     | NoOp
     | RenameBlock Block String
+    | UnsetBlockContextualMenu
     | SetMultipleSelect Bool
     | SyncBlockInputs Block
     | SyncPartitions
@@ -1474,6 +1475,18 @@ updateNoJs msg model =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
             in
                 updatedModel ! []
+
+        UnsetBlockContextualMenu ->
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState | blockContextualMenu = Nothing }
+            in
+                { model | uiState = newUiState } ! []
 
 
 updateToJs : ToJsMsg -> Model -> ( Model, Cmd Msg )
