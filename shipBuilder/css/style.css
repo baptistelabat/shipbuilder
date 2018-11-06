@@ -310,6 +310,15 @@ li.block-item.hidden {
     opacity: 0.5;
 }
 
+li.block-item .block-actions .open-contextual-menu,
+li.block-item .block-actions .close-contextual-menu {
+    margin-top: 4px;
+}
+
+li.block-item .block-actions .close-contextual-menu {
+    color: var(--contrast-color);
+}
+
 li.block-item .block-info-wrapper, li.hull-reference .hull-info-wrapper {
     padding: 8px 12px;
     width: 100%;
@@ -317,7 +326,47 @@ li.block-item .block-info-wrapper, li.hull-reference .hull-info-wrapper {
 }
 li.block-item:hover .block-info-wrapper {
     width: calc(100% - 28px);
+    position: relative;
 }
+li.block-item .block-info-wrapper {
+    position: relative;
+}
+
+.block-info-wrapper .block-contextual-menu {
+    background: var(--secondary-color__accent);
+    position: absolute;
+    top: 50%;
+    animation: absolute-enter-right 0.05s linear;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: 4px 4px;
+    padding: 0 4px;
+    display: none;
+    justify-content: flex-end;
+    border-right: 1px solid var(--contrast-color);
+}
+
+li.block-item:hover .block-contextual-menu {
+    display: flex;
+    align-items: center;
+    cursor: default;
+}
+
+.block-info-wrapper .block-contextual-menu .block-action svg {
+    height: 16px;
+    width: 18px;
+}
+
+.block-info-wrapper .block-contextual-menu .block-action {
+    margin: 0 4px;
+    cursor: pointer;
+}
+
+.block-info-wrapper .block-contextual-menu .block-action:hover {
+    color: var(--on-primary-color__muted);
+}
+
 
 li.block-item:hover, li.hull-reference:hover {
     border-left-width: 6px;
@@ -380,6 +429,16 @@ li.block-item .block-actions .block-action svg {
     height: 16px;
 }
 
+@keyframes absolute-enter-right {
+    from{
+        left: 100%;
+        opacity: 0;
+    }
+    to{
+        left: 0;
+        opacity: 1;
+    }
+}
 
 
 li.block-item__selected, li.hull-reference__selected {
