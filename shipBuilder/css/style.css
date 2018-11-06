@@ -717,3 +717,14 @@ a.download-kpis svg {
     height: 16px;
     margin-right: 8px;
 }
+
+.spacing-details-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.spacing-details-title svg {
+    height: 22px;
+}

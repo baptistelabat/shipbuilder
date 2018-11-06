@@ -571,6 +571,12 @@ type alias Model =
     , blocks : Blocks
     , toasts : Toasts
     , partitions : PartitionsData
+    , uiSettings : UiSettings
+    }
+
+
+type alias UiSettings =
+    { accordions : Dict String Bool
     }
 
 
@@ -1028,6 +1034,7 @@ initModel =
         , blocks = DictList.empty
         , toasts = emptyToasts
         , partitions = initPartitions
+        , uiSettings = { accordions = Dict.empty }
         }
 
 
@@ -1298,10 +1305,11 @@ type NoJsMsg
     = DismissToast String
     | DisplayToast Toast
     | NoOp
+    | RenameBlock Block String
     | SetMultipleSelect Bool
     | SyncBlockInputs Block
     | SyncPartitions
-    | RenameBlock Block String
+    | ToggleAccordion Bool String
     | UpdateDensity Block String
     | UpdateMass Block String
 
@@ -1395,6 +1403,18 @@ updateNoJs msg model =
 
         RenameBlock blockToRename newLabel ->
             updateBlockInModel (renameBlock newLabel blockToRename) model ! []
+
+        ToggleAccordion isOpen accordionId ->
+            let
+                uiSettings : UiSettings
+                uiSettings =
+                    model.uiSettings
+
+                newUiSettings : UiSettings
+                newUiSettings =
+                    { uiSettings | accordions = Dict.insert accordionId isOpen uiSettings.accordions }
+            in
+                { model | uiSettings = newUiSettings } ! []
 
         UpdateMass block input ->
             let
@@ -2606,26 +2626,35 @@ viewHullStudioPanel model =
 
 viewPartitioning : PartitioningView -> Model -> Html Msg
 viewPartitioning partitioningView model =
-    div
-        [ class "panel partioning-panel" ]
-    <|
-        viewShowingPartitions model.partitions.showing
-            :: (case partitioningView of
-                    PropertiesEdition ->
-                        [ viewDecks False model.partitions.decks
-                        , viewBulkheads False model.partitions.bulkheads
-                        ]
+    let
+        isDeckSpacingDetailsOpen : Bool
+        isDeckSpacingDetailsOpen =
+            Maybe.withDefault False <| Dict.get "deck-spacing-details" model.uiSettings.accordions
 
-                    OriginDefinition Deck ->
-                        [ viewDecks True model.partitions.decks
-                        , viewBulkheads False model.partitions.bulkheads
-                        ]
+        isBulkheadSpacingDetailsOpen : Bool
+        isBulkheadSpacingDetailsOpen =
+            Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiSettings.accordions
+    in
+        div
+            [ class "panel partioning-panel" ]
+        <|
+            viewShowingPartitions model.partitions.showing
+                :: (case partitioningView of
+                        PropertiesEdition ->
+                            [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
+                            , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
+                            ]
 
-                    OriginDefinition Bulkhead ->
-                        [ viewDecks False model.partitions.decks
-                        , viewBulkheads True model.partitions.bulkheads
-                        ]
-               )
+                        OriginDefinition Deck ->
+                            [ viewDecks True isDeckSpacingDetailsOpen model.partitions.decks
+                            , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
+                            ]
+
+                        OriginDefinition Bulkhead ->
+                            [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
+                            , viewBulkheads True isBulkheadSpacingDetailsOpen model.partitions.bulkheads
+                            ]
+                   )
 
 
 viewKpiStudio : Model -> Html Msg
@@ -2755,8 +2784,8 @@ viewShowingPartitions showing =
         ]
 
 
-viewDecks : Bool -> Decks -> Html Msg
-viewDecks isDefiningOrigin decks =
+viewDecks : Bool -> Bool -> Decks -> Html Msg
+viewDecks isDefiningOrigin isDetailsOpen decks =
     div [ class "decks stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
@@ -2822,13 +2851,13 @@ viewDecks isDefiningOrigin decks =
                     ]
                     []
                 ]
-            , viewPartitionSpacingDetails Deck decks
+            , viewPartitionSpacingDetails Deck isDetailsOpen decks
             ]
         ]
 
 
-viewPartitionSpacingDetails : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
-viewPartitionSpacingDetails partitionType partitionSummary =
+viewPartitionSpacingDetails : PartitionType -> Bool -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
+viewPartitionSpacingDetails partitionType isDetailsOpen partitionSummary =
     let
         rootClass : String
         rootClass =
@@ -2836,12 +2865,29 @@ viewPartitionSpacingDetails partitionType partitionSummary =
     in
         div
             [ class rootClass ]
-            [ p [ class <| rootClass ++ "-title" ] [ text "Spacing details" ]
-            , if partitionSummary.number.value > 0 then
-                viewPartitionSpacingList partitionType partitionSummary
-              else
-                p [ class "text-muted" ] [ text <| "There's no " ++ (String.toLower <| toString partitionType) ++ " yet" ]
-            ]
+        <|
+            if isDetailsOpen then
+                [ p
+                    [ class <| rootClass ++ "-title"
+                    , onClick <| NoJs <| ToggleAccordion False <| (String.toLower <| toString partitionType) ++ "-spacing-details"
+                    ]
+                    [ text "Spacing details"
+                    , FASolid.angle_down
+                    ]
+                , if partitionSummary.number.value > 0 then
+                    viewPartitionSpacingList partitionType partitionSummary
+                  else
+                    p [ class "text-muted" ] [ text <| "There's no " ++ (String.toLower <| toString partitionType) ++ " yet" ]
+                ]
+            else
+                [ p
+                    [ class <| rootClass ++ "-title"
+                    , onClick <| NoJs <| ToggleAccordion True <| (String.toLower <| toString partitionType) ++ "-spacing-details"
+                    ]
+                    [ text "Spacing details"
+                    , FASolid.angle_right
+                    ]
+                ]
 
 
 viewPartitionSpacingList : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
@@ -2886,8 +2932,8 @@ viewPartitionSpacingListItem partitionType defaultSpacing partitionSpacingData =
         ]
 
 
-viewBulkheads : Bool -> Bulkheads -> Html Msg
-viewBulkheads isDefiningOrigin bulkheads =
+viewBulkheads : Bool -> Bool -> Bulkheads -> Html Msg
+viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
     div [ class "bulkheads stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
@@ -2953,7 +2999,7 @@ viewBulkheads isDefiningOrigin bulkheads =
                     ]
                     []
                 ]
-            , viewPartitionSpacingDetails Bulkhead bulkheads
+            , viewPartitionSpacingDetails Bulkhead isDetailsOpen bulkheads
             ]
         ]
 
