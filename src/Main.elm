@@ -3060,7 +3060,21 @@ viewBackToWholeList =
 
 viewBlockProperties : Block -> List (Html Msg)
 viewBlockProperties block =
-    [ div
+    [ if block.visible then
+        div
+            [ class "block-visibility primary-button"
+            ]
+            [ text "Hide block"
+            , FASolid.eye_slash
+            ]
+      else
+        div
+            [ class "block-visibility primary-button"
+            ]
+            [ text "Show block"
+            , FASolid.eye
+            ]
+    , div
         [ class "input-group block-color" ]
         [ label [] [ text "Color" ]
         , SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
