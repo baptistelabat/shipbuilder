@@ -571,6 +571,12 @@ type alias Model =
     , blocks : Blocks
     , toasts : Toasts
     , partitions : PartitionsData
+    , uiSettings : UiSettings
+    }
+
+
+type alias UiSettings =
+    { accordions : Dict String Bool
     }
 
 
@@ -1028,6 +1034,7 @@ initModel =
         , blocks = DictList.empty
         , toasts = emptyToasts
         , partitions = initPartitions
+        , uiSettings = { accordions = Dict.empty }
         }
 
 
