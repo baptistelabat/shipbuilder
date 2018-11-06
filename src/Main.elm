@@ -558,6 +558,13 @@ encodeRestoreSaveCmd model =
         ]
 
 
+encodeToggleBlockVisibilityCmd : List Block -> Bool -> Encode.Value
+encodeToggleBlockVisibilityCmd blocks visible =
+    Encode.object
+        [ ( "visible", Encode.bool visible )
+        , ( "uuids", Encode.list <| List.map (Encode.string << .uuid) blocks )
+        ]
+
 
 -- MODEL
 
@@ -1296,6 +1303,7 @@ type ToJsMsg
     | SelectHullReference HullReference
     | SetSpacingException PartitionType Int String
     | SwitchViewMode ViewMode
+    | ToggleBlockVisibility Block Bool
     | TogglePartitions
     | UpdatePartitionNumber PartitionType String
     | UpdatePartitionSpacing PartitionType String
@@ -1776,6 +1784,19 @@ updateModelToJs msg model =
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
 
+        ToggleBlockVisibility block isVisible ->
+            case getBlockByUUID block.uuid model.blocks of
+                Just recoveredBlock ->
+                    let
+                        updatedBlock : Block
+                        updatedBlock =
+                            { block | visible = isVisible }
+                    in
+                        updateBlockInModel updatedBlock model
+
+                Nothing ->
+                    model
+
         TogglePartitions ->
             let
                 partitions : PartitionsData
@@ -2108,6 +2129,9 @@ msg2json model action =
 
         TogglePartitions ->
             Just { tag = "showing-partitions", data = Encode.bool <| not model.partitions.showing }
+
+        ToggleBlockVisibility block isVisible ->
+            Just { tag = "blocks-visibility", data = encodeToggleBlockVisibilityCmd [ block ] isVisible }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -3063,6 +3087,7 @@ viewBlockProperties block =
     [ if block.visible then
         div
             [ class "block-visibility primary-button"
+            , onClick <| ToJs <| ToggleBlockVisibility block False
             ]
             [ text "Hide block"
             , FASolid.eye_slash
@@ -3070,6 +3095,7 @@ viewBlockProperties block =
       else
         div
             [ class "block-visibility primary-button"
+            , onClick <| ToJs <| ToggleBlockVisibility block True
             ]
             [ text "Show block"
             , FASolid.eye

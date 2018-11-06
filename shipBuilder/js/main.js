@@ -52,6 +52,9 @@ app.ports.toJs.subscribe(function (message) {
         case "add-block-to-selection":
             addBlockToSelectionFromElm(data);
             break;
+        case "blocks-visibility":
+            toggleBlocksVisibility(data);
+            break;
         case "init-three":
             initThree(data);
             break;
@@ -116,6 +119,16 @@ let switchMode = function (newMode) {
             setObjectOpacityForCurrentMode(object);
         })
     }
+}
+
+let toggleBlocksVisibility = function (data) {
+    const visible = data.visible;
+    const uuids = data.uuids;
+    const blocks = scene.children.filter(child => isBlock(child) && uuids.includes(child.uuid));
+
+    blocks.forEach(block => {
+        block.visible = visible;
+    });
 }
 
 let setObjectOpacityForCurrentMode = function (object) {
