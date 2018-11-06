@@ -1305,10 +1305,11 @@ type NoJsMsg
     = DismissToast String
     | DisplayToast Toast
     | NoOp
+    | RenameBlock Block String
     | SetMultipleSelect Bool
     | SyncBlockInputs Block
     | SyncPartitions
-    | RenameBlock Block String
+    | ToggleAccordion Bool String
     | UpdateDensity Block String
     | UpdateMass Block String
 
@@ -1402,6 +1403,18 @@ updateNoJs msg model =
 
         RenameBlock blockToRename newLabel ->
             updateBlockInModel (renameBlock newLabel blockToRename) model ! []
+
+        ToggleAccordion isOpen accordionId ->
+            let
+                uiSettings : UiSettings
+                uiSettings =
+                    model.uiSettings
+
+                newUiSettings : UiSettings
+                newUiSettings =
+                    { uiSettings | accordions = Dict.insert accordionId isOpen uiSettings.accordions }
+            in
+                { model | uiSettings = newUiSettings } ! []
 
         UpdateMass block input ->
             let
@@ -2622,26 +2635,26 @@ viewPartitioning partitioningView model =
         isBulkheadSpacingDetailsOpen =
             Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiSettings.accordions
     in
-    div
-        [ class "panel partioning-panel" ]
-    <|
-        viewShowingPartitions model.partitions.showing
-            :: (case partitioningView of
-                    PropertiesEdition ->
+        div
+            [ class "panel partioning-panel" ]
+        <|
+            viewShowingPartitions model.partitions.showing
+                :: (case partitioningView of
+                        PropertiesEdition ->
                             [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
                             , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
-                        ]
+                            ]
 
-                    OriginDefinition Deck ->
+                        OriginDefinition Deck ->
                             [ viewDecks True isDeckSpacingDetailsOpen model.partitions.decks
                             , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
-                        ]
+                            ]
 
-                    OriginDefinition Bulkhead ->
+                        OriginDefinition Bulkhead ->
                             [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
                             , viewBulkheads True isBulkheadSpacingDetailsOpen model.partitions.bulkheads
-                        ]
-               )
+                            ]
+                   )
 
 
 viewKpiStudio : Model -> Html Msg
@@ -2852,12 +2865,29 @@ viewPartitionSpacingDetails partitionType isDetailsOpen partitionSummary =
     in
         div
             [ class rootClass ]
-            [ p [ class <| rootClass ++ "-title" ] [ text "Spacing details" ]
-            , if partitionSummary.number.value > 0 then
-                viewPartitionSpacingList partitionType partitionSummary
-              else
-                p [ class "text-muted" ] [ text <| "There's no " ++ (String.toLower <| toString partitionType) ++ " yet" ]
-            ]
+        <|
+            if isDetailsOpen then
+                [ p
+                    [ class <| rootClass ++ "-title"
+                    , onClick <| NoJs <| ToggleAccordion False <| (String.toLower <| toString partitionType) ++ "-spacing-details"
+                    ]
+                    [ text "Spacing details"
+                    , FASolid.angle_down
+                    ]
+                , if partitionSummary.number.value > 0 then
+                    viewPartitionSpacingList partitionType partitionSummary
+                  else
+                    p [ class "text-muted" ] [ text <| "There's no " ++ (String.toLower <| toString partitionType) ++ " yet" ]
+                ]
+            else
+                [ p
+                    [ class <| rootClass ++ "-title"
+                    , onClick <| NoJs <| ToggleAccordion True <| (String.toLower <| toString partitionType) ++ "-spacing-details"
+                    ]
+                    [ text "Spacing details"
+                    , FASolid.angle_right
+                    ]
+                ]
 
 
 viewPartitionSpacingList : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
