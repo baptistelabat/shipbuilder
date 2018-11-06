@@ -80,6 +80,7 @@ newBlockDecoder =
         |> Pipeline.required "size" decodeSize
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded { value = 0, string = "0" }
+        |> Pipeline.hardcoded True
 
 
 type alias SyncPosition =
@@ -184,6 +185,7 @@ decodeBlock =
         |> Pipeline.required "size" decodeSize
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
+        |> Pipeline.hardcoded True
 
 
 decodeColor : Decode.Decoder Color
@@ -556,6 +558,13 @@ encodeRestoreSaveCmd model =
         ]
 
 
+encodeToggleBlockVisibilityCmd : List Block -> Bool -> Encode.Value
+encodeToggleBlockVisibilityCmd blocks visible =
+    Encode.object
+        [ ( "visible", Encode.bool visible )
+        , ( "uuids", Encode.list <| List.map (Encode.string << .uuid) blocks )
+        ]
+
 
 -- MODEL
 
@@ -571,12 +580,13 @@ type alias Model =
     , blocks : Blocks
     , toasts : Toasts
     , partitions : PartitionsData
-    , uiSettings : UiSettings
+    , uiState : UiState
     }
 
 
-type alias UiSettings =
+type alias UiState =
     { accordions : Dict String Bool
+    , blockContextualMenu : Maybe String
     }
 
 
@@ -588,6 +598,7 @@ type alias Block =
     , size : Size
     , mass : FloatInput
     , density : FloatInput
+    , visible : Bool
     }
 
 
@@ -1034,7 +1045,10 @@ initModel =
         , blocks = DictList.empty
         , toasts = emptyToasts
         , partitions = initPartitions
-        , uiSettings = { accordions = Dict.empty }
+        , uiState = 
+            { accordions = Dict.empty
+            , blockContextualMenu = Nothing
+            }
         }
 
 
@@ -1293,6 +1307,7 @@ type ToJsMsg
     | SelectHullReference HullReference
     | SetSpacingException PartitionType Int String
     | SwitchViewMode ViewMode
+    | ToggleBlockVisibility Block Bool
     | TogglePartitions
     | UpdatePartitionNumber PartitionType String
     | UpdatePartitionSpacing PartitionType String
@@ -1306,6 +1321,8 @@ type NoJsMsg
     | DisplayToast Toast
     | NoOp
     | RenameBlock Block String
+    | SetBlockContextualMenu String
+    | UnsetBlockContextualMenu
     | SetMultipleSelect Bool
     | SyncBlockInputs Block
     | SyncPartitions
@@ -1325,6 +1342,18 @@ updateNoJs msg model =
 
         NoOp ->
             model ! []
+
+        SetBlockContextualMenu uuid ->
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState | blockContextualMenu = Just uuid }
+            in
+                { model | uiState = newUiState } ! []
 
         SetMultipleSelect boolean ->
             { model | multipleSelect = boolean } ! []
@@ -1406,15 +1435,15 @@ updateNoJs msg model =
 
         ToggleAccordion isOpen accordionId ->
             let
-                uiSettings : UiSettings
-                uiSettings =
-                    model.uiSettings
+                uiState : UiState
+                uiState =
+                    model.uiState
 
-                newUiSettings : UiSettings
-                newUiSettings =
-                    { uiSettings | accordions = Dict.insert accordionId isOpen uiSettings.accordions }
+                newUiState : UiState
+                newUiState =
+                    { uiState | accordions = Dict.insert accordionId isOpen uiState.accordions }
             in
-                { model | uiSettings = newUiSettings } ! []
+                { model | uiState = newUiState } ! []
 
         UpdateMass block input ->
             let
@@ -1459,6 +1488,18 @@ updateNoJs msg model =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
             in
                 updatedModel ! []
+
+        UnsetBlockContextualMenu ->
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState | blockContextualMenu = Nothing }
+            in
+                { model | uiState = newUiState } ! []
 
 
 updateToJs : ToJsMsg -> Model -> ( Model, Cmd Msg )
@@ -1772,6 +1813,19 @@ updateModelToJs msg model =
 
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
+
+        ToggleBlockVisibility block isVisible ->
+            case getBlockByUUID block.uuid model.blocks of
+                Just recoveredBlock ->
+                    let
+                        updatedBlock : Block
+                        updatedBlock =
+                            { block | visible = isVisible }
+                    in
+                        updateBlockInModel updatedBlock model
+
+                Nothing ->
+                    model
 
         TogglePartitions ->
             let
@@ -2105,6 +2159,9 @@ msg2json model action =
 
         TogglePartitions ->
             Just { tag = "showing-partitions", data = Encode.bool <| not model.partitions.showing }
+
+        ToggleBlockVisibility block isVisible ->
+            Just { tag = "blocks-visibility", data = encodeToggleBlockVisibilityCmd [ block ] isVisible }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -2629,11 +2686,11 @@ viewPartitioning partitioningView model =
     let
         isDeckSpacingDetailsOpen : Bool
         isDeckSpacingDetailsOpen =
-            Maybe.withDefault False <| Dict.get "deck-spacing-details" model.uiSettings.accordions
+            Maybe.withDefault False <| Dict.get "deck-spacing-details" model.uiState.accordions
 
         isBulkheadSpacingDetailsOpen : Bool
         isBulkheadSpacingDetailsOpen =
-            Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiSettings.accordions
+            Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiState.accordions
     in
         div
             [ class "panel partioning-panel" ]
@@ -3057,7 +3114,27 @@ viewBackToWholeList =
 
 viewBlockProperties : Block -> List (Html Msg)
 viewBlockProperties block =
-    [ SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
+    [ if block.visible then
+        div
+            [ class "block-visibility primary-button"
+            , onClick <| ToJs <| ToggleBlockVisibility block False
+            ]
+            [ text "Hide block"
+            , FASolid.eye_slash
+            ]
+      else
+        div
+            [ class "block-visibility primary-button"
+            , onClick <| ToJs <| ToggleBlockVisibility block True
+            ]
+            [ text "Show block"
+            , FASolid.eye
+            ]
+    , div
+        [ class "input-group block-color" ]
+        [ label [] [ text "Color" ]
+        , SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
+        ]
     , div
         [ class "block-position" ]
       <|
@@ -3255,17 +3332,30 @@ viewEditableBlockName block =
         []
 
 
-viewBlockList : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
-viewBlockList blocksModel =
-    ul
-        [ class "blocks" ]
-    <|
-        if List.length blocksModel.selectedBlocks > 0 then
-            (List.map (viewBlockItemWithSelection blocksModel.selectedBlocks) <| toList blocksModel.blocks)
-                ++ [ viewNewBlockItem ]
-        else
-            (List.map viewBlockItem <| (toList blocksModel.blocks))
-                ++ [ viewNewBlockItem ]
+viewBlockList : { a | blocks : Blocks, selectedBlocks : List String, uiState : UiState } -> Html Msg
+viewBlockList model =
+    let
+        showContextualMenuFor : Block -> Bool
+        showContextualMenuFor block =
+            Maybe.withDefault False <| Maybe.map ((==) block.uuid) model.uiState.blockContextualMenu
+
+        viewBlockWithSelection : Block -> Html Msg
+        viewBlockWithSelection block =
+            viewBlockItemWithSelection (showContextualMenuFor block) model.selectedBlocks block
+
+        viewBlockWithoutSelection : Block -> Html Msg
+        viewBlockWithoutSelection block =
+            viewBlockItem (showContextualMenuFor block) block
+    in
+        ul
+            [ class "blocks" ]
+        <|
+            if List.length model.selectedBlocks > 0 then
+                (List.map viewBlockWithSelection <| toList model.blocks)
+                    ++ [ viewNewBlockItem ]
+            else
+                (List.map viewBlockWithoutSelection <| toList model.blocks)
+                    ++ [ viewNewBlockItem ]
 
 
 viewNewBlockItem : Html Msg
@@ -3282,33 +3372,89 @@ viewNewBlockItem =
         ]
 
 
-viewBlockItem : Block -> Html Msg
-viewBlockItem block =
+viewBlockItem : Bool -> Block -> Html Msg
+viewBlockItem showContextualMenu block =
     li
-        [ class "block-item"
+        [ if block.visible then
+            class "block-item"
+          else
+            class "block-item hidden"
         , style [ ( "borderColor", colorToCssRgbString block.color ) ]
+        , onMouseLeave <| NoJs <| UnsetBlockContextualMenu
         ]
     <|
-        viewBlockItemContent block
+        viewBlockItemContent showContextualMenu block
 
 
-viewBlockItemContent : Block -> List (Html Msg)
-viewBlockItemContent block =
-    [ div
-        [ class "block-info-wrapper"
-        , onClick <| ToJs <| SelectBlock block
+viewBlockItemContent : Bool -> Block -> List (Html Msg)
+viewBlockItemContent showContextualMenu block =
+    if showContextualMenu then
+        [ div
+            [ class "block-info-wrapper"
+            , onClick <| ToJs <| SelectBlock block
+            ]
+            [ viewEditableBlockName block
+            , p
+                [ class "block-uuid" ]
+                [ text block.uuid ]
+            , viewBlockContextualMenu block
+            ]
+        , div
+            [ class "block-actions" ]
+            [ viewFocusBlockAction block
+            , viewCloseBlockContextualMenuAction
+            ]
         ]
-        [ viewEditableBlockName block
-        , p
-            [ class "block-uuid" ]
-            [ text block.uuid ]
+    else
+        [ div
+            [ class "block-info-wrapper"
+            , onClick <| ToJs <| SelectBlock block
+            ]
+            [ viewEditableBlockName block
+            , p
+                [ class "block-uuid" ]
+                [ text block.uuid ]
+            ]
+        , div
+            [ class "block-actions" ]
+            [ viewFocusBlockAction block
+            , viewOpenBlockContextualMenuAction block
+            ]
         ]
-    , div
-        [ class "block-actions" ]
-        [ viewFocusBlockAction block
-        , viewDeleteBlockAction block
+
+
+viewOpenBlockContextualMenuAction : Block -> Html Msg
+viewOpenBlockContextualMenuAction block =
+    div
+        [ class "block-action open-contextual-menu"
+        , onClick <| NoJs <| SetBlockContextualMenu block.uuid
+        , title "See extra actions"
         ]
-    ]
+        [ FASolid.ellipsis_h ]
+
+
+viewCloseBlockContextualMenuAction : Html Msg
+viewCloseBlockContextualMenuAction =
+    div
+        [ class "block-action close-contextual-menu"
+        , onClick <| NoJs <| UnsetBlockContextualMenu
+        , title "Hide extra actions"
+        ]
+        [ FARegular.times_circle ]
+
+
+viewBlockContextualMenu : Block -> Html Msg
+viewBlockContextualMenu block =
+    div
+        [ class "block-contextual-menu"
+        , onClickWithoutPropagation <| NoJs <| NoOp
+        ]
+        [ viewDeleteBlockAction block
+        , if block.visible then
+            viewHideBlockAction block
+          else
+            viewShowBlockAction block
+        ]
 
 
 viewFocusBlockAction : Block -> Html Msg
@@ -3316,6 +3462,7 @@ viewFocusBlockAction block =
     div
         [ class "block-action focus-block"
         , onClick <| ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock block.uuid
+        , title "Focus block"
         ]
         [ FASolid.arrow_right
         ]
@@ -3325,22 +3472,51 @@ viewDeleteBlockAction : Block -> Html Msg
 viewDeleteBlockAction block =
     div
         [ class "block-action delete-block"
-        , onClick <| ToJs <| RemoveBlock block
+        , onClickWithoutPropagation <| ToJs <| RemoveBlock block
+        , title "Delete block"
         ]
         [ FASolid.trash ]
 
 
-viewBlockItemWithSelection : List String -> Block -> Html Msg
-viewBlockItemWithSelection selectedBlocks block =
+onClickWithoutPropagation : Msg -> Html.Attribute Msg
+onClickWithoutPropagation msg =
+    onWithOptions "click" { stopPropagation = True, preventDefault = False } (Decode.succeed msg)
+
+
+viewShowBlockAction : Block -> Html Msg
+viewShowBlockAction block =
+    div
+        [ class "block-action show-block"
+        , onClickWithoutPropagation <| ToJs <| ToggleBlockVisibility block True
+        , title "Show block"
+        ]
+        [ FASolid.eye ]
+
+
+viewHideBlockAction : Block -> Html Msg
+viewHideBlockAction block =
+    div
+        [ class "block-action hide-block"
+        , onClickWithoutPropagation <| ToJs <| ToggleBlockVisibility block False
+        , title "Hide block"
+        ]
+        [ FASolid.eye_slash ]
+
+
+viewBlockItemWithSelection : Bool -> List String -> Block -> Html Msg
+viewBlockItemWithSelection showContextualMenu selectedBlocks block =
     if List.member block.uuid selectedBlocks then
         li
-            [ class "block-item block-item__selected"
+            [ if block.visible then
+                class "block-item block-item__selected"
+              else
+                class "block-item block-item__selected hidden"
             , style [ ( "borderColor", colorToCssRgbString block.color ) ]
             ]
         <|
-            viewBlockItemContent block
+            viewBlockItemContent showContextualMenu block
     else
-        viewBlockItem block
+        viewBlockItem showContextualMenu block
 
 
 
