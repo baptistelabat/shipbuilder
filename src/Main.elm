@@ -3306,16 +3306,29 @@ viewEditableBlockName block =
         []
 
 
-viewBlockList : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
-viewBlockList blocksModel =
+viewBlockList : { a | blocks : Blocks, selectedBlocks : List String, uiState : UiState } -> Html Msg
+viewBlockList model =
+    let
+        showContextualMenuFor : Block -> Bool
+        showContextualMenuFor block =
+            Maybe.withDefault False <| Maybe.map ((==) block.uuid) model.uiState.blockContextualMenu
+
+        viewBlockWithSelection : Block -> Html Msg
+        viewBlockWithSelection block =
+            viewBlockItemWithSelection (showContextualMenuFor block) model.selectedBlocks block
+
+        viewBlockWithoutSelection : Block -> Html Msg
+        viewBlockWithoutSelection block =
+            viewBlockItem (showContextualMenuFor block) block
+    in
     ul
         [ class "blocks" ]
     <|
-        if List.length blocksModel.selectedBlocks > 0 then
-            (List.map (viewBlockItemWithSelection blocksModel.selectedBlocks) <| toList blocksModel.blocks)
+            if List.length model.selectedBlocks > 0 then
+                (List.map viewBlockWithSelection <| toList model.blocks)
                 ++ [ viewNewBlockItem ]
         else
-            (List.map viewBlockItem <| (toList blocksModel.blocks))
+                (List.map viewBlockWithoutSelection <| toList model.blocks)
                 ++ [ viewNewBlockItem ]
 
 
@@ -3333,8 +3346,8 @@ viewNewBlockItem =
         ]
 
 
-viewBlockItem : Block -> Html Msg
-viewBlockItem block =
+viewBlockItem : Bool -> Block -> Html Msg
+viewBlockItem showContextualMenu block =
     li
         [ if block.visible then
             class "block-item"
@@ -3343,11 +3356,11 @@ viewBlockItem block =
         , style [ ( "borderColor", colorToCssRgbString block.color ) ]
         ]
     <|
-        viewBlockItemContent block
+        viewBlockItemContent showContextualMenu block
 
 
-viewBlockItemContent : Block -> List (Html Msg)
-viewBlockItemContent block =
+viewBlockItemContent : Bool -> Block -> List (Html Msg)
+viewBlockItemContent showContextualMenu block =
     [ div
         [ class "block-info-wrapper"
         , onClick <| ToJs <| SelectBlock block
@@ -3384,8 +3397,8 @@ viewDeleteBlockAction block =
         [ FASolid.trash ]
 
 
-viewBlockItemWithSelection : List String -> Block -> Html Msg
-viewBlockItemWithSelection selectedBlocks block =
+viewBlockItemWithSelection : Bool -> List String -> Block -> Html Msg
+viewBlockItemWithSelection showContextualMenu selectedBlocks block =
     if List.member block.uuid selectedBlocks then
         li
             [ if block.visible then
@@ -3395,9 +3408,9 @@ viewBlockItemWithSelection selectedBlocks block =
             , style [ ( "borderColor", colorToCssRgbString block.color ) ]
             ]
         <|
-            viewBlockItemContent block
+            viewBlockItemContent showContextualMenu block
     else
-        viewBlockItem block
+        viewBlockItem showContextualMenu block
 
 
 
