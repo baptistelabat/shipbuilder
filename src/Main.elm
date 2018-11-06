@@ -2613,24 +2613,33 @@ viewHullStudioPanel model =
 
 viewPartitioning : PartitioningView -> Model -> Html Msg
 viewPartitioning partitioningView model =
+    let
+        isDeckSpacingDetailsOpen : Bool
+        isDeckSpacingDetailsOpen =
+            Maybe.withDefault False <| Dict.get "deck-spacing-details" model.uiSettings.accordions
+
+        isBulkheadSpacingDetailsOpen : Bool
+        isBulkheadSpacingDetailsOpen =
+            Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiSettings.accordions
+    in
     div
         [ class "panel partioning-panel" ]
     <|
         viewShowingPartitions model.partitions.showing
             :: (case partitioningView of
                     PropertiesEdition ->
-                        [ viewDecks False model.partitions.decks
-                        , viewBulkheads False model.partitions.bulkheads
+                            [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
+                            , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
                         ]
 
                     OriginDefinition Deck ->
-                        [ viewDecks True model.partitions.decks
-                        , viewBulkheads False model.partitions.bulkheads
+                            [ viewDecks True isDeckSpacingDetailsOpen model.partitions.decks
+                            , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
                         ]
 
                     OriginDefinition Bulkhead ->
-                        [ viewDecks False model.partitions.decks
-                        , viewBulkheads True model.partitions.bulkheads
+                            [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
+                            , viewBulkheads True isBulkheadSpacingDetailsOpen model.partitions.bulkheads
                         ]
                )
 
@@ -2762,8 +2771,8 @@ viewShowingPartitions showing =
         ]
 
 
-viewDecks : Bool -> Decks -> Html Msg
-viewDecks isDefiningOrigin decks =
+viewDecks : Bool -> Bool -> Decks -> Html Msg
+viewDecks isDefiningOrigin isDetailsOpen decks =
     div [ class "decks stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
@@ -2893,8 +2902,8 @@ viewPartitionSpacingListItem partitionType defaultSpacing partitionSpacingData =
         ]
 
 
-viewBulkheads : Bool -> Bulkheads -> Html Msg
-viewBulkheads isDefiningOrigin bulkheads =
+viewBulkheads : Bool -> Bool -> Bulkheads -> Html Msg
+viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
     div [ class "bulkheads stacked-subpanel" ]
         [ div
             [ class "stacked-subpanel-header" ]
