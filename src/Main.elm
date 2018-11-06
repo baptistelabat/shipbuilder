@@ -3306,7 +3306,10 @@ viewNewBlockItem =
 viewBlockItem : Block -> Html Msg
 viewBlockItem block =
     li
-        [ class "block-item"
+        [ if block.visible then
+            class "block-item"
+          else
+            class "block-item hidden"
         , style [ ( "borderColor", colorToCssRgbString block.color ) ]
         ]
     <|
