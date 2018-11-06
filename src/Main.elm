@@ -3355,7 +3355,10 @@ viewBlockItemWithSelection : List String -> Block -> Html Msg
 viewBlockItemWithSelection selectedBlocks block =
     if List.member block.uuid selectedBlocks then
         li
-            [ class "block-item block-item__selected"
+            [ if block.visible then
+                class "block-item block-item__selected"
+              else
+                class "block-item block-item__selected hidden"
             , style [ ( "borderColor", colorToCssRgbString block.color ) ]
             ]
         <|

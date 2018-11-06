@@ -306,6 +306,10 @@ li.block-item, li.hull-reference {
     border-left-style: solid;
 }
 
+li.block-item.hidden {
+    opacity: 0.5;
+}
+
 li.block-item .block-info-wrapper, li.hull-reference .hull-info-wrapper {
     padding: 8px 12px;
     width: 100%;
@@ -502,6 +506,12 @@ p.text-muted {
 
 .input-group {
     margin: 8px 0;
+}
+
+.block-visibility svg {
+    height: 16px;
+    width: 24px;
+    margin-left: 8px;
 }
 
 .input-group label,
