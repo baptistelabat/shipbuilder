@@ -1048,7 +1048,7 @@ initModel =
         , uiState = 
             { accordions = Dict.empty
             , blockContextualMenu = Nothing
-        }
+            }
         }
 
 
@@ -3347,15 +3347,15 @@ viewBlockList model =
         viewBlockWithoutSelection block =
             viewBlockItem (showContextualMenuFor block) block
     in
-    ul
-        [ class "blocks" ]
-    <|
+        ul
+            [ class "blocks" ]
+        <|
             if List.length model.selectedBlocks > 0 then
                 (List.map viewBlockWithSelection <| toList model.blocks)
-                ++ [ viewNewBlockItem ]
-        else
+                    ++ [ viewNewBlockItem ]
+            else
                 (List.map viewBlockWithoutSelection <| toList model.blocks)
-                ++ [ viewNewBlockItem ]
+                    ++ [ viewNewBlockItem ]
 
 
 viewNewBlockItem : Html Msg
@@ -3380,6 +3380,7 @@ viewBlockItem showContextualMenu block =
           else
             class "block-item hidden"
         , style [ ( "borderColor", colorToCssRgbString block.color ) ]
+        , onMouseLeave <| NoJs <| UnsetBlockContextualMenu
         ]
     <|
         viewBlockItemContent showContextualMenu block
@@ -3388,19 +3389,19 @@ viewBlockItem showContextualMenu block =
 viewBlockItemContent : Bool -> Block -> List (Html Msg)
 viewBlockItemContent showContextualMenu block =
     if showContextualMenu then
-    [ div
-        [ class "block-info-wrapper"
-        , onClick <| ToJs <| SelectBlock block
-        ]
-        [ viewEditableBlockName block
-        , p
-            [ class "block-uuid" ]
-            [ text block.uuid ]
+        [ div
+            [ class "block-info-wrapper"
+            , onClick <| ToJs <| SelectBlock block
+            ]
+            [ viewEditableBlockName block
+            , p
+                [ class "block-uuid" ]
+                [ text block.uuid ]
             , viewBlockContextualMenu block
-        ]
-    , div
-        [ class "block-actions" ]
-        [ viewFocusBlockAction block
+            ]
+        , div
+            [ class "block-actions" ]
+            [ viewFocusBlockAction block
             , viewCloseBlockContextualMenuAction
             ]
         ]
@@ -3447,8 +3448,12 @@ viewBlockContextualMenu block =
     div
         [ class "block-contextual-menu"
         , onClickWithoutPropagation <| NoJs <| NoOp
-    ]
+        ]
         [ viewDeleteBlockAction block
+        , if block.visible then
+            viewHideBlockAction block
+          else
+            viewShowBlockAction block
         ]
 
 
@@ -3457,6 +3462,7 @@ viewFocusBlockAction block =
     div
         [ class "block-action focus-block"
         , onClick <| ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock block.uuid
+        , title "Focus block"
         ]
         [ FASolid.arrow_right
         ]
