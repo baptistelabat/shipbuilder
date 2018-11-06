@@ -80,6 +80,7 @@ newBlockDecoder =
         |> Pipeline.required "size" decodeSize
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded { value = 0, string = "0" }
+        |> Pipeline.hardcoded True
 
 
 type alias SyncPosition =
@@ -184,6 +185,7 @@ decodeBlock =
         |> Pipeline.required "size" decodeSize
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
+        |> Pipeline.hardcoded True
 
 
 decodeColor : Decode.Decoder Color
@@ -588,6 +590,7 @@ type alias Block =
     , size : Size
     , mass : FloatInput
     , density : FloatInput
+    , visible : Bool
     }
 
 
