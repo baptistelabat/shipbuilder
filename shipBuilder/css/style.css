@@ -355,20 +355,12 @@ li.block-item .block-actions {
     justify-content: space-evenly;
 }
 
-li.block-item .block-action {
+li.block-item .block-actions .block-action {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 4px;
     cursor: pointer;
-}
-
-li.block-item .block-action:first-child {
-    border-top-right-radius: 8px;
-}
-
-li.block-item .block-action:last-child {
-    border-bottom-right-radius: 8px;
 }
 
 li.block-item .focus-block {
@@ -384,11 +376,11 @@ li.block-item .delete-block {
     color: var(--on-secondary-color);
 }
 
-
-
-li.block-item .block-action svg {
+li.block-item .block-actions .block-action svg {
     height: 16px;
 }
+
+
 
 li.block-item__selected, li.hull-reference__selected {
     border-left-width: 6px;
