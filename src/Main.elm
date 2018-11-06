@@ -3387,6 +3387,7 @@ viewBlockItem showContextualMenu block =
 
 viewBlockItemContent : Bool -> Block -> List (Html Msg)
 viewBlockItemContent showContextualMenu block =
+    if showContextualMenu then
     [ div
         [ class "block-info-wrapper"
         , onClick <| ToJs <| SelectBlock block
@@ -3395,13 +3396,60 @@ viewBlockItemContent showContextualMenu block =
         , p
             [ class "block-uuid" ]
             [ text block.uuid ]
+            , viewBlockContextualMenu block
         ]
     , div
         [ class "block-actions" ]
         [ viewFocusBlockAction block
-        , viewDeleteBlockAction block
+            , viewCloseBlockContextualMenuAction
+            ]
         ]
+    else
+        [ div
+            [ class "block-info-wrapper"
+            , onClick <| ToJs <| SelectBlock block
+            ]
+            [ viewEditableBlockName block
+            , p
+                [ class "block-uuid" ]
+                [ text block.uuid ]
+            ]
+        , div
+            [ class "block-actions" ]
+            [ viewFocusBlockAction block
+            , viewOpenBlockContextualMenuAction block
+            ]
+        ]
+
+
+viewOpenBlockContextualMenuAction : Block -> Html Msg
+viewOpenBlockContextualMenuAction block =
+    div
+        [ class "block-action open-contextual-menu"
+        , onClick <| NoJs <| SetBlockContextualMenu block.uuid
+        , title "See extra actions"
+        ]
+        [ FASolid.ellipsis_h ]
+
+
+viewCloseBlockContextualMenuAction : Html Msg
+viewCloseBlockContextualMenuAction =
+    div
+        [ class "block-action close-contextual-menu"
+        , onClick <| NoJs <| UnsetBlockContextualMenu
+        , title "Hide extra actions"
+        ]
+        [ FARegular.times_circle ]
+
+
+viewBlockContextualMenu : Block -> Html Msg
+viewBlockContextualMenu block =
+    div
+        [ class "block-contextual-menu"
+        , onClickWithoutPropagation <| NoJs <| NoOp
     ]
+        [ viewDeleteBlockAction block
+        ]
 
 
 viewFocusBlockAction : Block -> Html Msg
@@ -3418,9 +3466,35 @@ viewDeleteBlockAction : Block -> Html Msg
 viewDeleteBlockAction block =
     div
         [ class "block-action delete-block"
-        , onClick <| ToJs <| RemoveBlock block
+        , onClickWithoutPropagation <| ToJs <| RemoveBlock block
+        , title "Delete block"
         ]
         [ FASolid.trash ]
+
+
+onClickWithoutPropagation : Msg -> Html.Attribute Msg
+onClickWithoutPropagation msg =
+    onWithOptions "click" { stopPropagation = True, preventDefault = False } (Decode.succeed msg)
+
+
+viewShowBlockAction : Block -> Html Msg
+viewShowBlockAction block =
+    div
+        [ class "block-action show-block"
+        , onClickWithoutPropagation <| ToJs <| ToggleBlockVisibility block True
+        , title "Show block"
+        ]
+        [ FASolid.eye ]
+
+
+viewHideBlockAction : Block -> Html Msg
+viewHideBlockAction block =
+    div
+        [ class "block-action hide-block"
+        , onClickWithoutPropagation <| ToJs <| ToggleBlockVisibility block False
+        , title "Hide block"
+        ]
+        [ FASolid.eye_slash ]
 
 
 viewBlockItemWithSelection : Bool -> List String -> Block -> Html Msg
