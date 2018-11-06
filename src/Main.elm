@@ -586,6 +586,7 @@ type alias Model =
 
 type alias UiState =
     { accordions : Dict String Bool
+    , blockContextualMenu : Maybe String
     }
 
 
@@ -1046,6 +1047,7 @@ initModel =
         , partitions = initPartitions
         , uiState = 
             { accordions = Dict.empty
+            , blockContextualMenu = Nothing
         }
         }
 
