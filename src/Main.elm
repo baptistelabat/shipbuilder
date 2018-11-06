@@ -3057,7 +3057,11 @@ viewBackToWholeList =
 
 viewBlockProperties : Block -> List (Html Msg)
 viewBlockProperties block =
-    [ SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
+    [ div
+        [ class "input-group block-color" ]
+        [ label [] [ text "Color" ]
+        , SIRColorPicker.view block.color (ToJs << ChangeBlockColor block)
+        ]
     , div
         [ class "block-position" ]
       <|

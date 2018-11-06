@@ -426,8 +426,6 @@ input.block-label {
 
 .blocks-panel__focus .focus-sub-header {
     margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--secondary-color);
     color: var(--on-secondary-color__muted);
     font-size: 0.6em;
 
@@ -683,6 +681,14 @@ p.block-volume-value {
     justify-content: space-between;
     align-items: center;
     margin: 4px 0;
+}
+
+.block-color .sir-color-picker {
+    justify-content: center;
+}
+.block-color .sir-color-item {
+    height: 25px;
+    width: 25px;
 }
 
 .kpi-color-label {
