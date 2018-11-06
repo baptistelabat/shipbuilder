@@ -580,11 +580,11 @@ type alias Model =
     , blocks : Blocks
     , toasts : Toasts
     , partitions : PartitionsData
-    , uiSettings : UiSettings
+    , uiState : UiState
     }
 
 
-type alias UiSettings =
+type alias UiState =
     { accordions : Dict String Bool
     }
 
@@ -1044,7 +1044,9 @@ initModel =
         , blocks = DictList.empty
         , toasts = emptyToasts
         , partitions = initPartitions
-        , uiSettings = { accordions = Dict.empty }
+        , uiState = 
+            { accordions = Dict.empty
+        }
         }
 
 
@@ -1417,15 +1419,15 @@ updateNoJs msg model =
 
         ToggleAccordion isOpen accordionId ->
             let
-                uiSettings : UiSettings
-                uiSettings =
-                    model.uiSettings
+                uiState : UiState
+                uiState =
+                    model.uiState
 
-                newUiSettings : UiSettings
-                newUiSettings =
-                    { uiSettings | accordions = Dict.insert accordionId isOpen uiSettings.accordions }
+                newUiState : UiState
+                newUiState =
+                    { uiState | accordions = Dict.insert accordionId isOpen uiState.accordions }
             in
-                { model | uiSettings = newUiSettings } ! []
+                { model | uiState = newUiState } ! []
 
         UpdateMass block input ->
             let
@@ -2656,11 +2658,11 @@ viewPartitioning partitioningView model =
     let
         isDeckSpacingDetailsOpen : Bool
         isDeckSpacingDetailsOpen =
-            Maybe.withDefault False <| Dict.get "deck-spacing-details" model.uiSettings.accordions
+            Maybe.withDefault False <| Dict.get "deck-spacing-details" model.uiState.accordions
 
         isBulkheadSpacingDetailsOpen : Bool
         isBulkheadSpacingDetailsOpen =
-            Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiSettings.accordions
+            Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiState.accordions
     in
         div
             [ class "panel partioning-panel" ]
