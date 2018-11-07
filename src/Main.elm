@@ -760,6 +760,7 @@ encodeModelForSave model =
         , ( "blocks", encodeBlocks model.blocks )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "partitions", encodePartitions model.partitions )
+        , ( "tags", encodeTags model.tags )
         ]
 
 
@@ -838,6 +839,19 @@ encodePartitions partitions =
         [ ( "decks", encodeDecks partitions.decks )
         , ( "bulkheads", encodeBulkheads partitions.bulkheads )
         ]
+
+
+encodeTag : Tag -> Encode.Value
+encodeTag tag =
+    Encode.object
+        [ ("color", Encode.string <| SIRColorPicker.getName tag.color )
+        , ("label", Encode.string tag.label )
+        ]
+
+
+encodeTags : Tags -> Encode.Value
+encodeTags tags =
+    Encode.list <| List.map encodeTag tags
 
 
 type alias ComputedPartition =
