@@ -1,29 +1,4 @@
-module SIRColorPicker
-    exposing
-        ( view
-        , palette
-        , getColor
-        , getName
-        , SirColor
-        , red
-        , pink
-        , purple
-        , deepPurple
-        , indigo
-        , blue
-        , lightBlue
-        , cyan
-        , teal
-        , green
-        , lightGreen
-        , lime
-        , yellow
-        , amber
-        , orange
-        , deepOrange
-        , brown
-        , black
-        )
+module SIRColorPicker exposing (..)
 
 import Color exposing (Color, hsl)
 import Html.Events exposing (onClick)
