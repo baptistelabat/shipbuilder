@@ -596,6 +596,18 @@ type alias Tag =
     }
 
 
+decodeTag : Decode.Decoder Tag
+decodeTag =
+    let
+        getColorFromName : String -> SIRColorPicker.SirColor
+        getColorFromName name =
+            Maybe.withDefault SIRColorPicker.Black <| SIRColorPicker.fromName name
+    in
+        Pipeline.decode Tag
+            |> Pipeline.required "label" Decode.string
+            |> Pipeline.required "color" (Decode.map getColorFromName Decode.string)
+
+
 type alias UiState =
     { accordions : Dict String Bool
     , blockContextualMenu : Maybe String
