@@ -3182,9 +3182,35 @@ viewWholeList : Model -> Html Msg
 viewWholeList model =
     div
         [ class "panel blocks-panel" ]
-        [ h2 [] [ text "Blocks" ]
+        [ h2
+            []
+            [ text "Blocks"
+            , div
+                [ class "blocks-visibility" ]
+                [viewShowBlocksAction (toList model.blocks)
+                , viewHideBlocksAction (toList model.blocks)
+                ]
+            ]
         , viewBlockList model
         ]
+
+
+viewShowBlocksAction : List Block -> Html Msg
+viewShowBlocksAction blocks =
+    div
+        [ class "blocks-action show-all-blocks"
+        , title "Show all blocks"
+        ]
+        [ FASolid.eye ]
+
+
+viewHideBlocksAction : List Block -> Html Msg
+viewHideBlocksAction blocks =
+    div
+        [ class "blocks-action hide-all-blocks"
+        , title "Hide all blocks"
+        ]
+        [ FASolid.eye_slash ]
 
 
 viewDetailedBlock : String -> Model -> Html Msg
