@@ -585,6 +585,11 @@ type alias Model =
     }
 
 
+type alias Tag =
+    { label : String
+    , color : SIRColorPicker.SirColor
+    }
+
 type alias UiState =
     { accordions : Dict String Bool
     , blockContextualMenu : Maybe String
