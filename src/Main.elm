@@ -2783,32 +2783,34 @@ listToCsvLine items =
         |> String.join ","
 
 
-viewMassKpi : Blocks -> Html Msg
-viewMassKpi blocks =
-    div [ class "kpi mass" ] <|
+viewKpi : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
+viewKpi kpiTitle className totalValue valueForColor tags =
+    let
+        getColor : SIRColorPicker.SirColor -> Color
+        getColor sirColor =
+            SIRColorPicker.getColor sirColor
+
+        getColorName : SIRColorPicker.SirColor -> String
+        getColorName sirColor =
+            SIRColorPicker.getName sirColor
+
+        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
+        getTagLabelForColor sirColor =
+            List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
+
+        getLabelForColor : SIRColorPicker.SirColor -> String
+        getLabelForColor sirColor =
+            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+    in
+        div [ class <| "kpi " ++ className ] <|
         (div [ class "kpi-total kpi-group" ]
-            [ h3 [ class "kpi-label" ] [ text "Σ Mass (T)" ]
-            , p [ class "kpi-value" ] [ text <| toString <| round <| (getSumOfMasses blocks) ]
+                [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
+                , p [ class "kpi-value" ] [ text <| toString totalValue ]
             ]
         )
             :: List.map
                 (\sirColor ->
-                    viewKpiByColor "mass" sirColor (round <| getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor)
-                )
-                SIRColorPicker.palette
-
-
-viewVolumeKpi : Blocks -> Html Msg
-viewVolumeKpi blocks =
-    div [ class "kpi volume" ] <|
-        (div [ class "kpi-total kpi-group" ]
-            [ h3 [ class "kpi-label" ] [ text "Σ Volume (m³)" ]
-            , p [ class "kpi-value" ] [ text <| toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumes blocks ]
-            ]
-        )
-            :: List.map
-                (\sirColor ->
-                    viewKpiByColor "volume" sirColor (flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
+                        viewKpiByColor className (getColor sirColor) (getLabelForColor sirColor) (valueForColor <| SIRColorPicker.getColor sirColor)
                 )
                 SIRColorPicker.palette
 
