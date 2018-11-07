@@ -2783,7 +2783,7 @@ viewMassKpi blocks =
         )
             :: List.map
                 (\sirColor ->
-                    viewKpiByColor "mass" (SIRColorPicker.getColor sirColor) (round <| getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor)
+                    viewKpiByColor "mass" sirColor (round <| getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor)
                 )
                 SIRColorPicker.palette
 
@@ -2798,7 +2798,7 @@ viewVolumeKpi blocks =
         )
             :: List.map
                 (\sirColor ->
-                    viewKpiByColor "volume" (SIRColorPicker.getColor sirColor) (flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
+                    viewKpiByColor "volume" sirColor (flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
                 )
                 SIRColorPicker.palette
 
@@ -2809,13 +2809,13 @@ getFullKpiSummary blocks =
         :: (List.map (computeKpisForColor blocks) SIRColorPicker.palette)
 
 
-viewKpiByColor : String -> Color -> number -> Html Msg
+viewKpiByColor : String -> SIRColorPicker.SirColor -> number -> Html Msg
 viewKpiByColor kpiClass color kpiValue =
     div [ class <| "kpi-group " ++ kpiClass ]
         [ div
             [ class "kpi-color-label"
             , style
-                [ ( "background-color", colorToCssRgbString color )
+                [ ( "background-color", colorToCssRgbString <| SIRColorPicker.getColor color )
                 ]
             ]
             []
