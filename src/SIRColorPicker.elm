@@ -87,7 +87,7 @@ type SirColor
     | DeepPurple
     | Indigo
     | Blue
-    | Lightblue
+    | LightBlue
     | Cyan
     | Teal
     | Green
@@ -122,7 +122,7 @@ getColor sirColor =
         Blue ->
             blue
 
-        Lightblue ->
+        LightBlue ->
             lightBlue
 
         Cyan ->
@@ -172,7 +172,7 @@ palette =
     , DeepPurple
     , Indigo
     , Blue
-    , Lightblue
+    , LightBlue
     , Cyan
     , Teal
     , Green
