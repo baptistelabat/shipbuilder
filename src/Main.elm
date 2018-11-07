@@ -2817,6 +2817,7 @@ viewKpiByColor kpiClass color kpiValue =
             , style
                 [ ( "background-color", colorToCssRgbString <| SIRColorPicker.getColor color )
                 ]
+            , title <| SIRColorPicker.getName color
             ]
             []
         , p
