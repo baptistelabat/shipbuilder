@@ -585,13 +585,16 @@ type alias Model =
     , tags : Tags
     }
 
+
 type alias Tags =
     List Tag
+
 
 type alias Tag =
     { label : String
     , color : SIRColorPicker.SirColor
     }
+
 
 type alias UiState =
     { accordions : Dict String Bool
@@ -2759,7 +2762,7 @@ viewKpiStudio model =
             , href <|
                 "data:text/csv;charset=utf-8,"
                     ++ (encodeUri <|
-                            kpisAsCsv model.blocks
+                            kpisAsCsv model.blocks model.tags
                        )
             , downloadAs "kpis.csv"
             ]
@@ -2769,33 +2772,46 @@ viewKpiStudio model =
         ]
 
 
-kpisAsCsv : Blocks -> String
-kpisAsCsv blocks =
+kpisAsCsv : Blocks -> Tags -> String
+kpisAsCsv blocks tags =
     let
         summaryList : List KpiSummary
         summaryList =
             getFullKpiSummary blocks
     in
         listToCsvLine [ "Target", "Mass (T)", "Volume (m³)" ]
-            :: List.map kpiSummaryToCsvLine summaryList
+            :: List.map (kpiSummaryToCsvLine tags) summaryList
             |> String.join "\n"
 
 
-kpiSummaryToCsvLine : KpiSummary -> String
-kpiSummaryToCsvLine summary =
-    listToCsvLine
-        [ case summary.target of
-            WholeShip ->
-                "Total"
+kpiSummaryToCsvLine : Tags -> KpiSummary -> String
+kpiSummaryToCsvLine tags summary =
+    let
+        getColorName : SIRColorPicker.SirColor -> String
+        getColorName sirColor =
+            SIRColorPicker.getName sirColor
 
-            ColorGroup color ->
-                SIRColorPicker.getName color
+        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
+        getTagLabelForColor sirColor =
+            List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
 
-            SingleBlock uuid ->
-                uuid
-        , toString <| round <| summary.mass
-        , toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| summary.volume
-        ]
+        getLabelForColor : SIRColorPicker.SirColor -> String
+        getLabelForColor sirColor =
+            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+    in
+        listToCsvLine
+            [ case summary.target of
+                WholeShip ->
+                    "Total"
+
+                ColorGroup color ->
+                    getLabelForColor color
+
+                SingleBlock uuid ->
+                    uuid
+            , toString <| round <| summary.mass
+            , toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| summary.volume
+            ]
 
 
 listToCsvLine : List String -> String
@@ -2845,16 +2861,16 @@ viewKpi kpiTitle className totalValue valueForColor tags =
             Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
     in
         div [ class <| "kpi " ++ className ] <|
-        (div [ class "kpi-total kpi-group" ]
+            (div [ class "kpi-total kpi-group" ]
                 [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
                 , p [ class "kpi-value" ] [ text <| toString totalValue ]
-            ]
-        )
-            :: List.map
-                (\sirColor ->
+                ]
+            )
+                :: List.map
+                    (\sirColor ->
                         viewKpiByColor className (getColor sirColor) (getLabelForColor sirColor) (valueForColor <| SIRColorPicker.getColor sirColor)
-                )
-                SIRColorPicker.palette
+                    )
+                    SIRColorPicker.palette
 
 
 getFullKpiSummary : Blocks -> List KpiSummary
