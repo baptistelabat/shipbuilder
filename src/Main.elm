@@ -525,7 +525,7 @@ restoreSaveInModel model saveFile =
 
         partitions =
             saveFile.partitions
-        
+
         tags =
             saveFile.tags
     in
@@ -565,8 +565,8 @@ encodeRestoreSaveCmd model =
         ]
 
 
-encodeToggleBlockVisibilityCmd : List Block -> Bool -> Encode.Value
-encodeToggleBlockVisibilityCmd blocks visible =
+encodeToggleBlocksVisibilityCmd : List Block -> Bool -> Encode.Value
+encodeToggleBlocksVisibilityCmd blocks visible =
     Encode.object
         [ ( "visible", Encode.bool visible )
         , ( "uuids", Encode.list <| List.map (Encode.string << .uuid) blocks )
@@ -868,8 +868,8 @@ encodePartitions partitions =
 encodeTag : Tag -> Encode.Value
 encodeTag tag =
     Encode.object
-        [ ("color", Encode.string <| SIRColorPicker.getName tag.color )
-        , ("label", Encode.string tag.label )
+        [ ( "color", Encode.string <| SIRColorPicker.getName tag.color )
+        , ( "label", Encode.string tag.label )
         ]
 
 
@@ -1358,7 +1358,6 @@ type ToJsMsg
     | SelectHullReference HullReference
     | SetSpacingException PartitionType Int String
     | SwitchViewMode ViewMode
-    | ToggleBlockVisibility Block Bool
     | ToggleBlocksVisibility (List Block) Bool
     | TogglePartitions
     | UpdatePartitionNumber PartitionType String
@@ -1888,19 +1887,6 @@ updateModelToJs msg model =
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
 
-        ToggleBlockVisibility block isVisible ->
-            case getBlockByUUID block.uuid model.blocks of
-                Just recoveredBlock ->
-                    let
-                        updatedBlock : Block
-                        updatedBlock =
-                            { block | visible = isVisible }
-                    in
-                        updateBlockInModel updatedBlock model
-
-                Nothing ->
-                    model
-
         ToggleBlocksVisibility blocks isVisible ->
             let
                 updateVisibilityIfTargeted : String -> Block -> Block
@@ -2245,11 +2231,8 @@ msg2json model action =
         TogglePartitions ->
             Just { tag = "showing-partitions", data = Encode.bool <| not model.partitions.showing }
 
-        ToggleBlockVisibility block isVisible ->
-            Just { tag = "blocks-visibility", data = encodeToggleBlockVisibilityCmd [ block ] isVisible }
-
         ToggleBlocksVisibility blocks isVisible ->
-            Just { tag = "blocks-visibility", data = encodeToggleBlockVisibilityCmd blocks isVisible }
+            Just { tag = "blocks-visibility", data = encodeToggleBlocksVisibilityCmd blocks isVisible }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -3277,7 +3260,7 @@ viewBlockProperties block =
     [ if block.visible then
         div
             [ class "block-visibility primary-button"
-            , onClick <| ToJs <| ToggleBlockVisibility block False
+            , onClick <| ToJs <| ToggleBlocksVisibility [ block ] False
             ]
             [ text "Hide block"
             , FASolid.eye_slash
@@ -3285,7 +3268,7 @@ viewBlockProperties block =
       else
         div
             [ class "block-visibility primary-button"
-            , onClick <| ToJs <| ToggleBlockVisibility block True
+            , onClick <| ToJs <| ToggleBlocksVisibility [ block ] True
             ]
             [ text "Show block"
             , FASolid.eye
@@ -3647,7 +3630,7 @@ viewShowBlockAction : Block -> Html Msg
 viewShowBlockAction block =
     div
         [ class "block-action show-block"
-        , onClickWithoutPropagation <| ToJs <| ToggleBlockVisibility block True
+        , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [block] True
         , title "Show block"
         ]
         [ FASolid.eye ]
@@ -3657,7 +3640,7 @@ viewHideBlockAction : Block -> Html Msg
 viewHideBlockAction block =
     div
         [ class "block-action hide-block"
-        , onClickWithoutPropagation <| ToJs <| ToggleBlockVisibility block False
+        , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [block] False
         , title "Hide block"
         ]
         [ FASolid.eye_slash ]
