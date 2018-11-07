@@ -102,6 +102,7 @@ type alias SaveFile =
     { blocks : List Block
     , coordinatesTransform : List Float
     , partitions : PartitionsData
+    , tags : Tags
     }
 
 
@@ -111,6 +112,7 @@ saveFileDecoderV1 =
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.hardcoded initPartitions
+        |> Pipeline.hardcoded []
 
 
 saveFileDecoderV2 : Decode.Decoder SaveFile
@@ -119,6 +121,7 @@ saveFileDecoderV2 =
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.required "partitions" decodePartitions
+        |> Pipeline.optional "tags" decodeTags []
 
 
 decodeSaveFile : Int -> Decode.Decoder SaveFile
@@ -522,6 +525,9 @@ restoreSaveInModel model saveFile =
 
         partitions =
             saveFile.partitions
+        
+        tags =
+            saveFile.tags
     in
         case maybeCoordinatesTransform of
             Just savedCoordinatesTransform ->
@@ -530,6 +536,7 @@ restoreSaveInModel model saveFile =
                     | blocks = savedBlocks
                     , coordinatesTransform = savedCoordinatesTransform
                     , partitions = partitions
+                    , tags = tags
                 }
 
             Nothing ->
