@@ -463,6 +463,36 @@ input.block-label {
     color: var(--on-secondary-color);
 }
 
+.blocks-panel h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.blocks-panel h2 .blocks-visibility {
+    display: flex;
+}
+
+.blocks-panel h2 .blocks-visibility .blocks-action {
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.blocks-panel h2 .blocks-visibility .blocks-action:hover {
+    opacity: 1;
+}
+
+.blocks-panel h2 .blocks-visibility .blocks-action:active {
+    opacity: 1;
+    color: var(--primary-color__contrast);
+}
+
+.blocks-panel h2 .blocks-visibility svg {
+    height: 16px;
+    width: 20px;
+    margin-left: 8px;
+}
+
 .blocks-panel__focus {
     display: flex;
     flex-direction: column;
