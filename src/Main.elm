@@ -2742,8 +2742,8 @@ viewKpiStudio model =
             , downloadAs "kpis.csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
-        , viewMassKpi model.blocks
-        , viewVolumeKpi model.blocks
+        , viewMassKpi model.blocks model.tags
+        , viewVolumeKpi model.blocks model.tags
         ]
 
 
