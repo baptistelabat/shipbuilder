@@ -582,6 +582,7 @@ type alias Model =
     , toasts : Toasts
     , partitions : PartitionsData
     , uiState : UiState
+    , tags : Tags
     }
 
 type alias Tags =
@@ -1057,6 +1058,7 @@ initModel =
             { accordions = Dict.empty
             , blockContextualMenu = Nothing
             }
+        , tags = []
         }
 
 
