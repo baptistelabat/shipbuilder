@@ -341,7 +341,7 @@ li.block-item .block-info-wrapper {
     right: 0;
     left: 0;
     margin: 4px 4px;
-    padding: 0 4px;
+    padding: 0 8px 0 4px;
     display: none;
     justify-content: flex-end;
     border-right: 1px solid var(--contrast-color);
@@ -355,11 +355,11 @@ li.block-item:hover .block-contextual-menu {
 
 .block-info-wrapper .block-contextual-menu .block-action svg {
     height: 16px;
-    width: 18px;
+    width: 20px;
 }
 
 .block-info-wrapper .block-contextual-menu .block-action {
-    margin: 0 4px;
+    margin: 0 2px;
     cursor: pointer;
 }
 
