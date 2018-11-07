@@ -159,6 +159,11 @@ getColor sirColor =
             black
 
 
+fromColor : Color -> Maybe SirColor
+fromColor color =
+    List.head <| List.filter ((==) color << getColor) palette
+
+
 getName : SirColor -> String
 getName sirColor =
     toString sirColor
