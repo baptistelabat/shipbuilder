@@ -1327,7 +1327,8 @@ type ToJsMsg
 
 
 type NoJsMsg
-    = DismissToast String
+    = CleanTags
+    | DismissToast String
     | DisplayToast Toast
     | NoOp
     | RenameBlock Block String
@@ -1345,6 +1346,9 @@ type NoJsMsg
 updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
 updateNoJs msg model =
     case msg of
+        CleanTags ->
+            { model | tags = List.filter ((/=) 0 << String.length << .label) model.tags } ! []
+
         DismissToast keyToDismiss ->
             { model | toasts = removeToast keyToDismiss model.toasts } ! []
 
@@ -2875,6 +2879,7 @@ viewKpiByColor kpiClass color colorLabel kpiValue =
             , class "kpi-label"
             , value colorLabel
             , onInput <| NoJs << SetTagForColor color
+            , onBlur <| NoJs CleanTags
             ]
             []
         , p
