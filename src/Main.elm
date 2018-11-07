@@ -2841,18 +2841,22 @@ getFullKpiSummary blocks =
         :: (List.map (computeKpisForColor blocks) SIRColorPicker.palette)
 
 
-viewKpiByColor : String -> SIRColorPicker.SirColor -> number -> Html Msg
-viewKpiByColor kpiClass color kpiValue =
+viewKpiByColor : String -> Color -> String -> number -> Html Msg
+viewKpiByColor kpiClass color colorLabel kpiValue =
     div [ class <| "input-group kpi-group " ++ kpiClass ]
         [ label
             [ class "kpi-color-label"
             , style
-                [ ( "background-color", colorToCssRgbString <| SIRColorPicker.getColor color )
+                [ ( "background-color", colorToCssRgbString color )
                 ]
-            , title <| SIRColorPicker.getName color
+            , title colorLabel
             ]
             []
-        , input [ type_ "text", class "kpi-label", value <| SIRColorPicker.getName color ]
+        , input
+            [ type_ "text"
+            , class "kpi-label"
+            , value colorLabel
+            ]
             []
         , p
             [ class "kpi-value" ]
