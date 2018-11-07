@@ -566,6 +566,7 @@ encodeToggleBlockVisibilityCmd blocks visible =
         ]
 
 
+
 -- MODEL
 
 
@@ -1045,7 +1046,7 @@ initModel =
         , blocks = DictList.empty
         , toasts = emptyToasts
         , partitions = initPartitions
-        , uiState = 
+        , uiState =
             { accordions = Dict.empty
             , blockContextualMenu = Nothing
             }
@@ -2811,14 +2812,16 @@ getFullKpiSummary blocks =
 
 viewKpiByColor : String -> SIRColorPicker.SirColor -> number -> Html Msg
 viewKpiByColor kpiClass color kpiValue =
-    div [ class <| "kpi-group " ++ kpiClass ]
-        [ div
+    div [ class <| "input-group kpi-group " ++ kpiClass ]
+        [ label
             [ class "kpi-color-label"
             , style
                 [ ( "background-color", colorToCssRgbString <| SIRColorPicker.getColor color )
                 ]
             , title <| SIRColorPicker.getName color
             ]
+            []
+        , input [ type_ "text", class "kpi-label", value <| SIRColorPicker.getName color ]
             []
         , p
             [ class "kpi-value" ]
