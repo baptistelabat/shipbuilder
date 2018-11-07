@@ -596,6 +596,11 @@ type alias Tag =
     }
 
 
+decodeTags : Decode.Decoder Tags
+decodeTags =
+    Decode.list decodeTag
+
+
 decodeTag : Decode.Decoder Tag
 decodeTag =
     let
