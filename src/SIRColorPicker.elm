@@ -144,6 +144,11 @@ getName sirColor =
     toString sirColor
 
 
+fromName : String -> Maybe SirColor
+fromName name =
+    List.head <| List.filter ((==) name << getName) palette
+
+
 palette : List SirColor
 palette =
     [ Red
