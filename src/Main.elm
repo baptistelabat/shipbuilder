@@ -1334,6 +1334,7 @@ type NoJsMsg
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetMultipleSelect Bool
+    | SetTagForColor Color String
     | SyncBlockInputs Block
     | SyncPartitions
     | ToggleAccordion Bool String
@@ -1367,6 +1368,23 @@ updateNoJs msg model =
 
         SetMultipleSelect boolean ->
             { model | multipleSelect = boolean } ! []
+
+        SetTagForColor color label ->
+            let
+                sirColor : Maybe SIRColorPicker.SirColor
+                sirColor =
+                    SIRColorPicker.fromColor color
+
+                newTags : Tags
+                newTags =
+                    model.tags
+                        |> List.filter ((/=) color << SIRColorPicker.getColor << .color)
+                        |> if sirColor /= Nothing then
+                            (::) { color = Maybe.withDefault SIRColorPicker.Black sirColor, label = label }
+                           else
+                            List.map identity
+            in
+                { model | tags = newTags } ! []
 
         SyncBlockInputs block ->
             let
@@ -2856,6 +2874,7 @@ viewKpiByColor kpiClass color colorLabel kpiValue =
             [ type_ "text"
             , class "kpi-label"
             , value colorLabel
+            , onInput <| NoJs << SetTagForColor color
             ]
             []
         , p
