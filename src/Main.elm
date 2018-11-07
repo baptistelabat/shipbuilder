@@ -1359,6 +1359,7 @@ type ToJsMsg
     | SetSpacingException PartitionType Int String
     | SwitchViewMode ViewMode
     | ToggleBlockVisibility Block Bool
+    | ToggleBlocksVisibility (List Block) Bool
     | TogglePartitions
     | UpdatePartitionNumber PartitionType String
     | UpdatePartitionSpacing PartitionType String
@@ -1900,6 +1901,17 @@ updateModelToJs msg model =
                 Nothing ->
                     model
 
+        ToggleBlocksVisibility blocks isVisible ->
+            let
+                updateVisibilityIfTargeted : String -> Block -> Block
+                updateVisibilityIfTargeted uuid block =
+                    if List.member block blocks then
+                        { block | visible = isVisible }
+                    else
+                        block
+            in
+                { model | blocks = DictList.map updateVisibilityIfTargeted model.blocks }
+
         TogglePartitions ->
             let
                 partitions : PartitionsData
@@ -2235,6 +2247,9 @@ msg2json model action =
 
         ToggleBlockVisibility block isVisible ->
             Just { tag = "blocks-visibility", data = encodeToggleBlockVisibilityCmd [ block ] isVisible }
+
+        ToggleBlocksVisibility blocks isVisible ->
+            Just { tag = "blocks-visibility", data = encodeToggleBlockVisibilityCmd blocks isVisible }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -3199,6 +3214,7 @@ viewShowBlocksAction : List Block -> Html Msg
 viewShowBlocksAction blocks =
     div
         [ class "blocks-action show-all-blocks"
+        , onClick <| ToJs <| ToggleBlocksVisibility blocks True
         , title "Show all blocks"
         ]
         [ FASolid.eye ]
@@ -3208,6 +3224,7 @@ viewHideBlocksAction : List Block -> Html Msg
 viewHideBlocksAction blocks =
     div
         [ class "blocks-action hide-all-blocks"
+        , onClick <| ToJs <| ToggleBlocksVisibility blocks False
         , title "Hide all blocks"
         ]
         [ FASolid.eye_slash ]
