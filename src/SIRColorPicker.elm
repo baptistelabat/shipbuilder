@@ -1,29 +1,4 @@
-module SIRColorPicker
-    exposing
-        ( view
-        , palette
-        , getColor
-        , getName
-        , SirColor
-        , red
-        , pink
-        , purple
-        , deepPurple
-        , indigo
-        , blue
-        , lightBlue
-        , cyan
-        , teal
-        , green
-        , lightGreen
-        , lime
-        , yellow
-        , amber
-        , orange
-        , deepOrange
-        , brown
-        , black
-        )
+module SIRColorPicker exposing (..)
 
 import Color exposing (Color, hsl)
 import Html.Events exposing (onClick)
@@ -87,7 +62,7 @@ type SirColor
     | DeepPurple
     | Indigo
     | Blue
-    | Lightblue
+    | LightBlue
     | Cyan
     | Teal
     | Green
@@ -122,7 +97,7 @@ getColor sirColor =
         Blue ->
             blue
 
-        Lightblue ->
+        LightBlue ->
             lightBlue
 
         Cyan ->
@@ -159,9 +134,19 @@ getColor sirColor =
             black
 
 
+fromColor : Color -> Maybe SirColor
+fromColor color =
+    List.head <| List.filter ((==) color << getColor) palette
+
+
 getName : SirColor -> String
 getName sirColor =
     toString sirColor
+
+
+fromName : String -> Maybe SirColor
+fromName name =
+    List.head <| List.filter ((==) name << getName) palette
 
 
 palette : List SirColor
@@ -172,7 +157,7 @@ palette =
     , DeepPurple
     , Indigo
     , Blue
-    , Lightblue
+    , LightBlue
     , Cyan
     , Teal
     , Green

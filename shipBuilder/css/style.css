@@ -728,7 +728,7 @@ p.block-volume-value {
 }
 
 .kpi-panel .kpi .kpi-group + .kpi-group {
-    margin-left: 52px;
+    margin-left: 32px;
     padding: 4px 0 0;
 
 }
@@ -744,6 +744,13 @@ p.block-volume-value {
     margin: 4px 0;
 }
 
+.kpi-group.input-group label {
+    margin-bottom: 0;
+}
+.kpi-group.input-group input {
+    max-width: 100px;
+}
+
 .block-color .sir-color-picker {
     justify-content: center;
 }
@@ -753,12 +760,16 @@ p.block-volume-value {
 }
 
 .kpi-color-label {
-    width: 22px;
+    width: 6px;
     height: 22px;
+    margin-right: 4px;
+    flex: none;
 }
 
 .kpi-value {
     margin: 0 8px;
+    flex: 1 0 auto;
+    text-align: right;
 }
 
 a.download-kpis{

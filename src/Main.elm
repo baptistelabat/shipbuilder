@@ -102,6 +102,7 @@ type alias SaveFile =
     { blocks : List Block
     , coordinatesTransform : List Float
     , partitions : PartitionsData
+    , tags : Tags
     }
 
 
@@ -111,6 +112,7 @@ saveFileDecoderV1 =
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.hardcoded initPartitions
+        |> Pipeline.hardcoded []
 
 
 saveFileDecoderV2 : Decode.Decoder SaveFile
@@ -119,6 +121,7 @@ saveFileDecoderV2 =
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.required "partitions" decodePartitions
+        |> Pipeline.optional "tags" decodeTags []
 
 
 decodeSaveFile : Int -> Decode.Decoder SaveFile
@@ -522,6 +525,9 @@ restoreSaveInModel model saveFile =
 
         partitions =
             saveFile.partitions
+        
+        tags =
+            saveFile.tags
     in
         case maybeCoordinatesTransform of
             Just savedCoordinatesTransform ->
@@ -530,6 +536,7 @@ restoreSaveInModel model saveFile =
                     | blocks = savedBlocks
                     , coordinatesTransform = savedCoordinatesTransform
                     , partitions = partitions
+                    , tags = tags
                 }
 
             Nothing ->
@@ -566,6 +573,7 @@ encodeToggleBlockVisibilityCmd blocks visible =
         ]
 
 
+
 -- MODEL
 
 
@@ -581,7 +589,35 @@ type alias Model =
     , toasts : Toasts
     , partitions : PartitionsData
     , uiState : UiState
+    , tags : Tags
     }
+
+
+type alias Tags =
+    List Tag
+
+
+type alias Tag =
+    { label : String
+    , color : SIRColorPicker.SirColor
+    }
+
+
+decodeTags : Decode.Decoder Tags
+decodeTags =
+    Decode.list decodeTag
+
+
+decodeTag : Decode.Decoder Tag
+decodeTag =
+    let
+        getColorFromName : String -> SIRColorPicker.SirColor
+        getColorFromName name =
+            Maybe.withDefault SIRColorPicker.Black <| SIRColorPicker.fromName name
+    in
+        Pipeline.decode Tag
+            |> Pipeline.required "label" Decode.string
+            |> Pipeline.required "color" (Decode.map getColorFromName Decode.string)
 
 
 type alias UiState =
@@ -748,6 +784,7 @@ encodeModelForSave model =
         , ( "blocks", encodeBlocks model.blocks )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "partitions", encodePartitions model.partitions )
+        , ( "tags", encodeTags model.tags )
         ]
 
 
@@ -826,6 +863,19 @@ encodePartitions partitions =
         [ ( "decks", encodeDecks partitions.decks )
         , ( "bulkheads", encodeBulkheads partitions.bulkheads )
         ]
+
+
+encodeTag : Tag -> Encode.Value
+encodeTag tag =
+    Encode.object
+        [ ("color", Encode.string <| SIRColorPicker.getName tag.color )
+        , ("label", Encode.string tag.label )
+        ]
+
+
+encodeTags : Tags -> Encode.Value
+encodeTags tags =
+    Encode.list <| List.map encodeTag tags
 
 
 type alias ComputedPartition =
@@ -1045,10 +1095,11 @@ initModel =
         , blocks = DictList.empty
         , toasts = emptyToasts
         , partitions = initPartitions
-        , uiState = 
+        , uiState =
             { accordions = Dict.empty
             , blockContextualMenu = Nothing
             }
+        , tags = []
         }
 
 
@@ -1317,13 +1368,15 @@ type ToJsMsg
 
 
 type NoJsMsg
-    = DismissToast String
+    = CleanTags
+    | DismissToast String
     | DisplayToast Toast
     | NoOp
     | RenameBlock Block String
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetMultipleSelect Bool
+    | SetTagForColor Color String
     | SyncBlockInputs Block
     | SyncPartitions
     | ToggleAccordion Bool String
@@ -1334,6 +1387,9 @@ type NoJsMsg
 updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
 updateNoJs msg model =
     case msg of
+        CleanTags ->
+            { model | tags = List.filter ((/=) 0 << String.length << .label) model.tags } ! []
+
         DismissToast keyToDismiss ->
             { model | toasts = removeToast keyToDismiss model.toasts } ! []
 
@@ -1357,6 +1413,23 @@ updateNoJs msg model =
 
         SetMultipleSelect boolean ->
             { model | multipleSelect = boolean } ! []
+
+        SetTagForColor color label ->
+            let
+                sirColor : Maybe SIRColorPicker.SirColor
+                sirColor =
+                    SIRColorPicker.fromColor color
+
+                newTags : Tags
+                newTags =
+                    model.tags
+                        |> List.filter ((/=) color << SIRColorPicker.getColor << .color)
+                        |> if sirColor /= Nothing then
+                            (::) { color = Maybe.withDefault SIRColorPicker.Black sirColor, label = label }
+                           else
+                            List.map identity
+            in
+                { model | tags = newTags } ! []
 
         SyncBlockInputs block ->
             let
@@ -2727,43 +2800,56 @@ viewKpiStudio model =
             , href <|
                 "data:text/csv;charset=utf-8,"
                     ++ (encodeUri <|
-                            kpisAsCsv model.blocks
+                            kpisAsCsv model.blocks model.tags
                        )
             , downloadAs "kpis.csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
-        , viewMassKpi model.blocks
-        , viewVolumeKpi model.blocks
+        , viewMassKpi model.blocks model.tags
+        , viewVolumeKpi model.blocks model.tags
         ]
 
 
-kpisAsCsv : Blocks -> String
-kpisAsCsv blocks =
+kpisAsCsv : Blocks -> Tags -> String
+kpisAsCsv blocks tags =
     let
         summaryList : List KpiSummary
         summaryList =
             getFullKpiSummary blocks
     in
         listToCsvLine [ "Target", "Mass (T)", "Volume (m³)" ]
-            :: List.map kpiSummaryToCsvLine summaryList
+            :: List.map (kpiSummaryToCsvLine tags) summaryList
             |> String.join "\n"
 
 
-kpiSummaryToCsvLine : KpiSummary -> String
-kpiSummaryToCsvLine summary =
-    listToCsvLine
-        [ case summary.target of
-            WholeShip ->
-                "Total"
+kpiSummaryToCsvLine : Tags -> KpiSummary -> String
+kpiSummaryToCsvLine tags summary =
+    let
+        getColorName : SIRColorPicker.SirColor -> String
+        getColorName sirColor =
+            SIRColorPicker.getName sirColor
 
-            ColorGroup color ->
-                SIRColorPicker.getName color
+        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
+        getTagLabelForColor sirColor =
+            List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
 
-            SingleBlock uuid ->
-                uuid
-        , toString <| round <| summary.mass
-        , toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| summary.volume
-        ]
+        getLabelForColor : SIRColorPicker.SirColor -> String
+        getLabelForColor sirColor =
+            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+    in
+        listToCsvLine
+            [ case summary.target of
+                WholeShip ->
+                    "Total"
+
+                ColorGroup color ->
+                    getLabelForColor color
+
+                SingleBlock uuid ->
+                    uuid
+            , toString <| round <| summary.mass
+            , toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| summary.volume
+            ]
 
 
 listToCsvLine : List String -> String
@@ -2773,34 +2859,56 @@ listToCsvLine items =
         |> String.join ","
 
 
-viewMassKpi : Blocks -> Html Msg
-viewMassKpi blocks =
-    div [ class "kpi mass" ] <|
-        (div [ class "kpi-total kpi-group" ]
-            [ h3 [ class "kpi-label" ] [ text "Σ Mass (T)" ]
-            , p [ class "kpi-value" ] [ text <| toString <| round <| (getSumOfMasses blocks) ]
-            ]
-        )
-            :: List.map
-                (\sirColor ->
-                    viewKpiByColor "mass" (SIRColorPicker.getColor sirColor) (round <| getSumOfMassesForColor blocks <| SIRColorPicker.getColor sirColor)
-                )
-                SIRColorPicker.palette
+viewMassKpi : Blocks -> Tags -> Html Msg
+viewMassKpi blocks tags =
+    let
+        transform : Float -> Int
+        transform value =
+            round value
+    in
+        viewKpi "Σ Mass (T)" "mass" (transform <| getSumOfMasses blocks) (transform << getSumOfMassesForColor blocks) tags
 
 
-viewVolumeKpi : Blocks -> Html Msg
-viewVolumeKpi blocks =
-    div [ class "kpi volume" ] <|
-        (div [ class "kpi-total kpi-group" ]
-            [ h3 [ class "kpi-label" ] [ text "Σ Volume (m³)" ]
-            , p [ class "kpi-value" ] [ text <| toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumes blocks ]
-            ]
-        )
-            :: List.map
-                (\sirColor ->
-                    viewKpiByColor "volume" (SIRColorPicker.getColor sirColor) (flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| getSumOfVolumesForColor blocks <| SIRColorPicker.getColor sirColor)
-                )
-                SIRColorPicker.palette
+viewVolumeKpi : Blocks -> Tags -> Html Msg
+viewVolumeKpi blocks tags =
+    let
+        transform : Float -> Float
+        transform value =
+            flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| value
+    in
+        viewKpi "Σ Volume (m³)" "volume" (transform <| getSumOfVolumes blocks) (transform << getSumOfVolumesForColor blocks) tags
+
+
+viewKpi : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
+viewKpi kpiTitle className totalValue valueForColor tags =
+    let
+        getColor : SIRColorPicker.SirColor -> Color
+        getColor sirColor =
+            SIRColorPicker.getColor sirColor
+
+        getColorName : SIRColorPicker.SirColor -> String
+        getColorName sirColor =
+            SIRColorPicker.getName sirColor
+
+        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
+        getTagLabelForColor sirColor =
+            List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
+
+        getLabelForColor : SIRColorPicker.SirColor -> String
+        getLabelForColor sirColor =
+            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+    in
+        div [ class <| "kpi " ++ className ] <|
+            (div [ class "kpi-total kpi-group" ]
+                [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
+                , p [ class "kpi-value" ] [ text <| toString totalValue ]
+                ]
+            )
+                :: List.map
+                    (\sirColor ->
+                        viewKpiByColor className (getColor sirColor) (getLabelForColor sirColor) (valueForColor <| SIRColorPicker.getColor sirColor)
+                    )
+                    SIRColorPicker.palette
 
 
 getFullKpiSummary : Blocks -> List KpiSummary
@@ -2809,14 +2917,23 @@ getFullKpiSummary blocks =
         :: (List.map (computeKpisForColor blocks) SIRColorPicker.palette)
 
 
-viewKpiByColor : String -> Color -> number -> Html Msg
-viewKpiByColor kpiClass color kpiValue =
-    div [ class <| "kpi-group " ++ kpiClass ]
-        [ div
+viewKpiByColor : String -> Color -> String -> number -> Html Msg
+viewKpiByColor kpiClass color colorLabel kpiValue =
+    div [ class <| "input-group kpi-group " ++ kpiClass ]
+        [ label
             [ class "kpi-color-label"
             , style
                 [ ( "background-color", colorToCssRgbString color )
                 ]
+            , title colorLabel
+            ]
+            []
+        , input
+            [ type_ "text"
+            , class "kpi-label"
+            , value colorLabel
+            , onInput <| NoJs << SetTagForColor color
+            , onBlur <| NoJs CleanTags
             ]
             []
         , p
