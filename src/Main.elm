@@ -584,6 +584,8 @@ type alias Model =
     , uiState : UiState
     }
 
+type alias Tags =
+    List Tag
 
 type alias Tag =
     { label : String
