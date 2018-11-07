@@ -2783,6 +2783,26 @@ listToCsvLine items =
         |> String.join ","
 
 
+viewMassKpi : Blocks -> Tags -> Html Msg
+viewMassKpi blocks tags =
+    let
+        transform : Float -> Int
+        transform value =
+            round value
+    in
+        viewKpi "Σ Mass (T)" "mass" (transform <| getSumOfMasses blocks) (transform << getSumOfMassesForColor blocks) tags
+
+
+viewVolumeKpi : Blocks -> Tags -> Html Msg
+viewVolumeKpi blocks tags =
+    let
+        transform : Float -> Float
+        transform value =
+            flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| value
+    in
+        viewKpi "Σ Volume (m³)" "volume" (transform <| getSumOfVolumes blocks) (transform << getSumOfVolumesForColor blocks) tags
+
+
 viewKpi : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
 viewKpi kpiTitle className totalValue valueForColor tags =
     let
