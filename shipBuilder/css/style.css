@@ -628,6 +628,13 @@ p.block-volume-label {
     font-style: italic;
     font-size: 0.9em;
 }
+
+.focus-custom-properties {
+    border-top: 1px solid var(--secondary-color__contrast);
+    margin-top: 4px;
+    padding-top: 4px;
+}
+
 .input-group label::first-letter,
 p.block-volume-label::first-letter {
     text-transform: uppercase;
@@ -693,7 +700,8 @@ p.block-volume-label {
     margin-bottom: 4px;
 }
 
-p.block-volume-value {
+p.block-volume-value,
+.input-group input:disabled {
     background: var(--secondary-color__contrast);
     font-size: 0.9em;
     color: var(--on-secondary-color);

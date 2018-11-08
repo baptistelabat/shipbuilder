@@ -3302,6 +3302,10 @@ viewDetailedBlock uuid model =
                     [ class "focus-properties" ]
                   <|
                     viewBlockProperties block
+                , div
+                    [ class "focus-custom-properties" ]
+                  <|
+                    viewBlockCustomProperties block
                 ]
 
             Nothing ->
@@ -3351,6 +3355,16 @@ viewBlockProperties block =
     , viewBlockMassInfo block
     ]
 
+viewBlockCustomProperties : Block -> List (Html Msg)
+viewBlockCustomProperties block =
+    [ viewBlockAddCustomProperty ]
+
+viewBlockAddCustomProperty : Html Msg
+viewBlockAddCustomProperty =
+    div
+        [ class "custom-property add-custom-property input-group" ]
+        [ input [ type_ "text", placeholder "New custom property" ] []
+        ]
 
 viewBlockMassInfo : Block -> Html Msg
 viewBlockMassInfo block =
