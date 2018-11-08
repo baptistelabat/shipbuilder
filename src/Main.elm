@@ -786,7 +786,13 @@ encodeModelForSave model =
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "partitions", encodePartitions model.partitions )
         , ( "tags", encodeTags model.tags )
+        , ( "customProperties", encodeCustomProperties model.customProperties )
         ]
+
+
+encodeCustomProperties : List String -> Encode.Value
+encodeCustomProperties customProperties =
+    Encode.list <| List.map Encode.string customProperties
 
 
 encodeBlock : Block -> Encode.Value
