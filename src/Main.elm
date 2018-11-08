@@ -3185,11 +3185,35 @@ viewWholeList model =
             [ text "Blocks"
             , div
                 [ class "blocks-visibility" ]
-                [viewShowBlocksAction (toList model.blocks)
+                [ viewShowBlocksAction (toList model.blocks)
                 , viewHideBlocksAction (toList model.blocks)
                 ]
+            , viewSelectedBlocksSummary model
             ]
         , viewBlockList model
+        ]
+
+
+viewSelectedBlocksSummary : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
+viewSelectedBlocksSummary model =
+    let
+        selectedBlocks : List Block
+        selectedBlocks =
+            List.filter (\block -> List.member block.uuid model.selectedBlocks) <| toList model.blocks
+    in
+    
+    div
+        [ if List.length selectedBlocks > 1 then
+            class "selected-blocks-summary selected-blocks-summary__visible"
+          else
+            class "selected-blocks-summary"
+        ]
+        [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
+        , div
+            [ class "blocks-visibility" ]
+            [ viewShowBlocksAction selectedBlocks
+            , viewHideBlocksAction selectedBlocks
+            ]
         ]
 
 
@@ -3630,7 +3654,7 @@ viewShowBlockAction : Block -> Html Msg
 viewShowBlockAction block =
     div
         [ class "block-action show-block"
-        , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [block] True
+        , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [ block ] True
         , title "Show block"
         ]
         [ FASolid.eye ]
@@ -3640,7 +3664,7 @@ viewHideBlockAction : Block -> Html Msg
 viewHideBlockAction block =
     div
         [ class "block-action hide-block"
-        , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [block] False
+        , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [ block ] False
         , title "Hide block"
         ]
         [ FASolid.eye_slash ]

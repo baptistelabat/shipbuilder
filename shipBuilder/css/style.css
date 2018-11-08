@@ -467,6 +467,9 @@ input.block-label {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin: -12px;
+    padding: 12px;
+    position: relative;
 }
 
 .blocks-panel h2 .blocks-visibility {
@@ -491,6 +494,27 @@ input.block-label {
     height: 16px;
     width: 20px;
     margin-left: 8px;
+}
+
+.blocks-panel h2 .selected-blocks-summary {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: none;
+    justify-content: space-between;
+}
+
+.blocks-panel h2 .selected-blocks-summary__visible {
+    display: flex;
+    font-size: 0.7em;
+    padding: 12px 16px;
+}
+
+.blocks-panel h2 .selected-blocks-summary__visible .blocks-action:active {
+    color: var(--on-primary-color__muted);
 }
 
 .blocks-panel__focus {
@@ -687,7 +711,8 @@ p.block-volume-value {
     text-align: center;
 }
 
-.showing-partitions {
+.showing-partitions, 
+.selected-blocks-summary__visible {
     background: var(--contrast-color);
     color: var(--on-contrast-color);
     padding: 8px 12px;
@@ -697,6 +722,10 @@ p.block-volume-value {
     font-size: 0.9em;
     font-style: italic;
     box-shadow: inset 0 0 8px var(--shadow-color);
+}
+
+.showing-partitions {
+    height: 45px;
 }
 
 .showing-partitions label {
