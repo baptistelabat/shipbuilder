@@ -1383,6 +1383,7 @@ type NoJsMsg
     | SyncBlockInputs Block
     | SyncPartitions
     | ToggleAccordion Bool String
+    | UpdateCustomPropertyLabel String String
     | UpdateDensity Block String
     | UpdateMass Block String
 
@@ -1532,6 +1533,17 @@ updateNoJs msg model =
                     { uiState | accordions = Dict.insert accordionId isOpen uiState.accordions }
             in
                 { model | uiState = newUiState } ! []
+
+        UpdateCustomPropertyLabel currentLabel newLabel ->
+            let
+                updateLabelIfMatches : String -> String
+                updateLabelIfMatches label =
+                    if label == currentLabel then
+                        newLabel
+                    else
+                        label
+            in
+                { model | customProperties = List.map updateLabelIfMatches model.customProperties } ! []
 
         UpdateMass block input ->
             let
@@ -3392,6 +3404,7 @@ viewBlockCustomProperty block propertyIndex label =
             , class "custom-property-label label-like input-label"
             , id labelId
             , value label
+            , onInput <| NoJs << UpdateCustomPropertyLabel label
             ]
             []
         , input
