@@ -103,6 +103,7 @@ type alias SaveFile =
     , coordinatesTransform : List Float
     , partitions : PartitionsData
     , tags : Tags
+    , customProperties : List String
     }
 
 
@@ -113,6 +114,7 @@ saveFileDecoderV1 =
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.hardcoded initPartitions
         |> Pipeline.hardcoded []
+        |> Pipeline.hardcoded []
 
 
 saveFileDecoderV2 : Decode.Decoder SaveFile
@@ -122,6 +124,7 @@ saveFileDecoderV2 =
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.required "partitions" decodePartitions
         |> Pipeline.optional "tags" decodeTags []
+        |> Pipeline.optional "customProperties" decodeCustomProperties []
 
 
 decodeSaveFile : Int -> Decode.Decoder SaveFile
@@ -140,6 +143,11 @@ decodeSaveFile version =
 decodeVersion : Decode.Decoder Int
 decodeVersion =
     Decode.field "version" Decode.int
+
+
+decodeCustomProperties : Decode.Decoder (List String)
+decodeCustomProperties =
+    Decode.list Decode.string
 
 
 type alias SelectPartitionData =
@@ -528,6 +536,9 @@ restoreSaveInModel model saveFile =
 
         tags =
             saveFile.tags
+        
+        customProperties =
+            saveFile.customProperties
     in
         case maybeCoordinatesTransform of
             Just savedCoordinatesTransform ->
@@ -537,6 +548,7 @@ restoreSaveInModel model saveFile =
                     , coordinatesTransform = savedCoordinatesTransform
                     , partitions = partitions
                     , tags = tags
+                    , customProperties = customProperties
                 }
 
             Nothing ->
@@ -2964,7 +2976,7 @@ viewKpi kpiTitle className totalValue valueForColor tags =
             [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
             , p [ class "kpi-value" ] [ text <| toString totalValue ]
             , FASolid.angle_right
-        ]
+            ]
         ]
 
 
@@ -3398,7 +3410,7 @@ viewBlockProperties block =
 viewBlockCustomProperties : List String -> Block -> List (Html Msg)
 viewBlockCustomProperties customProperties block =
     List.indexedMap (viewBlockCustomProperty block) customProperties
-    ++ [ viewBlockAddCustomProperty ]
+        ++ [ viewBlockAddCustomProperty ]
 
 
 viewBlockCustomProperty : Block -> Int -> String -> Html Msg
@@ -3406,34 +3418,36 @@ viewBlockCustomProperty block propertyIndex label =
     let
         -- used to focus the newly created properties
         labelId : String
-        labelId = "custom-property-" ++ (toString <| propertyIndex + 1)
+        labelId =
+            "custom-property-" ++ (toString <| propertyIndex + 1)
     in
-    div
-        [ class "custom-property input-group" ]
-        [ div
-            [ class "custom-property-header" ] 
-            [ input
+        div
+            [ class "custom-property input-group" ]
+            [ div
+                [ class "custom-property-header" ]
+                [ input
+                    [ type_ "text"
+                    , class "custom-property-label label-like input-label"
+                    , id labelId
+                    , value label
+                    , onInput <| NoJs << UpdateCustomPropertyLabel label
+                    ]
+                    []
+                , p
+                    [ class "delete-custom-property"
+                    , title <| "Delete " ++ label
+                    , onClick <| NoJs <| DeleteCustomProperty label
+                    ]
+                    [ FASolid.trash ]
+                ]
+            , input
                 [ type_ "text"
-                , class "custom-property-label label-like input-label"
-                , id labelId
-                , value label
-                , onInput <| NoJs << UpdateCustomPropertyLabel label
+                , class "custom-property-value"
+                , placeholder <| label ++ " value"
                 ]
                 []
-            , p
-                [ class "delete-custom-property"
-                , title <| "Delete " ++ label 
-                , onClick <| NoJs <| DeleteCustomProperty label
-                ]
-                [ FASolid.trash ]
             ]
-        , input
-            [ type_ "text"
-            , class "custom-property-value"
-            , placeholder <| label ++ " value"
-            ]
-            []
-        ]
+
 
 viewBlockAddCustomProperty : Html Msg
 viewBlockAddCustomProperty =
