@@ -1370,7 +1370,8 @@ type ToJsMsg
 
 
 type NoJsMsg
-    = CleanTags
+    = AddCustomProperty String
+    | CleanTags
     | DismissToast String
     | DisplayToast Toast
     | NoOp
@@ -1389,6 +1390,18 @@ type NoJsMsg
 updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
 updateNoJs msg model =
     case msg of
+        AddCustomProperty label ->
+            let
+                updatedCustomProperties : List String
+                updatedCustomProperties =
+                    model.customProperties ++ [ label ]
+
+                newCustomPropertyId : String
+                newCustomPropertyId =
+                    "custom-property-" ++ (toString <| List.length updatedCustomProperties)
+            in
+                { model | customProperties = updatedCustomProperties } ! [ Task.attempt (\_ -> NoJs NoOp) (Dom.focus newCustomPropertyId) ]
+
         CleanTags ->
             { model | tags = List.filter ((/=) 0 << String.length << .label) model.tags } ! []
 
@@ -3366,8 +3379,14 @@ viewBlockAddCustomProperty : Html Msg
 viewBlockAddCustomProperty =
     div
         [ class "custom-property add-custom-property input-group" ]
-        [ input [ type_ "text", placeholder "New custom property" ] []
+        [ input
+            [ type_ "text"
+            , placeholder "New custom property"
+            , onInput <| NoJs << AddCustomProperty
+            ]
+            []
         ]
+
 
 viewBlockMassInfo : Block -> Html Msg
 viewBlockMassInfo block =
