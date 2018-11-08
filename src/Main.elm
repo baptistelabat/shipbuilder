@@ -3374,11 +3374,11 @@ viewBlockProperties block =
 
 viewBlockCustomProperties : List String -> Block -> List (Html Msg)
 viewBlockCustomProperties customProperties block =
-    List.map (viewBlockCustomProperty block) customProperties
+    List.indexedMap (viewBlockCustomProperty block) customProperties
     ++ [ viewBlockAddCustomProperty ]
 
-viewBlockCustomProperty : Block -> String -> Html Msg
-viewBlockCustomProperty block label =
+viewBlockCustomProperty : Block -> Int -> String -> Html Msg
+viewBlockCustomProperty block propertyIndex label =
     text label
 
 viewBlockAddCustomProperty : Html Msg
