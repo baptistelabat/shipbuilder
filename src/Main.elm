@@ -525,7 +525,7 @@ restoreSaveInModel model saveFile =
 
         partitions =
             saveFile.partitions
-        
+
         tags =
             saveFile.tags
     in
@@ -565,8 +565,8 @@ encodeRestoreSaveCmd model =
         ]
 
 
-encodeToggleBlockVisibilityCmd : List Block -> Bool -> Encode.Value
-encodeToggleBlockVisibilityCmd blocks visible =
+encodeToggleBlocksVisibilityCmd : List Block -> Bool -> Encode.Value
+encodeToggleBlocksVisibilityCmd blocks visible =
     Encode.object
         [ ( "visible", Encode.bool visible )
         , ( "uuids", Encode.list <| List.map (Encode.string << .uuid) blocks )
@@ -868,8 +868,8 @@ encodePartitions partitions =
 encodeTag : Tag -> Encode.Value
 encodeTag tag =
     Encode.object
-        [ ("color", Encode.string <| SIRColorPicker.getName tag.color )
-        , ("label", Encode.string tag.label )
+        [ ( "color", Encode.string <| SIRColorPicker.getName tag.color )
+        , ( "label", Encode.string tag.label )
         ]
 
 
@@ -1358,7 +1358,7 @@ type ToJsMsg
     | SelectHullReference HullReference
     | SetSpacingException PartitionType Int String
     | SwitchViewMode ViewMode
-    | ToggleBlockVisibility Block Bool
+    | ToggleBlocksVisibility (List Block) Bool
     | TogglePartitions
     | UpdatePartitionNumber PartitionType String
     | UpdatePartitionSpacing PartitionType String
@@ -1887,18 +1887,16 @@ updateModelToJs msg model =
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
 
-        ToggleBlockVisibility block isVisible ->
-            case getBlockByUUID block.uuid model.blocks of
-                Just recoveredBlock ->
-                    let
-                        updatedBlock : Block
-                        updatedBlock =
-                            { block | visible = isVisible }
-                    in
-                        updateBlockInModel updatedBlock model
-
-                Nothing ->
-                    model
+        ToggleBlocksVisibility blocks isVisible ->
+            let
+                updateVisibilityIfTargeted : String -> Block -> Block
+                updateVisibilityIfTargeted uuid block =
+                    if List.member block blocks then
+                        { block | visible = isVisible }
+                    else
+                        block
+            in
+                { model | blocks = DictList.map updateVisibilityIfTargeted model.blocks }
 
         TogglePartitions ->
             let
@@ -2233,8 +2231,8 @@ msg2json model action =
         TogglePartitions ->
             Just { tag = "showing-partitions", data = Encode.bool <| not model.partitions.showing }
 
-        ToggleBlockVisibility block isVisible ->
-            Just { tag = "blocks-visibility", data = encodeToggleBlockVisibilityCmd [ block ] isVisible }
+        ToggleBlocksVisibility blocks isVisible ->
+            Just { tag = "blocks-visibility", data = encodeToggleBlocksVisibilityCmd blocks isVisible }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -3182,9 +3180,61 @@ viewWholeList : Model -> Html Msg
 viewWholeList model =
     div
         [ class "panel blocks-panel" ]
-        [ h2 [] [ text "Blocks" ]
+        [ h2
+            []
+            [ text "Blocks"
+            , div
+                [ class "blocks-visibility" ]
+                [ viewShowBlocksAction (toList model.blocks)
+                , viewHideBlocksAction (toList model.blocks)
+                ]
+            , viewSelectedBlocksSummary model
+            ]
         , viewBlockList model
         ]
+
+
+viewSelectedBlocksSummary : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
+viewSelectedBlocksSummary model =
+    let
+        selectedBlocks : List Block
+        selectedBlocks =
+            List.filter (\block -> List.member block.uuid model.selectedBlocks) <| toList model.blocks
+    in
+    
+    div
+        [ if List.length selectedBlocks > 1 then
+            class "selected-blocks-summary selected-blocks-summary__visible"
+          else
+            class "selected-blocks-summary"
+        ]
+        [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
+        , div
+            [ class "blocks-visibility" ]
+            [ viewShowBlocksAction selectedBlocks
+            , viewHideBlocksAction selectedBlocks
+            ]
+        ]
+
+
+viewShowBlocksAction : List Block -> Html Msg
+viewShowBlocksAction blocks =
+    div
+        [ class "blocks-action show-all-blocks"
+        , onClick <| ToJs <| ToggleBlocksVisibility blocks True
+        , title "Show all blocks"
+        ]
+        [ FASolid.eye ]
+
+
+viewHideBlocksAction : List Block -> Html Msg
+viewHideBlocksAction blocks =
+    div
+        [ class "blocks-action hide-all-blocks"
+        , onClick <| ToJs <| ToggleBlocksVisibility blocks False
+        , title "Hide all blocks"
+        ]
+        [ FASolid.eye_slash ]
 
 
 viewDetailedBlock : String -> Model -> Html Msg
@@ -3234,7 +3284,7 @@ viewBlockProperties block =
     [ if block.visible then
         div
             [ class "block-visibility primary-button"
-            , onClick <| ToJs <| ToggleBlockVisibility block False
+            , onClick <| ToJs <| ToggleBlocksVisibility [ block ] False
             ]
             [ text "Hide block"
             , FASolid.eye_slash
@@ -3242,7 +3292,7 @@ viewBlockProperties block =
       else
         div
             [ class "block-visibility primary-button"
-            , onClick <| ToJs <| ToggleBlockVisibility block True
+            , onClick <| ToJs <| ToggleBlocksVisibility [ block ] True
             ]
             [ text "Show block"
             , FASolid.eye
@@ -3604,7 +3654,7 @@ viewShowBlockAction : Block -> Html Msg
 viewShowBlockAction block =
     div
         [ class "block-action show-block"
-        , onClickWithoutPropagation <| ToJs <| ToggleBlockVisibility block True
+        , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [ block ] True
         , title "Show block"
         ]
         [ FASolid.eye ]
@@ -3614,7 +3664,7 @@ viewHideBlockAction : Block -> Html Msg
 viewHideBlockAction block =
     div
         [ class "block-action hide-block"
-        , onClickWithoutPropagation <| ToJs <| ToggleBlockVisibility block False
+        , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [ block ] False
         , title "Hide block"
         ]
         [ FASolid.eye_slash ]
