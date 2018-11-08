@@ -3371,10 +3371,15 @@ viewBlockProperties block =
     , viewBlockMassInfo block
     ]
 
+
 viewBlockCustomProperties : List String -> Block -> List (Html Msg)
 viewBlockCustomProperties customProperties block =
-    List.map text customProperties
+    List.map (viewBlockCustomProperty block) customProperties
     ++ [ viewBlockAddCustomProperty ]
+
+viewBlockCustomProperty : Block -> String -> Html Msg
+viewBlockCustomProperty block label =
+    text label
 
 viewBlockAddCustomProperty : Html Msg
 viewBlockAddCustomProperty =
