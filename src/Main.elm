@@ -2752,16 +2752,21 @@ viewHullStudioPanel model =
                 (ToJs << SelectHullReference)
 
 
+isAccordionOpened : UiState -> String -> Bool
+isAccordionOpened uiState accordionId =
+    Maybe.withDefault False <| Dict.get accordionId uiState.accordions
+
+
 viewPartitioning : PartitioningView -> Model -> Html Msg
 viewPartitioning partitioningView model =
     let
         isDeckSpacingDetailsOpen : Bool
         isDeckSpacingDetailsOpen =
-            Maybe.withDefault False <| Dict.get "deck-spacing-details" model.uiState.accordions
+            isAccordionOpened model.uiState "deck-spacing-details"
 
         isBulkheadSpacingDetailsOpen : Bool
         isBulkheadSpacingDetailsOpen =
-            Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiState.accordions
+            isAccordionOpened model.uiState "bulkhead-spacing-details"
     in
         div
             [ class "panel partioning-panel" ]
@@ -2803,8 +2808,8 @@ viewKpiStudio model =
             , downloadAs "kpis.csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
-        , viewMassKpi model.blocks model.tags
-        , viewVolumeKpi model.blocks model.tags
+        , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
+        , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
         ]
 
 
@@ -2857,56 +2862,90 @@ listToCsvLine items =
         |> String.join ","
 
 
-viewMassKpi : Blocks -> Tags -> Html Msg
-viewMassKpi blocks tags =
+viewMassKpi : Blocks -> Tags -> Bool -> Html Msg
+viewMassKpi blocks tags showKpiForColors =
     let
         transform : Float -> Int
         transform value =
             round value
+
+        viewMassKpiContent : String -> String -> Int -> (Color -> Int) -> Tags -> Html Msg
+        viewMassKpiContent =
+            if showKpiForColors then
+                viewKpiWithColors
+            else
+                viewKpi
     in
-        viewKpi "Σ Mass (T)" "mass" (transform <| getSumOfMasses blocks) (transform << getSumOfMassesForColor blocks) tags
+        viewMassKpiContent "Σ Mass (T)" "mass" (transform <| getSumOfMasses blocks) (transform << getSumOfMassesForColor blocks) tags
 
 
-viewVolumeKpi : Blocks -> Tags -> Html Msg
-viewVolumeKpi blocks tags =
+viewVolumeKpi : Blocks -> Tags -> Bool -> Html Msg
+viewVolumeKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
             flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| value
+
+        viewVolumeKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
+        viewVolumeKpiContent =
+            if showKpiForColors then
+                viewKpiWithColors
+            else
+                viewKpi
     in
-        viewKpi "Σ Volume (m³)" "volume" (transform <| getSumOfVolumes blocks) (transform << getSumOfVolumesForColor blocks) tags
+        viewVolumeKpiContent "Σ Volume (m³)" "volume" (transform <| getSumOfVolumes blocks) (transform << getSumOfVolumesForColor blocks) tags
+
+
+getColor : SIRColorPicker.SirColor -> Color
+getColor sirColor =
+    SIRColorPicker.getColor sirColor
+
+
+getColorName : SIRColorPicker.SirColor -> String
+getColorName sirColor =
+    SIRColorPicker.getName sirColor
+
+
+getTagLabelForColor : SIRColorPicker.SirColor -> Tags -> Maybe String
+getTagLabelForColor sirColor tags =
+    List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
+
+
+getLabelForColor : SIRColorPicker.SirColor -> Tags -> String
+getLabelForColor sirColor tags =
+    Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor tags)
 
 
 viewKpi : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
 viewKpi kpiTitle className totalValue valueForColor tags =
-    let
-        getColor : SIRColorPicker.SirColor -> Color
-        getColor sirColor =
-            SIRColorPicker.getColor sirColor
+    div [ class <| "kpi " ++ className ] <|
+        [ div
+            [ class "kpi-total kpi-group"
+            , onClick <| NoJs <| ToggleAccordion True <| className ++ "-kpi"
+            ]
+            [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
+            , p [ class "kpi-value" ] [ text <| toString totalValue ]
+            , FASolid.angle_right]
+        ]
 
-        getColorName : SIRColorPicker.SirColor -> String
-        getColorName sirColor =
-            SIRColorPicker.getName sirColor
 
-        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
-        getTagLabelForColor sirColor =
-            List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
-
-        getLabelForColor : SIRColorPicker.SirColor -> String
-        getLabelForColor sirColor =
-            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
-    in
-        div [ class <| "kpi " ++ className ] <|
-            (div [ class "kpi-total kpi-group" ]
-                [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
-                , p [ class "kpi-value" ] [ text <| toString totalValue ]
-                ]
-            )
-                :: List.map
-                    (\sirColor ->
-                        viewKpiByColor className (getColor sirColor) (getLabelForColor sirColor) (valueForColor <| SIRColorPicker.getColor sirColor)
-                    )
-                    SIRColorPicker.palette
+viewKpiWithColors : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
+viewKpiWithColors kpiTitle className totalValue valueForColor tags =
+    div [ class <| "kpi " ++ className ] <|
+        (div
+            [ class "kpi-total kpi-group"
+            , onClick <| NoJs <| ToggleAccordion False <| className ++ "-kpi"
+            ]
+            [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
+            , p [ class "kpi-value" ] [ text <| toString totalValue ]
+            , FASolid.angle_down
+            ]
+        )
+            :: List.map
+                (\sirColor ->
+                    viewKpiByColor className (getColor sirColor) (getLabelForColor sirColor tags) (valueForColor <| SIRColorPicker.getColor sirColor)
+                )
+                SIRColorPicker.palette
 
 
 getFullKpiSummary : Blocks -> List KpiSummary
@@ -3201,20 +3240,19 @@ viewSelectedBlocksSummary model =
         selectedBlocks =
             List.filter (\block -> List.member block.uuid model.selectedBlocks) <| toList model.blocks
     in
-    
-    div
-        [ if List.length selectedBlocks > 1 then
-            class "selected-blocks-summary selected-blocks-summary__visible"
-          else
-            class "selected-blocks-summary"
-        ]
-        [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
-        , div
-            [ class "blocks-visibility" ]
-            [ viewShowBlocksAction selectedBlocks
-            , viewHideBlocksAction selectedBlocks
+        div
+            [ if List.length selectedBlocks > 1 then
+                class "selected-blocks-summary selected-blocks-summary__visible"
+              else
+                class "selected-blocks-summary"
             ]
-        ]
+            [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
+            , div
+                [ class "blocks-visibility" ]
+                [ viewShowBlocksAction selectedBlocks
+                , viewHideBlocksAction selectedBlocks
+                ]
+            ]
 
 
 viewShowBlocksAction : List Block -> Html Msg
