@@ -2808,8 +2808,8 @@ viewKpiStudio model =
             , downloadAs "kpis.csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
-        , viewMassKpi model.blocks model.tags
-        , viewVolumeKpi model.blocks model.tags
+        , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
+        , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
         ]
 
 
@@ -2862,8 +2862,8 @@ listToCsvLine items =
         |> String.join ","
 
 
-viewMassKpi : Blocks -> Tags -> Html Msg
-viewMassKpi blocks tags =
+viewMassKpi : Blocks -> Tags -> Bool -> Html Msg
+viewMassKpi blocks tags showKpiForColors =
     let
         transform : Float -> Int
         transform value =
@@ -2872,8 +2872,8 @@ viewMassKpi blocks tags =
         viewKpi "Σ Mass (T)" "mass" (transform <| getSumOfMasses blocks) (transform << getSumOfMassesForColor blocks) tags
 
 
-viewVolumeKpi : Blocks -> Tags -> Html Msg
-viewVolumeKpi blocks tags =
+viewVolumeKpi : Blocks -> Tags -> Bool -> Html Msg
+viewVolumeKpi blocks tags showKpiForColor =
     let
         transform : Float -> Float
         transform value =
