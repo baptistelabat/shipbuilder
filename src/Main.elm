@@ -2940,7 +2940,8 @@ viewKpi kpiTitle className totalValue valueForColor tags =
             ]
             [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
             , p [ class "kpi-value" ] [ text <| toString totalValue ]
-            , FASolid.angle_right]
+            , FASolid.angle_right
+        ]
         ]
 
 
