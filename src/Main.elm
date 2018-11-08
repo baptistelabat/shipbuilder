@@ -1372,6 +1372,7 @@ type ToJsMsg
 type NoJsMsg
     = AddCustomProperty String
     | CleanTags
+    | DeleteCustomProperty String
     | DismissToast String
     | DisplayToast Toast
     | NoOp
@@ -1405,6 +1406,10 @@ updateNoJs msg model =
 
         CleanTags ->
             { model | tags = List.filter ((/=) 0 << String.length << .label) model.tags } ! []
+
+        DeleteCustomProperty label ->
+            -- TODO: delete associated values in all blocks
+            { model | customProperties = List.filter ((/=) label) model.customProperties } ! []
 
         DismissToast keyToDismiss ->
             { model | toasts = removeToast keyToDismiss model.toasts } ! []
@@ -3399,14 +3404,23 @@ viewBlockCustomProperty block propertyIndex label =
     in
     div
         [ class "custom-property input-group" ]
-        [ input
-            [ type_ "text"
-            , class "custom-property-label label-like input-label"
-            , id labelId
-            , value label
-            , onInput <| NoJs << UpdateCustomPropertyLabel label
+        [ div
+            [ class "custom-property-header" ] 
+            [ input
+                [ type_ "text"
+                , class "custom-property-label label-like input-label"
+                , id labelId
+                , value label
+                , onInput <| NoJs << UpdateCustomPropertyLabel label
+                ]
+                []
+            , p
+                [ class "delete-custom-property"
+                , title <| "Delete " ++ label 
+                , onClick <| NoJs <| DeleteCustomProperty label
+                ]
+                [ FASolid.trash ]
             ]
-            []
         , input
             [ type_ "text"
             , class "custom-property-value"

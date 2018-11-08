@@ -641,7 +641,7 @@ p.block-volume-label,
     background: none;
     border-bottom: 1px solid var(--secondary-color__contrast);
     padding: 0 4px;
-    margin: 0 4px 4px;
+    margin: 0;
     width: calc(100% - 8px); /* remove lateral margins from width */
     box-shadow: none;
     font-style: italic;
@@ -658,6 +658,35 @@ p.block-volume-label,
 
 .custom-property + .add-custom-property {
     margin-top: 16px;
+}
+
+.custom-property-header {
+    display: flex;
+    align-items: center;
+    margin: 0 4px 4px;
+}
+.custom-property-header input.custom-property-label {
+    flex: 1 1 auto;
+    width: 50px;
+}
+
+.custom-property-header .delete-custom-property {
+    cursor: pointer;
+    background: red;
+    padding: 4px;
+    color: white;
+    border-radius: 4px;
+    margin-left: 4px;
+}
+
+.custom-property-header .delete-custom-property svg {
+    height: 12px;
+    margin-right: -1px;
+}
+
+.custom-property p { 
+    margin: 0;
+    padding: 0;
 }
 
 .add-custom-property {
