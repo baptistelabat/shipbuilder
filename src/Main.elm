@@ -3377,9 +3377,30 @@ viewBlockCustomProperties customProperties block =
     List.indexedMap (viewBlockCustomProperty block) customProperties
     ++ [ viewBlockAddCustomProperty ]
 
+
 viewBlockCustomProperty : Block -> Int -> String -> Html Msg
 viewBlockCustomProperty block propertyIndex label =
-    text label
+    let
+        -- used to focus the newly created properties
+        labelId : String
+        labelId = "custom-property-" ++ (toString <| propertyIndex + 1)
+    in
+    div
+        [ class "custom-property input-group" ]
+        [ input
+            [ type_ "text"
+            , class "custom-property-label label-like input-label"
+            , id labelId
+            , value label
+            ]
+            []
+        , input
+            [ type_ "text"
+            , class "custom-property-value"
+            , placeholder <| label ++ " value"
+            ]
+            []
+        ]
 
 viewBlockAddCustomProperty : Html Msg
 viewBlockAddCustomProperty =
