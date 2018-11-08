@@ -103,7 +103,7 @@ type alias SaveFile =
     , coordinatesTransform : List Float
     , partitions : PartitionsData
     , tags : Tags
-    , customProperties : List String
+    , customProperties : List CustomProperty
     }
 
 
@@ -145,9 +145,21 @@ decodeVersion =
     Decode.field "version" Decode.int
 
 
-decodeCustomProperties : Decode.Decoder (List String)
+decodeCustomProperties : Decode.Decoder (List CustomProperty)
 decodeCustomProperties =
-    Decode.list Decode.string
+    Decode.list decodeCustomProperty
+
+
+decodeCustomProperty : Decode.Decoder CustomProperty
+decodeCustomProperty =
+    Pipeline.decode CustomProperty
+        |> Pipeline.required "label" Decode.string
+        |> Pipeline.required "values" decodeCustomPropertyValues
+
+
+decodeCustomPropertyValues : Decode.Decoder (Dict String String)
+decodeCustomPropertyValues =
+    Decode.dict Decode.string
 
 
 type alias SelectPartitionData =
@@ -536,7 +548,7 @@ restoreSaveInModel model saveFile =
 
         tags =
             saveFile.tags
-        
+
         customProperties =
             saveFile.customProperties
     in
@@ -602,7 +614,13 @@ type alias Model =
     , partitions : PartitionsData
     , uiState : UiState
     , tags : Tags
-    , customProperties : List String
+    , customProperties : List CustomProperty
+    }
+
+
+type alias CustomProperty =
+    { label : String
+    , values : Dict String String
     }
 
 
@@ -802,9 +820,21 @@ encodeModelForSave model =
         ]
 
 
-encodeCustomProperties : List String -> Encode.Value
+encodeCustomProperties : List CustomProperty -> Encode.Value
 encodeCustomProperties customProperties =
-    Encode.list <| List.map Encode.string customProperties
+    Encode.list <| List.map encodeCustomProperty customProperties
+
+
+encodeCustomProperty : CustomProperty -> Encode.Value
+encodeCustomProperty customProperty =
+    Encode.object
+        [ ( "label", Encode.string customProperty.label )
+        , ( "values"
+          , Dict.toList customProperty.values
+                |> List.map (\( uuid, value ) -> ( uuid, Encode.string value ))
+                |> Encode.object
+          )
+        ]
 
 
 encodeBlock : Block -> Encode.Value
@@ -1390,7 +1420,7 @@ type ToJsMsg
 type NoJsMsg
     = AddCustomProperty String
     | CleanTags
-    | DeleteCustomProperty String
+    | DeleteCustomProperty CustomProperty
     | DismissToast String
     | DisplayToast Toast
     | NoOp
@@ -1402,7 +1432,7 @@ type NoJsMsg
     | SyncBlockInputs Block
     | SyncPartitions
     | ToggleAccordion Bool String
-    | UpdateCustomPropertyLabel String String
+    | UpdateCustomPropertyLabel CustomProperty String
     | UpdateDensity Block String
     | UpdateMass Block String
 
@@ -1412,9 +1442,9 @@ updateNoJs msg model =
     case msg of
         AddCustomProperty label ->
             let
-                updatedCustomProperties : List String
+                updatedCustomProperties : List CustomProperty
                 updatedCustomProperties =
-                    model.customProperties ++ [ label ]
+                    model.customProperties ++ [ { label = label, values = Dict.empty } ]
 
                 newCustomPropertyId : String
                 newCustomPropertyId =
@@ -1425,9 +1455,8 @@ updateNoJs msg model =
         CleanTags ->
             { model | tags = List.filter ((/=) 0 << String.length << .label) model.tags } ! []
 
-        DeleteCustomProperty label ->
-            -- TODO: delete associated values in all blocks
-            { model | customProperties = List.filter ((/=) label) model.customProperties } ! []
+        DeleteCustomProperty property ->
+            { model | customProperties = List.filter ((/=) property) model.customProperties } ! []
 
         DismissToast keyToDismiss ->
             { model | toasts = removeToast keyToDismiss model.toasts } ! []
@@ -1557,16 +1586,19 @@ updateNoJs msg model =
             in
                 { model | uiState = newUiState } ! []
 
-        UpdateCustomPropertyLabel currentLabel newLabel ->
-            let
-                updateLabelIfMatches : String -> String
-                updateLabelIfMatches label =
-                    if label == currentLabel then
-                        newLabel
-                    else
-                        label
-            in
-                { model | customProperties = List.map updateLabelIfMatches model.customProperties } ! []
+        UpdateCustomPropertyLabel property newLabel ->
+            { model
+                | customProperties =
+                    List.map
+                        (\p ->
+                            if p == property then
+                                { p | label = newLabel }
+                            else
+                                p
+                        )
+                        model.customProperties
+            }
+                ! []
 
         UpdateMass block input ->
             let
@@ -3407,14 +3439,14 @@ viewBlockProperties block =
     ]
 
 
-viewBlockCustomProperties : List String -> Block -> List (Html Msg)
+viewBlockCustomProperties : List CustomProperty -> Block -> List (Html Msg)
 viewBlockCustomProperties customProperties block =
     List.indexedMap (viewBlockCustomProperty block) customProperties
         ++ [ viewBlockAddCustomProperty ]
 
 
-viewBlockCustomProperty : Block -> Int -> String -> Html Msg
-viewBlockCustomProperty block propertyIndex label =
+viewBlockCustomProperty : Block -> Int -> CustomProperty -> Html Msg
+viewBlockCustomProperty block propertyIndex property =
     let
         -- used to focus the newly created properties
         labelId : String
@@ -3429,21 +3461,21 @@ viewBlockCustomProperty block propertyIndex label =
                     [ type_ "text"
                     , class "custom-property-label label-like input-label"
                     , id labelId
-                    , value label
-                    , onInput <| NoJs << UpdateCustomPropertyLabel label
+                    , value property.label
+                    , onInput <| NoJs << UpdateCustomPropertyLabel property
                     ]
                     []
                 , p
                     [ class "delete-custom-property"
-                    , title <| "Delete " ++ label
-                    , onClick <| NoJs <| DeleteCustomProperty label
+                    , title <| "Delete " ++ property.label
+                    , onClick <| NoJs <| DeleteCustomProperty property
                     ]
                     [ FASolid.trash ]
                 ]
             , input
                 [ type_ "text"
                 , class "custom-property-value"
-                , placeholder <| label ++ " value"
+                , placeholder <| property.label ++ " value"
                 ]
                 []
             ]
