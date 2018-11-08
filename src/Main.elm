@@ -830,10 +830,10 @@ encodeCustomProperty customProperty =
     Encode.object
         [ ( "label", Encode.string customProperty.label )
         , ( "values"
-          , Dict.toList customProperty.values
+        , Dict.toList customProperty.values
                 |> List.map (\( uuid, value ) -> ( uuid, Encode.string value ))
                 |> Encode.object
-          )
+        )
         ]
 
 
@@ -1429,6 +1429,7 @@ type NoJsMsg
     | UnsetBlockContextualMenu
     | SetMultipleSelect Bool
     | SetTagForColor Color String
+    | SetValueForCustomProperty CustomProperty Block String
     | SyncBlockInputs Block
     | SyncPartitions
     | ToggleAccordion Bool String
@@ -1498,6 +1499,27 @@ updateNoJs msg model =
                             List.map identity
             in
                 { model | tags = newTags } ! []
+
+        SetValueForCustomProperty property block value ->
+            let
+                updatedProperty : CustomProperty
+                updatedProperty = 
+                    { property | values = 
+                        if String.length value > 0 then
+                            Dict.insert block.uuid value property.values
+                        else
+                            Dict.remove block.uuid property.values
+                    }
+
+                replaceProperty : CustomProperty -> CustomProperty
+                replaceProperty customProperty = 
+                    if property == customProperty then
+                        updatedProperty
+                    else
+                        customProperty
+            in
+                { model | customProperties = List.map replaceProperty model.customProperties } ! []
+
 
         SyncBlockInputs block ->
             let
@@ -3452,6 +3474,11 @@ viewBlockCustomProperty block propertyIndex property =
         labelId : String
         labelId =
             "custom-property-" ++ (toString <| propertyIndex + 1)
+
+        propertyValue : String
+        propertyValue =
+            Maybe.withDefault "" <| Dict.get block.uuid property.values
+
     in
         div
             [ class "custom-property input-group" ]
@@ -3476,6 +3503,8 @@ viewBlockCustomProperty block propertyIndex property =
                 [ type_ "text"
                 , class "custom-property-value"
                 , placeholder <| property.label ++ " value"
+                , onInput <| NoJs << SetValueForCustomProperty property block
+                , value propertyValue
                 ]
                 []
             ]
