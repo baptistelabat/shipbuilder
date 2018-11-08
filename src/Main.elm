@@ -2752,16 +2752,21 @@ viewHullStudioPanel model =
                 (ToJs << SelectHullReference)
 
 
+isAccordionOpened : UiState -> String -> Bool
+isAccordionOpened uiState accordionId =
+    Maybe.withDefault False <| Dict.get accordionId uiState.accordions
+
+
 viewPartitioning : PartitioningView -> Model -> Html Msg
 viewPartitioning partitioningView model =
     let
         isDeckSpacingDetailsOpen : Bool
         isDeckSpacingDetailsOpen =
-            Maybe.withDefault False <| Dict.get "deck-spacing-details" model.uiState.accordions
+            isAccordionOpened model.uiState "deck-spacing-details"
 
         isBulkheadSpacingDetailsOpen : Bool
         isBulkheadSpacingDetailsOpen =
-            Maybe.withDefault False <| Dict.get "bulkhead-spacing-details" model.uiState.accordions
+            isAccordionOpened model.uiState "bulkhead-spacing-details"
     in
         div
             [ class "panel partioning-panel" ]
@@ -3201,20 +3206,19 @@ viewSelectedBlocksSummary model =
         selectedBlocks =
             List.filter (\block -> List.member block.uuid model.selectedBlocks) <| toList model.blocks
     in
-    
-    div
-        [ if List.length selectedBlocks > 1 then
-            class "selected-blocks-summary selected-blocks-summary__visible"
-          else
-            class "selected-blocks-summary"
-        ]
-        [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
-        , div
-            [ class "blocks-visibility" ]
-            [ viewShowBlocksAction selectedBlocks
-            , viewHideBlocksAction selectedBlocks
+        div
+            [ if List.length selectedBlocks > 1 then
+                class "selected-blocks-summary selected-blocks-summary__visible"
+              else
+                class "selected-blocks-summary"
             ]
-        ]
+            [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
+            , div
+                [ class "blocks-visibility" ]
+                [ viewShowBlocksAction selectedBlocks
+                , viewHideBlocksAction selectedBlocks
+                ]
+            ]
 
 
 viewShowBlocksAction : List Block -> Html Msg
