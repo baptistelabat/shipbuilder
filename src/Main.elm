@@ -590,6 +590,7 @@ type alias Model =
     , partitions : PartitionsData
     , uiState : UiState
     , tags : Tags
+    , customProperties : List String
     }
 
 
@@ -1100,6 +1101,7 @@ initModel =
             , blockContextualMenu = Nothing
             }
         , tags = []
+        , customProperties = []
         }
 
 
@@ -3305,7 +3307,7 @@ viewDetailedBlock uuid model =
                 , div
                     [ class "focus-custom-properties" ]
                   <|
-                    viewBlockCustomProperties block
+                    viewBlockCustomProperties model.customProperties block
                 ]
 
             Nothing ->
@@ -3355,9 +3357,10 @@ viewBlockProperties block =
     , viewBlockMassInfo block
     ]
 
-viewBlockCustomProperties : Block -> List (Html Msg)
-viewBlockCustomProperties block =
-    [ viewBlockAddCustomProperty ]
+viewBlockCustomProperties : List String -> Block -> List (Html Msg)
+viewBlockCustomProperties customProperties block =
+    List.map text customProperties
+    ++ [ viewBlockAddCustomProperty ]
 
 viewBlockAddCustomProperty : Html Msg
 viewBlockAddCustomProperty =
