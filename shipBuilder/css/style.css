@@ -892,8 +892,18 @@ p.block-volume-value,
     justify-content: center;
 }
 .block-color .sir-color-item {
-    height: 25px;
-    width: 25px;
+    width: calc(100% / 9);
+}
+/* the next two rules make the sir-color-item square */ 
+.block-color .sir-color-item::before {
+  content: '';
+  padding-top: 100%;
+  float: left;
+}
+.block-color .sir-color-item::after {
+  content: '';
+  display: block;
+  clear: both;
 }
 
 .kpi-color-label {
