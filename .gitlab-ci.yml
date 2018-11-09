@@ -8,7 +8,7 @@ build:
      - make
     artifacts:
       paths:
-        - shipBuilder/shipBuilder.html
+        - shipBuilder/index.html
         - shipBuilder/css
         - shipBuilder/assets
         - shipBuilder/js
@@ -19,7 +19,6 @@ pages:
      - build
   script:
        - mv shipBuilder/ public/
-       - rm -rf public/index.template.html
   artifacts:
         when: on_success
         paths:
