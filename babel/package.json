@@ -1,0 +1,12 @@
+{
+  "name": "shipbuilder",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "babel shipBuilder/js --out-dir shipBuilder/babel-js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.5",
+    "@babel/preset-env": "^7.1.5"
+  }
+}
