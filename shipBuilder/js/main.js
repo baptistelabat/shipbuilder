@@ -1,7 +1,7 @@
 'use strict';
 
 const div = document.getElementById('elm-app');
-const app = Elm.Main.embed(div);
+const app = Elm.Main.embed(div, gitSha);
 
 const mouse = new THREE.Vector2();
 const wrapperId = "three-wrapper"; // defined in elm

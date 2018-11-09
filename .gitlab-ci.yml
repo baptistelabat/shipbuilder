@@ -19,8 +19,7 @@ pages:
      - build
   script:
        - mv shipBuilder/ public/
-       - mv public/shipBuilder.html public/index.html
-       - rm -rf public/shipBuilder.html
+       - rm -rf public/index.template.html
   artifacts:
         when: on_success
         paths:
