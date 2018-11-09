@@ -25,7 +25,7 @@ babel:
     - build
     script:
     - docker run -t --rm -v `pwd`:/work -w /work -u $(id -u):$(id -g) babel
-    - mv shipBuilder/babel-js shipBuilder/js
+    - mv shipBuilder/babel-js/* shipBuilder/js
     artifacts:
       paths:
         - shipBuilder/index.html
