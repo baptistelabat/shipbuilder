@@ -1,5 +1,6 @@
 stages:
     - build
+    - babel
     - deploy
 
 build:
@@ -13,10 +14,29 @@ build:
         - shipBuilder/assets
         - shipBuilder/js
 
+build-babel:
+    stage: build
+    script:
+    - cd babel && make
+
+babel:
+    stage: babel
+    dependencies:
+    - build
+    script:
+    - docker run -t --rm -v `pwd`:/work -w /work -u $(id -u):$(id -g) babel
+    - mv shipBuilder/babel-js shipBuilder/js
+    artifacts:
+      paths:
+        - shipBuilder/index.html
+        - shipBuilder/css
+        - shipBuilder/assets
+        - shipBuilder/js
+
 pages:
   stage: deploy
   dependencies:
-     - build
+     - babel
   script:
        - mv shipBuilder/ public/
   artifacts:
