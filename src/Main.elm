@@ -51,9 +51,13 @@ type alias JsData =
     }
 
 
-main : Program Never Model Msg
+type alias Flag =
+    String
+
+
+main : Program Flag Model Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update
@@ -551,10 +555,14 @@ restoreSaveInModel model saveFile =
 
         customProperties =
             saveFile.customProperties
+
+        cleanModel : Model
+        cleanModel =
+            initModel model.build
     in
         case maybeCoordinatesTransform of
             Just savedCoordinatesTransform ->
-                { initModel
+                { cleanModel
                   -- resets focused block and selections
                     | blocks = savedBlocks
                     , coordinatesTransform = savedCoordinatesTransform
@@ -830,10 +838,10 @@ encodeCustomProperty customProperty =
     Encode.object
         [ ( "label", Encode.string customProperty.label )
         , ( "values"
-        , Dict.toList customProperty.values
+          , Dict.toList customProperty.values
                 |> List.map (\( uuid, value ) -> ( uuid, Encode.string value ))
                 |> Encode.object
-        )
+          )
         ]
 
 
@@ -1114,17 +1122,17 @@ getBlockByUUID uuid blocks =
     DictList.get uuid blocks
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Flag -> ( Model, Cmd Msg )
+init flag =
     let
         model =
-            initModel
+            initModel flag
     in
-        ( initModel, toJs <| initCmd model )
+        ( model, toJs <| initCmd model )
 
 
-initModel : Model
-initModel =
+initModel : Flag -> Model
+initModel flag =
     let
         viewports : Viewports
         viewports =
@@ -1134,7 +1142,7 @@ initModel =
         viewMode =
             HullStudio
     in
-        { build = "0.0.1"
+        { build = flag
         , viewMode = viewMode
         , viewports = viewports
         , coordinatesTransform = CoordinatesTransform.default
@@ -1503,23 +1511,23 @@ updateNoJs msg model =
         SetValueForCustomProperty property block value ->
             let
                 updatedProperty : CustomProperty
-                updatedProperty = 
-                    { property | values = 
-                        if String.length value > 0 then
-                            Dict.insert block.uuid value property.values
-                        else
-                            Dict.remove block.uuid property.values
+                updatedProperty =
+                    { property
+                        | values =
+                            if String.length value > 0 then
+                                Dict.insert block.uuid value property.values
+                            else
+                                Dict.remove block.uuid property.values
                     }
 
                 replaceProperty : CustomProperty -> CustomProperty
-                replaceProperty customProperty = 
+                replaceProperty customProperty =
                     if property == customProperty then
                         updatedProperty
                     else
                         customProperty
             in
                 { model | customProperties = List.map replaceProperty model.customProperties } ! []
-
 
         SyncBlockInputs block ->
             let
@@ -3478,7 +3486,6 @@ viewBlockCustomProperty block propertyIndex property =
         propertyValue : String
         propertyValue =
             Maybe.withDefault "" <| Dict.get block.uuid property.values
-
     in
         div
             [ class "custom-property input-group" ]
