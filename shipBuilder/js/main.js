@@ -826,8 +826,8 @@ let onMouseMove = function (event) {
         const camera = panning.camera;
         const canControl = panning.getCanControl();
 
-        const eventMovementX = event.movementX ? event.movementX : event.mozMovementX;
-        const eventMovementY = event.movementY ? event.movementY : event.mozMovementY;
+        const eventMovementX = event.movementX !== undefined ? event.movementX : event.mozMovementX;
+        const eventMovementY = event.movementY !== undefined ? event.movementY : event.mozMovementY;
         // we weight the movement of the camera with the zoom to keep a constant speed across all zoom levels
         const movementX = eventMovementX / camera.zoom;
         // -eventMovementY because in the browser, Y = 0 is at the bottom of the screen
