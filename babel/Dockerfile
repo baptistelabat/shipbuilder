@@ -2,7 +2,6 @@ FROM node:9.3-alpine
 
 WORKDIR /app
 COPY package.json /app
-
 RUN npm install
 
 COPY babel-entrypoint.sh /usr/local/bin/

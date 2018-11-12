@@ -2,7 +2,7 @@
   "name": "shipbuilder",
   "version": "1.0.0",
   "scripts": {
-    "build": "babel shipBuilder/js/main.js --out-file shipBuilder/js/main.babel.js"
+    "build": "babel shipBuilder/js/main.js --out-file shipBuilder/js/main.babel.js && babel shipBuilder/js/lib/TransformControls.js --out-file shipBuilder/js/lib/TransformControls.babel.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.5",

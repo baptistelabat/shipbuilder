@@ -1,7 +1,7 @@
 # elm-package generated files
 generated-code
 shipBuilder/js/elm.js
-shipBuilder/babel-js
+*.babel.js
 shipBuilder/index.html
 build-artifacts
 .elm-analyse
