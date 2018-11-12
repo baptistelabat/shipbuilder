@@ -2682,7 +2682,7 @@ colorToCssRgbString color =
         rgb =
             Color.toRgb color
     in
-        "rgba(" ++ (toString rgb.red) ++ "," ++ (toString rgb.green) ++ "," ++ (toString rgb.blue) ++ ")"
+        "rgb(" ++ (toString rgb.red) ++ "," ++ (toString rgb.green) ++ "," ++ (toString rgb.blue) ++ ")"
 
 
 
