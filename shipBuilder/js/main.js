@@ -775,7 +775,7 @@ let displayLabels = function () {
 
     views.forEach(view => {
         var label = document.createElement('div');
-        label.innerText = view.label;
+        label.innerHTML = view.label;
         label.classList.add("viewport-label");
         label.style.top = 20 + view.top * wrapper.clientHeight + "px";
         label.style.left = 20 + view.left * wrapper.clientWidth + "px";
@@ -826,10 +826,12 @@ let onMouseMove = function (event) {
         const camera = panning.camera;
         const canControl = panning.getCanControl();
 
+        const eventMovementX = event.movementX ? event.movementX : event.mozMovementX;
+        const eventModementY = event.movementY ? event.movementY : event.mozMovementY;
         // we weight the movement of the camera with the zoom to keep a constant speed across all zoom levels
-        const movementX = event.movementX / camera.zoom;
-        // -event.movementY because in the browser, Y = 0 is at the bottom of the screen
-        const movementY = -event.movementY / camera.zoom;
+        const movementX = eventMovementX / camera.zoom;
+        // -eventMovementY because in the browser, Y = 0 is at the bottom of the screen
+        const movementY = -eventMovementY / camera.zoom;
 
         views
             .filter(view => view.cameraType === "Orthographic")
