@@ -569,7 +569,8 @@ restoreSaveInModel model saveFile =
             Just savedCoordinatesTransform ->
                 { cleanModel
                   -- resets focused block and selections
-                    | blocks = savedBlocks
+                    | currentDate = model.currentDate
+                    , blocks = savedBlocks
                     , coordinatesTransform = savedCoordinatesTransform
                     , partitions = partitions
                     , tags = tags
