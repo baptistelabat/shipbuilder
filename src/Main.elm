@@ -3382,6 +3382,12 @@ viewWholeList model =
         ]
 
 
+viewCsvButton : Html Msg
+viewCsvButton =
+    div [ class "csv-button text-button" ]
+        [ text "CSV" ]
+
+
 viewSelectedBlocksSummary : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
 viewSelectedBlocksSummary model =
     let
