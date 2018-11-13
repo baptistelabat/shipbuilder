@@ -191,7 +191,7 @@ let resetScene = function (views, scene) {
 
 let restoreBlocks = function (blocks) {
     blocks.forEach(block => {
-        restoreBlock(block.uuid, block.color, block.position, block.size);
+        restoreBlock(block.uuid, block.color, block.position, block.size, block.visible);
     });
 }
 
@@ -405,7 +405,7 @@ let addCube = function (label, color = 0x5078ff, sizeX = 10, sizeY = 5, sizeZ = 
 }
 
 // position and size in ship coordinates
-let restoreBlock = function (uuid, color, position, size) {
+let restoreBlock = function (uuid, color, position, size, visible = true) {
     const threeJsSize = sizeToThreeJsCoordinates(size.x, size.y, size.z, coordinatesTransform);
     const threeJsPosition = toThreeJsCoordinates(position.x, position.y, position.z, coordinatesTransform);
     const threeJsColor = getThreeColorFromElmColor(color);
@@ -418,6 +418,7 @@ let restoreBlock = function (uuid, color, position, size) {
     block.position.fromArray([threeJsPosition.x, threeJsPosition.y, threeJsPosition.z]);
     block.baseColor = threeJsColor;
     block.sbType = "block";
+    block.visible = visible;
     scene.add(block);
 }
 
