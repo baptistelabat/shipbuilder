@@ -19,6 +19,8 @@ port module Main
 
 import Color exposing (Color)
 import Date
+import Date.Extra.Format
+import Date.Extra.Config.Config_fr_fr exposing (config)
 import SIRColorPicker
 import Dict exposing (Dict)
 import DictList exposing (DictList)
@@ -2728,7 +2730,7 @@ viewSaveMenuItem model =
                             stringifyEncodeValue <|
                                 encodeModelForSave model
                        )
-            , downloadAs <| "Project_Shipbuilder_" ++ model.build ++ ".json"
+            , downloadAs <| (getDateForFilename model) ++ "_Project_Shipbuilder_" ++ model.build ++ ".json"
             ]
             [ FASolid.download ]
         ]
@@ -2942,7 +2944,7 @@ viewKpiStudio model =
                     ++ (encodeUri <|
                             kpisAsCsv model.blocks model.tags
                        )
-            , downloadAs <| "KPIs_Shipbuilder_" ++ model.build ++ ".csv"
+            , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
         , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
