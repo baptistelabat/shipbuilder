@@ -1133,7 +1133,12 @@ init flag =
         model =
             initModel flag
     in
-        ( model, toJs <| initCmd model )
+        ( model
+        , Cmd.batch 
+            [ toJs <| initCmd model
+            , Task.perform (NoJs << SetCurrentDate) Date.now
+            ]
+        )
 
 
 initModel : Flag -> Model
