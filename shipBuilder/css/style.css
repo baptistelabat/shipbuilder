@@ -807,15 +807,23 @@ p.block-volume-value,
 
 .showing-partitions {
     height: 45px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
 }
 
-.showing-partitions label {
-    margin: 0;
-    margin-right: 8px;
-    color: var(--on-contrast-color);
+.showing-partitions:hover {
+    color: var(--on-primary-color__muted);
 }
-.showing-partitions input {
-    width: auto;
+
+.showing-partitions:active {
+    color: var(--on-primary-color__accent);
+}
+
+.showing-partitions svg {
+    height: 16px;
+    width: 21px;
 }
 
 .spacing-details-title {

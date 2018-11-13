@@ -3129,18 +3129,18 @@ viewKpiByColor kpiClass color colorLabel kpiValue =
 
 viewShowingPartitions : Bool -> Html Msg
 viewShowingPartitions showing =
-    div [ class "showing-partitions input-group" ]
-        [ label
-            [ for "showing-partitions-checkbox" ]
-            [ text "Show partitions" ]
-        , input
-            [ type_ "checkbox"
-            , id "showing-partitions-checkbox"
-            , checked showing
-            , onClick <| ToJs TogglePartitions
-            ]
-            []
+    div
+        [ class "showing-partitions input-group"
+        , onClick <| ToJs TogglePartitions
         ]
+        <| if showing then
+            [ text "Hide partitions" 
+            , FASolid.eye_slash
+            ]
+        else
+            [ text "Show partitions"
+            , FASolid.eye 
+            ]
 
 
 viewDecks : Bool -> Bool -> Decks -> Html Msg
