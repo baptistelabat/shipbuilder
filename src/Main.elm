@@ -2920,7 +2920,7 @@ viewKpiStudio model =
                     ++ (encodeUri <|
                             kpisAsCsv model.blocks model.tags
                        )
-            , downloadAs "kpis.csv"
+            , downloadAs <| "KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
         , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
