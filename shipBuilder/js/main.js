@@ -70,6 +70,9 @@ app.ports.toJs.subscribe(function (message) {
         case "load-hull":
             loadHull(data);
             break;
+        case "unload-hull":
+            unloadHull();
+            break;
         case "make-bulkheads":
             makeBulkheads(data);
             break;
@@ -314,13 +317,17 @@ let makeDecks = function (decks) {
     })
 }
 
+let unloadHull = function () {
+    const previousHull = scene.children.find(child => child.sbType && child.sbType === "hull");
+    if (previousHull) {
+        removeFromScene(previousHull);
+    }
+}
+
 let loadHull = function (path) {
     loader.load(path, (bufferGeometry) => {
         // there can only be one hull in the scene
-        const previousHull = scene.children.find(child => child.sbType && child.sbType === "hull");
-        if (previousHull) {
-            removeFromScene(previousHull);
-        }
+        unloadHull();
 
         const hullColor = new THREE.Color(0.56, 0.69, 1);
         const geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);

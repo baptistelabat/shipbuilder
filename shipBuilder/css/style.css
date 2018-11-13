@@ -376,13 +376,16 @@ li.hull-reference {
     border-color: var(--on-primary-color__accent);
 }
 
+li.hull-reference-none {
+    border-color: var(--secondary-color__contrast);
+}
+
 li.block-item:hover .block-info-wrapper, li.hull-reference:hover .hull-info-wrapper {
     padding-left: 6px;
 }
 
 li.block-item:hover .block-actions {
     display: flex;
-
 }
 
 li.block-item p, li.hull-reference p {
