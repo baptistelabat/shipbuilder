@@ -617,6 +617,10 @@ p.text-muted {
     margin: 8px 0;
 }
 
+.blocks-actions {
+    display: flex;
+}
+
 .text-button {
     font-size: 0.556em;
     font-weight: bold;

@@ -3373,11 +3373,11 @@ viewWholeList model =
             [ text "Blocks"
             , div [ class "blocks-actions" ]
                 [ downloadBlocksAsCsv model
-            , div
-                [ class "blocks-visibility" ]
-                [ viewShowBlocksAction (toList model.blocks)
-                , viewHideBlocksAction (toList model.blocks)
-                ]
+                , div
+                    [ class "blocks-visibility" ]
+                    [ viewShowBlocksAction (toList model.blocks)
+                    , viewHideBlocksAction (toList model.blocks)
+                    ]
                 ]
             , viewSelectedBlocksSummary model
             ]
