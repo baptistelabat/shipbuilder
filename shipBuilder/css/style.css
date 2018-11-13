@@ -619,10 +619,11 @@ p.text-muted {
 
 .blocks-actions {
     display: flex;
+    align-items: center;
 }
 
 .text-button {
-    font-size: 0.556em;
+    font-size: 9px;
     font-weight: bold;
     text-transform: uppercase;
     padding: 2px;
@@ -631,6 +632,7 @@ p.text-muted {
     border-radius: 4px;
     cursor: pointer;
     transform: scale(0.9);
+    font-style: normal;
 }
 
 .text-button:hover {

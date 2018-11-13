@@ -3372,7 +3372,7 @@ viewWholeList model =
             []
             [ text "Blocks"
             , div [ class "blocks-actions" ]
-                [ downloadBlocksAsCsv model
+                [ downloadBlocksAsCsv (toList model.blocks) model
                 , div
                     [ class "blocks-visibility" ]
                     [ viewShowBlocksAction (toList model.blocks)
@@ -3391,14 +3391,14 @@ viewCsvButton =
         [ text "CSV" ]
 
 
-downloadBlocksAsCsv : Model -> Html Msg
-downloadBlocksAsCsv model =
+downloadBlocksAsCsv : List Block -> Model -> Html Msg
+downloadBlocksAsCsv blocksList model =
     a
         [ type_ "button"
         , href <|
             "data:text/csv;charset=utf-8,"
                 ++ (encodeUri <|
-                        blocksAsCsv model.blocks model.tags model.customProperties
+                        blocksAsCsv blocksList model.tags model.customProperties
                     )
         , downloadAs <| (getDateForFilename model) ++ "_Blocks_Shipbuilder_" ++ model.build ++ ".csv"
         , title "Download blocks as CSV"
@@ -3406,14 +3406,14 @@ downloadBlocksAsCsv model =
         [ viewCsvButton ]
 
 
-blocksAsCsv : Blocks -> Tags -> List CustomProperty -> String
-blocksAsCsv blocks tags customProperties =
+blocksAsCsv : List Block -> Tags -> List CustomProperty -> String
+blocksAsCsv blocksList tags customProperties =
     let
         customPropertyLabels : List String
         customPropertyLabels = List.map .label customProperties
     in
         listToCsvLine ([ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "volume", "mass", "density" ] ++ customPropertyLabels)
-            :: List.map (blockToCsvLine tags customProperties) (toList blocks)
+            :: List.map (blockToCsvLine tags customProperties) blocksList
             |> String.join "\n"
 
 
@@ -3452,7 +3452,7 @@ blockToCsvLine tags customProperties block =
             ] ++ customPropertyValues)
 
 
-viewSelectedBlocksSummary : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
+viewSelectedBlocksSummary : Model -> Html Msg
 viewSelectedBlocksSummary model =
     let
         selectedBlocks : List Block
@@ -3467,9 +3467,13 @@ viewSelectedBlocksSummary model =
             ]
             [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
             , div
-                [ class "blocks-visibility" ]
-                [ viewShowBlocksAction selectedBlocks
-                , viewHideBlocksAction selectedBlocks
+                [ class "blocks-actions" ]
+                [ downloadBlocksAsCsv selectedBlocks model
+                , div
+                    [ class "blocks-visibility" ]
+                    [ viewShowBlocksAction selectedBlocks
+                    , viewHideBlocksAction selectedBlocks
+                    ]
                 ]
             ]
 
