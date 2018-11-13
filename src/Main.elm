@@ -2890,13 +2890,14 @@ viewHullStudioPanel model =
             HullReferences.viewHullStudioPanelWithSelection
                 hullReferences
                 (ToJs << SelectHullReference)
+                (ToJs <| UnselectHullReference)
                 selectedHullReferencePath
 
         Nothing ->
             HullReferences.viewHullStudioPanel
                 hullReferences
                 (ToJs << SelectHullReference)
-
+                (ToJs <| UnselectHullReference)
 
 isAccordionOpened : UiState -> String -> Bool
 isAccordionOpened uiState accordionId =

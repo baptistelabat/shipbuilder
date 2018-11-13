@@ -15,8 +15,8 @@ type alias HullReference =
     }
 
 
-viewHullStudioPanelWithSelection : HullReferences -> (HullReference -> msg) -> String -> Html msg
-viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg selectedHullReferencePath =
+viewHullStudioPanelWithSelection : HullReferences -> (HullReference -> msg) -> msg -> String -> Html msg
+viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
     div
         [ class "panel hull-panel"
         ]
@@ -51,8 +51,8 @@ viewHullReferenceWithSelection referenceSelectionMsg selectedHullReferencePath r
         ]
 
 
-viewHullStudioPanel : HullReferences -> (HullReference -> msg) -> Html msg
-viewHullStudioPanel hullRefs referenceSelectionMsg =
+viewHullStudioPanel : HullReferences -> (HullReference -> msg) -> msg -> Html msg
+viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg =
     div
         [ class "panel hull-panel"
         ]
