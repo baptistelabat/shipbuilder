@@ -3398,7 +3398,7 @@ downloadBlocksAsCsv model =
         , href <|
             "data:text/csv;charset=utf-8,"
                 ++ (encodeUri <|
-                        blocksAsCsv model.blocks model.tags
+                        blocksAsCsv model.blocks model.tags model.customProperties
                     )
         , downloadAs <| (getDateForFilename model) ++ "_Blocks_Shipbuilder_" ++ model.build ++ ".csv"
         , title "Download blocks as CSV"
@@ -3406,15 +3406,19 @@ downloadBlocksAsCsv model =
         [ viewCsvButton ]
 
 
-blocksAsCsv : Blocks -> Tags -> String
-blocksAsCsv blocks tags =
-    listToCsvLine [ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "volume", "mass", "density" ]
-        :: List.map (blockToCsvLine tags) (toList blocks)
-        |> String.join "\n"
+blocksAsCsv : Blocks -> Tags -> List CustomProperty -> String
+blocksAsCsv blocks tags customProperties =
+    let
+        customPropertyLabels : List String
+        customPropertyLabels = List.map .label customProperties
+    in
+        listToCsvLine ([ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "volume", "mass", "density" ] ++ customPropertyLabels)
+            :: List.map (blockToCsvLine tags customProperties) (toList blocks)
+            |> String.join "\n"
 
 
-blockToCsvLine : Tags -> Block -> String
-blockToCsvLine tags block =
+blockToCsvLine : Tags -> List CustomProperty -> Block -> String
+blockToCsvLine tags customProperties block =
     let
         getColorName : SIRColorPicker.SirColor -> String
         getColorName sirColor =
@@ -3427,9 +3431,13 @@ blockToCsvLine tags block =
         getLabelForColor : SIRColorPicker.SirColor -> String
         getLabelForColor sirColor =
             Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+
+        customPropertyValues : List String
+        customPropertyValues =
+            List.map (\customProperty -> Maybe.withDefault "" (Dict.get block.uuid customProperty.values)) customProperties
     in
         listToCsvLine
-            [ block.uuid
+            ([ block.uuid
             , block.label
             , Maybe.withDefault "" <| Maybe.map getLabelForColor <| SIRColorPicker.fromColor block.color
             , block.position.x.string
@@ -3441,7 +3449,7 @@ blockToCsvLine tags block =
             , toString <| computeVolume block
             , block.mass.string
             , block.density.string
-            ]
+            ] ++ customPropertyValues)
 
 
 viewSelectedBlocksSummary : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
