@@ -3388,6 +3388,37 @@ viewCsvButton =
         [ text "CSV" ]
 
 
+blockToCsvLine : Tags -> Block -> String
+blockToCsvLine tags block =
+    let
+        getColorName : SIRColorPicker.SirColor -> String
+        getColorName sirColor =
+            SIRColorPicker.getName sirColor
+
+        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
+        getTagLabelForColor sirColor =
+            List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
+
+        getLabelForColor : SIRColorPicker.SirColor -> String
+        getLabelForColor sirColor =
+            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+    in
+        listToCsvLine
+            [ block.uuid
+            , block.label
+            , Maybe.withDefault "" <| Maybe.map getLabelForColor <| SIRColorPicker.fromColor block.color
+            , block.position.x.string
+            , block.position.y.string
+            , block.position.z.string
+            , block.size.length.string
+            , block.size.height.string
+            , block.size.width.string
+            , toString <| computeVolume block
+            , block.mass.string
+            , block.density.string
+            ]
+
+
 viewSelectedBlocksSummary : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
 viewSelectedBlocksSummary model =
     let
