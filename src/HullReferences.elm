@@ -28,7 +28,7 @@ viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg unselectMsg sele
 viewHullReferencesWithSelection : HullReferences -> (HullReference -> msg) -> msg -> String -> Html msg
 viewHullReferencesWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
     ul [ class "hull-references" ] <|
-        List.map (viewHullReferenceWithSelection referenceSelectionMsg selectedHullReferencePath) hullRefs
+        (viewUnselectHullReference True unselectMsg) :: List.map (viewHullReferenceWithSelection referenceSelectionMsg selectedHullReferencePath) hullRefs
 
 
 viewHullReferenceWithSelection : (HullReference -> msg) -> String -> HullReference -> Html msg
@@ -64,7 +64,7 @@ viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg =
 viewHullReferences : HullReferences -> (HullReference -> msg) -> msg -> Html msg
 viewHullReferences hullRefs referenceSelectionMsg unselectMsg =
     ul [ class "hull-references" ] <|
-        List.map (viewHullReference referenceSelectionMsg) hullRefs
+        (viewUnselectHullReference False unselectMsg):: List.map (viewHullReference referenceSelectionMsg) hullRefs
 
 
 viewHullReference : (HullReference -> msg) -> HullReference -> Html msg
@@ -73,5 +73,21 @@ viewHullReference referenceSelectionMsg ref =
         [ div [ class "hull-info-wrapper" ]
             [ p [ class "hull-label" ] [ text ref.label ]
             , p [ class "hull-path" ] [ text ref.path ]
+            ]
+        ]
+
+viewUnselectHullReference : Bool -> msg -> Html msg
+viewUnselectHullReference isAHullSelected unselectMsg =
+    li 
+        (if isAHullSelected then
+            [ class "hull-reference"
+            , onClick <| unselectMsg
+            ]
+         else
+            [ class "hull-reference hull-reference-none hull-reference__selected" ]
+        )
+        [ div [ class "hull-info-wrapper" ]
+            [ p [ class "hull-label" ] [ text "None" ]
+            , p [ class "hull-path" ] [ text "No hull is displayed or used in computations" ]
             ]
         ]
