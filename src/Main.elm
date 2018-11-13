@@ -34,6 +34,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Keyboard exposing (KeyCode)
 import Task
+import Time
 import Debug
 import Viewports exposing (Viewports, encodeViewports)
 import CoordinatesTransform exposing (CoordinatesTransform)
@@ -72,6 +73,7 @@ subscriptions model =
         [ fromJs jsMsgToMsg
         , Keyboard.downs keydownToMsg
         , Keyboard.ups keyupToMsg
+        , Time.every (20 * Time.second) (NoJs << SetCurrentDate << Date.fromTime)
         ]
 
 
@@ -1439,6 +1441,7 @@ type NoJsMsg
     | RenameBlock Block String
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
+    | SetCurrentDate Date.Date
     | SetMultipleSelect Bool
     | SetTagForColor Color String
     | SetValueForCustomProperty CustomProperty Block String
@@ -1491,6 +1494,9 @@ updateNoJs msg model =
                     { uiState | blockContextualMenu = Just uuid }
             in
                 { model | uiState = newUiState } ! []
+
+        SetCurrentDate date ->
+            { model | currentDate = date } ! []
 
         SetMultipleSelect boolean ->
             { model | multipleSelect = boolean } ! []
