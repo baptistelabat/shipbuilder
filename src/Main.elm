@@ -2998,7 +2998,7 @@ listToCsvLine : List String -> String
 listToCsvLine items =
     items
         |> List.map (\item -> "\"" ++ item ++ "\"")
-        |> String.join ","
+        |> String.join ";"
 
 
 viewMassKpi : Blocks -> Tags -> Bool -> Html Msg
