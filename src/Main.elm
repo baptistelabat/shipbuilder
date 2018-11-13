@@ -1431,6 +1431,7 @@ type ToJsMsg
     | SwitchViewMode ViewMode
     | ToggleBlocksVisibility (List Block) Bool
     | TogglePartitions
+    | UnselectHullReference
     | UpdatePartitionNumber PartitionType String
     | UpdatePartitionSpacing PartitionType String
     | UpdatePartitionZeroPosition PartitionType String
@@ -1976,6 +1977,9 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference.path }
 
+        UnselectHullReference ->
+            { model | selectedHullReference = Nothing }
+
         SetSpacingException partitionType index input ->
             let
                 ( partition, asPartitionInPartitions ) =
@@ -2314,6 +2318,9 @@ msg2json model action =
 
         SelectHullReference hullReference ->
             Just { tag = "load-hull", data = Encode.string hullReference.path }
+
+        UnselectHullReference ->
+            Just { tag = "unload-hull", data = Encode.null }
 
         SetSpacingException partitionType index input ->
             let
