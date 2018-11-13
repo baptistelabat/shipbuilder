@@ -21,12 +21,12 @@ viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg unselectMsg sele
         [ class "panel hull-panel"
         ]
         [ h2 [] [ text "Hull Studio" ]
-        , viewHullReferencesWithSelection hullRefs referenceSelectionMsg selectedHullReferencePath
+        , viewHullReferencesWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath
         ]
 
 
-viewHullReferencesWithSelection : HullReferences -> (HullReference -> msg) -> String -> Html msg
-viewHullReferencesWithSelection hullRefs referenceSelectionMsg selectedHullReferencePath =
+viewHullReferencesWithSelection : HullReferences -> (HullReference -> msg) -> msg -> String -> Html msg
+viewHullReferencesWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
     ul [ class "hull-references" ] <|
         List.map (viewHullReferenceWithSelection referenceSelectionMsg selectedHullReferencePath) hullRefs
 
@@ -57,12 +57,12 @@ viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg =
         [ class "panel hull-panel"
         ]
         [ h2 [] [ text "Hull Studio" ]
-        , viewHullReferences hullRefs referenceSelectionMsg
+        , viewHullReferences hullRefs referenceSelectionMsg unselectMsg
         ]
 
 
-viewHullReferences : HullReferences -> (HullReference -> msg) -> Html msg
-viewHullReferences hullRefs referenceSelectionMsg =
+viewHullReferences : HullReferences -> (HullReference -> msg) -> msg -> Html msg
+viewHullReferences hullRefs referenceSelectionMsg unselectMsg =
     ul [ class "hull-references" ] <|
         List.map (viewHullReference referenceSelectionMsg) hullRefs
 
