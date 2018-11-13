@@ -3388,6 +3388,13 @@ viewCsvButton =
         [ text "CSV" ]
 
 
+blocksAsCsv : Blocks -> Tags -> String
+blocksAsCsv blocks tags =
+    listToCsvLine [ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "volume", "mass", "density" ]
+        :: List.map (blockToCsvLine tags) (toList blocks)
+        |> String.join "\n"
+
+
 blockToCsvLine : Tags -> Block -> String
 blockToCsvLine tags block =
     let
