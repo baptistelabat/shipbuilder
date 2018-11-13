@@ -569,7 +569,8 @@ restoreSaveInModel model saveFile =
             Just savedCoordinatesTransform ->
                 { cleanModel
                   -- resets focused block and selections
-                    | blocks = savedBlocks
+                    | currentDate = model.currentDate
+                    , blocks = savedBlocks
                     , coordinatesTransform = savedCoordinatesTransform
                     , partitions = partitions
                     , tags = tags
@@ -3370,10 +3371,13 @@ viewWholeList model =
         [ h2
             []
             [ text "Blocks"
-            , div
-                [ class "blocks-visibility" ]
-                [ viewShowBlocksAction (toList model.blocks)
-                , viewHideBlocksAction (toList model.blocks)
+            , div [ class "blocks-actions" ]
+                [ downloadBlocksAsCsv (toList model.blocks) model
+                , div
+                    [ class "blocks-visibility" ]
+                    [ viewShowBlocksAction (toList model.blocks)
+                    , viewHideBlocksAction (toList model.blocks)
+                    ]
                 ]
             , viewSelectedBlocksSummary model
             ]
@@ -3381,7 +3385,74 @@ viewWholeList model =
         ]
 
 
-viewSelectedBlocksSummary : { a | blocks : Blocks, selectedBlocks : List String } -> Html Msg
+viewCsvButton : Html Msg
+viewCsvButton =
+    div [ class "csv-button text-button" ]
+        [ text "CSV" ]
+
+
+downloadBlocksAsCsv : List Block -> Model -> Html Msg
+downloadBlocksAsCsv blocksList model =
+    a
+        [ type_ "button"
+        , href <|
+            "data:text/csv;charset=utf-8,"
+                ++ (encodeUri <|
+                        blocksAsCsv blocksList model.tags model.customProperties
+                    )
+        , downloadAs <| (getDateForFilename model) ++ "_Blocks_Shipbuilder_" ++ model.build ++ ".csv"
+        , title "Download blocks as CSV"
+        ]
+        [ viewCsvButton ]
+
+
+blocksAsCsv : List Block -> Tags -> List CustomProperty -> String
+blocksAsCsv blocksList tags customProperties =
+    let
+        customPropertyLabels : List String
+        customPropertyLabels = List.map .label customProperties
+    in
+        listToCsvLine ([ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "volume", "mass", "density" ] ++ customPropertyLabels)
+            :: List.map (blockToCsvLine tags customProperties) blocksList
+            |> String.join "\n"
+
+
+blockToCsvLine : Tags -> List CustomProperty -> Block -> String
+blockToCsvLine tags customProperties block =
+    let
+        getColorName : SIRColorPicker.SirColor -> String
+        getColorName sirColor =
+            SIRColorPicker.getName sirColor
+
+        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
+        getTagLabelForColor sirColor =
+            List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
+
+        getLabelForColor : SIRColorPicker.SirColor -> String
+        getLabelForColor sirColor =
+            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+
+        customPropertyValues : List String
+        customPropertyValues =
+            List.map (\customProperty -> Maybe.withDefault "" (Dict.get block.uuid customProperty.values)) customProperties
+    in
+        listToCsvLine
+            ([ block.uuid
+            , block.label
+            , Maybe.withDefault "" <| Maybe.map getLabelForColor <| SIRColorPicker.fromColor block.color
+            , block.position.x.string
+            , block.position.y.string
+            , block.position.z.string
+            , block.size.length.string
+            , block.size.height.string
+            , block.size.width.string
+            , toString <| computeVolume block
+            , block.mass.string
+            , block.density.string
+            ] ++ customPropertyValues)
+
+
+viewSelectedBlocksSummary : Model -> Html Msg
 viewSelectedBlocksSummary model =
     let
         selectedBlocks : List Block
@@ -3396,9 +3467,13 @@ viewSelectedBlocksSummary model =
             ]
             [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
             , div
-                [ class "blocks-visibility" ]
-                [ viewShowBlocksAction selectedBlocks
-                , viewHideBlocksAction selectedBlocks
+                [ class "blocks-actions" ]
+                [ downloadBlocksAsCsv selectedBlocks model
+                , div
+                    [ class "blocks-visibility" ]
+                    [ viewShowBlocksAction selectedBlocks
+                    , viewHideBlocksAction selectedBlocks
+                    ]
                 ]
             ]
 

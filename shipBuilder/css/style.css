@@ -617,6 +617,36 @@ p.text-muted {
     margin: 8px 0;
 }
 
+.blocks-actions {
+    display: flex;
+    align-items: center;
+}
+
+.text-button {
+    font-size: 9px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 2px;
+    background: var(--primary-color);
+    color: var(--on-primary-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transform: scale(0.9);
+    font-style: normal;
+}
+
+.text-button:hover {
+    background: var(--primary-color__accent);
+    color: var(--on-primary-color__accent);
+    transform: scale(1);
+}
+
+.text-button:active {
+    background: var(--primary-color__contrast);
+    color: var(--on-primary-color__contrast);
+    transform: scale(1);
+}
+
 .block-visibility svg {
     height: 16px;
     width: 24px;
