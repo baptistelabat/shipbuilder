@@ -2706,7 +2706,7 @@ viewSaveMenuItem model =
                             stringifyEncodeValue <|
                                 encodeModelForSave model
                        )
-            , downloadAs "shipbuilder.json"
+            , downloadAs <| "Project_Shipbuilder_" ++ model.build ++ ".json"
             ]
             [ FASolid.download ]
         ]
