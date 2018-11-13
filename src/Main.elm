@@ -212,7 +212,7 @@ decodeBlock =
         |> Pipeline.required "size" decodeSize
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
-        |> Pipeline.hardcoded True
+        |> Pipeline.optional "visible" Decode.bool True
 
 
 decodeColor : Decode.Decoder Color
@@ -855,6 +855,7 @@ encodeBlock block =
         , ( "size", encodeSize block.size )
         , ( "mass", Encode.float block.mass.value )
         , ( "density", Encode.float block.density.value )
+        , ( "visible", Encode.bool block.visible )
         ]
 
 
