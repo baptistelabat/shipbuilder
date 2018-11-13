@@ -3388,6 +3388,21 @@ viewCsvButton =
         [ text "CSV" ]
 
 
+downloadBlocksAsCsv : Model -> Html Msg
+downloadBlocksAsCsv model =
+    a
+        [ type_ "button"
+        , href <|
+            "data:text/csv;charset=utf-8,"
+                ++ (encodeUri <|
+                        blocksAsCsv model.blocks model.tags
+                    )
+        , downloadAs <| (getDateForFilename model) ++ "_Blocks_Shipbuilder_" ++ model.build ++ ".csv"
+        , title "Download blocks as CSV"
+        ]
+        [ viewCsvButton ]
+
+
 blocksAsCsv : Blocks -> Tags -> String
 blocksAsCsv blocks tags =
     listToCsvLine [ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "volume", "mass", "density" ]
