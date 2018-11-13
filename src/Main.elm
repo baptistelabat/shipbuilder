@@ -2702,6 +2702,14 @@ colorToCssRgbString color =
         "rgb(" ++ (toString rgb.red) ++ "," ++ (toString rgb.green) ++ "," ++ (toString rgb.blue) ++ ")"
 
 
+getDateForFilename : { a | currentDate : Date.Date } -> String
+getDateForFilename dateSha=
+    let
+        offsetFromUTC : Int
+        offsetFromUTC =
+            -120
+    in
+        Date.Extra.Format.format config "%Y%m%d-%Hh%M" dateSha.currentDate
 
 -- HEADER MENU
 
