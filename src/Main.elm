@@ -18,6 +18,7 @@ port module Main
         )
 
 import Color exposing (Color)
+import Date
 import SIRColorPicker
 import Dict exposing (Dict)
 import DictList exposing (DictList)
@@ -611,6 +612,7 @@ encodeToggleBlocksVisibilityCmd blocks visible =
 
 type alias Model =
     { build : String
+    , currentDate : Date.Date
     , viewMode : ViewMode
     , viewports : Viewports
     , coordinatesTransform : CoordinatesTransform
@@ -1144,6 +1146,7 @@ initModel flag =
             HullStudio
     in
         { build = flag
+        , currentDate = Date.fromTime 0
         , viewMode = viewMode
         , viewports = viewports
         , coordinatesTransform = CoordinatesTransform.default
