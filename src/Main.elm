@@ -18,6 +18,9 @@ port module Main
         )
 
 import Color exposing (Color)
+import Date
+import Date.Extra.Format
+import Date.Extra.Config.Config_fr_fr exposing (config)
 import SIRColorPicker
 import Dict exposing (Dict)
 import DictList exposing (DictList)
@@ -33,6 +36,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Keyboard exposing (KeyCode)
 import Task
+import Time
 import Debug
 import Viewports exposing (Viewports, encodeViewports)
 import CoordinatesTransform exposing (CoordinatesTransform)
@@ -71,6 +75,7 @@ subscriptions model =
         [ fromJs jsMsgToMsg
         , Keyboard.downs keydownToMsg
         , Keyboard.ups keyupToMsg
+        , Time.every (20 * Time.second) (NoJs << SetCurrentDate << Date.fromTime)
         ]
 
 
@@ -611,6 +616,7 @@ encodeToggleBlocksVisibilityCmd blocks visible =
 
 type alias Model =
     { build : String
+    , currentDate : Date.Date
     , viewMode : ViewMode
     , viewports : Viewports
     , coordinatesTransform : CoordinatesTransform
@@ -1129,7 +1135,12 @@ init flag =
         model =
             initModel flag
     in
-        ( model, toJs <| initCmd model )
+        ( model
+        , Cmd.batch 
+            [ toJs <| initCmd model
+            , Task.perform (NoJs << SetCurrentDate) Date.now
+            ]
+        )
 
 
 initModel : Flag -> Model
@@ -1144,6 +1155,7 @@ initModel flag =
             HullStudio
     in
         { build = flag
+        , currentDate = Date.fromTime 0
         , viewMode = viewMode
         , viewports = viewports
         , coordinatesTransform = CoordinatesTransform.default
@@ -1436,6 +1448,7 @@ type NoJsMsg
     | RenameBlock Block String
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
+    | SetCurrentDate Date.Date
     | SetMultipleSelect Bool
     | SetTagForColor Color String
     | SetValueForCustomProperty CustomProperty Block String
@@ -1488,6 +1501,9 @@ updateNoJs msg model =
                     { uiState | blockContextualMenu = Just uuid }
             in
                 { model | uiState = newUiState } ! []
+
+        SetCurrentDate date ->
+            { model | currentDate = date } ! []
 
         SetMultipleSelect boolean ->
             { model | multipleSelect = boolean } ! []
@@ -2688,6 +2704,14 @@ colorToCssRgbString color =
         "rgb(" ++ (toString rgb.red) ++ "," ++ (toString rgb.green) ++ "," ++ (toString rgb.blue) ++ ")"
 
 
+getDateForFilename : { a | currentDate : Date.Date } -> String
+getDateForFilename dateSha=
+    let
+        offsetFromUTC : Int
+        offsetFromUTC =
+            -120
+    in
+        Date.Extra.Format.format config "%Y%m%d-%Hh%M" dateSha.currentDate
 
 -- HEADER MENU
 
@@ -2706,7 +2730,7 @@ viewSaveMenuItem model =
                             stringifyEncodeValue <|
                                 encodeModelForSave model
                        )
-            , downloadAs "shipbuilder.json"
+            , downloadAs <| (getDateForFilename model) ++ "_Project_Shipbuilder_" ++ model.build ++ ".json"
             ]
             [ FASolid.download ]
         ]
@@ -2920,7 +2944,7 @@ viewKpiStudio model =
                     ++ (encodeUri <|
                             kpisAsCsv model.blocks model.tags
                        )
-            , downloadAs "kpis.csv"
+            , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
         , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
