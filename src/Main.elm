@@ -2541,6 +2541,8 @@ hullReferences : HullReferences
 hullReferences =
     [ { label = "Anthineas", path = "assets/anthineas.stl" }
     , { label = "KCS", path = "assets/KCS.stl" }
+    , { label = "DTMB 5415", path = "assets/DTMB_5415.stl" }
+    , { label = "OPV", path = "assets/OPV.stl" }
     ]
 
 
