@@ -3066,6 +3066,21 @@ roundToNearestHundredth float =
         |> flip (/) 100.0
 
 
+viewLengthKpi : Float -> Html Msg
+viewLengthKpi length =
+    viewSimpleKpi "Length (m)" "length" <| roundToNearestHundredth length
+
+
+viewWidthKpi : Float -> Html Msg
+viewWidthKpi width =
+    viewSimpleKpi "Width (m)" "width" <| roundToNearestHundredth width
+
+
+viewHeightKpi : Float -> Html Msg
+viewHeightKpi height =
+    viewSimpleKpi "Height (m)" "height" <| roundToNearestHundredth height
+
+
 kpisAsCsv : Blocks -> Tags -> String
 kpisAsCsv blocks tags =
     let
