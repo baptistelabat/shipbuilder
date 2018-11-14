@@ -3059,10 +3059,10 @@ viewKpiStudio model =
             , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
-            , viewLengthKpi blocksBoundingBoxSize.length
-            , viewWidthKpi blocksBoundingBoxSize.width
-            , viewHeightKpi blocksBoundingBoxSize.height
-            , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
+        , viewLengthKpi blocksBoundingBoxSize.length
+        , viewWidthKpi blocksBoundingBoxSize.width
+        , viewHeightKpi blocksBoundingBoxSize.height
+        , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
         , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
         ]
 
