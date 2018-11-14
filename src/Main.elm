@@ -1452,6 +1452,21 @@ type alias Point =
     }
 
 
+getBlockBoundingBox : Block -> BoundingBox
+getBlockBoundingBox block =
+    { min =
+        { x = block.position.x.value
+        , y = block.position.y.value
+        , z = block.position.z.value 
+        }
+    , max =
+        { x = (block.position.x.value + block.size.length.value)
+        , y = (block.position.y.value + block.size.width.value)
+        , z = block.position.z.value - block.size.height.value
+        }
+    }
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
