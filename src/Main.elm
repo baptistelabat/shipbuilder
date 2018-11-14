@@ -3036,6 +3036,13 @@ viewPartitioning partitioningView model =
 
 viewKpiStudio : Model -> Html Msg
 viewKpiStudio model =
+    let
+        blocksBoundingBox : BoundingBox
+        blocksBoundingBox = getBlocksBoundingBox model.blocks
+
+        blocksBoundingBoxSize : { length : Float, width: Float, height: Float } 
+        blocksBoundingBoxSize = getBoundingBoxSize blocksBoundingBox
+    in
     div
         [ class "panel kpi-panel" ]
         [ h2
@@ -3052,8 +3059,11 @@ viewKpiStudio model =
             , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
+            , viewLengthKpi blocksBoundingBoxSize.length
+            , viewWidthKpi blocksBoundingBoxSize.width
+            , viewHeightKpi blocksBoundingBoxSize.height
+            , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
         , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
-        , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
         ]
 
 
