@@ -220,6 +220,26 @@ decodeBlock =
         |> Pipeline.optional "visible" Decode.bool True
 
 
+decodeReferenceForMass : Decode.Decoder ReferenceForMass
+decodeReferenceForMass =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "None" ->
+                        Decode.succeed None
+
+                    "Mass" ->
+                        Decode.succeed Mass
+
+                    "Density" ->
+                        Decode.succeed Density
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown referenceForMass : " ++ somethingElse
+            )
+
+
 decodeColor : Decode.Decoder Color
 decodeColor =
     Pipeline.decode Color.rgba
