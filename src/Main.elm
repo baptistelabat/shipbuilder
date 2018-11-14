@@ -3054,7 +3054,7 @@ viewKpiStudio model =
             , href <|
                 "data:text/csv;charset=utf-8,"
                     ++ (encodeUri <|
-                            kpisAsCsv model.blocks model.tags
+                            kpiSummaryListAsCsv model.blocks model.tags
                        )
             , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
@@ -3091,8 +3091,8 @@ viewHeightKpi height =
     viewSimpleKpi "Height (m)" "height" <| roundToNearestHundredth height
 
 
-kpisAsCsv : Blocks -> Tags -> String
-kpisAsCsv blocks tags =
+kpiSummaryListAsCsv : Blocks -> Tags -> String
+kpiSummaryListAsCsv blocks tags =
     let
         summaryList : List KpiSummary
         summaryList =
