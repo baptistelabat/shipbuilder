@@ -87,6 +87,7 @@ newBlockDecoder =
         |> Pipeline.required "color" decodeRgbRecord
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
+        |> Pipeline.hardcoded None
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded True
@@ -215,9 +216,30 @@ decodeBlock =
         |> Pipeline.required "color" decodeColor
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
+        |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "visible" Decode.bool True
+
+
+decodeReferenceForMass : Decode.Decoder ReferenceForMass
+decodeReferenceForMass =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "None" ->
+                        Decode.succeed None
+
+                    "Mass" ->
+                        Decode.succeed Mass
+
+                    "Density" ->
+                        Decode.succeed Density
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown referenceForMass : " ++ somethingElse
+            )
 
 
 decodeColor : Decode.Decoder Color
@@ -678,11 +700,16 @@ type alias Block =
     , color : Color
     , position : Position
     , size : Size
+    , referenceForMass : ReferenceForMass
     , mass : FloatInput
     , density : FloatInput
     , visible : Bool
     }
 
+type ReferenceForMass
+    = None
+    | Mass
+    | Density
 
 type alias Position =
     { x : FloatInput, y : FloatInput, z : FloatInput }
@@ -860,6 +887,7 @@ encodeBlock block =
         , ( "color", encodeColor block.color )
         , ( "position", encodePosition block.position )
         , ( "size", encodeSize block.size )
+        , ( "referenceForMass", Encode.string <| toString block.referenceForMass)
         , ( "mass", Encode.float block.mass.value )
         , ( "density", Encode.float block.density.value )
         , ( "visible", Encode.bool block.visible )
@@ -1398,6 +1426,19 @@ computeVolume block =
         size.height.value * size.width.value * size.length.value
 
 
+updateBlockMassAndDensity : Block -> Block
+updateBlockMassAndDensity block =
+    case block.referenceForMass of
+        None ->
+            block
+
+        Mass ->
+            { block | density = numberToNumberInput <|block.mass.value / (computeVolume block) }
+
+        Density ->
+            { block | mass = numberToNumberInput <| block.density.value * (computeVolume block) }
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
@@ -1655,16 +1696,12 @@ updateNoJs msg model =
                 newMass =
                     abs <| Result.withDefault block.mass.value <| String.toFloat input
 
-                newDensity : Float
-                newDensity =
-                    newMass / (computeVolume block)
-
                 updatedBlock : Block
                 updatedBlock =
                     { block
                         | mass = { value = newMass, string = input }
-                        , density = numberToNumberInput newDensity
-                    }
+                        , referenceForMass = Mass
+                    } |> updateBlockMassAndDensity
 
                 updatedModel =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
@@ -1677,16 +1714,12 @@ updateNoJs msg model =
                 newDensity =
                     abs <| Result.withDefault block.density.value <| String.toFloat input
 
-                newMass : Float
-                newMass =
-                    newDensity * (computeVolume block)
-
                 updatedBlock : Block
                 updatedBlock =
                     { block
                         | density = { value = newDensity, string = input }
-                        , mass = numberToNumberInput newMass
-                    }
+                        , referenceForMass = Density
+                    } |> updateBlockMassAndDensity
 
                 updatedModel =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
@@ -1950,6 +1983,7 @@ updateModelToJs msg model =
                         updatedBlock : Block
                         updatedBlock =
                             updateBlockSizeForDimension dimension block newFloatInput
+                            |> updateBlockMassAndDensity
                     in
                         updateBlockInModel updatedBlock model
 
@@ -2167,6 +2201,7 @@ updateModelToJs msg model =
                                     |> flip asStringInNumberInput input
                                     |> (asDimensionInSize dimension) block.size
                                     |> asSizeInBlock block
+                                    |> updateBlockMassAndDensity
                         in
                             updateBlockInModel updatedBlock model
 
