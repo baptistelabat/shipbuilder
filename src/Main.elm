@@ -3054,7 +3054,7 @@ viewKpiStudio model =
             , href <|
                 "data:text/csv;charset=utf-8,"
                     ++ (encodeUri <|
-                            kpiSummaryListAsCsv model.blocks model.tags
+                            kpisAsCsv model.blocks model.tags
                        )
             , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
@@ -3091,20 +3091,47 @@ viewHeightKpi height =
     viewSimpleKpi "Height (m)" "height" <| roundToNearestHundredth height
 
 
-kpiSummaryListAsCsv : Blocks -> Tags -> String
-kpiSummaryListAsCsv blocks tags =
+kpisAsCsv : Blocks -> Tags -> String
+kpisAsCsv blocks tags =
     let
+        blocksBoundingBox : BoundingBox
+        blocksBoundingBox = getBlocksBoundingBox blocks
+
+        blocksBoundingBoxSize : { length : Float, width: Float, height: Float } 
+        blocksBoundingBoxSize = getBoundingBoxSize blocksBoundingBox  
+
+        totalSummary : KpiSummary
+        totalSummary =
+            computeKpisForAll blocks
+
         summaryList : List KpiSummary
         summaryList =
-            getFullKpiSummary blocks
+            List.map (computeKpisForColor blocks) SIRColorPicker.palette
     in
-        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)" ]
-            :: List.map (kpiSummaryToCsvLine tags) summaryList
+        -- Length, width and height are not in KpiSummary because they only apply for the whole ship
+        -- We add the corresponding headers to the end of the list of those inside KpiSummary
+        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)"]
+            :: (( kpiSummaryToStringList tags totalSummary
+                  |> flip (++)
+                    -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+                    [ toString <| blocksBoundingBoxSize.length
+                    , toString <| blocksBoundingBoxSize.width
+                    , toString <| blocksBoundingBoxSize.height
+                    ]
+                  |> listToCsvLine
+                ) :: List.map
+                    (\summary ->
+                        kpiSummaryToStringList tags summary
+                        |> flip (++) ["","",""] -- We add empty values for the color groups because length, width and height don't apply
+                        |> listToCsvLine
+                    )
+                    summaryList
+               )
             |> String.join "\n"
 
 
-kpiSummaryToCsvLine : Tags -> KpiSummary -> String
-kpiSummaryToCsvLine tags summary =
+kpiSummaryToStringList : Tags -> KpiSummary -> List String
+kpiSummaryToStringList tags summary =
     let
         getColorName : SIRColorPicker.SirColor -> String
         getColorName sirColor =
@@ -3118,19 +3145,18 @@ kpiSummaryToCsvLine tags summary =
         getLabelForColor sirColor =
             Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
     in
-        listToCsvLine
-            [ case summary.target of
-                WholeShip ->
-                    "Total"
+        [ case summary.target of
+            WholeShip ->
+                "Total"
 
-                ColorGroup color ->
-                    getLabelForColor color
+            ColorGroup color ->
+                getLabelForColor color
 
-                SingleBlock uuid ->
-                    uuid
-            , toString <| round <| summary.mass
-            , toString <| roundToNearestHundredth summary.volume
-            ]
+            SingleBlock uuid ->
+                uuid
+        , toString <| round <| summary.mass
+        , toString <| roundToNearestHundredth summary.volume
+        ]
 
 
 listToCsvLine : List String -> String
