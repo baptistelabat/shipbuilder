@@ -87,6 +87,7 @@ newBlockDecoder =
         |> Pipeline.required "color" decodeRgbRecord
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
+        |> Pipeline.hardcoded None
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded True
@@ -215,6 +216,7 @@ decodeBlock =
         |> Pipeline.required "color" decodeColor
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
+        |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "visible" Decode.bool True
@@ -698,6 +700,7 @@ type alias Block =
     , color : Color
     , position : Position
     , size : Size
+    , referenceForMass : ReferenceForMass
     , mass : FloatInput
     , density : FloatInput
     , visible : Bool
@@ -884,6 +887,7 @@ encodeBlock block =
         , ( "color", encodeColor block.color )
         , ( "position", encodePosition block.position )
         , ( "size", encodeSize block.size )
+        , ( "referenceForMass", Encode.string <| toString block.referenceForMass)
         , ( "mass", Encode.float block.mass.value )
         , ( "density", Encode.float block.density.value )
         , ( "visible", Encode.bool block.visible )
