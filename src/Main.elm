@@ -1445,6 +1445,13 @@ type alias BoundingBox =
     }
 
 
+type alias Point =
+    { x : Float
+    , y : Float
+    , z : Float
+    }
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
