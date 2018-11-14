@@ -1492,6 +1492,14 @@ getBlocksBoundingBox blocks =
             boundingBoxList
 
 
+getBoundingBoxSize : BoundingBox -> { length : Float, height : Float, width : Float }
+getBoundingBoxSize bBox =
+    { length = abs <| bBox.max.x - bBox.min.x
+    , width = abs <| bBox.max.y - bBox.min.y
+    , height = abs <| bBox.max.z - bBox.min.z
+    }
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
