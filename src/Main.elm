@@ -1439,6 +1439,12 @@ updateBlockMassAndDensity block =
             { block | mass = numberToNumberInput <| block.density.value * (computeVolume block) }
 
 
+type alias BoundingBox =
+    { min : Point
+    , max : Point
+    }
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
