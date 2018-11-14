@@ -1467,6 +1467,31 @@ getBlockBoundingBox block =
     }
 
 
+getBlocksBoundingBox : Blocks -> BoundingBox
+getBlocksBoundingBox blocks =
+    let
+        boundingBoxList : List BoundingBox
+        boundingBoxList = 
+            List.map getBlockBoundingBox (toList blocks)
+    in
+        List.foldl 
+            (\a b ->
+                { min = 
+                    { x = (if a.min.x < b.min.x then a.min.x else b.min.x)
+                    , y = (if a.min.y < b.min.y then a.min.y else b.min.y)
+                    , z = (if a.min.z > b.min.z then a.min.z else b.min.z)
+                    }
+                , max =
+                    { x = (if a.max.x > b.max.x then a.max.x else b.max.x)
+                    , y = (if a.max.y > b.max.y then a.max.y else b.max.y)
+                    , z = (if a.max.z < b.max.z then a.max.z else b.max.z)
+                    }
+                }
+            )
+            (Maybe.withDefault { min = { x = 0.0, y = 0.0, z = 0.0 }, max = { x = 0.0, y = 0.0, z = 0.0 } } <| List.head boundingBoxList)
+            boundingBoxList
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
