@@ -1696,16 +1696,12 @@ updateNoJs msg model =
                 newMass =
                     abs <| Result.withDefault block.mass.value <| String.toFloat input
 
-                newDensity : Float
-                newDensity =
-                    newMass / (computeVolume block)
-
                 updatedBlock : Block
                 updatedBlock =
                     { block
                         | mass = { value = newMass, string = input }
-                        , density = numberToNumberInput newDensity
-                    }
+                        , referenceForMass = Mass
+                    } |> updateBlockMassAndDensity
 
                 updatedModel =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
@@ -1718,16 +1714,12 @@ updateNoJs msg model =
                 newDensity =
                     abs <| Result.withDefault block.density.value <| String.toFloat input
 
-                newMass : Float
-                newMass =
-                    newDensity * (computeVolume block)
-
                 updatedBlock : Block
                 updatedBlock =
                     { block
                         | density = { value = newDensity, string = input }
-                        , mass = numberToNumberInput newMass
-                    }
+                        , referenceForMass = Density
+                    } |> updateBlockMassAndDensity
 
                 updatedModel =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
