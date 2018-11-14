@@ -1426,6 +1426,19 @@ computeVolume block =
         size.height.value * size.width.value * size.length.value
 
 
+updateBlockMassAndDensity : Block -> Block
+updateBlockMassAndDensity block =
+    case block.referenceForMass of
+        None ->
+            block
+
+        Mass ->
+            { block | density = numberToNumberInput <|block.mass.value / (computeVolume block) }
+
+        Density ->
+            { block | mass = numberToNumberInput <| block.density.value * (computeVolume block) }
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
