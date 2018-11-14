@@ -1439,6 +1439,67 @@ updateBlockMassAndDensity block =
             { block | mass = numberToNumberInput <| block.density.value * (computeVolume block) }
 
 
+type alias BoundingBox =
+    { min : Point
+    , max : Point
+    }
+
+
+type alias Point =
+    { x : Float
+    , y : Float
+    , z : Float
+    }
+
+
+getBlockBoundingBox : Block -> BoundingBox
+getBlockBoundingBox block =
+    { min =
+        { x = block.position.x.value
+        , y = block.position.y.value
+        , z = block.position.z.value 
+        }
+    , max =
+        { x = (block.position.x.value + block.size.length.value)
+        , y = (block.position.y.value + block.size.width.value)
+        , z = block.position.z.value - block.size.height.value
+        }
+    }
+
+
+getBlocksBoundingBox : Blocks -> BoundingBox
+getBlocksBoundingBox blocks =
+    let
+        boundingBoxList : List BoundingBox
+        boundingBoxList = 
+            List.map getBlockBoundingBox (toList blocks)
+    in
+        List.foldl 
+            (\a b ->
+                { min = 
+                    { x = (if a.min.x < b.min.x then a.min.x else b.min.x)
+                    , y = (if a.min.y < b.min.y then a.min.y else b.min.y)
+                    , z = (if a.min.z > b.min.z then a.min.z else b.min.z)
+                    }
+                , max =
+                    { x = (if a.max.x > b.max.x then a.max.x else b.max.x)
+                    , y = (if a.max.y > b.max.y then a.max.y else b.max.y)
+                    , z = (if a.max.z < b.max.z then a.max.z else b.max.z)
+                    }
+                }
+            )
+            (Maybe.withDefault { min = { x = 0.0, y = 0.0, z = 0.0 }, max = { x = 0.0, y = 0.0, z = 0.0 } } <| List.head boundingBoxList)
+            boundingBoxList
+
+
+getBoundingBoxSize : BoundingBox -> { length : Float, height : Float, width : Float }
+getBoundingBoxSize bBox =
+    { length = abs <| bBox.max.x - bBox.min.x
+    , width = abs <| bBox.max.y - bBox.min.y
+    , height = abs <| bBox.max.z - bBox.min.z
+    }
+
+
 type Msg
     = FromJs FromJsMsg
     | NoJs NoJsMsg
@@ -2975,6 +3036,13 @@ viewPartitioning partitioningView model =
 
 viewKpiStudio : Model -> Html Msg
 viewKpiStudio model =
+    let
+        blocksBoundingBox : BoundingBox
+        blocksBoundingBox = getBlocksBoundingBox model.blocks
+
+        blocksBoundingBoxSize : { length : Float, width: Float, height: Float } 
+        blocksBoundingBoxSize = getBoundingBoxSize blocksBoundingBox
+    in
     div
         [ class "panel kpi-panel" ]
         [ h2
@@ -2991,25 +3059,79 @@ viewKpiStudio model =
             , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
             [ FASolid.download, text "Download as CSV" ]
-        , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
+        , viewLengthKpi blocksBoundingBoxSize.length
+        , viewWidthKpi blocksBoundingBoxSize.width
+        , viewHeightKpi blocksBoundingBoxSize.height
         , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
+        , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
         ]
+
+
+roundToNearestHundredth : Float -> Float
+roundToNearestHundredth float =
+    float
+        |> (*) 100.0
+        |> round
+        |> toFloat
+        |> flip (/) 100.0
+
+
+viewLengthKpi : Float -> Html Msg
+viewLengthKpi length =
+    viewSimpleKpi "Length (m)" "length" <| roundToNearestHundredth length
+
+
+viewWidthKpi : Float -> Html Msg
+viewWidthKpi width =
+    viewSimpleKpi "Width (m)" "width" <| roundToNearestHundredth width
+
+
+viewHeightKpi : Float -> Html Msg
+viewHeightKpi height =
+    viewSimpleKpi "Height (m)" "height" <| roundToNearestHundredth height
 
 
 kpisAsCsv : Blocks -> Tags -> String
 kpisAsCsv blocks tags =
     let
+        blocksBoundingBox : BoundingBox
+        blocksBoundingBox = getBlocksBoundingBox blocks
+
+        blocksBoundingBoxSize : { length : Float, width: Float, height: Float } 
+        blocksBoundingBoxSize = getBoundingBoxSize blocksBoundingBox  
+
+        totalSummary : KpiSummary
+        totalSummary =
+            computeKpisForAll blocks
+
         summaryList : List KpiSummary
         summaryList =
-            getFullKpiSummary blocks
+            List.map (computeKpisForColor blocks) SIRColorPicker.palette
     in
-        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)" ]
-            :: List.map (kpiSummaryToCsvLine tags) summaryList
+        -- Length, width and height are not in KpiSummary because they only apply for the whole ship
+        -- We add the corresponding headers to the end of the list of those inside KpiSummary
+        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)"]
+            :: (( kpiSummaryToStringList tags totalSummary
+                  |> flip (++)
+                    -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+                    [ toString <| blocksBoundingBoxSize.length
+                    , toString <| blocksBoundingBoxSize.width
+                    , toString <| blocksBoundingBoxSize.height
+                    ]
+                  |> listToCsvLine
+                ) :: List.map
+                    (\summary ->
+                        kpiSummaryToStringList tags summary
+                        |> flip (++) ["","",""] -- We add empty values for the color groups because length, width and height don't apply
+                        |> listToCsvLine
+                    )
+                    summaryList
+               )
             |> String.join "\n"
 
 
-kpiSummaryToCsvLine : Tags -> KpiSummary -> String
-kpiSummaryToCsvLine tags summary =
+kpiSummaryToStringList : Tags -> KpiSummary -> List String
+kpiSummaryToStringList tags summary =
     let
         getColorName : SIRColorPicker.SirColor -> String
         getColorName sirColor =
@@ -3023,19 +3145,18 @@ kpiSummaryToCsvLine tags summary =
         getLabelForColor sirColor =
             Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
     in
-        listToCsvLine
-            [ case summary.target of
-                WholeShip ->
-                    "Total"
+        [ case summary.target of
+            WholeShip ->
+                "Total"
 
-                ColorGroup color ->
-                    getLabelForColor color
+            ColorGroup color ->
+                getLabelForColor color
 
-                SingleBlock uuid ->
-                    uuid
-            , toString <| round <| summary.mass
-            , toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| summary.volume
-            ]
+            SingleBlock uuid ->
+                uuid
+        , toString <| round <| summary.mass
+        , toString <| roundToNearestHundredth summary.volume
+        ]
 
 
 listToCsvLine : List String -> String
@@ -3067,7 +3188,7 @@ viewVolumeKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
-            flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| value
+            roundToNearestHundredth value
 
         viewVolumeKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewVolumeKpiContent =
@@ -3097,6 +3218,18 @@ getTagLabelForColor sirColor tags =
 getLabelForColor : SIRColorPicker.SirColor -> Tags -> String
 getLabelForColor sirColor tags =
     Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor tags)
+
+
+viewSimpleKpi : String -> String -> number -> Html Msg
+viewSimpleKpi kpiTitle className totalValue =
+    div [ class <| "kpi " ++ className ] <|
+        [ div
+            [ class "kpi-total kpi-group"
+            ]
+            [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
+            , p [ class "kpi-value" ] [ text <| toString totalValue ]
+            ]
+        ]
 
 
 viewKpi : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
