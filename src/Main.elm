@@ -3104,7 +3104,7 @@ kpiSummaryToCsvLine tags summary =
                 SingleBlock uuid ->
                     uuid
             , toString <| round <| summary.mass
-            , toString <| flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| summary.volume
+            , toString <| roundToNearestHundredth summary.volume
             ]
 
 
@@ -3137,7 +3137,7 @@ viewVolumeKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
-            flip (/) 100.0 <| toFloat <| round <| (*) 100.0 <| value
+            roundToNearestHundredth value
 
         viewVolumeKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewVolumeKpiContent =
