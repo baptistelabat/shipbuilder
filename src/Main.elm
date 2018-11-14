@@ -1983,6 +1983,7 @@ updateModelToJs msg model =
                         updatedBlock : Block
                         updatedBlock =
                             updateBlockSizeForDimension dimension block newFloatInput
+                            |> updateBlockMassAndDensity
                     in
                         updateBlockInModel updatedBlock model
 
@@ -2200,6 +2201,7 @@ updateModelToJs msg model =
                                     |> flip asStringInNumberInput input
                                     |> (asDimensionInSize dimension) block.size
                                     |> asSizeInBlock block
+                                    |> updateBlockMassAndDensity
                         in
                             updateBlockInModel updatedBlock model
 
