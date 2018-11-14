@@ -3169,6 +3169,18 @@ getLabelForColor sirColor tags =
     Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor tags)
 
 
+viewSimpleKpi : String -> String -> number -> Html Msg
+viewSimpleKpi kpiTitle className totalValue =
+    div [ class <| "kpi " ++ className ] <|
+        [ div
+            [ class "kpi-total kpi-group"
+            ]
+            [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
+            , p [ class "kpi-value" ] [ text <| toString totalValue ]
+            ]
+        ]
+
+
 viewKpi : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
 viewKpi kpiTitle className totalValue valueForColor tags =
     div [ class <| "kpi " ++ className ] <|
