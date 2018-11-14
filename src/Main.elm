@@ -683,6 +683,10 @@ type alias Block =
     , visible : Bool
     }
 
+type ReferenceForMass
+    = None
+    | Mass
+    | Density
 
 type alias Position =
     { x : FloatInput, y : FloatInput, z : FloatInput }
