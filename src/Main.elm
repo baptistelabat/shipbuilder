@@ -3057,6 +3057,15 @@ viewKpiStudio model =
         ]
 
 
+roundToNearestHundredth : Float -> Float
+roundToNearestHundredth float =
+    float
+        |> (*) 100.0
+        |> round
+        |> toFloat
+        |> flip (/) 100.0
+
+
 kpisAsCsv : Blocks -> Tags -> String
 kpisAsCsv blocks tags =
     let
