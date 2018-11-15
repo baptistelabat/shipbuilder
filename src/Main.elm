@@ -1608,6 +1608,7 @@ type NoJsMsg
     | DeleteCustomProperty CustomProperty
     | DismissToast String
     | DisplayToast Toast
+    | FreeCenterOfGravity Block
     | NoOp
     | RenameBlock Block String
     | SetBlockContextualMenu String
@@ -1650,6 +1651,25 @@ updateNoJs msg model =
 
         DisplayToast toast ->
             { model | toasts = addToast toast model.toasts } ! []
+
+        FreeCenterOfGravity block ->
+            let
+                centerOfVolume : Point
+                centerOfVolume =
+                    getCenterOfVolume block
+
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | centerOfGravity =
+                            UserInput <|
+                                { x = numberToNumberInput centerOfVolume.x
+                                , y = numberToNumberInput centerOfVolume.y
+                                , z = numberToNumberInput centerOfVolume.z
+                                }
+                    }
+            in
+                { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
 
         NoOp ->
             model ! []
@@ -3960,6 +3980,7 @@ viewBlockCenterOfGravityComputed block =
             , div
                 [ class "form-group-action form-group-action__active"
                 , title "Stop tracking the center of the volume"
+                , onClick <| NoJs <| FreeCenterOfGravity block
                 ]
                 [ FASolid.crosshairs ]
             ]
