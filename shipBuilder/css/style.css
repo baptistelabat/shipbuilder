@@ -330,7 +330,6 @@ li.block-item.hidden {
     position: absolute;
     margin: 0 33%;
     width: 34%;
-    cursor: pointer;
 }
 
 .block-info-wrapper .move-block svg {
@@ -339,12 +338,14 @@ li.block-item.hidden {
 
 .move-block.move-up {
     top: -4px;
-    background: radial-gradient(circle at top, var(--secondary-color), transparent 80%);
+    background: radial-gradient(circle at top, var(--secondary-color), transparent 75%);
+    cursor: n-resize;
 }
 
 .move-block.move-down {
     bottom: -4px;
-    background: radial-gradient(circle at bottom, var(--secondary-color), transparent 80%);
+    background: radial-gradient(circle at bottom, var(--secondary-color), transparent 75%);
+    cursor: s-resize;
 }
 
 
