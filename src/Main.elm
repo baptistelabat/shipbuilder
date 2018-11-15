@@ -1664,6 +1664,7 @@ type NoJsMsg
     | DisplayToast Toast
     | FreeCenterOfGravity Block
     | LockCenterOfGravityToCenterOfVolume Block
+    | MoveBlockDown Block
     | NoOp
     | RenameBlock Block String
     | SetBlockContextualMenu String
@@ -1736,6 +1737,18 @@ updateNoJs msg model =
                     }
             in
                 { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
+
+        MoveBlockDown block ->
+            let
+                maybeNext : Maybe ( String, Block )
+                maybeNext =
+                    DictList.next block.uuid model.blocks
+
+                updatedBlocks : Blocks
+                updatedBlocks = 
+                    Maybe.withDefault model.blocks <| Maybe.map (\next -> DictList.insertAfter (Tuple.first next) block.uuid block model.blocks) maybeNext
+            in
+                { model | blocks = updatedBlocks } ! []
 
         NoOp ->
             model ! []
