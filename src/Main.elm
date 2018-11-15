@@ -1664,6 +1664,8 @@ type NoJsMsg
     | DisplayToast Toast
     | FreeCenterOfGravity Block
     | LockCenterOfGravityToCenterOfVolume Block
+    | MoveBlockDown Block
+    | MoveBlockUp Block
     | NoOp
     | RenameBlock Block String
     | SetBlockContextualMenu String
@@ -1736,6 +1738,30 @@ updateNoJs msg model =
                     }
             in
                 { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
+
+        MoveBlockDown block ->
+            let
+                maybeNext : Maybe ( String, Block )
+                maybeNext =
+                    DictList.next block.uuid model.blocks
+
+                updatedBlocks : Blocks
+                updatedBlocks = 
+                    Maybe.withDefault model.blocks <| Maybe.map (\next -> DictList.insertAfter (Tuple.first next) block.uuid block model.blocks) maybeNext
+            in
+                { model | blocks = updatedBlocks } ! []
+
+        MoveBlockUp block ->
+            let
+                maybePrevious : Maybe ( String, Block )
+                maybePrevious =
+                    DictList.previous block.uuid model.blocks
+
+                updatedBlocks : Blocks
+                updatedBlocks = 
+                    Maybe.withDefault model.blocks <| Maybe.map (\previous -> DictList.insertBefore (Tuple.first previous) block.uuid block model.blocks) maybePrevious
+            in
+                { model | blocks = updatedBlocks } ! []
 
         NoOp ->
             model ! []
@@ -4417,6 +4443,18 @@ viewBlockItemContent showContextualMenu block =
             , p
                 [ class "block-uuid" ]
                 [ text block.uuid ]
+            , div
+                [ class "move-up move-block"
+                , onClickWithoutPropagation <| NoJs <| MoveBlockUp block
+                , title "Move up"
+                ]
+                [ FASolid.angle_up ]
+            , div
+                [ class "move-down move-block"
+                , onClickWithoutPropagation <| NoJs <| MoveBlockDown block
+                , title "Move down"
+                ]
+                [ FASolid.angle_down ]
             ]
         , div
             [ class "block-actions" ]

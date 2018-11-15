@@ -310,6 +310,44 @@ li.block-item.hidden {
     opacity: 0.5;
 }
 
+.block-info-wrapper {
+    position: relative;
+}
+
+.block-item + .block-item:hover .move-block.move-up {
+    display: flex;
+}
+
+.block-item:not(:nth-last-of-type(2)):hover .move-block.move-down {
+    display: flex;
+}
+
+.block-info-wrapper .move-block {
+    display: none;
+    justify-content: center;
+    height: 12px;
+    padding: 1px 0;
+    position: absolute;
+    margin: 0 33%;
+    width: 34%;
+    cursor: pointer;
+}
+
+.block-info-wrapper .move-block svg {
+    height: 10px;
+}
+
+.move-block.move-up {
+    top: -4px;
+    background: radial-gradient(circle at top, var(--secondary-color), transparent 80%);
+}
+
+.move-block.move-down {
+    bottom: -4px;
+    background: radial-gradient(circle at bottom, var(--secondary-color), transparent 80%);
+}
+
+
 li.block-item .block-actions .open-contextual-menu,
 li.block-item .block-actions .close-contextual-menu {
     margin-top: 4px;
