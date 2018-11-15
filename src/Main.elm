@@ -3245,6 +3245,9 @@ viewKpiStudio model =
         blocksBoundingBoxSize : { length : Float, width : Float, height : Float }
         blocksBoundingBoxSize =
             getBoundingBoxSize blocksBoundingBox
+
+        cog : Point
+        cog = getCentroidOfBlocks model.blocks
     in
         div
             [ class "panel kpi-panel" ]
@@ -3265,6 +3268,9 @@ viewKpiStudio model =
             , viewLengthKpi blocksBoundingBoxSize.length
             , viewWidthKpi blocksBoundingBoxSize.width
             , viewHeightKpi blocksBoundingBoxSize.height
+            , viewCenterOfGravityXKpi cog.x
+            , viewCenterOfGravityYKpi cog.y
+            , viewCenterOfGravityZKpi cog.z
             , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
             , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
             ]
