@@ -1734,9 +1734,28 @@ updateNoJs msg model =
                 syncedDensity =
                     syncNumberInput block.density
 
+                syncedCenterOfGravity : CenterOfGravity
+                syncedCenterOfGravity =
+                    case block.centerOfGravity of
+                        Computed ->
+                            Computed
+
+                        UserInput position ->
+                            UserInput <|
+                                { x = syncNumberInput position.x
+                                , y = syncNumberInput position.y
+                                , z = syncNumberInput position.z
+                                }
+
                 syncedBlock : Block
                 syncedBlock =
-                    { block | size = syncedSize, position = syncedPosition, mass = syncedMass, density = syncedDensity }
+                    { block
+                        | size = syncedSize
+                        , position = syncedPosition
+                        , mass = syncedMass
+                        , density = syncedDensity
+                        , centerOfGravity = syncedCenterOfGravity
+                    }
             in
                 { model | blocks = updateBlockInBlocks syncedBlock model.blocks } ! []
 
