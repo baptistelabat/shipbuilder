@@ -91,6 +91,7 @@ newBlockDecoder =
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded True
+        |> Pipeline.hardcoded Computed
 
 
 type alias SyncPosition =
@@ -220,6 +221,7 @@ decodeBlock =
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "visible" Decode.bool True
+        |> Pipeline.optional "centerOfGravity" (Decode.map UserInput decodePosition) Computed
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -704,7 +706,22 @@ type alias Block =
     , mass : FloatInput
     , density : FloatInput
     , visible : Bool
+    , centerOfGravity : CenterOfGravity
     }
+
+
+type CenterOfGravity
+    = Computed
+    | UserInput Position
+
+
+getCenterOfVolume : Block -> Point
+getCenterOfVolume block =
+    { x = block.position.x.value + 0.5 * block.size.length.value
+    , y = block.position.y.value + 0.5 * block.size.width.value
+    , z = block.position.z.value - 0.5 * block.size.height.value
+    }
+
 
 type ReferenceForMass
     = None
