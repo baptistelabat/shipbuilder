@@ -3928,6 +3928,28 @@ viewBlockMassInfo block =
         ]
 
 
+viewBlockCenterOfGravityComputed : Block -> List (Html Msg)
+viewBlockCenterOfGravityComputed block =
+    let
+        cog : Point
+        cog =
+            getCenterOfVolume block
+    in
+        [ div
+            [ class "form-group-title" ]
+            [ text "Center of gravity"
+            , div
+                [ class "form-group-action form-group-action__active"
+                , title "Stop tracking the center of the volume"
+                ]
+                [ FASolid.crosshairs ]
+            ]
+        , viewCenterOfGravityComputedCoordinate X cog.x
+        , viewCenterOfGravityComputedCoordinate Y cog.y
+        , viewCenterOfGravityComputedCoordinate Z cog.z
+        ]
+
+
 viewCenterOfGravityComputedCoordinate : Axis -> Float -> Html Msg
 viewCenterOfGravityComputedCoordinate axis coordinateValue =
     let
