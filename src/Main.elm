@@ -3326,6 +3326,9 @@ kpisAsCsv blocks tags =
         blocksBoundingBoxSize =
             getBoundingBoxSize blocksBoundingBox
 
+        cog : Point
+        cog = getCentroidOfBlocks blocks
+
         totalSummary : KpiSummary
         totalSummary =
             computeKpisForAll blocks
@@ -3336,21 +3339,25 @@ kpisAsCsv blocks tags =
     in
         -- Length, width and height are not in KpiSummary because they only apply for the whole ship
         -- We add the corresponding headers to the end of the list of those inside KpiSummary
-        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)" ]
+        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)", "Center of gravity : x", "Center of gravity : y", "Center of gravity : z" ]
             :: ((kpiSummaryToStringList tags totalSummary
                     |> flip (++)
                         -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
                         [ toString <| blocksBoundingBoxSize.length
                         , toString <| blocksBoundingBoxSize.width
                         , toString <| blocksBoundingBoxSize.height
+                        -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+                        , toString <| cog.x
+                        , toString <| cog.y
+                        , toString <| cog.z
                         ]
                     |> listToCsvLine
                 )
                     :: List.map
                         (\summary ->
                             kpiSummaryToStringList tags summary
-                                |> flip (++) [ "", "", "" ]
-                                -- We add empty values for the color groups because length, width and height don't apply
+                                |> flip (++) [ "", "", "", "", "", "" ]
+                                -- We add empty values for the color groups because length, width, height and the center of gravity don't apply
                                 |>
                                     listToCsvLine
                         )
