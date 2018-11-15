@@ -4417,6 +4417,16 @@ viewBlockItemContent showContextualMenu block =
             , p
                 [ class "block-uuid" ]
                 [ text block.uuid ]
+            , div
+                [ class "move-up move-block"
+                , title "Move up"
+                ]
+                [ FASolid.angle_up ]
+            , div
+                [ class "move-down move-block"
+                , title "Move down"
+                ]
+                [ FASolid.angle_down ]
             ]
         , div
             [ class "block-actions" ]
