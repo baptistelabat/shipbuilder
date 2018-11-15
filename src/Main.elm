@@ -3304,6 +3304,11 @@ viewCenterOfGravityYKpi cogy =
     viewSimpleKpi "Center of gravity : y" "cog-y" <| roundToNearestHundredth cogy
 
 
+viewCenterOfGravityZKpi : Float -> Html Msg
+viewCenterOfGravityZKpi cogz =
+    viewSimpleKpi "Center of gravity : z" "cog-z" <| roundToNearestHundredth cogz
+
+
 kpisAsCsv : Blocks -> Tags -> String
 kpisAsCsv blocks tags =
     let
