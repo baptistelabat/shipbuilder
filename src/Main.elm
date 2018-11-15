@@ -3928,6 +3928,30 @@ viewBlockMassInfo block =
         ]
 
 
+viewCenterOfGravityComputedCoordinate : Axis -> Float -> Html Msg
+viewCenterOfGravityComputedCoordinate axis coordinateValue =
+    let
+        axisLabel : String
+        axisLabel =
+            String.toLower <| toString axis
+    in
+        div
+            [ class "input-group cog-coordinate" ]
+            [ label
+                [ for <| "block-cog-" ++ axisLabel ++ "-input"
+                , title <| "Center of gravity: " ++ axisLabel ++ " coordinate"
+                ]
+                [ text "CoG", sub [] [ text axisLabel ] ]
+            , input
+                [ type_ "text"
+                , id <| "block-cog-" ++ axisLabel ++ "-input"
+                , disabled True
+                , value <| toString coordinateValue
+                ]
+                []
+            ]
+
+
 type Axis
     = X
     | Y
