@@ -221,7 +221,12 @@ decodeBlock =
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "visible" Decode.bool True
-        |> Pipeline.optional "centerOfGravity" (Decode.map UserInput decodePosition) Computed
+        |> Pipeline.optional "centerOfGravity" decodeCenterOfGravity Computed
+
+
+decodeCenterOfGravity : Decode.Decoder CenterOfGravity
+decodeCenterOfGravity =
+    Decode.oneOf [ Decode.map UserInput decodePosition, Decode.null Computed ]
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -899,7 +904,7 @@ encodeCustomProperty customProperty =
 
 encodeBlock : Block -> Encode.Value
 encodeBlock block =
-    Encode.object
+    Encode.object <|
         [ ( "uuid", Encode.string block.uuid )
         , ( "label", Encode.string block.label )
         , ( "color", encodeColor block.color )
@@ -909,6 +914,13 @@ encodeBlock block =
         , ( "mass", Encode.float block.mass.value )
         , ( "density", Encode.float block.density.value )
         , ( "visible", Encode.bool block.visible )
+        , ( "centerOfGravity"
+            , case block.centerOfGravity of 
+                Computed ->
+                    Encode.null
+                UserInput position ->
+                    encodePosition position
+          )
         ]
 
 
