@@ -664,6 +664,59 @@ p.block-volume-label,
     font-size: 0.9em;
 }
 
+.form-group {
+    border: 1px solid var(--secondary-color__contrast);
+    padding: 0 8px;
+    border-radius: 4px;
+    margin-top: 12px;
+}
+
+.form-group-title {
+    margin: 0;
+    padding: 8px 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.form-group-action {
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.form-group-action:hover {
+    opacity: 1;
+}
+
+.form-group-action:active {
+    opacity: 1;
+    color: var(--primary-color__contrast);
+}
+
+.form-group-action__active {
+    color: var(--primary-color);
+}
+
+.form-group-action svg {
+    height: 16px;
+}
+
+.form-group .input-group {
+    display: flex;
+    align-items: center;
+}
+
+.form-group .input-group label {
+    width: 33%;
+    padding-right: 8px;
+    text-align: right;
+    margin: 0;
+}
+
+.form-group .input-group input {
+    width: 67%;
+}
+
 .focus-custom-properties .input-group .custom-property-value {
     background: var(--secondary-color);
     box-shadow: none;
@@ -806,7 +859,7 @@ p.block-volume-label {
 p.block-volume-value,
 .input-group input:disabled {
     background: var(--secondary-color__contrast);
-    font-size: 0.9em;
+    font-size: 0.8em;
     color: var(--on-secondary-color);
     box-shadow: none;
 }

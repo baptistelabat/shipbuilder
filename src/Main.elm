@@ -3869,6 +3869,7 @@ viewBlockProperties block =
         [ class "block-size" ]
       <|
         List.map (flip viewSizeInput block) [ Length, Width, Height ]
+    , viewBlockCenterOfGravity block
     , viewBlockMassInfo block
     ]
 
@@ -3976,6 +3977,17 @@ viewBlockMassInfo block =
                 []
             ]
         ]
+
+
+viewBlockCenterOfGravity : Block -> Html Msg
+viewBlockCenterOfGravity block =
+    div [ class "block-cog form-group" ] <|
+        case block.centerOfGravity of
+            Computed ->
+                viewBlockCenterOfGravityComputed block
+
+            UserInput position ->
+                viewBlockCenterOfGravityUserInput block position
 
 
 viewBlockCenterOfGravityComputed : Block -> List (Html Msg)
