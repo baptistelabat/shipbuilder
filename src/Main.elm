@@ -3974,6 +3974,29 @@ viewCenterOfGravityComputedCoordinate axis coordinateValue =
             ]
 
 
+viewCenterOfGravityUserInputCoordinate : Axis -> Block -> FloatInput -> Html Msg
+viewCenterOfGravityUserInputCoordinate axis block coordinateInput =
+    let
+        axisLabel : String
+        axisLabel =
+            String.toLower <| toString axis
+    in
+        div
+            [ class "input-group cog-coordinate" ]
+            [ label
+                [ for <| "block-cog-" ++ axisLabel ++ "-input"
+                , title <| "Center of gravity: " ++ axisLabel ++ " coordinate"
+                ]
+                [ text "CoG", sub [] [ text axisLabel ] ]
+            , input
+                [ type_ "text"
+                , id <| "block-cog-" ++ axisLabel ++ "-input"
+                , value coordinateInput.string
+                ]
+                []
+            ]
+
+
 type Axis
     = X
     | Y
