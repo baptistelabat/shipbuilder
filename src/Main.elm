@@ -1609,6 +1609,7 @@ type NoJsMsg
     | DismissToast String
     | DisplayToast Toast
     | FreeCenterOfGravity Block
+    | LockCenterOfGravityToCenterOfVolume Block
     | NoOp
     | RenameBlock Block String
     | SetBlockContextualMenu String
@@ -1667,6 +1668,16 @@ updateNoJs msg model =
                                 , y = numberToNumberInput centerOfVolume.y
                                 , z = numberToNumberInput centerOfVolume.z
                                 }
+                    }
+            in
+                { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
+
+        LockCenterOfGravityToCenterOfVolume block ->
+            let
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | centerOfGravity = Computed
                     }
             in
                 { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
@@ -4022,6 +4033,7 @@ viewBlockCenterOfGravityUserInput block cog =
         , div
             [ class "form-group-action"
             , title "Track the center of the volume"
+            , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
             ]
             [ FASolid.crosshairs ]
         ]
