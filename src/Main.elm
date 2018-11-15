@@ -91,6 +91,7 @@ newBlockDecoder =
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded True
+        |> Pipeline.hardcoded Computed
 
 
 type alias SyncPosition =
@@ -220,6 +221,12 @@ decodeBlock =
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "visible" Decode.bool True
+        |> Pipeline.optional "centerOfGravity" decodeCenterOfGravity Computed
+
+
+decodeCenterOfGravity : Decode.Decoder CenterOfGravity
+decodeCenterOfGravity =
+    Decode.oneOf [ Decode.map UserInput decodePosition, Decode.null Computed ]
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -704,12 +711,28 @@ type alias Block =
     , mass : FloatInput
     , density : FloatInput
     , visible : Bool
+    , centerOfGravity : CenterOfGravity
     }
+
+
+type CenterOfGravity
+    = Computed
+    | UserInput Position
+
+
+getCenterOfVolume : Block -> Point
+getCenterOfVolume block =
+    { x = roundToNearestHundredth <| block.position.x.value + 0.5 * block.size.length.value
+    , y = roundToNearestHundredth <| block.position.y.value + 0.5 * block.size.width.value
+    , z = roundToNearestHundredth <| block.position.z.value - 0.5 * block.size.height.value
+    }
+
 
 type ReferenceForMass
     = None
     | Mass
     | Density
+
 
 type alias Position =
     { x : FloatInput, y : FloatInput, z : FloatInput }
@@ -881,16 +904,23 @@ encodeCustomProperty customProperty =
 
 encodeBlock : Block -> Encode.Value
 encodeBlock block =
-    Encode.object
+    Encode.object <|
         [ ( "uuid", Encode.string block.uuid )
         , ( "label", Encode.string block.label )
         , ( "color", encodeColor block.color )
         , ( "position", encodePosition block.position )
         , ( "size", encodeSize block.size )
-        , ( "referenceForMass", Encode.string <| toString block.referenceForMass)
+        , ( "referenceForMass", Encode.string <| toString block.referenceForMass )
         , ( "mass", Encode.float block.mass.value )
         , ( "density", Encode.float block.density.value )
         , ( "visible", Encode.bool block.visible )
+        , ( "centerOfGravity"
+            , case block.centerOfGravity of 
+                Computed ->
+                    Encode.null
+                UserInput position ->
+                    encodePosition position
+          )
         ]
 
 
@@ -1165,7 +1195,7 @@ init flag =
             initModel flag
     in
         ( model
-        , Cmd.batch 
+        , Cmd.batch
             [ toJs <| initCmd model
             , Task.perform (NoJs << SetCurrentDate) Date.now
             ]
@@ -1433,7 +1463,7 @@ updateBlockMassAndDensity block =
             block
 
         Mass ->
-            { block | density = numberToNumberInput <|block.mass.value / (computeVolume block) }
+            { block | density = numberToNumberInput <| block.mass.value / (computeVolume block) }
 
         Density ->
             { block | mass = numberToNumberInput <| block.density.value * (computeVolume block) }
@@ -1457,7 +1487,7 @@ getBlockBoundingBox block =
     { min =
         { x = block.position.x.value
         , y = block.position.y.value
-        , z = block.position.z.value 
+        , z = block.position.z.value
         }
     , max =
         { x = (block.position.x.value + block.size.length.value)
@@ -1471,20 +1501,50 @@ getBlocksBoundingBox : Blocks -> BoundingBox
 getBlocksBoundingBox blocks =
     let
         boundingBoxList : List BoundingBox
-        boundingBoxList = 
+        boundingBoxList =
             List.map getBlockBoundingBox (toList blocks)
     in
-        List.foldl 
+        List.foldl
             (\a b ->
-                { min = 
-                    { x = (if a.min.x < b.min.x then a.min.x else b.min.x)
-                    , y = (if a.min.y < b.min.y then a.min.y else b.min.y)
-                    , z = (if a.min.z > b.min.z then a.min.z else b.min.z)
+                { min =
+                    { x =
+                        (if a.min.x < b.min.x then
+                            a.min.x
+                         else
+                            b.min.x
+                        )
+                    , y =
+                        (if a.min.y < b.min.y then
+                            a.min.y
+                         else
+                            b.min.y
+                        )
+                    , z =
+                        (if a.min.z > b.min.z then
+                            a.min.z
+                         else
+                            b.min.z
+                        )
                     }
                 , max =
-                    { x = (if a.max.x > b.max.x then a.max.x else b.max.x)
-                    , y = (if a.max.y > b.max.y then a.max.y else b.max.y)
-                    , z = (if a.max.z < b.max.z then a.max.z else b.max.z)
+                    { x =
+                        (if a.max.x > b.max.x then
+                            a.max.x
+                         else
+                            b.max.x
+                        )
+                    , y =
+                        (if a.max.y > b.max.y then
+                            a.max.y
+                         else
+                            b.max.y
+                        )
+                    , z =
+                        (if a.max.z < b.max.z then
+                            a.max.z
+                         else
+                            b.max.z
+                        )
                     }
                 }
             )
@@ -1548,6 +1608,8 @@ type NoJsMsg
     | DeleteCustomProperty CustomProperty
     | DismissToast String
     | DisplayToast Toast
+    | FreeCenterOfGravity Block
+    | LockCenterOfGravityToCenterOfVolume Block
     | NoOp
     | RenameBlock Block String
     | SetBlockContextualMenu String
@@ -1559,6 +1621,7 @@ type NoJsMsg
     | SyncBlockInputs Block
     | SyncPartitions
     | ToggleAccordion Bool String
+    | UpdateCenterOfGravity Axis Block String
     | UpdateCustomPropertyLabel CustomProperty String
     | UpdateDensity Block String
     | UpdateMass Block String
@@ -1590,6 +1653,35 @@ updateNoJs msg model =
 
         DisplayToast toast ->
             { model | toasts = addToast toast model.toasts } ! []
+
+        FreeCenterOfGravity block ->
+            let
+                centerOfVolume : Point
+                centerOfVolume =
+                    getCenterOfVolume block
+
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | centerOfGravity =
+                            UserInput <|
+                                { x = numberToNumberInput centerOfVolume.x
+                                , y = numberToNumberInput centerOfVolume.y
+                                , z = numberToNumberInput centerOfVolume.z
+                                }
+                    }
+            in
+                { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
+
+        LockCenterOfGravityToCenterOfVolume block ->
+            let
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | centerOfGravity = Computed
+                    }
+            in
+                { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
 
         NoOp ->
             model ! []
@@ -1674,9 +1766,28 @@ updateNoJs msg model =
                 syncedDensity =
                     syncNumberInput block.density
 
+                syncedCenterOfGravity : CenterOfGravity
+                syncedCenterOfGravity =
+                    case block.centerOfGravity of
+                        Computed ->
+                            Computed
+
+                        UserInput position ->
+                            UserInput <|
+                                { x = syncNumberInput position.x
+                                , y = syncNumberInput position.y
+                                , z = syncNumberInput position.z
+                                }
+
                 syncedBlock : Block
                 syncedBlock =
-                    { block | size = syncedSize, position = syncedPosition, mass = syncedMass, density = syncedDensity }
+                    { block
+                        | size = syncedSize
+                        , position = syncedPosition
+                        , mass = syncedMass
+                        , density = syncedDensity
+                        , centerOfGravity = syncedCenterOfGravity
+                    }
             in
                 { model | blocks = updateBlockInBlocks syncedBlock model.blocks } ! []
 
@@ -1737,6 +1848,37 @@ updateNoJs msg model =
             in
                 { model | uiState = newUiState } ! []
 
+        UpdateCenterOfGravity axis block input ->
+            case block.centerOfGravity of
+                Computed ->
+                    model ! []
+
+                UserInput position ->
+                    let
+                        axisFloatInput : FloatInput
+                        axisFloatInput =
+                            position |> axisAccessor axis
+
+                        updatedBlock : Block
+                        updatedBlock =
+                            { block
+                                | centerOfGravity =
+                                    (case String.toFloat input of
+                                        Ok value ->
+                                            value
+                                                |> asValueInNumberInput axisFloatInput
+                                                |> flip asStringInNumberInput input
+
+                                        Err error ->
+                                            input
+                                                |> asStringInNumberInput axisFloatInput
+                                    )
+                                        |> (asAxisInPosition axis) position
+                                        |> UserInput
+                            }
+                    in
+                        updateBlockInModel updatedBlock model ! []
+
         UpdateCustomPropertyLabel property newLabel ->
             { model
                 | customProperties =
@@ -1762,7 +1904,8 @@ updateNoJs msg model =
                     { block
                         | mass = { value = newMass, string = input }
                         , referenceForMass = Mass
-                    } |> updateBlockMassAndDensity
+                    }
+                        |> updateBlockMassAndDensity
 
                 updatedModel =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
@@ -1780,7 +1923,8 @@ updateNoJs msg model =
                     { block
                         | density = { value = newDensity, string = input }
                         , referenceForMass = Density
-                    } |> updateBlockMassAndDensity
+                    }
+                        |> updateBlockMassAndDensity
 
                 updatedModel =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
@@ -2044,7 +2188,7 @@ updateModelToJs msg model =
                         updatedBlock : Block
                         updatedBlock =
                             updateBlockSizeForDimension dimension block newFloatInput
-                            |> updateBlockMassAndDensity
+                                |> updateBlockMassAndDensity
                     in
                         updateBlockInModel updatedBlock model
 
@@ -2809,13 +2953,15 @@ colorToCssRgbString color =
 
 
 getDateForFilename : { a | currentDate : Date.Date } -> String
-getDateForFilename dateSha=
+getDateForFilename dateSha =
     let
         offsetFromUTC : Int
         offsetFromUTC =
             -120
     in
         Date.Extra.Format.format config "%Y%m%d-%Hh%M" dateSha.currentDate
+
+
 
 -- HEADER MENU
 
@@ -2996,6 +3142,7 @@ viewHullStudioPanel model =
                 (ToJs << SelectHullReference)
                 (ToJs <| UnselectHullReference)
 
+
 isAccordionOpened : UiState -> String -> Bool
 isAccordionOpened uiState accordionId =
     Maybe.withDefault False <| Dict.get accordionId uiState.accordions
@@ -3038,33 +3185,35 @@ viewKpiStudio : Model -> Html Msg
 viewKpiStudio model =
     let
         blocksBoundingBox : BoundingBox
-        blocksBoundingBox = getBlocksBoundingBox model.blocks
+        blocksBoundingBox =
+            getBlocksBoundingBox model.blocks
 
-        blocksBoundingBoxSize : { length : Float, width: Float, height: Float } 
-        blocksBoundingBoxSize = getBoundingBoxSize blocksBoundingBox
+        blocksBoundingBoxSize : { length : Float, width : Float, height : Float }
+        blocksBoundingBoxSize =
+            getBoundingBoxSize blocksBoundingBox
     in
-    div
-        [ class "panel kpi-panel" ]
-        [ h2
-            [ class "kpi-panel-title" ]
-            [ text "KPIs" ]
-        , a
-            [ class "download-kpis"
-            , type_ "button"
-            , href <|
-                "data:text/csv;charset=utf-8,"
-                    ++ (encodeUri <|
-                            kpisAsCsv model.blocks model.tags
-                       )
-            , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
+        div
+            [ class "panel kpi-panel" ]
+            [ h2
+                [ class "kpi-panel-title" ]
+                [ text "KPIs" ]
+            , a
+                [ class "download-kpis"
+                , type_ "button"
+                , href <|
+                    "data:text/csv;charset=utf-8,"
+                        ++ (encodeUri <|
+                                kpisAsCsv model.blocks model.tags
+                           )
+                , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
+                ]
+                [ FASolid.download, text "Download as CSV" ]
+            , viewLengthKpi blocksBoundingBoxSize.length
+            , viewWidthKpi blocksBoundingBoxSize.width
+            , viewHeightKpi blocksBoundingBoxSize.height
+            , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
+            , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
             ]
-            [ FASolid.download, text "Download as CSV" ]
-        , viewLengthKpi blocksBoundingBoxSize.length
-        , viewWidthKpi blocksBoundingBoxSize.width
-        , viewHeightKpi blocksBoundingBoxSize.height
-        , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
-        , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
-        ]
 
 
 roundToNearestHundredth : Float -> Float
@@ -3095,10 +3244,12 @@ kpisAsCsv : Blocks -> Tags -> String
 kpisAsCsv blocks tags =
     let
         blocksBoundingBox : BoundingBox
-        blocksBoundingBox = getBlocksBoundingBox blocks
+        blocksBoundingBox =
+            getBlocksBoundingBox blocks
 
-        blocksBoundingBoxSize : { length : Float, width: Float, height: Float } 
-        blocksBoundingBoxSize = getBoundingBoxSize blocksBoundingBox  
+        blocksBoundingBoxSize : { length : Float, width : Float, height : Float }
+        blocksBoundingBoxSize =
+            getBoundingBoxSize blocksBoundingBox
 
         totalSummary : KpiSummary
         totalSummary =
@@ -3110,22 +3261,25 @@ kpisAsCsv blocks tags =
     in
         -- Length, width and height are not in KpiSummary because they only apply for the whole ship
         -- We add the corresponding headers to the end of the list of those inside KpiSummary
-        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)"]
-            :: (( kpiSummaryToStringList tags totalSummary
-                  |> flip (++)
-                    -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
-                    [ toString <| blocksBoundingBoxSize.length
-                    , toString <| blocksBoundingBoxSize.width
-                    , toString <| blocksBoundingBoxSize.height
-                    ]
-                  |> listToCsvLine
-                ) :: List.map
-                    (\summary ->
-                        kpiSummaryToStringList tags summary
-                        |> flip (++) ["","",""] -- We add empty values for the color groups because length, width and height don't apply
-                        |> listToCsvLine
-                    )
-                    summaryList
+        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)" ]
+            :: ((kpiSummaryToStringList tags totalSummary
+                    |> flip (++)
+                        -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+                        [ toString <| blocksBoundingBoxSize.length
+                        , toString <| blocksBoundingBoxSize.width
+                        , toString <| blocksBoundingBoxSize.height
+                        ]
+                    |> listToCsvLine
+                )
+                    :: List.map
+                        (\summary ->
+                            kpiSummaryToStringList tags summary
+                                |> flip (++) [ "", "", "" ]
+                                -- We add empty values for the color groups because length, width and height don't apply
+                                |>
+                                    listToCsvLine
+                        )
+                        summaryList
                )
             |> String.join "\n"
 
@@ -3302,13 +3456,14 @@ viewShowingPartitions showing =
         [ class "showing-partitions input-group"
         , onClick <| ToJs TogglePartitions
         ]
-        <| if showing then
-            [ text "Hide partitions" 
+    <|
+        if showing then
+            [ text "Hide partitions"
             , FASolid.eye_slash
             ]
         else
             [ text "Show partitions"
-            , FASolid.eye 
+            , FASolid.eye
             ]
 
 
@@ -3567,7 +3722,7 @@ downloadBlocksAsCsv blocksList model =
             "data:text/csv;charset=utf-8,"
                 ++ (encodeUri <|
                         blocksAsCsv blocksList model.tags model.customProperties
-                    )
+                   )
         , downloadAs <| (getDateForFilename model) ++ "_Blocks_Shipbuilder_" ++ model.build ++ ".csv"
         , title "Download blocks as CSV"
         ]
@@ -3578,7 +3733,8 @@ blocksAsCsv : List Block -> Tags -> List CustomProperty -> String
 blocksAsCsv blocksList tags customProperties =
     let
         customPropertyLabels : List String
-        customPropertyLabels = List.map .label customProperties
+        customPropertyLabels =
+            List.map .label customProperties
     in
         listToCsvLine ([ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "volume", "mass", "density" ] ++ customPropertyLabels)
             :: List.map (blockToCsvLine tags customProperties) blocksList
@@ -3606,18 +3762,20 @@ blockToCsvLine tags customProperties block =
     in
         listToCsvLine
             ([ block.uuid
-            , block.label
-            , Maybe.withDefault "" <| Maybe.map getLabelForColor <| SIRColorPicker.fromColor block.color
-            , block.position.x.string
-            , block.position.y.string
-            , block.position.z.string
-            , block.size.length.string
-            , block.size.height.string
-            , block.size.width.string
-            , toString <| computeVolume block
-            , block.mass.string
-            , block.density.string
-            ] ++ customPropertyValues)
+             , block.label
+             , Maybe.withDefault "" <| Maybe.map getLabelForColor <| SIRColorPicker.fromColor block.color
+             , block.position.x.string
+             , block.position.y.string
+             , block.position.z.string
+             , block.size.length.string
+             , block.size.height.string
+             , block.size.width.string
+             , toString <| computeVolume block
+             , block.mass.string
+             , block.density.string
+             ]
+                ++ customPropertyValues
+            )
 
 
 viewSelectedBlocksSummary : Model -> Html Msg
@@ -3743,6 +3901,7 @@ viewBlockProperties block =
         [ class "block-size" ]
       <|
         List.map (flip viewSizeInput block) [ Length, Width, Height ]
+    , viewBlockCenterOfGravity block
     , viewBlockMassInfo block
     ]
 
@@ -3850,6 +4009,107 @@ viewBlockMassInfo block =
                 []
             ]
         ]
+
+
+viewBlockCenterOfGravity : Block -> Html Msg
+viewBlockCenterOfGravity block =
+    div [ class "block-cog form-group" ] <|
+        case block.centerOfGravity of
+            Computed ->
+                viewBlockCenterOfGravityComputed block
+
+            UserInput position ->
+                viewBlockCenterOfGravityUserInput block position
+
+
+viewBlockCenterOfGravityComputed : Block -> List (Html Msg)
+viewBlockCenterOfGravityComputed block =
+    let
+        cog : Point
+        cog =
+            getCenterOfVolume block
+    in
+        [ div
+            [ class "form-group-title" ]
+            [ text "Center of gravity"
+            , div
+                [ class "form-group-action form-group-action__active"
+                , title "Stop tracking the center of the volume"
+                , onClick <| NoJs <| FreeCenterOfGravity block
+                ]
+                [ FASolid.crosshairs ]
+            ]
+        , viewCenterOfGravityComputedCoordinate X cog.x
+        , viewCenterOfGravityComputedCoordinate Y cog.y
+        , viewCenterOfGravityComputedCoordinate Z cog.z
+        ]
+
+
+viewCenterOfGravityComputedCoordinate : Axis -> Float -> Html Msg
+viewCenterOfGravityComputedCoordinate axis coordinateValue =
+    let
+        axisLabel : String
+        axisLabel =
+            String.toLower <| toString axis
+    in
+        div
+            [ class "input-group cog-coordinate" ]
+            [ label
+                [ for <| "block-cog-" ++ axisLabel ++ "-input"
+                , title <| "Center of gravity: " ++ axisLabel ++ " coordinate"
+                ]
+                [ text "CoG", sub [] [ text axisLabel ] ]
+            , input
+                [ type_ "text"
+                , id <| "block-cog-" ++ axisLabel ++ "-input"
+                , disabled True
+                , value <| toString coordinateValue
+                ]
+                []
+            ]
+
+
+viewBlockCenterOfGravityUserInput : Block -> Position -> List (Html Msg)
+viewBlockCenterOfGravityUserInput block cog =
+    [ div
+        [ class "form-group-title" ]
+        [ text "Center of gravity"
+        , div
+            [ class "form-group-action"
+            , title "Track the center of the volume"
+            , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
+            ]
+            [ FASolid.crosshairs ]
+        ]
+    , viewCenterOfGravityUserInputCoordinate X block cog.x
+    , viewCenterOfGravityUserInputCoordinate Y block cog.y
+    , viewCenterOfGravityUserInputCoordinate Z block cog.z
+    ]
+
+
+viewCenterOfGravityUserInputCoordinate : Axis -> Block -> FloatInput -> Html Msg
+viewCenterOfGravityUserInputCoordinate axis block coordinateInput =
+    let
+        axisLabel : String
+        axisLabel =
+            String.toLower <| toString axis
+    in
+        div
+            [ class "input-group cog-coordinate" ]
+            [ label
+                [ for <| "block-cog-" ++ axisLabel ++ "-input"
+                , title <| "Center of gravity: " ++ axisLabel ++ " coordinate"
+                ]
+                [ text "CoG", sub [] [ text axisLabel ] ]
+            , input
+                [ type_ "text"
+                , id <| "block-cog-" ++ axisLabel ++ "-input"
+                , value coordinateInput.string
+                , onInput <| NoJs << UpdateCenterOfGravity axis block
+                , onBlur <| NoJs <| SyncBlockInputs block
+                ]
+                []
+            ]
 
 
 type Axis
