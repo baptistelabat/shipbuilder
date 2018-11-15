@@ -3974,6 +3974,23 @@ viewCenterOfGravityComputedCoordinate axis coordinateValue =
             ]
 
 
+viewBlockCenterOfGravityUserInput : Block -> Position -> List (Html Msg)
+viewBlockCenterOfGravityUserInput block cog =
+    [ div
+        [ class "form-group-title" ]
+        [ text "Center of gravity"
+        , div
+            [ class "form-group-action"
+            , title "Track the center of the volume"
+            ]
+            [ FASolid.crosshairs ]
+        ]
+    , viewCenterOfGravityUserInputCoordinate X block cog.x
+    , viewCenterOfGravityUserInputCoordinate Y block cog.y
+    , viewCenterOfGravityUserInputCoordinate Z block cog.z
+    ]
+
+
 viewCenterOfGravityUserInputCoordinate : Axis -> Block -> FloatInput -> Html Msg
 viewCenterOfGravityUserInputCoordinate axis block coordinateInput =
     let
