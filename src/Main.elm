@@ -579,8 +579,7 @@ restoreSaveInModel model saveFile =
             CoordinatesTransform.fromList saveFile.coordinatesTransform
 
         savedBlocks =
-            listOfBlocksToBlocks <|
-                Debug.log "blocks" saveFile.blocks
+            listOfBlocksToBlocks saveFile.blocks
 
         partitions =
             saveFile.partitions
