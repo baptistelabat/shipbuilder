@@ -3294,6 +3294,11 @@ viewHeightKpi height =
     viewSimpleKpi "Height (m)" "height" <| roundToNearestHundredth height
 
 
+viewCenterOfGravityXKpi : Float -> Html Msg
+viewCenterOfGravityXKpi cogx =
+    viewSimpleKpi "Center of gravity : x" "cog-x" <| roundToNearestHundredth cogx
+
+
 kpisAsCsv : Blocks -> Tags -> String
 kpisAsCsv blocks tags =
     let
