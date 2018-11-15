@@ -4445,11 +4445,13 @@ viewBlockItemContent showContextualMenu block =
                 [ text block.uuid ]
             , div
                 [ class "move-up move-block"
+                , onClickWithoutPropagation <| NoJs <| MoveBlockUp block
                 , title "Move up"
                 ]
                 [ FASolid.angle_up ]
             , div
                 [ class "move-down move-block"
+                , onClickWithoutPropagation <| NoJs <| MoveBlockDown block
                 , title "Move down"
                 ]
                 [ FASolid.angle_down ]
