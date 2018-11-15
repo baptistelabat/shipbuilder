@@ -728,6 +728,19 @@ getCenterOfVolume block =
     }
 
 
+getCenterOfGravity : Block -> Point
+getCenterOfGravity block =
+    case block.centerOfGravity of
+        Computed ->
+            getCenterOfVolume block
+    
+        UserInput position ->
+            { x = position.x.value
+            , y = position.y.value
+            , z = position.z.value
+            }
+            
+
 type ReferenceForMass
     = None
     | Mass
