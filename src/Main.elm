@@ -1665,6 +1665,7 @@ type NoJsMsg
     | FreeCenterOfGravity Block
     | LockCenterOfGravityToCenterOfVolume Block
     | MoveBlockDown Block
+    | MoveBlockUp Block
     | NoOp
     | RenameBlock Block String
     | SetBlockContextualMenu String
@@ -1747,6 +1748,18 @@ updateNoJs msg model =
                 updatedBlocks : Blocks
                 updatedBlocks = 
                     Maybe.withDefault model.blocks <| Maybe.map (\next -> DictList.insertAfter (Tuple.first next) block.uuid block model.blocks) maybeNext
+            in
+                { model | blocks = updatedBlocks } ! []
+
+        MoveBlockUp block ->
+            let
+                maybePrevious : Maybe ( String, Block )
+                maybePrevious =
+                    DictList.previous block.uuid model.blocks
+
+                updatedBlocks : Blocks
+                updatedBlocks = 
+                    Maybe.withDefault model.blocks <| Maybe.map (\previous -> DictList.insertBefore (Tuple.first previous) block.uuid block model.blocks) maybePrevious
             in
                 { model | blocks = updatedBlocks } ! []
 
