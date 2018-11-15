@@ -4028,6 +4028,7 @@ viewCenterOfGravityUserInputCoordinate axis block coordinateInput =
                 [ type_ "text"
                 , id <| "block-cog-" ++ axisLabel ++ "-input"
                 , value coordinateInput.string
+                , onBlur <| NoJs <| SyncBlockInputs block
                 ]
                 []
             ]
