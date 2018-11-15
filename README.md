@@ -74,7 +74,7 @@ Le tableau suivant résume les entrées acceptées par chacun des champs et s'il
 | Width (taille sur Y)      | Nombre décimal __positif__ | Oui                    |
 | Height (taille sur Z)     | Nombre décimal __positif__ | Oui                    |
 | Center of gravity (x, y et z) | Nombre décimal     | Non                        |
-| Volume (               | _Non éditable_         | _Non éditable_             |
+| Volume                | _Non éditable_         | _Non éditable_             |
 | Density                  | Nombre décimal __positif__ | Non                    |
 | Mass                    | Nombre décimal __positif__ | Non                    |
 
@@ -84,6 +84,7 @@ L'onglet KPIs présente et permet de télécharger au format CSV certaines métr
 - la longueur (axe X) totale occupée par les blocs
 - la largeur (axe Y) totale occupée par les blocs
 - la hauteur (axe Z) totale occupée par les blocs
+- le centre de gravité de l'ensemble des blocs (sur les axes X, Y et Z)
 - la somme des volumes des blocs
 - la somme des masses des blocs.
 

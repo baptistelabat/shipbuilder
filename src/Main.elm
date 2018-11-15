@@ -728,6 +728,60 @@ getCenterOfVolume block =
     }
 
 
+getCenterOfGravity : Block -> Point
+getCenterOfGravity block =
+    case block.centerOfGravity of
+        Computed ->
+            getCenterOfVolume block
+    
+        UserInput position ->
+            { x = position.x.value
+            , y = position.y.value
+            , z = position.z.value
+            }
+            
+
+getCentroidOfBlocks : Blocks -> Point
+getCentroidOfBlocks blocks =
+    let
+        sumOfMasses : Float
+        sumOfMasses =
+            getSumOfMasses blocks
+
+        weightedCenterOfGravity : Block -> Point
+        weightedCenterOfGravity block =
+            let
+                cog : Point
+                cog = getCenterOfGravity block
+            in
+                { x = block.mass.value * cog.x
+                , y = block.mass.value * cog.y
+                , z = block.mass.value * cog.z
+                }
+
+        addWeightedCentersOfGravity : Point -> Point -> Point
+        addWeightedCentersOfGravity centerA centerB =
+            { x = centerA.x + centerB.x
+            , y = centerA.y + centerB.y
+            , z = centerA.z + centerB.z
+            }
+
+        divideBySumOfMasses : Point -> Point
+        divideBySumOfMasses point =
+            if sumOfMasses /= 0 then
+                { x = point.x / sumOfMasses
+                , y = point.y / sumOfMasses
+                , z = point.z / sumOfMasses
+                }
+            else
+                { x = 0, y = 0, z = 0 }
+    in
+        toList blocks
+            |> List.map weightedCenterOfGravity
+            |> List.foldl addWeightedCentersOfGravity { x = 0, y = 0, z = 0 }
+            |> divideBySumOfMasses
+
+
 type ReferenceForMass
     = None
     | Mass
@@ -3191,6 +3245,9 @@ viewKpiStudio model =
         blocksBoundingBoxSize : { length : Float, width : Float, height : Float }
         blocksBoundingBoxSize =
             getBoundingBoxSize blocksBoundingBox
+
+        cog : Point
+        cog = getCentroidOfBlocks model.blocks
     in
         div
             [ class "panel kpi-panel" ]
@@ -3211,6 +3268,9 @@ viewKpiStudio model =
             , viewLengthKpi blocksBoundingBoxSize.length
             , viewWidthKpi blocksBoundingBoxSize.width
             , viewHeightKpi blocksBoundingBoxSize.height
+            , viewCenterOfGravityXKpi cog.x
+            , viewCenterOfGravityYKpi cog.y
+            , viewCenterOfGravityZKpi cog.z
             , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
             , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
             ]
@@ -3240,6 +3300,21 @@ viewHeightKpi height =
     viewSimpleKpi "Height (m)" "height" <| roundToNearestHundredth height
 
 
+viewCenterOfGravityXKpi : Float -> Html Msg
+viewCenterOfGravityXKpi cogx =
+    viewSimpleKpi "Center of gravity : x" "cog-x" <| roundToNearestHundredth cogx
+
+
+viewCenterOfGravityYKpi : Float -> Html Msg
+viewCenterOfGravityYKpi cogy =
+    viewSimpleKpi "Center of gravity : y" "cog-y" <| roundToNearestHundredth cogy
+
+
+viewCenterOfGravityZKpi : Float -> Html Msg
+viewCenterOfGravityZKpi cogz =
+    viewSimpleKpi "Center of gravity : z" "cog-z" <| roundToNearestHundredth cogz
+
+
 kpisAsCsv : Blocks -> Tags -> String
 kpisAsCsv blocks tags =
     let
@@ -3251,6 +3326,9 @@ kpisAsCsv blocks tags =
         blocksBoundingBoxSize =
             getBoundingBoxSize blocksBoundingBox
 
+        cog : Point
+        cog = getCentroidOfBlocks blocks
+
         totalSummary : KpiSummary
         totalSummary =
             computeKpisForAll blocks
@@ -3261,21 +3339,25 @@ kpisAsCsv blocks tags =
     in
         -- Length, width and height are not in KpiSummary because they only apply for the whole ship
         -- We add the corresponding headers to the end of the list of those inside KpiSummary
-        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)" ]
+        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)", "Center of gravity : x", "Center of gravity : y", "Center of gravity : z" ]
             :: ((kpiSummaryToStringList tags totalSummary
                     |> flip (++)
                         -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
                         [ toString <| blocksBoundingBoxSize.length
                         , toString <| blocksBoundingBoxSize.width
                         , toString <| blocksBoundingBoxSize.height
+                        -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+                        , toString <| cog.x
+                        , toString <| cog.y
+                        , toString <| cog.z
                         ]
                     |> listToCsvLine
                 )
                     :: List.map
                         (\summary ->
                             kpiSummaryToStringList tags summary
-                                |> flip (++) [ "", "", "" ]
-                                -- We add empty values for the color groups because length, width and height don't apply
+                                |> flip (++) [ "", "", "", "", "", "" ]
+                                -- We add empty values for the color groups because length, width, height and the center of gravity don't apply
                                 |>
                                     listToCsvLine
                         )
