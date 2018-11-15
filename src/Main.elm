@@ -741,6 +741,47 @@ getCenterOfGravity block =
             }
             
 
+getCentroidOfBlocks : Blocks -> Point
+getCentroidOfBlocks blocks =
+    let
+        sumOfMasses : Float
+        sumOfMasses =
+            getSumOfMasses blocks
+
+        weightedCenterOfGravity : Block -> Point
+        weightedCenterOfGravity block =
+            let
+                cog : Point
+                cog = getCenterOfGravity block
+            in
+                { x = block.mass.value * cog.x
+                , y = block.mass.value * cog.y
+                , z = block.mass.value * cog.z
+                }
+
+        addWeightedCentersOfGravity : Point -> Point -> Point
+        addWeightedCentersOfGravity centerA centerB =
+            { x = centerA.x + centerB.x
+            , y = centerA.y + centerB.y
+            , z = centerA.z + centerB.z
+            }
+
+        divideBySumOfMasses : Point -> Point
+        divideBySumOfMasses point =
+            if sumOfMasses /= 0 then
+                { x = point.x / sumOfMasses
+                , y = point.y / sumOfMasses
+                , z = point.z / sumOfMasses
+                }
+            else
+                { x = 0, y = 0, z = 0 }
+    in
+        toList blocks
+            |> List.map weightedCenterOfGravity
+            |> List.foldl addWeightedCentersOfGravity { x = 0, y = 0, z = 0 }
+            |> divideBySumOfMasses
+
+
 type ReferenceForMass
     = None
     | Mass
