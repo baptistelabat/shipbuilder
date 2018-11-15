@@ -717,9 +717,9 @@ type CenterOfGravity
 
 getCenterOfVolume : Block -> Point
 getCenterOfVolume block =
-    { x = block.position.x.value + 0.5 * block.size.length.value
-    , y = block.position.y.value + 0.5 * block.size.width.value
-    , z = block.position.z.value - 0.5 * block.size.height.value
+    { x = roundToNearestHundredth <| block.position.x.value + 0.5 * block.size.length.value
+    , y = roundToNearestHundredth <| block.position.y.value + 0.5 * block.size.width.value
+    , z = roundToNearestHundredth <| block.position.z.value - 0.5 * block.size.height.value
     }
 
 
