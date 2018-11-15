@@ -45,6 +45,8 @@ L'onglet permet de visualiser et d'éditer la liste des blocs qui composent le n
 
 Les blocs peuvent être cachés (et affichés à nouveau), ou supprimés après avoir cliqué sur l'icône  `...` affichée au survol d'un bloc.
 
+Il est possible de réordonner la liste des blocs. Au survol d'un bloc, des flèches apparaissent au dessus et en dessous de la ligne du bloc pour permettre de déplacer le bloc vers le haut ou le bas de la liste.
+
 Il est possible de sélectionner un bloc en cliquant sur sa ligne. Sa couleur est alors affichée sur la bordure de gauche tant que le bloc reste sélectionné. Cette bordure s'affiche également au survol des blocs dans la liste.
 
 Pour sélectionner plusieurs blocs, il faut maintenir la touche `<Ctrl>` enfoncée et cliquer sur chaque bloc à sélectionner.
