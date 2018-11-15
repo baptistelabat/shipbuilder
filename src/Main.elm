@@ -579,7 +579,8 @@ restoreSaveInModel model saveFile =
             CoordinatesTransform.fromList saveFile.coordinatesTransform
 
         savedBlocks =
-            listOfBlocksToBlocks saveFile.blocks
+            listOfBlocksToBlocks <|
+                Debug.log "blocks" saveFile.blocks
 
         partitions =
             saveFile.partitions
@@ -1621,6 +1622,7 @@ type NoJsMsg
     | SyncBlockInputs Block
     | SyncPartitions
     | ToggleAccordion Bool String
+    | UpdateCenterOfGravity Axis Block String
     | UpdateCustomPropertyLabel CustomProperty String
     | UpdateDensity Block String
     | UpdateMass Block String
@@ -1846,6 +1848,37 @@ updateNoJs msg model =
                     { uiState | accordions = Dict.insert accordionId isOpen uiState.accordions }
             in
                 { model | uiState = newUiState } ! []
+
+        UpdateCenterOfGravity axis block input ->
+            case block.centerOfGravity of
+                Computed ->
+                    model ! []
+
+                UserInput position ->
+                    let
+                        axisFloatInput : FloatInput
+                        axisFloatInput =
+                            position |> axisAccessor axis
+
+                        updatedBlock : Block
+                        updatedBlock =
+                            { block
+                                | centerOfGravity =
+                                    (case String.toFloat input of
+                                        Ok value ->
+                                            value
+                                                |> asValueInNumberInput axisFloatInput
+                                                |> flip asStringInNumberInput input
+
+                                        Err error ->
+                                            input
+                                                |> asStringInNumberInput axisFloatInput
+                                    )
+                                        |> (asAxisInPosition axis) position
+                                        |> UserInput
+                            }
+                    in
+                        updateBlockInModel updatedBlock model ! []
 
         UpdateCustomPropertyLabel property newLabel ->
             { model
@@ -4073,6 +4106,7 @@ viewCenterOfGravityUserInputCoordinate axis block coordinateInput =
                 [ type_ "text"
                 , id <| "block-cog-" ++ axisLabel ++ "-input"
                 , value coordinateInput.string
+                , onInput <| NoJs << UpdateCenterOfGravity axis block
                 , onBlur <| NoJs <| SyncBlockInputs block
                 ]
                 []
