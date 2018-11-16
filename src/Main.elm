@@ -752,7 +752,8 @@ getCentroidOfBlocks blocks =
         weightedCenterOfGravity block =
             let
                 cog : Point
-                cog = getCenterOfGravity block
+                cog =
+                    getCenterOfGravity block
             in
                 { x = block.mass.value * cog.x
                 , y = block.mass.value * cog.y
@@ -972,6 +973,7 @@ encodeBlock block =
             , case block.centerOfGravity of 
                 Computed ->
                     Encode.null
+
                 UserInput position ->
                     encodePosition position
           )
@@ -3273,7 +3275,8 @@ viewKpiStudio model =
             getBoundingBoxSize blocksBoundingBox
 
         cog : Point
-        cog = getCentroidOfBlocks model.blocks
+        cog =
+            getCentroidOfBlocks model.blocks
     in
         div
             [ class "panel kpi-panel" ]
@@ -3353,7 +3356,8 @@ kpisAsCsv blocks tags =
             getBoundingBoxSize blocksBoundingBox
 
         cog : Point
-        cog = getCentroidOfBlocks blocks
+        cog =
+            getCentroidOfBlocks blocks
 
         totalSummary : KpiSummary
         totalSummary =
