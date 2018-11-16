@@ -1323,7 +1323,7 @@ type ViewMode
     | HullStudio
     | Partitioning PartitioningView
     | KpiStudio
-    | Modelling
+    | Modeller
 
 
 type SpaceReservationView
@@ -1364,8 +1364,8 @@ encodeViewMode viewMode =
             KpiStudio ->
                 "kpi"
             
-            Modelling ->
-                "modelling"
+            Modeller ->
+                "modeller"
 
 
 encodeColor : Color -> Encode.Value
@@ -2879,7 +2879,7 @@ tabItems =
     , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     , { title = "KPIs", icon = FASolid.tachometer_alt, viewMode = KpiStudio }
-    , { title = "Modelling", icon = FASolid.clone, viewMode = Modelling }
+    , { title = "Modeller", icon = FASolid.clone, viewMode = Modeller }
     ]
 
 
@@ -3163,9 +3163,9 @@ viewModesMatch left right =
                 _ ->
                     False
         
-        Modelling ->
+        Modeller ->
             case right of
-                Modelling ->
+                Modeller ->
                     True
                 
                 _ ->
@@ -3210,8 +3210,8 @@ viewPanel model =
         KpiStudio ->
             viewKpiStudio model
 
-        Modelling ->
-            viewModelling model
+        Modeller ->
+            viewModeller model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
@@ -3278,13 +3278,13 @@ viewPartitioning partitioningView model =
                             ]
                    )
 
-viewModelling : Model -> Html Msg
-viewModelling model =
+viewModeller : Model -> Html Msg
+viewModeller model =
     div
-        [ class "panel modelling-panel" ]
+        [ class "panel modeller-panel" ]
         [ h2
-            [ class "modelling-panel-title" ]
-            [ text "Modelling" ]
+            [ class "modeller-panel-title" ]
+            [ text "Modeller" ]
         ]
 
     
