@@ -662,6 +662,9 @@ type alias Model =
     }
 
 
+type alias Frames = Dict Int Frame
+
+
 type alias Frame =
     { x : FloatInput
     , points : Dict Int FramePoint
