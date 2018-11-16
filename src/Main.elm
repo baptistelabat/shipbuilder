@@ -3271,6 +3271,15 @@ viewPartitioning partitioningView model =
                             ]
                    )
 
+viewModelling : Model -> Html Msg
+viewModelling model =
+    div
+        [ class "panel modelling-panel" ]
+        [ h2
+            [ class "modelling-panel-title" ]
+            [ text "Modelling" ]
+        ]
+
 
 viewKpiStudio : Model -> Html Msg
 viewKpiStudio model =
