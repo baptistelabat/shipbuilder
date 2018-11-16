@@ -733,13 +733,13 @@ getCenterOfGravity block =
     case block.centerOfGravity of
         Computed ->
             getCenterOfVolume block
-    
+
         UserInput position ->
             { x = position.x.value
             , y = position.y.value
             , z = position.z.value
             }
-            
+
 
 getCentroidOfBlocks : Blocks -> Point
 getCentroidOfBlocks blocks =
@@ -752,7 +752,8 @@ getCentroidOfBlocks blocks =
         weightedCenterOfGravity block =
             let
                 cog : Point
-                cog = getCenterOfGravity block
+                cog =
+                    getCenterOfGravity block
             in
                 { x = block.mass.value * cog.x
                 , y = block.mass.value * cog.y
@@ -969,9 +970,10 @@ encodeBlock block =
         , ( "density", Encode.float block.density.value )
         , ( "visible", Encode.bool block.visible )
         , ( "centerOfGravity"
-            , case block.centerOfGravity of 
+          , case block.centerOfGravity of
                 Computed ->
                     Encode.null
+
                 UserInput position ->
                     encodePosition position
           )
@@ -3273,7 +3275,8 @@ viewKpiStudio model =
             getBoundingBoxSize blocksBoundingBox
 
         cog : Point
-        cog = getCentroidOfBlocks model.blocks
+        cog =
+            getCentroidOfBlocks model.blocks
     in
         div
             [ class "panel kpi-panel" ]
@@ -3353,7 +3356,8 @@ kpisAsCsv blocks tags =
             getBoundingBoxSize blocksBoundingBox
 
         cog : Point
-        cog = getCentroidOfBlocks blocks
+        cog =
+            getCentroidOfBlocks blocks
 
         totalSummary : KpiSummary
         totalSummary =
@@ -3372,7 +3376,7 @@ kpisAsCsv blocks tags =
                         [ toString <| blocksBoundingBoxSize.length
                         , toString <| blocksBoundingBoxSize.width
                         , toString <| blocksBoundingBoxSize.height
-                        -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+                          -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
                         , toString <| cog.x
                         , toString <| cog.y
                         , toString <| cog.z
@@ -3844,7 +3848,7 @@ blocksAsCsv blocksList tags customProperties =
         customPropertyLabels =
             List.map .label customProperties
     in
-        listToCsvLine ([ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "volume", "mass", "density" ] ++ customPropertyLabels)
+        listToCsvLine ([ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "Center of gravity: x", "Center of gravity: y", "Center of gravity: z", "volume", "mass", "density" ] ++ customPropertyLabels)
             :: List.map (blockToCsvLine tags customProperties) blocksList
             |> String.join "\n"
 
@@ -3867,6 +3871,10 @@ blockToCsvLine tags customProperties block =
         customPropertyValues : List String
         customPropertyValues =
             List.map (\customProperty -> Maybe.withDefault "" (Dict.get block.uuid customProperty.values)) customProperties
+
+        cog : Point
+        cog =
+            getCenterOfGravity block
     in
         listToCsvLine
             ([ block.uuid
@@ -3878,6 +3886,9 @@ blockToCsvLine tags customProperties block =
              , block.size.length.string
              , block.size.height.string
              , block.size.width.string
+             , toString cog.x
+             , toString cog.y
+             , toString cog.z
              , toString <| computeVolume block
              , block.mass.string
              , block.density.string
