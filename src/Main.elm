@@ -1363,6 +1363,9 @@ encodeViewMode viewMode =
 
             KpiStudio ->
                 "kpi"
+            
+            Modelling ->
+                "modelling"
 
 
 encodeColor : Color -> Encode.Value
@@ -2876,6 +2879,7 @@ tabItems =
     , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
     , { title = "KPIs", icon = FASolid.tachometer_alt, viewMode = KpiStudio }
+    , { title = "Modelling", icon = FASolid.clone, viewMode = Modelling }
     ]
 
 
@@ -3158,7 +3162,7 @@ viewModesMatch left right =
 
                 _ ->
                     False
-
+        
         Modelling ->
             case right of
                 Modelling ->
@@ -3205,6 +3209,9 @@ viewPanel model =
 
         KpiStudio ->
             viewKpiStudio model
+
+        Modelling ->
+            viewModelling model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
@@ -3280,7 +3287,7 @@ viewModelling model =
             [ text "Modelling" ]
         ]
 
-
+    
 viewKpiStudio : Model -> Html Msg
 viewKpiStudio model =
     let
