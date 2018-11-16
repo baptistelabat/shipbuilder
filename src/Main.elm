@@ -668,6 +668,13 @@ type alias FramePoint =
     }
 
 
+initFramePoint : FramePoint
+initFramePoint =
+    { y = numberToNumberInput 0.0
+    , z = numberToNumberInput 0.0
+    }
+
+
 type alias CustomProperty =
     { label : String
     , values : Dict String String
