@@ -1323,6 +1323,7 @@ type ViewMode
     | HullStudio
     | Partitioning PartitioningView
     | KpiStudio
+    | Modelling
 
 
 type SpaceReservationView
@@ -3155,6 +3156,14 @@ viewModesMatch left right =
                 KpiStudio ->
                     True
 
+                _ ->
+                    False
+
+        Modelling ->
+            case right of
+                Modelling ->
+                    True
+                
                 _ ->
                     False
 
