@@ -662,6 +662,12 @@ type alias Model =
     }
 
 
+type alias FramePoint =
+    { y : FloatInput
+    , z : FloatInput
+    }
+
+
 type alias CustomProperty =
     { label : String
     , values : Dict String String
