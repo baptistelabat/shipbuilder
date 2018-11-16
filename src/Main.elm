@@ -665,6 +665,11 @@ type alias Model =
 type alias Frames = Dict Int Frame
 
 
+initFrames : Frames
+initFrames =
+    Dict.fromList [ (0, initFrame), (1, initFrame), (2,initFrame) ]
+
+
 type alias Frame =
     { x : FloatInput
     , points : Dict Int FramePoint
