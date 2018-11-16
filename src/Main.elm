@@ -668,6 +668,13 @@ type alias Frame =
     }
 
 
+initFrame : Frame
+initFrame =
+    { x = numberToNumberInput 0.0
+    , points = Dict.fromList [ (0,initFramePoint), (1,initFramePoint), (2,initFramePoint), (3,initFramePoint), (4,initFramePoint) ]
+    }
+
+
 type alias FramePoint =
     { y : FloatInput
     , z : FloatInput
