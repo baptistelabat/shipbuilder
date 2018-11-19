@@ -749,6 +749,21 @@ type alias Block =
     }
 
 
+initBlock : String -> String -> Color -> Position -> Size -> Block
+initBlock uuid label color position size =
+    { uuid = uuid
+    , label = label
+    , color = color
+    , position = position
+    , size = size
+    , referenceForMass = None
+    , mass = numberToNumberInput 0.0
+    , density = numberToNumberInput 0.0
+    , visible = True
+    , centerOfGravity = Computed
+    }
+
+
 type CenterOfGravity
     = Computed
     | UserInput Position
