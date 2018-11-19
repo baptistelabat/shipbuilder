@@ -12,6 +12,8 @@ import Main
         , init
         , initCmd
         , initModel
+        , initBlock
+        , Model
         , Msg(..)
         , NoJsMsg(..)
         , ToJsMsg(..)
@@ -29,75 +31,69 @@ import Test exposing (..)
 
 blockA : Block
 blockA =
-    { uuid = "abcd"
-    , label = "Helicopter"
-    , color = Color.blue
-    , position =
+    initBlock
+        "abcd"
+        "Helicopter"
+        Color.blue
         { x = { value = 0, string = "0" }
         , y = { value = 0, string = "0" }
         , z = { value = 0, string = "0" }
         }
-    , size =
         { length = { value = 10, string = "10" }
         , width = { value = 10, string = "10" }
         , height = { value = 10, string = "10" }
         }
-    }
 
 
 blockAYellow : Block
 blockAYellow =
-    { uuid = "abcd"
-    , label = "Helicopter"
-    , color = Color.yellow
-    , position =
+    initBlock
+        "abcd"
+        "Helicopter"
+        Color.yellow
         { x = { value = 0, string = "0" }
         , y = { value = 0, string = "0" }
         , z = { value = 0, string = "0" }
         }
-    , size =
         { length = { value = 10, string = "10" }
         , width = { value = 10, string = "10" }
         , height = { value = 10, string = "10" }
         }
-    }
 
 
 blockB : Block
 blockB =
-    { uuid = "efgh"
-    , label = "Tank"
-    , color = Color.red
-    , position =
+    initBlock
+        "efgh"
+        "Tank"
+        Color.red
         { x = { value = 0, string = "0" }
         , y = { value = 0, string = "0" }
         , z = { value = 0, string = "0" }
         }
-    , size =
         { length = { value = 10, string = "10" }
         , width = { value = 10, string = "10" }
         , height = { value = 10, string = "10" }
         }
-    }
 
 
 blockC : Block
 blockC =
-    { uuid = "ijkl"
-    , label = "Hangar"
-    , color = Color.green
-    , position =
+    initBlock
+        "ijkl"
+        "Hangar"
+        Color.green
         { x = { value = 0, string = "0" }
         , y = { value = 0, string = "0" }
         , z = { value = 0, string = "0" }
         }
-    , size =
         { length = { value = 10, string = "10" }
         , width = { value = 10, string = "10" }
         , height = { value = 10, string = "10" }
         }
-    }
 
+initialModel : Model
+initialModel = initModel "1.0.0"
 
 suite : Test
 suite =
@@ -186,22 +182,22 @@ suite =
         , describe "init"
             [ test "init with initModel" <|
                 \_ ->
-                    init
+                    init "1.0.0"
                         |> Tuple.first
-                        |> Expect.equal initModel
-            , test "init has initCmd as side effect" <|
+                        |> Expect.equal initialModel
+            , test "init has side effects" <|
                 \_ ->
                     let
                         ( model, cmd ) =
-                            init
+                            init "1.0.0"
                     in
-                        Expect.equal cmd (toJs <| initCmd model)
+                        Expect.notEqual cmd Cmd.none
             , test "initCmd is init-three" <|
                 \_ ->
                     Expect.equal
-                        (initCmd initModel)
+                        (initCmd initialModel)
                         { tag = "init-three"
-                        , data = (encodeInitThreeCommand initModel)
+                        , data = (encodeInitThreeCommand initialModel)
                         }
             ]
         , describe "update"
@@ -209,15 +205,15 @@ suite =
                 [ describe "NoOp"
                     [ test "leaves model untouched" <|
                         \_ ->
-                            initModel
+                            initialModel
                                 |> update (NoJs NoOp)
                                 |> Tuple.first
-                                |> Expect.equal initModel
+                                |> Expect.equal initialModel
                     , test
                         "has no side effect"
                       <|
                         \_ ->
-                            initModel
+                            initialModel
                                 |> update (NoJs NoOp)
                                 |> Tuple.second
                                 |> Expect.equal Cmd.none
@@ -226,25 +222,25 @@ suite =
                     [ describe "ChangeBlockColor"
                         [ test "updates only the color of the given block" <|
                             \_ ->
-                                { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
                                     |> Tuple.first
-                                    |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
+                                    |> Expect.equal { initialModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
                         , test "leaves model untouched if the block doesn't exist" <|
                             \_ ->
-                                { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
                                     |> Tuple.first
-                                    |> Expect.equal { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                    |> Expect.equal { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                         , test "has a side effect" <|
                             \_ ->
-                                { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
                                     |> Tuple.second
                                     |> Expect.notEqual Cmd.none
                         , test "has no side effect if the block doesn't exist" <|
                             \_ ->
-                                { initModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
                                     |> Tuple.second
                                     |> Expect.equal Cmd.none
@@ -252,25 +248,25 @@ suite =
                     , describe "AddBlock"
                         [ test "leaves the model untouched" <|
                             \_ ->
-                                initModel
+                                initialModel
                                     |> update (ToJs <| AddBlock "aLabel")
                                     |> Tuple.first
-                                    |> Expect.equal initModel
+                                    |> Expect.equal initialModel
                         , test "has a side effect" <|
                             \_ ->
-                                initModel
+                                initialModel
                                     |> update (ToJs <| AddBlock "aLabel")
                                     |> Tuple.second
                                     |> Expect.notEqual Cmd.none
                         , fuzz Fuzz.string "leaves the model untouched no matter the label" <|
                             \label ->
-                                initModel
+                                initialModel
                                     |> update (ToJs <| AddBlock label)
                                     |> Tuple.first
-                                    |> Expect.equal initModel
+                                    |> Expect.equal initialModel
                         , fuzz Fuzz.string "has a side effect no matter the label" <|
                             \label ->
-                                initModel
+                                initialModel
                                     |> update (ToJs <| AddBlock label)
                                     |> Tuple.second
                                     |> Expect.notEqual Cmd.none

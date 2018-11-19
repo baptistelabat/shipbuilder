@@ -5,6 +5,8 @@ port module Main
         , init
         , initCmd
         , initModel
+        , initBlock
+        , Model
         , Msg(..)
         , NoJsMsg(..)
         , ToJsMsg(..)
@@ -746,6 +748,21 @@ type alias Block =
     , density : FloatInput
     , visible : Bool
     , centerOfGravity : CenterOfGravity
+    }
+
+
+initBlock : String -> String -> Color -> Position -> Size -> Block
+initBlock uuid label color position size =
+    { uuid = uuid
+    , label = label
+    , color = color
+    , position = position
+    , size = size
+    , referenceForMass = None
+    , mass = numberToNumberInput 0.0
+    , density = numberToNumberInput 0.0
+    , visible = True
+    , centerOfGravity = Computed
     }
 
 
@@ -2188,6 +2205,7 @@ updateFromJs jsmsg model =
                 Just block ->
                     size
                         |> asSizeInBlock block
+                        |> updateBlockMassAndDensity
                         |> flip updateBlockInModel model
 
                 Nothing ->
