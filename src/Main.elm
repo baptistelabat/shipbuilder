@@ -662,6 +662,40 @@ type alias Model =
     }
 
 
+type alias Frames = Dict Int Frame
+
+
+initFrames : Frames
+initFrames =
+    Dict.fromList [ (0, initFrame), (1, initFrame), (2,initFrame) ]
+
+
+type alias Frame =
+    { x : FloatInput
+    , points : Dict Int FramePoint
+    }
+
+
+initFrame : Frame
+initFrame =
+    { x = numberToNumberInput 0.0
+    , points = Dict.fromList [ (0,initFramePoint), (1,initFramePoint), (2,initFramePoint), (3,initFramePoint), (4,initFramePoint) ]
+    }
+
+
+type alias FramePoint =
+    { y : FloatInput
+    , z : FloatInput
+    }
+
+
+initFramePoint : FramePoint
+initFramePoint =
+    { y = numberToNumberInput 0.0
+    , z = numberToNumberInput 0.0
+    }
+
+
 type alias CustomProperty =
     { label : String
     , values : Dict String String
