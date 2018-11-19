@@ -2205,6 +2205,7 @@ updateFromJs jsmsg model =
                 Just block ->
                     size
                         |> asSizeInBlock block
+                        |> updateBlockMassAndDensity
                         |> flip updateBlockInModel model
 
                 Nothing ->
