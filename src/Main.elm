@@ -6,6 +6,7 @@ port module Main
         , initCmd
         , initModel
         , initBlock
+        , Model
         , Msg(..)
         , NoJsMsg(..)
         , ToJsMsg(..)
