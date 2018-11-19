@@ -6,6 +6,7 @@ import Viewports
         , Viewports
         , encodeViewport
         , encodeViewports
+        , CameraType(..)
         )
 import Color
 import Math.Vector3 exposing (vec3)
@@ -24,6 +25,7 @@ viewport =
         Color.white
         (vec3 0 1000 0)
         { x = True, y = True, z = False }
+        Orthographic
 
 
 viewportJsonString : String
@@ -49,7 +51,8 @@ viewportJsonString =
         "x": true,
         "y": true,
         "z": false
-    }
+    },
+    "cameraType": "Orthographic"
 }"""
 
 
@@ -63,6 +66,7 @@ viewports =
         Color.white
         (vec3 0 1000 0)
         { x = True, y = True, z = False }
+        Orthographic
     , Viewport "Second"
         0.5
         0
@@ -71,6 +75,7 @@ viewports =
         Color.white
         (vec3 0 1000 0)
         { x = True, y = True, z = False }
+        Orthographic
     ]
 
 
@@ -98,7 +103,8 @@ viewportsJsonString =
             "x": true,
             "y": true,
             "z": false
-        }
+        },
+        "cameraType": "Orthographic"
     },
     {
         "label": "Second",
@@ -121,7 +127,8 @@ viewportsJsonString =
             "x": true,
             "y": true,
             "z": false
-        }
+        },
+        "cameraType": "Orthographic"
     }
 ]"""
 

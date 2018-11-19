@@ -5,6 +5,7 @@ module Viewports
         , Viewports
         , encodeViewport
         , encodeViewports
+        , CameraType(..)
         )
 
 import Color exposing (Color, hsl, toRgb)
