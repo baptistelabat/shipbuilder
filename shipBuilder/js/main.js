@@ -478,7 +478,8 @@ let removeObject = function (block) {
             hovered = null;
         }
         if (isObjectSelected(objectToRemove)) {
-            resetSelection();
+            // remove object from selection
+            removeFromSelection(objectToRemove);
         }
 
         removeFromScene(objectToRemove);
