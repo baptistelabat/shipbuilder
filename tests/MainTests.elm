@@ -364,11 +364,11 @@ suite =
 
                     updateY : Block -> Block
                     updateY block =
-                        { block | position = numberToNumberInput 1.0 |> asYInPosition block.position }
+                        { block | position = numberToNumberInput 2.0 |> asYInPosition block.position }
 
                     updateZ : Block -> Block
                     updateZ block =
-                        { block | position = numberToNumberInput 1.0 |> asZInPosition block.position }
+                        { block | position = numberToNumberInput 3.3 |> asZInPosition block.position }
 
                     updateXInAFromElm : Model
                     updateXInAFromElm =
@@ -377,6 +377,14 @@ suite =
                     updateXInAFromJs : Model
                     updateXInAFromJs =
                         updateModel [ FromJs <| SynchronizePosition blockA.uuid (.position <| updateX blockA) ] modelWithTwoBlocks
+
+                    updateMultipleAxisFromElm : Model
+                    updateMultipleAxisFromElm =
+                        updateModel [ ToJs <| UpdatePosition X blockB "1", ToJs <| UpdatePosition Y blockB "2", ToJs <| UpdatePosition Z blockB "3.3" ] modelWithTwoBlocks
+
+                    updateMultipleAxisFromJs : Model
+                    updateMultipleAxisFromJs =
+                        updateModel [ FromJs <| SynchronizePosition blockB.uuid (.position <| updateX <| updateZ <| updateY blockB) ] modelWithTwoBlocks
                 in
                     [ test "Update X from Elm" <|
                         \_ ->
@@ -393,6 +401,89 @@ suite =
                     , test "Update X from Elm == Update X from Js" <|
                         \_ ->
                             Expect.equal updateXInAFromElm updateXInAFromJs
+                    , test "Update the position on multiple axis from Elm" <|
+                        \_ ->
+                            updateMultipleAxisFromElm
+                                |> .blocks
+                                |> toList
+                                |> Expect.equal [ blockA, updateX <| updateY <| updateZ blockB ]
+                    , test "Update the position on multiple axis from Js" <|
+                        \_ ->
+                            updateMultipleAxisFromJs
+                                |> .blocks
+                                |> toList
+                                |> Expect.equal [ blockA, updateX <| updateY <| updateZ blockB ]
+                    , test "Update the position on multiple axis from Elm == from Js" <|
+                        \_ ->
+                            Expect.equal updateMultipleAxisFromElm updateMultipleAxisFromJs
+                    ]
+            , describe "Update the size of a block" <|
+                let
+                    modelWithTwoBlocks : Model
+                    modelWithTwoBlocks =
+                        setModel
+                            [ FromJs <| NewBlock blockA
+                            , FromJs <| NewBlock blockB
+                            ]
+
+                    updateLength : Block -> Block
+                    updateLength block =
+                        { block | size = numberToNumberInput 20 |> asLengthInSize block.size }
+
+                    updateWidth : Block -> Block
+                    updateWidth block =
+                        { block | size = numberToNumberInput 1 |> asWidthInSize block.size }
+
+                    updateHeight : Block -> Block
+                    updateHeight block =
+                        { block | size = numberToNumberInput 150.8 |> asHeightInSize block.size }
+
+                    updateLengthInAFromElm : Model
+                    updateLengthInAFromElm =
+                        updateModel [ ToJs <| UpdateDimension Length blockA "20" ] modelWithTwoBlocks
+
+                    updateLengthInAFromJs : Model
+                    updateLengthInAFromJs =
+                        updateModel [ FromJs <| SynchronizeSize blockA.uuid (.size <| updateLength blockA) ] modelWithTwoBlocks
+
+                    updateMultipleDimensionFromElm : Model
+                    updateMultipleDimensionFromElm =
+                        updateModel [ ToJs <| UpdateDimension Length blockB "20", ToJs <| UpdateDimension Width blockB "1", ToJs <| UpdateDimension Height blockB "150.8" ] modelWithTwoBlocks
+
+                    updateMultipleDimensionFromJs : Model
+                    updateMultipleDimensionFromJs =
+                        updateModel [ FromJs <| SynchronizeSize blockB.uuid (.size <| updateLength <| updateWidth <| updateHeight blockB) ] modelWithTwoBlocks
+                in
+                    [ test "Update length from Elm" <|
+                        \_ ->
+                            updateLengthInAFromElm
+                                |> .blocks
+                                |> toList
+                                |> Expect.equal [ updateLength blockA, blockB ]
+                    , test "Update length from Js" <|
+                        \_ ->
+                            updateLengthInAFromJs
+                                |> .blocks
+                                |> toList
+                                |> Expect.equal [ updateLength blockA, blockB ]
+                    , test "Update length from Elm == Update length from Js" <|
+                        \_ ->
+                            Expect.equal updateLengthInAFromElm updateLengthInAFromJs
+                    , test "Update the size on multiple dimensions from Elm" <|
+                        \_ ->
+                            updateMultipleDimensionFromElm
+                                |> .blocks
+                                |> toList
+                                |> Expect.equal [ blockA, updateLength <| updateWidth <| updateHeight blockB ]
+                    , test "Update the size on multiple dimensions from Js" <|
+                        \_ ->
+                            updateMultipleDimensionFromJs
+                                |> .blocks
+                                |> toList
+                                |> Expect.equal [ blockA, updateLength <| updateWidth <| updateHeight blockB ]
+                    , test "Update the size on multiple dimensions from Elm == from Js" <|
+                        \_ ->
+                            Expect.equal updateMultipleDimensionFromElm updateMultipleDimensionFromJs
                     ]
             ]
         ]
