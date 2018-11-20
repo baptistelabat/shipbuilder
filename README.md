@@ -10,6 +10,12 @@ La dernière version de la page est disponible ici : [https://projets.gitlab-pag
 Pour une version offline, télécharger les artefacts ici : [https://gitlab.sirehna.com/projets/ShipBuilder2/-/jobs/artifacts/master/download?job=build](https://gitlab.sirehna.com/projets/ShipBuilder2/-/jobs/artifacts/master/download?job=build).
 Ensuite, ouvrir le fichier `shipBuilder/index.html` dans le navigateur (double-cliquer dessus dans l'explorateur de fichier, par exemple).
 
+## Note sur la librairie TransformControls.js
+
+Les gizmos de manipulation dans les vues 3D sont gérés par la librairie TransformControls. Elle ne fait pas partie de Three.js mais de ses exemples. Il a fallu en modifier une partie (rechercher "view" dans le fichier) pour fonctionner avec les viewports multiples. Si les viewports devaient évoluer, il faudrait revoir les parties modifiées. La version "originale" est disponible à l'adresse suivante : [https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/TransformControls.js](https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/TransformControls.js)
+
+Elle permet de gérer une seule vue par canvas.
+
 # Barre de titre
 
 La barre de titre permet, via les actions à sa droite, d'ouvrir un fichier JSON précédemment sauvegardé dans l'application ou de sauver le projet courant au format JSON.
