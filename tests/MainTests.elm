@@ -274,4 +274,125 @@ suite =
                     ]
                 ]
             ]
+        , describe "Common messages From/ToJs"
+            [ describe "Select a block" <|
+                let
+                    selectOneInElm : Model
+                    selectOneInElm =
+                        setModel
+                            [ FromJs <| NewBlock blockA
+                            , FromJs <| NewBlock blockB
+                            , ToJs <| SelectBlock blockA
+                            ]
+
+                    selectOneInJs : Model
+                    selectOneInJs =
+                        setModel
+                            [ FromJs <| NewBlock <| blockA
+                            , FromJs <| NewBlock blockB
+                            , FromJs <| Select blockA.uuid
+                            ]
+
+                    selectSecondInElm : Model
+                    selectSecondInElm =
+                        updateModel [ NoJs <| SetMultipleSelect True, ToJs <| SelectBlock blockB, NoJs <| SetMultipleSelect False ] selectOneInElm
+
+                    selectSecondInJs : Model
+                    selectSecondInJs =
+                        updateModel [ FromJs <| AddToSelection blockB.uuid ] selectOneInJs
+
+                    unselectFirstInElm : Model
+                    unselectFirstInElm =
+                        updateModel [ NoJs <| SetMultipleSelect True, ToJs <| SelectBlock blockA, NoJs <| SetMultipleSelect False ] selectSecondInElm
+
+                    unselectFirstInJs : Model
+                    unselectFirstInJs =
+                        updateModel [ FromJs <| RemoveFromSelection blockA.uuid ] selectSecondInJs
+                in
+                    [ test "Select a block in Elm" <|
+                        \_ ->
+                            selectOneInElm
+                                |> .selectedBlocks
+                                |> Expect.equal [ blockA.uuid ]
+                    , test "Select a block in Js" <|
+                        \_ ->
+                            selectOneInJs
+                                |> .selectedBlocks
+                                |> Expect.equal [ blockA.uuid ]
+                    , test "Select a block in Js == Select a block in Elm" <|
+                        \_ ->
+                            Expect.equal selectOneInElm selectOneInJs
+                    , test "Select second block in Elm" <|
+                        \_ ->
+                            selectSecondInElm
+                                |> .selectedBlocks
+                                |> Expect.equal [ blockA.uuid, blockB.uuid ]
+                    , test "Select second block in Js" <|
+                        \_ ->
+                            selectSecondInJs
+                                |> .selectedBlocks
+                                |> Expect.equal [ blockA.uuid, blockB.uuid ]
+                    , test "Select second block in Js == Select second block in Elm" <|
+                        \_ ->
+                            Expect.equal selectSecondInElm selectSecondInJs
+                    , test "Unselect first block in Elm" <|
+                        \_ ->
+                            unselectFirstInElm
+                                |> .selectedBlocks
+                                |> Expect.equal [ blockB.uuid ]
+                    , test "Unselect first block in Js" <|
+                        \_ ->
+                            unselectFirstInJs
+                                |> .selectedBlocks
+                                |> Expect.equal [ blockB.uuid ]
+                    , test "Unselect first block in Js == Unselect first block in Elm" <|
+                        \_ ->
+                            Expect.equal unselectFirstInElm unselectFirstInJs
+                    ]
+            , describe "Update the position of a block" <|
+                let
+                    modelWithTwoBlocks : Model
+                    modelWithTwoBlocks =
+                        setModel
+                            [ FromJs <| NewBlock blockA
+                            , FromJs <| NewBlock blockB
+                            ]
+
+                    updateX : Block -> Block
+                    updateX block =
+                        { block | position = numberToNumberInput 1.0 |> asXInPosition block.position }
+
+                    updateY : Block -> Block
+                    updateY block =
+                        { block | position = numberToNumberInput 1.0 |> asYInPosition block.position }
+
+                    updateZ : Block -> Block
+                    updateZ block =
+                        { block | position = numberToNumberInput 1.0 |> asZInPosition block.position }
+
+                    updateXInAFromElm : Model
+                    updateXInAFromElm =
+                        updateModel [ ToJs <| UpdatePosition X blockA "1" ] modelWithTwoBlocks
+
+                    updateXInAFromJs : Model
+                    updateXInAFromJs =
+                        updateModel [ FromJs <| SynchronizePosition blockA.uuid (.position <| updateX blockA) ] modelWithTwoBlocks
+                in
+                    [ test "Update X from Elm" <|
+                        \_ ->
+                            updateXInAFromElm
+                                |> .blocks
+                                |> toList
+                                |> Expect.equal [ updateX blockA, blockB ]
+                    , test "Update X from Js" <|
+                        \_ ->
+                            updateXInAFromJs
+                                |> .blocks
+                                |> toList
+                                |> Expect.equal [ updateX blockA, blockB ]
+                    , test "Update X from Elm == Update X from Js" <|
+                        \_ ->
+                            Expect.equal updateXInAFromElm updateXInAFromJs
+                    ]
+            ]
         ]
