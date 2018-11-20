@@ -9,6 +9,7 @@ port module Main
         , Model
         , Msg(..)
         , NoJsMsg(..)
+        , FromJsMsg(..)
         , ToJsMsg(..)
         , toJs
         , update
@@ -17,6 +18,16 @@ port module Main
         , Blocks
         , addBlockTo
         , removeBlockFrom
+        , toList
+        , asXInPosition
+        , asYInPosition
+        , asZInPosition
+        , asLengthInSize
+        , asWidthInSize
+        , asHeightInSize
+        , Axis(..)
+        , Dimension(..)
+        , numberToNumberInput
         )
 
 import Color exposing (Color)
@@ -664,12 +675,13 @@ type alias Model =
     }
 
 
-type alias Frames = Dict Int Frame
+type alias Frames =
+    Dict Int Frame
 
 
 initFrames : Frames
 initFrames =
-    Dict.fromList [ (0, initFrame), (1, initFrame), (2,initFrame) ]
+    Dict.fromList [ ( 0, initFrame ), ( 1, initFrame ), ( 2, initFrame ) ]
 
 
 type alias Frame =
@@ -681,7 +693,7 @@ type alias Frame =
 initFrame : Frame
 initFrame =
     { x = numberToNumberInput 0.0
-    , points = Dict.fromList [ (0,initFramePoint), (1,initFramePoint), (2,initFramePoint), (3,initFramePoint), (4,initFramePoint) ]
+    , points = Dict.fromList [ ( 0, initFramePoint ), ( 1, initFramePoint ), ( 2, initFramePoint ), ( 3, initFramePoint ), ( 4, initFramePoint ) ]
     }
 
 
@@ -1414,7 +1426,7 @@ encodeViewMode viewMode =
 
             KpiStudio ->
                 "kpi"
-            
+
             Modeller ->
                 "modeller"
 
@@ -1803,7 +1815,7 @@ updateNoJs msg model =
                     DictList.next block.uuid model.blocks
 
                 updatedBlocks : Blocks
-                updatedBlocks = 
+                updatedBlocks =
                     Maybe.withDefault model.blocks <| Maybe.map (\next -> DictList.insertAfter (Tuple.first next) block.uuid block model.blocks) maybeNext
             in
                 { model | blocks = updatedBlocks } ! []
@@ -1815,7 +1827,7 @@ updateNoJs msg model =
                     DictList.previous block.uuid model.blocks
 
                 updatedBlocks : Blocks
-                updatedBlocks = 
+                updatedBlocks =
                     Maybe.withDefault model.blocks <| Maybe.map (\previous -> DictList.insertBefore (Tuple.first previous) block.uuid block model.blocks) maybePrevious
             in
                 { model | blocks = updatedBlocks } ! []
@@ -2501,6 +2513,10 @@ updateModelToJs msg model =
                 axisFloatInput : FloatInput
                 axisFloatInput =
                     block.position |> axisAccessor axis
+
+                blockInModel : Block
+                blockInModel =
+                    Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
             in
                 case String.toFloat input of
                     Ok value ->
@@ -2510,22 +2526,25 @@ updateModelToJs msg model =
                                 value
                                     |> asValueInNumberInput axisFloatInput
                                     |> flip asStringInNumberInput input
-                                    |> (asAxisInPosition axis) block.position
-                                    |> asPositionInBlock block
+                                    |> (asAxisInPosition axis) blockInModel.position
+                                    |> asPositionInBlock blockInModel
                         in
                             updateBlockInModel updatedBlock model
 
                     Err error ->
                         input
                             |> asStringInNumberInput axisFloatInput
-                            |> (asAxisInPosition axis) block.position
-                            |> asPositionInBlock block
+                            |> (asAxisInPosition axis) blockInModel.position
+                            |> asPositionInBlock blockInModel
                             |> flip updateBlockInModel model
 
         UpdateDimension dimension block input ->
             let
                 dimensionFloatInput =
                     block.size |> dimensionAccessor dimension
+
+                blockInModel : Block
+                blockInModel = Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
             in
                 case String.toFloat input of
                     Ok value ->
@@ -2542,8 +2561,8 @@ updateModelToJs msg model =
                                 newValue
                                     |> asValueInNumberInput dimensionFloatInput
                                     |> flip asStringInNumberInput input
-                                    |> (asDimensionInSize dimension) block.size
-                                    |> asSizeInBlock block
+                                    |> (asDimensionInSize dimension) blockInModel.size
+                                    |> asSizeInBlock blockInModel
                                     |> updateBlockMassAndDensity
                         in
                             updateBlockInModel updatedBlock model
@@ -2551,8 +2570,8 @@ updateModelToJs msg model =
                     Err message ->
                         input
                             |> asStringInNumberInput dimensionFloatInput
-                            |> (asDimensionInSize dimension) block.size
-                            |> asSizeInBlock block
+                            |> (asDimensionInSize dimension) blockInModel.size
+                            |> asSizeInBlock blockInModel
                             |> flip updateBlockInModel model
 
 
@@ -2828,13 +2847,17 @@ msg2json model action =
                         axisFloatInput =
                             block.position |> axisAccessor axis
 
+                        blockInModel : Block
+                        blockInModel =
+                            Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
+
                         updatedBlock : Block
                         updatedBlock =
                             value
                                 |> asValueInNumberInput axisFloatInput
                                 |> flip asStringInNumberInput input
-                                |> (asAxisInPosition axis) block.position
-                                |> asPositionInBlock block
+                                |> (asAxisInPosition axis) blockInModel.position
+                                |> asPositionInBlock blockInModel
                     in
                         { tag = "update-position", data = encodeUpdatePositionCommand updatedBlock }
                 )
@@ -2857,13 +2880,17 @@ msg2json model action =
                             else
                                 (abs value)
 
+                        blockInModel : Block
+                        blockInModel =
+                            Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
+
                         updatedBlock : Block
                         updatedBlock =
                             newValue
                                 |> asValueInNumberInput dimensionFloatInput
                                 |> flip asStringInNumberInput input
-                                |> (asDimensionInSize dimension) block.size
-                                |> asSizeInBlock block
+                                |> (asDimensionInSize dimension) blockInModel.size
+                                |> asSizeInBlock blockInModel
                     in
                         { tag = "update-size", data = (encodeUpdateSizeCommand updatedBlock) }
                 )
@@ -3214,12 +3241,12 @@ viewModesMatch left right =
 
                 _ ->
                     False
-        
+
         Modeller ->
             case right of
                 Modeller ->
                     True
-                
+
                 _ ->
                     False
 
@@ -3330,6 +3357,7 @@ viewPartitioning partitioningView model =
                             ]
                    )
 
+
 viewModeller : Model -> Html Msg
 viewModeller model =
     div
@@ -3339,7 +3367,7 @@ viewModeller model =
             [ text "Modeller" ]
         ]
 
-    
+
 viewKpiStudio : Model -> Html Msg
 viewKpiStudio model =
     let
