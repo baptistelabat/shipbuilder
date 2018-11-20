@@ -42,22 +42,6 @@ blockA =
         }
 
 
-blockAYellow : Block
-blockAYellow =
-    initBlock
-        "abcd"
-        "Helicopter"
-        Color.yellow
-        { x = { value = 0, string = "0" }
-        , y = { value = 0, string = "0" }
-        , z = { value = 0, string = "0" }
-        }
-        { length = { value = 10, string = "10" }
-        , width = { value = 10, string = "10" }
-        , height = { value = 10, string = "10" }
-        }
-
-
 blockB : Block
 blockB =
     initBlock
@@ -107,7 +91,16 @@ suite =
                     Expect.equal (DictList.fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ]) blockA)
             , test "Add one block to a list containing a block with the same uuid" <|
                 \_ ->
-                    Expect.equal (DictList.fromList [ ( blockAYellow.uuid, blockAYellow ) ]) (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ]) blockAYellow)
+                    Expect.equal
+                        (DictList.fromList
+                            [ ( { blockA | color = Color.yellow }.uuid
+                              , { blockA | color = Color.yellow }
+                              )
+                            ]
+                        )
+                        (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ])
+                            { blockA | color = Color.yellow }
+                        )
             , test "Add one block to an existing list (same order)" <|
                 \_ ->
                     Expect.equal
@@ -168,7 +161,7 @@ suite =
                         DictList.empty
                         (removeBlockFrom
                             (DictList.fromList [ ( blockA.uuid, blockA ) ])
-                            blockAYellow
+                            { blockA | color = Color.yellow }
                         )
             , test "Removing one block from an empty list" <|
                 \_ ->
