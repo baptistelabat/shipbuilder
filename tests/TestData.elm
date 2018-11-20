@@ -3,6 +3,7 @@ module TestData exposing (..)
 import Main exposing (..)
 import Viewports exposing (..)
 import Math.Vector3 exposing (..)
+import Html exposing (Html)
 import Color
 import Json.Encode as Encode
 
@@ -63,6 +64,11 @@ blockC =
 initialModel : Model
 initialModel =
     initModel "1.0.0"
+
+
+initialView : Html Msg
+initialView =
+    view initialModel
 
 
 viewport : Viewport

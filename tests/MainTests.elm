@@ -6,7 +6,17 @@ import Expect exposing (Expectation)
 import Fuzz
 import Main exposing (..)
 import Test exposing (..)
+import Html exposing (Html)
+import Test.Html.Query as Query
+import Test.Html.Event as Event
+import Test.Html.Selector as Selector
 import TestData exposing (..)
+import HullReferences
+
+
+setView : List Msg -> Html Msg
+setView =
+    view << setModel
 
 
 discardCmd : ( Model, Cmd Msg ) -> Model
@@ -422,6 +432,140 @@ suite =
                     , test "Update the size on multiple dimensions from Elm == from Js" <|
                         \_ ->
                             Expect.equal updateMultipleDimensionFromElm updateMultipleDimensionFromJs
+                    ]
+            ]
+        , describe "UI" <|
+            [ describe "ViewMode"
+                [ test "Hull panel is the default" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.class "hull-panel" ]
+                , test "Hull panel is displayed when switching mode" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| HullStudio ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.class "hull-panel" ]
+                , test "Partitioning panel is displayed when switching mode" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.class "partitioning-panel" ]
+                , test "Blocks panel is displayed when switching mode" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| SpaceReservation WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.class "blocks-panel" ]
+                , test "KPIs panel is displayed when switching mode" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| KpiStudio ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.class "kpi-panel" ]
+                , test "Modeller panel is displayed when switching mode" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Modeller ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.class "modeller-panel" ]
+                , test "There is a single active tab-item on init" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.classes [ "tab-item", "active" ] ]
+                            |> Query.count (Expect.equal 1)
+                , test "There is a single active tab-item after switching ViewMode" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| KpiStudio ]
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.classes [ "tab-item", "active" ] ]
+                            |> Query.count (Expect.equal 1)
+                , test "The first tab-item triggers HullStudio" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.class "tab-item" ]
+                            |> Query.index 0
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode HullStudio)
+                , test "The second tab-item triggers Partitioning" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.class "tab-item" ]
+                            |> Query.index 1
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode <| Partitioning PropertiesEdition)
+                , test "The second tab-item triggers SpaceReservation" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.class "tab-item" ]
+                            |> Query.index 2
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode <| SpaceReservation WholeList)
+                , test "The second tab-item triggers KPIs" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.class "tab-item" ]
+                            |> Query.index 3
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode KpiStudio)
+                , test "The fourth tab-item triggers Modeller" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.class "tab-item" ]
+                            |> Query.index 4
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode Modeller)
+                ]
+            , describe "HullStudio" <|
+                let
+                    hullRef : HullReferences.HullReference
+                    hullRef =
+                        Maybe.withDefault { path = "tests/assets", label = "Test asset" } <| List.head hullReferences
+                in
+                    [ test "None selected by default" <|
+                        \_ ->
+                            initialView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-none" ] ]
+                                |> Query.has [ Selector.class "hull-reference__selected" ]
+                    , test "None unselected if a hull-reference is selected" <|
+                        \_ ->
+                            setView
+                                [ ToJs <| SelectHullReference hullRef ]
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-none" ] ]
+                                |> Query.hasNot [ Selector.class "hull-reference__selected" ]
+                    , test "Selected HullReference correctly displayed" <|
+                        \_ ->
+                            setView
+                                [ ToJs <| SelectHullReference hullRef ]
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
+                                |> Query.find [ Selector.class "hull-label" ]
+                                |> Query.has [ Selector.text hullRef.label ]
+                    , test "Clicking a hull reference selects it" <|
+                        \_ ->
+                            initialView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.class "hull-reference" ]
+                                |> Query.index 1
+                                |> Event.simulate Event.click
+                                |> Event.expect (ToJs <| SelectHullReference hullRef)
                     ]
             ]
         ]

@@ -13,6 +13,7 @@ port module Main
         , ToJsMsg(..)
         , toJs
         , update
+        , view
           --Blocks
         , Block
         , Blocks
@@ -28,6 +29,11 @@ port module Main
         , Axis(..)
         , Dimension(..)
         , numberToNumberInput
+        , ViewMode(..)
+        , PartitioningView(..)
+        , PartitionType(..)
+        , SpaceReservationView(..)
+        , hullReferences
         )
 
 import Color exposing (Color)
@@ -2544,7 +2550,8 @@ updateModelToJs msg model =
                     block.size |> dimensionAccessor dimension
 
                 blockInModel : Block
-                blockInModel = Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
+                blockInModel =
+                    Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
             in
                 case String.toFloat input of
                     Ok value ->
@@ -3337,7 +3344,7 @@ viewPartitioning partitioningView model =
             isAccordionOpened model.uiState "bulkhead-spacing-details"
     in
         div
-            [ class "panel partioning-panel" ]
+            [ class "panel partitioning-panel" ]
         <|
             viewShowingPartitions model.partitions.showing
                 :: (case partitioningView of
