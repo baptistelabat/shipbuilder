@@ -1,14 +1,12 @@
 module MainTests exposing (..)
 
-import Array
 import Color
 import DictList
 import Expect exposing (Expectation)
 import Fuzz
-import Json.Encode as Encode
 import Main exposing (..)
-import Math.Vector3 exposing (vec3)
 import Test exposing (..)
+import TestData exposing (..)
 
 
 discardCmd : ( Model, Cmd Msg ) -> Model
@@ -24,59 +22,6 @@ setModel msgs =
 updateModel : List Msg -> Model -> Model
 updateModel msgs modelToUpdate =
     List.foldl (\msg model -> update msg model |> discardCmd) modelToUpdate msgs
-
-
-blockA : Block
-blockA =
-    initBlock
-        "abcd"
-        "Helicopter"
-        Color.blue
-        { x = { value = 0, string = "0" }
-        , y = { value = 0, string = "0" }
-        , z = { value = 0, string = "0" }
-        }
-        { length = { value = 10, string = "10" }
-        , width = { value = 10, string = "10" }
-        , height = { value = 10, string = "10" }
-        }
-
-
-blockB : Block
-blockB =
-    initBlock
-        "efgh"
-        "Tank"
-        Color.red
-        { x = { value = 0, string = "0" }
-        , y = { value = 0, string = "0" }
-        , z = { value = 0, string = "0" }
-        }
-        { length = { value = 10, string = "10" }
-        , width = { value = 10, string = "10" }
-        , height = { value = 10, string = "10" }
-        }
-
-
-blockC : Block
-blockC =
-    initBlock
-        "ijkl"
-        "Hangar"
-        Color.green
-        { x = { value = 0, string = "0" }
-        , y = { value = 0, string = "0" }
-        , z = { value = 0, string = "0" }
-        }
-        { length = { value = 10, string = "10" }
-        , width = { value = 10, string = "10" }
-        , height = { value = 10, string = "10" }
-        }
-
-
-initialModel : Model
-initialModel =
-    initModel "1.0.0"
 
 
 suite : Test
