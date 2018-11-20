@@ -11,6 +11,21 @@ import Math.Vector3 exposing (vec3)
 import Test exposing (..)
 
 
+discardCmd : ( Model, Cmd Msg ) -> Model
+discardCmd ( model, _ ) =
+    model
+
+
+setModel : List Msg -> Model
+setModel msgs =
+    List.foldl (\msg model -> update msg model |> discardCmd) initialModel msgs
+
+
+updateModel : List Msg -> Model -> Model
+updateModel msgs modelToUpdate =
+    List.foldl (\msg model -> update msg model |> discardCmd) modelToUpdate msgs
+
+
 blockA : Block
 blockA =
     initBlock
