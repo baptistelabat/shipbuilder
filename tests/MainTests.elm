@@ -89,8 +89,11 @@ blockC =
         , height = { value = 10, string = "10" }
         }
 
+
 initialModel : Model
-initialModel = initModel "1.0.0"
+initialModel =
+    initModel "1.0.0"
+
 
 suite : Test
 suite =
