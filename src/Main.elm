@@ -2542,6 +2542,9 @@ updateModelToJs msg model =
             let
                 dimensionFloatInput =
                     block.size |> dimensionAccessor dimension
+
+                blockInModel : Block
+                blockInModel = Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
             in
                 case String.toFloat input of
                     Ok value ->
@@ -2558,8 +2561,8 @@ updateModelToJs msg model =
                                 newValue
                                     |> asValueInNumberInput dimensionFloatInput
                                     |> flip asStringInNumberInput input
-                                    |> (asDimensionInSize dimension) block.size
-                                    |> asSizeInBlock block
+                                    |> (asDimensionInSize dimension) blockInModel.size
+                                    |> asSizeInBlock blockInModel
                                     |> updateBlockMassAndDensity
                         in
                             updateBlockInModel updatedBlock model
@@ -2567,8 +2570,8 @@ updateModelToJs msg model =
                     Err message ->
                         input
                             |> asStringInNumberInput dimensionFloatInput
-                            |> (asDimensionInSize dimension) block.size
-                            |> asSizeInBlock block
+                            |> (asDimensionInSize dimension) blockInModel.size
+                            |> asSizeInBlock blockInModel
                             |> flip updateBlockInModel model
 
 
@@ -2845,7 +2848,8 @@ msg2json model action =
                             block.position |> axisAccessor axis
 
                         blockInModel : Block
-                        blockInModel = Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
+                        blockInModel =
+                            Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
 
                         updatedBlock : Block
                         updatedBlock =
@@ -2876,13 +2880,17 @@ msg2json model action =
                             else
                                 (abs value)
 
+                        blockInModel : Block
+                        blockInModel =
+                            Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
+
                         updatedBlock : Block
                         updatedBlock =
                             newValue
                                 |> asValueInNumberInput dimensionFloatInput
                                 |> flip asStringInNumberInput input
-                                |> (asDimensionInSize dimension) block.size
-                                |> asSizeInBlock block
+                                |> (asDimensionInSize dimension) blockInModel.size
+                                |> asSizeInBlock blockInModel
                     in
                         { tag = "update-size", data = (encodeUpdateSizeCommand updatedBlock) }
                 )
