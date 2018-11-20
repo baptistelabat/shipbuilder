@@ -9,6 +9,7 @@ port module Main
         , Model
         , Msg(..)
         , NoJsMsg(..)
+        , FromJsMsg(..)
         , ToJsMsg(..)
         , toJs
         , update
@@ -17,6 +18,16 @@ port module Main
         , Blocks
         , addBlockTo
         , removeBlockFrom
+        , toList
+        , asXInPosition
+        , asYInPosition
+        , asZInPosition
+        , asLengthInSize
+        , asWidthInSize
+        , asHeightInSize
+        , Axis(..)
+        , Dimension(..)
+        , numberToNumberInput
         )
 
 import Color exposing (Color)

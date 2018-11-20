@@ -6,25 +6,7 @@ import DictList
 import Expect exposing (Expectation)
 import Fuzz
 import Json.Encode as Encode
-import Main
-    exposing
-        ( encodeInitThreeCommand
-        , init
-        , initCmd
-        , initModel
-        , initBlock
-        , Model
-        , Msg(..)
-        , NoJsMsg(..)
-        , ToJsMsg(..)
-        , toJs
-        , update
-          --Blocks
-        , Block
-        , Blocks
-        , addBlockTo
-        , removeBlockFrom
-        )
+import Main exposing (..)
 import Math.Vector3 exposing (vec3)
 import Test exposing (..)
 
