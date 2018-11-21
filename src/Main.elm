@@ -784,15 +784,19 @@ getCenterOfVolume block =
 
 getCenterOfGravity : Block -> Point
 getCenterOfGravity block =
-    case block.centerOfGravity of
-        Computed ->
-            getCenterOfVolume block
+    cogToPoint block.centerOfGravity
 
-        UserInput position ->
-            { x = position.x.value
-            , y = position.y.value
-            , z = position.z.value
-            }
+
+getAbsoluteCenterOfGravity : Block -> Point
+getAbsoluteCenterOfGravity block =
+    let
+        p1 =
+            getCenterOfVolume block
+    in
+        { x = p1.x + block.centerOfGravity.x.value
+        , y = p1.y + block.centerOfGravity.y.value
+        , z = p1.z + block.centerOfGravity.z.value
+        }
 
 
 getCentroidOfBlocks : Blocks -> Point
@@ -807,7 +811,7 @@ getCentroidOfBlocks blocks =
             let
                 cog : Point
                 cog =
-                    getCenterOfGravity block
+                    getAbsoluteCenterOfGravity block
             in
                 { x = block.mass.value * cog.x
                 , y = block.mass.value * cog.y
@@ -1980,35 +1984,33 @@ updateNoJs msg model =
                 { model | uiState = newUiState } ! []
 
         UpdateCenterOfGravity axis block input ->
-            case block.centerOfGravity of
-                Computed ->
-                    model ! []
+            let
+                position =
+                    block.centerOfGravity
 
-                UserInput position ->
-                    let
-                        axisFloatInput : FloatInput
-                        axisFloatInput =
-                            position |> axisAccessor axis
+                axisFloatInput : FloatInput
+                axisFloatInput =
+                    position |> axisAccessor axis
 
-                        updatedBlock : Block
-                        updatedBlock =
-                            { block
-                                | centerOfGravity =
-                                    (case String.toFloat input of
-                                        Ok value ->
-                                            value
-                                                |> asValueInNumberInput axisFloatInput
-                                                |> flip asStringInNumberInput input
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | centerOfGravity =
+                            (case String.toFloat input of
+                                Ok value ->
+                                    value
+                                        |> asValueInNumberInput axisFloatInput
+                                        |> flip asStringInNumberInput input
 
-                                        Err error ->
-                                            input
-                                                |> asStringInNumberInput axisFloatInput
-                                    )
-                                        |> (asAxisInPosition axis) position
-                                        |> UserInput
-                            }
-                    in
-                        updateBlockInModel updatedBlock model ! []
+                                Err error ->
+                                    input
+                                        |> asStringInNumberInput axisFloatInput
+                            )
+                                |> (asAxisInPosition axis) position
+                            -- |> UserInput
+                    }
+            in
+                updateBlockInModel updatedBlock model ! []
 
         UpdateCustomPropertyLabel property newLabel ->
             { model
