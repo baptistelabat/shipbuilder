@@ -848,7 +848,7 @@ p.block-volume-value {
     display: none;
 }
 
-.partioning-panel {
+.partitioning-panel {
     padding: 0;
     display: flex;
     flex-direction: column;
