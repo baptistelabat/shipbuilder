@@ -873,5 +873,63 @@ suite =
                             |> Query.children [ Selector.tag "li" ]
                             |> Query.count (Expect.equal numberOfBulkheads)
                 ]
+            , describe "Blocks list" <|
+                [ test "Block list displayed in blocks panel" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.children [ Selector.tag "ul", Selector.class "blocks" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Block list has one element by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "ul", Selector.class "blocks" ]
+                            |> Query.children []
+                            |> Query.count (Expect.equal 1)
+                , test "Only element in block list is 'add-block' by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "ul", Selector.class "blocks" ]
+                            |> Query.has [ Selector.tag "li", Selector.class "add-block" ]
+                , fuzz (Fuzz.intRange 0 20) "Block list has number of blocks + 1 elements" <|
+                    \numberOfBlocks ->
+                        List.repeat numberOfBlocks blockA
+                            |> List.indexedMap (\index block -> { block | uuid = toString index, label = toString index })
+                            |> List.map (\block -> FromJs <| NewBlock block)
+                            |> (++) [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> setView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "ul", Selector.class "blocks" ]
+                            |> Query.children []
+                            |> Query.count (Expect.equal (numberOfBlocks + 1))
+                , test "Adding a new block triggers AddBlock" <|
+                    \_ ->
+                        setView [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.tag "li", Selector.class "add-block" ]
+                            |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
+                            |> Event.simulate (Event.input "Block")
+                            |> Event.expect (ToJs <| AddBlock "Block")
+                , test "Blocks have a block-label triggering RenameBlock on input" <|
+                    \_ ->
+                        setView
+                            [ FromJs <| NewBlock blockA
+                            , ToJs <| SwitchViewMode <| SpaceReservation <| WholeList
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.tag "li", Selector.class "block-item" ]
+                            |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
+                            |> Event.simulate (Event.input "a")
+                            |> Event.expect (NoJs <| RenameBlock blockA "a")
+                ]
             ]
         ]
