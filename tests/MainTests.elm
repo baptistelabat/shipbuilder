@@ -567,5 +567,311 @@ suite =
                                 |> Event.simulate Event.click
                                 |> Event.expect (ToJs <| SelectHullReference hullRef)
                     ]
+            , describe "Partitions" <|
+                [ test "Show/hide partitions triggers the right event" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "showing-partitions" ]
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| TogglePartitions)
+                , test "Show partitions on init" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "showing-partitions" ]
+                            |> Query.has [ Selector.text "Hide" ]
+                , test "Hide partitions after first toggle" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , ToJs <| TogglePartitions
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "showing-partitions" ]
+                            |> Query.has [ Selector.text "Show" ]
+                , test "Partitions panel has decks" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.children [ Selector.class "decks" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Decks number input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.has [ Selector.id "decks-number" ]
+                , test "Decks number input triggers UpdatePartitionNumber" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "decks-number" ]
+                            |> Event.simulate (Event.input "10")
+                            |> Event.expect (ToJs <| UpdatePartitionNumber Deck "10")
+                , test "Decks number input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "decks-number" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Decks spacing input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.has [ Selector.id "decks-spacing" ]
+                , test "Decks spacing input triggers UpdatePartitionSpacing" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "decks-spacing" ]
+                            |> Event.simulate (Event.input "4.5")
+                            |> Event.expect (ToJs <| UpdatePartitionSpacing Deck "4.5")
+                , test "Decks spacing input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "decks-spacing" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Define deck zero is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.has [ Selector.class "deck-zero" ]
+                , test "Define deck zero triggers Defining" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.class "deck-zero" ]
+                            |> Query.find [ Selector.tag "button" ]
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode <| Partitioning <| OriginDefinition Deck)
+                , test "Deck zero position input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.has [ Selector.id "deck-zero-position" ]
+                , test "Decks zero position input triggers UpdatePartitionNumber" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "deck-zero-position" ]
+                            |> Event.simulate (Event.input "10")
+                            |> Event.expect (ToJs <| UpdatePartitionZeroPosition Deck "10")
+                , test "Decks zero position input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "deck-zero-position" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Decks has spacing details" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.findAll [ Selector.class "spacing-details" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Decks spacing details accordion is closed by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.hasNot [ Selector.tag "ul" ]
+                , test "Decks spacing details accordion contains nothing by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , NoJs <| ToggleAccordion True "deck-spacing-details"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.children []
+                            |> Query.each (Expect.all [ Query.has [ Selector.tag "p" ] ])
+                , fuzz (Fuzz.intRange 1 100) "Decks spacing details accordion contains a list of {deck number} element when deck number > 0" <|
+                    \numberOfDecks ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , ToJs <| UpdatePartitionNumber Deck (toString numberOfDecks)
+                            , NoJs <| ToggleAccordion True "deck-spacing-details"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.find [ Selector.tag "ul" ]
+                            |> Query.children [ Selector.tag "li" ]
+                            |> Query.count (Expect.equal numberOfDecks)
+                , test "Partitions panel has bulkheads" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.children [ Selector.class "bulkheads" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Bulkheads number input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.has [ Selector.id "bulkheads-number" ]
+                , test "Bulkheads number input triggers UpdatePartitionNumber" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkheads-number" ]
+                            |> Event.simulate (Event.input "10")
+                            |> Event.expect (ToJs <| UpdatePartitionNumber Bulkhead "10")
+                , test "Bulkheads number input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkheads-number" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Bulkheads spacing input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.has [ Selector.id "bulkheads-spacing" ]
+                , test "Bulkheads spacing input triggers UpdatePartitionSpacing" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkheads-spacing" ]
+                            |> Event.simulate (Event.input "4.5")
+                            |> Event.expect (ToJs <| UpdatePartitionSpacing Bulkhead "4.5")
+                , test "Bulkheads spacing input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkheads-spacing" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Define bulkhead zero is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.has [ Selector.class "bulkhead-zero" ]
+                , test "Define bulkhead zero triggers Defining" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.class "bulkhead-zero" ]
+                            |> Query.find [ Selector.tag "button" ]
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode <| Partitioning <| OriginDefinition Bulkhead)
+                , test "Bulkhead zero position input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.has [ Selector.id "bulkhead-zero-position" ]
+                , test "Bulkhead zero position input triggers UpdatePartitionNumber" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkhead-zero-position" ]
+                            |> Event.simulate (Event.input "10")
+                            |> Event.expect (ToJs <| UpdatePartitionZeroPosition Bulkhead "10")
+                , test "Bulkhead zero position input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkhead-zero-position" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Bulkheads has spacing details" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.findAll [ Selector.class "spacing-details" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Bulkheads spacing details accordion is closed by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.hasNot [ Selector.tag "ul" ]
+                , test "Bulkheads spacing details accordion contains nothing by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , NoJs <| ToggleAccordion True "bulkhead-spacing-details"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.children []
+                            |> Query.each (Expect.all [ Query.has [ Selector.tag "p" ] ])
+                , fuzz (Fuzz.intRange 1 100) "Bulkheads spacing details accordion contains a list of {bulkhead number} element when bulkhead number > 0" <|
+                    \numberOfBulkheads ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , ToJs <| UpdatePartitionNumber Bulkhead (toString numberOfBulkheads)
+                            , NoJs <| ToggleAccordion True "bulkhead-spacing-details"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.find [ Selector.tag "ul" ]
+                            |> Query.children [ Selector.tag "li" ]
+                            |> Query.count (Expect.equal numberOfBulkheads)
+                ]
             ]
         ]
