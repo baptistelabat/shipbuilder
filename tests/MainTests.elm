@@ -1160,5 +1160,98 @@ suite =
                                 |> Event.simulate Event.blur
                                 |> Event.expect (NoJs <| SyncBlockInputs blockA)
                     ]
+            , describe "KPIs" <|
+                [ test "All KPIs are equal to 0 on init" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.findAll [ Selector.class "kpi-value" ]
+                            |> Query.each
+                                (Expect.all [ Query.has [ Selector.text "0" ] ])
+                , test "KPIs by color are not displayed on init" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio ]
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.class "kpi-color-label" ]
+                            |> Query.count (Expect.equal 0)
+                , test "KPIs Length is displayed" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio ]
+                            |> Query.fromHtml 
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.classes [ "kpi", "length" ] ]
+                , test "KPIs Width is displayed" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio ]
+                            |> Query.fromHtml 
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.classes [ "kpi", "width" ] ]
+                , test "KPIs Height is displayed" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio ]
+                            |> Query.fromHtml 
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.classes [ "kpi", "height" ] ]
+                , test "KPIs Volume is displayed" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio ]
+                            |> Query.fromHtml 
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.classes [ "kpi", "volume" ] ]
+                , test "KPIs Mass is displayed" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio ]
+                            |> Query.fromHtml 
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.classes [ "kpi", "mass" ] ]
+                , test "KPIs by color for Volume are displayed after toggling the accordion" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio
+                            , NoJs <| ToggleAccordion True "volume-kpi"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.classes ["kpi-group","volume"] ]
+                            |> Query.count (Expect.equal 18)
+                , test "All KPIs by color for Volume are equal to 0 on init" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio 
+                            , NoJs <| ToggleAccordion True "volume-kpi"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.classes ["kpi", "volume"] ]
+                            |> Query.children [ Selector.class "kpi-value" ]
+                            |> Query.each
+                                (Expect.all [ Query.has [ Selector.text "0" ] ])
+                , test "KPIs by color for Mass are displayed after toggling the accordion" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio
+                            , NoJs <| ToggleAccordion True "mass-kpi"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.classes ["kpi-group","mass"] ]
+                            |> Query.count (Expect.equal 18)
+                , test "All KPIs by color for Mass are equal to 0 on init" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode KpiStudio 
+                            , NoJs <| ToggleAccordion True "mass-kpi"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.classes ["kpi", "mass"] ]
+                            |> Query.children [ Selector.class "kpi-value" ]
+                            |> Query.each
+                                (Expect.all [ Query.has [ Selector.text "0" ] ])
+                ]
             ]
         ]
