@@ -7,6 +7,7 @@ import Fuzz
 import Main exposing (..)
 import Test exposing (..)
 import Html exposing (Html)
+import Html.Attributes as Attributes
 import Test.Html.Query as Query
 import Test.Html.Event as Event
 import Test.Html.Selector as Selector
@@ -566,6 +567,598 @@ suite =
                                 |> Query.index 1
                                 |> Event.simulate Event.click
                                 |> Event.expect (ToJs <| SelectHullReference hullRef)
+                    ]
+            , describe "Partitions" <|
+                [ test "Show/hide partitions triggers the right event" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "showing-partitions" ]
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| TogglePartitions)
+                , test "Show partitions on init" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "showing-partitions" ]
+                            |> Query.has [ Selector.text "Hide" ]
+                , test "Hide partitions after first toggle" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , ToJs <| TogglePartitions
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "showing-partitions" ]
+                            |> Query.has [ Selector.text "Show" ]
+                , test "Partitions panel has decks" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.children [ Selector.class "decks" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Decks number input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.has [ Selector.id "decks-number" ]
+                , test "Decks number input triggers UpdatePartitionNumber" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "decks-number" ]
+                            |> Event.simulate (Event.input "10")
+                            |> Event.expect (ToJs <| UpdatePartitionNumber Deck "10")
+                , test "Decks number input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "decks-number" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Decks spacing input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.has [ Selector.id "decks-spacing" ]
+                , test "Decks spacing input triggers UpdatePartitionSpacing" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "decks-spacing" ]
+                            |> Event.simulate (Event.input "4.5")
+                            |> Event.expect (ToJs <| UpdatePartitionSpacing Deck "4.5")
+                , test "Decks spacing input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "decks-spacing" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Define deck zero is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.has [ Selector.class "deck-zero" ]
+                , test "Define deck zero triggers Defining" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.class "deck-zero" ]
+                            |> Query.find [ Selector.tag "button" ]
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode <| Partitioning <| OriginDefinition Deck)
+                , test "Deck zero position input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.has [ Selector.id "deck-zero-position" ]
+                , test "Decks zero position input triggers UpdatePartitionNumber" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "deck-zero-position" ]
+                            |> Event.simulate (Event.input "10")
+                            |> Event.expect (ToJs <| UpdatePartitionZeroPosition Deck "10")
+                , test "Decks zero position input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.id "deck-zero-position" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Decks has spacing details" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.findAll [ Selector.class "spacing-details" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Decks spacing details accordion is closed by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.hasNot [ Selector.tag "ul" ]
+                , test "Decks spacing details accordion contains nothing by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , NoJs <| ToggleAccordion True "deck-spacing-details"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.children []
+                            |> Query.each (Expect.all [ Query.has [ Selector.tag "p" ] ])
+                , fuzz (Fuzz.intRange 1 100) "Decks spacing details accordion contains a list of {deck number} element when deck number > 0" <|
+                    \numberOfDecks ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , ToJs <| UpdatePartitionNumber Deck (toString numberOfDecks)
+                            , NoJs <| ToggleAccordion True "deck-spacing-details"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "decks" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.find [ Selector.tag "ul" ]
+                            |> Query.children [ Selector.tag "li" ]
+                            |> Query.count (Expect.equal numberOfDecks)
+                , test "Partitions panel has bulkheads" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.children [ Selector.class "bulkheads" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Bulkheads number input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.has [ Selector.id "bulkheads-number" ]
+                , test "Bulkheads number input triggers UpdatePartitionNumber" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkheads-number" ]
+                            |> Event.simulate (Event.input "10")
+                            |> Event.expect (ToJs <| UpdatePartitionNumber Bulkhead "10")
+                , test "Bulkheads number input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkheads-number" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Bulkheads spacing input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.has [ Selector.id "bulkheads-spacing" ]
+                , test "Bulkheads spacing input triggers UpdatePartitionSpacing" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkheads-spacing" ]
+                            |> Event.simulate (Event.input "4.5")
+                            |> Event.expect (ToJs <| UpdatePartitionSpacing Bulkhead "4.5")
+                , test "Bulkheads spacing input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkheads-spacing" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Define bulkhead zero is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.has [ Selector.class "bulkhead-zero" ]
+                , test "Define bulkhead zero triggers Defining" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.class "bulkhead-zero" ]
+                            |> Query.find [ Selector.tag "button" ]
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SwitchViewMode <| Partitioning <| OriginDefinition Bulkhead)
+                , test "Bulkhead zero position input is present" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.has [ Selector.id "bulkhead-zero-position" ]
+                , test "Bulkhead zero position input triggers UpdatePartitionNumber" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkhead-zero-position" ]
+                            |> Event.simulate (Event.input "10")
+                            |> Event.expect (ToJs <| UpdatePartitionZeroPosition Bulkhead "10")
+                , test "Bulkhead zero position input syncs on blur" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.id "bulkhead-zero-position" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncPartitions)
+                , test "Bulkheads has spacing details" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.findAll [ Selector.class "spacing-details" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Bulkheads spacing details accordion is closed by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.hasNot [ Selector.tag "ul" ]
+                , test "Bulkheads spacing details accordion contains nothing by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , NoJs <| ToggleAccordion True "bulkhead-spacing-details"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.children []
+                            |> Query.each (Expect.all [ Query.has [ Selector.tag "p" ] ])
+                , fuzz (Fuzz.intRange 1 100) "Bulkheads spacing details accordion contains a list of {bulkhead number} element when bulkhead number > 0" <|
+                    \numberOfBulkheads ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
+                            , ToJs <| UpdatePartitionNumber Bulkhead (toString numberOfBulkheads)
+                            , NoJs <| ToggleAccordion True "bulkhead-spacing-details"
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "bulkheads" ]
+                            |> Query.find [ Selector.class "spacing-details" ]
+                            |> Query.find [ Selector.tag "ul" ]
+                            |> Query.children [ Selector.tag "li" ]
+                            |> Query.count (Expect.equal numberOfBulkheads)
+                ]
+            , describe "Blocks list" <|
+                [ test "Block list displayed in blocks panel" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.children [ Selector.tag "ul", Selector.class "blocks" ]
+                            |> Query.count (Expect.equal 1)
+                , test "Block list has one element by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "ul", Selector.class "blocks" ]
+                            |> Query.children []
+                            |> Query.count (Expect.equal 1)
+                , test "Only element in block list is 'add-block' by default" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "ul", Selector.class "blocks" ]
+                            |> Query.has [ Selector.tag "li", Selector.class "add-block" ]
+                , fuzz (Fuzz.intRange 0 20) "Block list has number of blocks + 1 elements" <|
+                    \numberOfBlocks ->
+                        List.repeat numberOfBlocks blockA
+                            |> List.indexedMap (\index block -> { block | uuid = toString index, label = toString index })
+                            |> List.map (\block -> FromJs <| NewBlock block)
+                            |> (++) [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> setView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "ul", Selector.class "blocks" ]
+                            |> Query.children []
+                            |> Query.count (Expect.equal (numberOfBlocks + 1))
+                , test "Adding a new block triggers AddBlock" <|
+                    \_ ->
+                        setView [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.tag "li", Selector.class "add-block" ]
+                            |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
+                            |> Event.simulate (Event.input "Block")
+                            |> Event.expect (ToJs <| AddBlock "Block")
+                , test "Blocks have a block-label triggering RenameBlock on input" <|
+                    \_ ->
+                        setView
+                            [ FromJs <| NewBlock blockA
+                            , ToJs <| SwitchViewMode <| SpaceReservation <| WholeList
+                            ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.tag "li", Selector.class "block-item" ]
+                            |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
+                            |> Event.simulate (Event.input "a")
+                            |> Event.expect (NoJs <| RenameBlock blockA "a")
+                ]
+            , describe "Block details" <|
+                let
+                    blockDetailsView =
+                        setView
+                            [ FromJs <| NewBlock blockA
+                            , ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock blockA.uuid
+                            ]
+                in
+                    [ test "Block details view shows its name" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
+                                |> Query.has [ Selector.attribute <| Attributes.value blockA.label ]
+                    , test "Block details view allows renaming the block" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
+                                |> Event.simulate (Event.input "a")
+                                |> Event.expect (NoJs <| RenameBlock blockA "a")
+                    , test "Block details view displays the position" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.class "block-position" ]
+                    , test "Block details view displays the position on 3 axis" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.class "block-position" ]
+                                |> Query.children []
+                                |> Query.count (Expect.equal 3)
+                    , test "Block details view displays an input for the position on X" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.tag "input", Selector.id "position-x" ]
+                    , test "Input for the position of the block on X triggers UpdatePosition X" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "position-x" ]
+                                |> Event.simulate (Event.input "-8")
+                                |> Event.expect (ToJs <| UpdatePosition X blockA "-8")
+                    , test "onBlur on position on X triggers SyncBlockInputs" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "position-x" ]
+                                |> Event.simulate Event.blur
+                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                    , test "Block details view displays an input for the position on Y" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.tag "input", Selector.id "position-y" ]
+                    , test "Input for the position of the block on Y triggers UpdatePosition Y" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "position-y" ]
+                                |> Event.simulate (Event.input "1.2")
+                                |> Event.expect (ToJs <| UpdatePosition Y blockA "1.2")
+                    , test "onBlur on position on Y triggers SyncBlockInputs" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "position-y" ]
+                                |> Event.simulate Event.blur
+                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                    , test "Block details view displays an input for the position on Z" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.tag "input", Selector.id "position-z" ]
+                    , test "Input for the position of the block on Z triggers UpdatePosition Z" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "position-z" ]
+                                |> Event.simulate (Event.input "199")
+                                |> Event.expect (ToJs <| UpdatePosition Z blockA "199")
+                    , test "onBlur on position on Z triggers SyncBlockInputs" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "position-z" ]
+                                |> Event.simulate Event.blur
+                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                    , test "Block details view displays the size" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.class "block-size" ]
+                    , test "Block details view displays the size on 3 axis" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.class "block-size" ]
+                                |> Query.children []
+                                |> Query.count (Expect.equal 3)
+                    , test "Block details view displays an input for the length" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.tag "input", Selector.id "size-length" ]
+                    , test "Input for the length of the block triggers UpdateDimension Length" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "size-length" ]
+                                |> Event.simulate (Event.input "0")
+                                |> Event.expect (ToJs <| UpdateDimension Length blockA "0")
+                    , test "onBlur on length triggers SyncBlockInputs" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "size-length" ]
+                                |> Event.simulate Event.blur
+                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                    , test "Block details view displays an input for the width" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.tag "input", Selector.id "size-width" ]
+                    , test "Input for the width the block triggers UpdateDimension Width" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "size-width" ]
+                                |> Event.simulate (Event.input "1.2")
+                                |> Event.expect (ToJs <| UpdateDimension Width blockA "1.2")
+                    , test "onBlur on width triggers SyncBlockInputs" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "size-width" ]
+                                |> Event.simulate Event.blur
+                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                    , test "Block details view displays an input for the height" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.tag "input", Selector.id "size-height" ]
+                    , test "Input for the height the block triggers UpdateDimension Height" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "size-height" ]
+                                |> Event.simulate (Event.input "255")
+                                |> Event.expect (ToJs <| UpdateDimension Height blockA "255")
+                    , test "onBlur on height triggers SyncBlockInputs" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "size-height" ]
+                                |> Event.simulate Event.blur
+                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                    , test "Block details view displays an input for the density" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.tag "input", Selector.id "block-density-input" ]
+                    , test "Input for the density the block triggers UpdateDensity" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "block-density-input" ]
+                                |> Event.simulate (Event.input "0.5")
+                                |> Event.expect (NoJs <| UpdateDensity blockA "0.5")
+                    , test "onBlur on density triggers SyncBlockInputs" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "block-density-input" ]
+                                |> Event.simulate Event.blur
+                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                    , test "Block details view displays an input for the mass" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.has [ Selector.tag "input", Selector.id "block-mass-input" ]
+                    , test "Input for the mass the block triggers UpdateMass" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "block-mass-input" ]
+                                |> Event.simulate (Event.input "10.5")
+                                |> Event.expect (NoJs <| UpdateMass blockA "10.5")
+                    , test "onBlur on mass triggers SyncBlockInputs" <|
+                        \_ ->
+                            blockDetailsView
+                                |> Query.fromHtml
+                                |> Query.find [ Selector.class "panel" ]
+                                |> Query.find [ Selector.tag "input", Selector.id "block-mass-input" ]
+                                |> Event.simulate Event.blur
+                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
                     ]
             ]
         ]
