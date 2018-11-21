@@ -93,7 +93,7 @@ newBlockDecoder =
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded True
-        |> Pipeline.hardcoded Computed
+        |> Pipeline.hardcoded initPosition
 
 
 type alias SyncPosition =
@@ -223,12 +223,7 @@ decodeBlock =
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "visible" Decode.bool True
-        |> Pipeline.optional "centerOfGravity" decodeCenterOfGravity Computed
-
-
-decodeCenterOfGravity : Decode.Decoder CenterOfGravity
-decodeCenterOfGravity =
-    Decode.oneOf [ Decode.map UserInput decodePosition, Decode.null Computed ]
+        |> Pipeline.optional "centerOfGravity" decodePosition initPosition
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -763,13 +758,20 @@ initBlock uuid label color position size =
     , mass = numberToNumberInput 0.0
     , density = numberToNumberInput 0.0
     , visible = True
-    , centerOfGravity = Computed
+    , centerOfGravity = initPosition
     }
 
 
-type CenterOfGravity
-    = Computed
-    | UserInput Position
+type alias CenterOfGravity =
+    Position
+
+
+cogToPoint : CenterOfGravity -> Point
+cogToPoint p =
+    { x = p.x.value
+    , y = p.y.value
+    , z = p.z.value
+    }
 
 
 getCenterOfVolume : Block -> Point
@@ -843,6 +845,11 @@ type ReferenceForMass
 
 type alias Position =
     { x : FloatInput, y : FloatInput, z : FloatInput }
+
+
+initPosition : Position
+initPosition =
+    { x = numberToNumberInput 0, y = numberToNumberInput 0, z = numberToNumberInput 0 }
 
 
 type alias Size =
@@ -1021,14 +1028,7 @@ encodeBlock block =
         , ( "mass", Encode.float block.mass.value )
         , ( "density", Encode.float block.density.value )
         , ( "visible", Encode.bool block.visible )
-        , ( "centerOfGravity"
-          , case block.centerOfGravity of
-                Computed ->
-                    Encode.null
-
-                UserInput position ->
-                    encodePosition position
-          )
+        , ( "centerOfGravity", encodePosition block.centerOfGravity )
         ]
 
 
@@ -1778,11 +1778,10 @@ updateNoJs msg model =
                 updatedBlock =
                     { block
                         | centerOfGravity =
-                            UserInput <|
-                                { x = numberToNumberInput centerOfVolume.x
-                                , y = numberToNumberInput centerOfVolume.y
-                                , z = numberToNumberInput centerOfVolume.z
-                                }
+                            { x = numberToNumberInput centerOfVolume.x
+                            , y = numberToNumberInput centerOfVolume.y
+                            , z = numberToNumberInput centerOfVolume.z
+                            }
                     }
             in
                 { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
@@ -1792,7 +1791,7 @@ updateNoJs msg model =
                 updatedBlock : Block
                 updatedBlock =
                     { block
-                        | centerOfGravity = Computed
+                        | centerOfGravity = initPosition
                     }
             in
                 { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
@@ -1906,16 +1905,10 @@ updateNoJs msg model =
 
                 syncedCenterOfGravity : CenterOfGravity
                 syncedCenterOfGravity =
-                    case block.centerOfGravity of
-                        Computed ->
-                            Computed
-
-                        UserInput position ->
-                            UserInput <|
-                                { x = syncNumberInput position.x
-                                , y = syncNumberInput position.y
-                                , z = syncNumberInput position.z
-                                }
+                    { x = syncNumberInput block.centerOfGravity.x
+                    , y = syncNumberInput block.centerOfGravity.y
+                    , z = syncNumberInput block.centerOfGravity.z
+                    }
 
                 syncedBlock : Block
                 syncedBlock =
