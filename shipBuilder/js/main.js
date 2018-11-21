@@ -485,7 +485,7 @@ let restoreBlock = function (uuid, color, position, size, visible = true) {
 // input : size in threejs coordinates
 let restoreCubeGeometry = function (size) {
     const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
-    geometry.translate(size.x / 2, size.y / 2, size.z / 2); // set the origin in the bottom left 
+    geometry.translate(size.x / 2, size.y / 2, size.z / 2); // set the origin in the bottom left
     return geometry;
 }
 
@@ -616,7 +616,7 @@ let addBlockToSelectionFromElm = function (elmBlock) {
     addToSelection(block);
 }
 
-// handle unselecting a block in a multiple select in Elm : Elm sends the uuid of the block 
+// handle unselecting a block in a multiple select in Elm : Elm sends the uuid of the block
 let removeBlockFromSelectionFromElm = function (elmBlock) {
     const block = getBlockByUuid(elmBlock.uuid);
     removeFromSelection(block);
