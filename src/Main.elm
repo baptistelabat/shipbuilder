@@ -986,9 +986,14 @@ stringifyEncodeValue value =
     Encode.encode 4 value
 
 
+encodeListBlocks : List Block -> Encode.Value
+encodeListBlocks blocks =
+    Encode.list <| List.map encodeBlock blocks
+
+
 encodeBlocks : Blocks -> Encode.Value
 encodeBlocks blocks =
-    Encode.list <| List.map encodeBlock (toList blocks)
+    encodeListBlocks (toList blocks)
 
 
 encodeModelForSave : Model -> Encode.Value
@@ -1273,6 +1278,16 @@ getSumOfVolumesForColor blocks color =
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
+
+
+removeListBlocksFrom : Blocks -> List Block -> Blocks
+removeListBlocksFrom blocks list =
+    case list of
+        [] ->
+            blocks
+
+        x :: xs ->
+            removeListBlocksFrom (removeBlockFrom blocks x) xs
 
 
 renameBlock : String -> Block -> Block
@@ -1704,6 +1719,7 @@ type ToJsMsg
     | KeyDownOnPartitionSpacingInput PartitionType KeyEvent
     | OpenSaveFile
     | RemoveBlock Block
+    | RemoveBlocks (List Block)
     | SelectBlock Block
     | SelectHullReference HullReference
     | SetSpacingException PartitionType Int String
@@ -2337,6 +2353,16 @@ updateModelToJs msg model =
             in
                 { model | blocks = blocks }
 
+        RemoveBlocks blocks ->
+            let
+                _ =
+                    Debug.log "remove blocks " (List.length blocks)
+
+                nblocks =
+                    removeListBlocksFrom model.blocks blocks
+            in
+                { model | blocks = nblocks }
+
         SelectBlock block ->
             if model.multipleSelect == False then
                 -- set selection as only this block
@@ -2678,6 +2704,10 @@ msg2json model action =
 
         RemoveBlock block ->
             Just { tag = "remove-block", data = encodeBlock block }
+
+        RemoveBlocks blocks ->
+            Just
+                { tag = "remove-blocks", data = encodeListBlocks blocks }
 
         SelectBlock block ->
             Just <|
@@ -3887,6 +3917,7 @@ viewWholeList model =
                     [ viewShowBlocksAction (toList model.blocks)
                     , viewHideBlocksAction (toList model.blocks)
                     ]
+                , viewDeleteBlocksAction (toList model.blocks)
                 ]
             , viewSelectedBlocksSummary model
             ]
@@ -3992,6 +4023,7 @@ viewSelectedBlocksSummary model =
                     [ class "blocks-visibility" ]
                     [ viewShowBlocksAction selectedBlocks
                     , viewHideBlocksAction selectedBlocks
+                    , viewDeleteBlocksAction selectedBlocks
                     ]
                 ]
             ]
@@ -4207,59 +4239,7 @@ viewBlockMassInfo block =
 viewBlockCenterOfGravity : Block -> Html Msg
 viewBlockCenterOfGravity block =
     div [ class "block-cog form-group" ] <|
-        case block.centerOfGravity of
-            Computed ->
-                viewBlockCenterOfGravityComputed block
-
-            UserInput position ->
-                viewBlockCenterOfGravityUserInput block position
-
-
-viewBlockCenterOfGravityComputed : Block -> List (Html Msg)
-viewBlockCenterOfGravityComputed block =
-    let
-        cog : Point
-        cog =
-            getCenterOfVolume block
-    in
-        [ div
-            [ class "form-group-title" ]
-            [ text "Center of gravity"
-            , div
-                [ class "form-group-action form-group-action__active"
-                , title "Stop tracking the center of the volume"
-                , onClick <| NoJs <| FreeCenterOfGravity block
-                ]
-                [ FASolid.crosshairs ]
-            ]
-        , viewCenterOfGravityComputedCoordinate X cog.x
-        , viewCenterOfGravityComputedCoordinate Y cog.y
-        , viewCenterOfGravityComputedCoordinate Z cog.z
-        ]
-
-
-viewCenterOfGravityComputedCoordinate : Axis -> Float -> Html Msg
-viewCenterOfGravityComputedCoordinate axis coordinateValue =
-    let
-        axisLabel : String
-        axisLabel =
-            String.toLower <| toString axis
-    in
-        div
-            [ class "input-group cog-coordinate" ]
-            [ label
-                [ for <| "block-cog-" ++ axisLabel ++ "-input"
-                , title <| "Center of gravity: " ++ axisLabel ++ " coordinate"
-                ]
-                [ text "CoG", sub [] [ text axisLabel ] ]
-            , input
-                [ type_ "text"
-                , id <| "block-cog-" ++ axisLabel ++ "-input"
-                , disabled True
-                , value <| toString coordinateValue
-                ]
-                []
-            ]
+        viewBlockCenterOfGravityUserInput block block.centerOfGravity
 
 
 viewBlockCenterOfGravityUserInput : Block -> Position -> List (Html Msg)
@@ -4269,7 +4249,7 @@ viewBlockCenterOfGravityUserInput block cog =
         [ text "Center of gravity"
         , div
             [ class "form-group-action"
-            , title "Track the center of the volume"
+            , title "Set to the center of the volume"
             , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
             ]
             [ FASolid.crosshairs ]
@@ -4592,6 +4572,16 @@ viewFocusBlockAction block =
         ]
         [ FASolid.arrow_right
         ]
+
+
+viewDeleteBlocksAction : List Block -> Html Msg
+viewDeleteBlocksAction blocks =
+    div
+        [ class "blocks-action delete-block"
+        , onClick <| ToJs <| RemoveBlocks blocks
+        , title "Delete all blocks"
+        ]
+        [ FASolid.trash ]
 
 
 viewDeleteBlockAction : Block -> Html Msg
