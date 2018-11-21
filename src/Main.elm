@@ -664,12 +664,13 @@ type alias Model =
     }
 
 
-type alias Frames = Dict Int Frame
+type alias Frames =
+    Dict Int Frame
 
 
 initFrames : Frames
 initFrames =
-    Dict.fromList [ (0, initFrame), (1, initFrame), (2,initFrame) ]
+    Dict.fromList [ ( 0, initFrame ), ( 1, initFrame ), ( 2, initFrame ) ]
 
 
 type alias Frame =
@@ -681,7 +682,7 @@ type alias Frame =
 initFrame : Frame
 initFrame =
     { x = numberToNumberInput 0.0
-    , points = Dict.fromList [ (0,initFramePoint), (1,initFramePoint), (2,initFramePoint), (3,initFramePoint), (4,initFramePoint) ]
+    , points = Dict.fromList [ ( 0, initFramePoint ), ( 1, initFramePoint ), ( 2, initFramePoint ), ( 3, initFramePoint ), ( 4, initFramePoint ) ]
     }
 
 
@@ -1414,7 +1415,7 @@ encodeViewMode viewMode =
 
             KpiStudio ->
                 "kpi"
-            
+
             Modeller ->
                 "modeller"
 
@@ -1803,7 +1804,7 @@ updateNoJs msg model =
                     DictList.next block.uuid model.blocks
 
                 updatedBlocks : Blocks
-                updatedBlocks = 
+                updatedBlocks =
                     Maybe.withDefault model.blocks <| Maybe.map (\next -> DictList.insertAfter (Tuple.first next) block.uuid block model.blocks) maybeNext
             in
                 { model | blocks = updatedBlocks } ! []
@@ -1815,7 +1816,7 @@ updateNoJs msg model =
                     DictList.previous block.uuid model.blocks
 
                 updatedBlocks : Blocks
-                updatedBlocks = 
+                updatedBlocks =
                     Maybe.withDefault model.blocks <| Maybe.map (\previous -> DictList.insertBefore (Tuple.first previous) block.uuid block model.blocks) maybePrevious
             in
                 { model | blocks = updatedBlocks } ! []
@@ -3214,12 +3215,12 @@ viewModesMatch left right =
 
                 _ ->
                     False
-        
+
         Modeller ->
             case right of
                 Modeller ->
                     True
-                
+
                 _ ->
                     False
 
@@ -3330,6 +3331,7 @@ viewPartitioning partitioningView model =
                             ]
                    )
 
+
 viewModeller : Model -> Html Msg
 viewModeller model =
     div
@@ -3339,7 +3341,7 @@ viewModeller model =
             [ text "Modeller" ]
         ]
 
-    
+
 viewKpiStudio : Model -> Html Msg
 viewKpiStudio model =
     let
