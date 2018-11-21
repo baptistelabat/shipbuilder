@@ -82,6 +82,9 @@ app.ports.toJs.subscribe(function (message) {
         case "remove-block":
             removeObject(data);
             break;
+        case "remove-blocks":
+            removeObjects(data);
+            break;
         case "remove-block-from-selection": // unselect one in multiple select
             removeBlockFromSelectionFromElm(data);
             break;
@@ -527,6 +530,12 @@ let makeCube = function (sizeX, sizeY, sizeZ, x, y, z, color) {
     return cube;
 }
 
+let removeObjects = function (data) {
+    data.forEach(block => {
+      removeObject(block);
+    });
+}
+
 // remove an object from the scene
 let removeObject = function (block) {
     const objectToRemove = findObjectByUUID(block.uuid);
@@ -535,6 +544,18 @@ let removeObject = function (block) {
             // reset hovered
             hovered = null;
         }
+
+        views.forEach(view => {
+          if(view.control != null)
+          {
+            if(view.control.object != null)
+            {
+              if(view.control.object.uuid === block.uuid )
+                detachControls(); // detach gizmo
+            }
+          }
+        });
+
         if (isObjectSelected(objectToRemove)) {
             // remove object from selection
             removeFromSelection(objectToRemove);
