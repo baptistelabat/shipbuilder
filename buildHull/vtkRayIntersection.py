@@ -355,9 +355,9 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
         #     np.savetxt('intersectionPoints{0}.csv'.format(i), intersectionPoints, delimiter=',', header='x,y,z', comments='')
 
     # construction du json
-    maxPoints = max ( list(map(lambda x: len(x['z']), datas) ) )
+    maxPoints = max ( list(map(lambda x: len(x['y']), datas) ) )
     print('max', maxPoints)
-    filter_datas = filter(lambda x: len(x['z']) == maxPoints, datas)
+    filter_datas = filter(lambda x: len(x['y']) == maxPoints, datas)
 
     global_json = { "L": dx, "B": dy, "H": dz, "datas": filter_datas }
     s = json.dumps(global_json, indent=4)
