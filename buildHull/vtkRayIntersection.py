@@ -409,12 +409,17 @@ def main(cli=None):
 
 
     args = parser.parse_args(cli)
+
+    lxx = args.lx
+    if(args.lx==None):
+        lxx = []
+
     extractNPointsOnSlicesOfAMesh(filename=args.filename,
         nx=args.nx,
         ny=args.ny,
         intersection_direction=args.intersection_direction,
         outputCsvFilename=args.output,
-        lx=args.lx
+        lx=lxx
         )
 
 
