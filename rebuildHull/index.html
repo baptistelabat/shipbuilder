@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>TU</title>
+    <!-- <link rel="stylesheet" href="graphTool.css"> -->
+    <script src="./js/FileSaver.js"></script>
+    <script src="./js/three.js"></script>
+    <script src="./js/stlExporter.js"></script>
+    <script src="./js/test.js"></script>
+  </head>
+  <!-- <body onload="doSaveSTL()"> -->
+  <body onload="doIt()">
+    <input type="file" id="file-input" />
+
+    <script>
+	function doIt() {
+
+        <!-- const sphoords = TEST._Sphoords; -->
+        <!-- // var coordsRadians = Sphoords.getCoordinatesInRadians(); -->
+        <!-- // console.log(coordsRadians); -->
+        <!-- console.log(sphoords.toRadians(90.0)); -->
+		
+
+        <!-- var vec22 = new TEST.Vector2(); -->
+        <!-- vec22.set(100.26,123.56); -->
+        <!-- console.log(vec22); -->		
+    }	
+
+    function toStl(data, filename) {
+      var exporter = new THREE.STLExporter();
+      var data = exporter.parse( mesh, { binary: false } );
+      var blob = new Blob( [ data ], { type: 'text/plain' } );
+      //var blob = new Blob([data], {type: 'application/octet-binary'});
+      saveAs(blob, filename);
+
+    }
+
+    function readSingleFile(e) {
+      var file = e.target.files[0];
+      if (!file) {
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var contents = e.target.result;
+        var json = JSON.parse(contents);
+		
+        mesh = TEST.Hull.buildHull(json);
+
+        var outfilename=file.name.split('.')[0] + '.stl';
+        toStl(mesh, outfilename);
+
+      };
+
+      reader.readAsText(file);
+
+    }
+
+    document.getElementById('file-input').addEventListener('change', readSingleFile, false);
+
+
+    </script>
+  </body>
+</html>
