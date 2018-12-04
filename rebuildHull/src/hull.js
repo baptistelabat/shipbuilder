@@ -2,6 +2,11 @@ import * as THREE from 'three';
 
 var Hull = {
 
+	/**
+	 * Returns a hull mesh
+	 * @param {json}
+	 * @return {THREE.Mesh} The hull mesh
+	 **/
 	buildHull: function ( json ) {
 		var H = json['H'];
 		var B = json['B'];
