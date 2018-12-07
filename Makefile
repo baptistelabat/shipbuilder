@@ -8,6 +8,7 @@ build: shipBuilder/js/elm.js shipBuilder/index.html
 
 json:
 	cd buildHull && make
+	cp buildHull/*.json shipBuilder/assets
 
 shipBuilder/js/elm.js: src/*
 	rm -rf elm-stuff/generated-code || true
