@@ -2,9 +2,6 @@ import os
 import vtk
 import numpy as np
 
-import matplotlib
-matplotlib.use('AGG')
-import matplotlib.pyplot as plt
 import json
 
 
@@ -100,14 +97,6 @@ class Slicer(object):
         if verbose:
             print("Bounds {0}".format(self.bounds))
 
-        self.fig = plt.figure(0) # , figsize = outputFigureSizeCm, dpi = dpi)
-        self.ax1 = self.fig.add_subplot(111)
-
-    def clearFigure(self):
-        self.fig.clear()
-        self.fig = plt.figure(0) # , figsize = outputFigureSizeCm, dpi = dpi)
-        self.ax1 = self.fig.add_subplot(111)
-
     def cut(self):
         # Create a plane to cut
         plane = vtk.vtkPlane()
@@ -166,22 +155,6 @@ class Slicer(object):
                 pt = resPoly.GetPoint(idPoint)
                 x[i], y[i] = pt[1], pt[2]
             self.ax1.plot(x, y, color=color, linestyle=linestyle)
-
-    def export(self, outputFilename='', grid=False, bounds=None):
-        if len(outputFilename) == 0:
-            outputFilename = os.path.splitext(self.filename)[0] + '.png'
-        if grid:
-            self.ax1.grid()
-            self.ax1.set_xlabel('Y')
-            self.ax1.set_ylabel('Z')
-        else:
-            self.ax1.axis('off')
-        self.ax1.set_aspect('equal')
-        if bounds:
-            self.ax1.set_xlim(bounds[0:2])
-            self.ax1.set_ylim(bounds[2:4])
-        # self.ax1.set_aspect('equal', adjustable='box')
-        self.fig.savefig(outputFilename, bbox_inches='tight')
 
     def get_slice_bounds(self, origin = 0.0, isOriginRelative=False):
         # Plane used to cut
