@@ -251,8 +251,7 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
     lx = kwargs.get('lx', [])
     print('lx', lx)
 
-    outputCsvFilename = kwargs.get('outputCsvFilename', None)
-    individual = kwargs.get('individual', False)
+    outputJsonFilename = kwargs.get('outputJsonFilename', None)
 
     bounds = getMeshBounds(filename)
 
@@ -324,8 +323,6 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
         to_json = ri.tojson(intersectionPoints, x)
         datas.append (to_json)
 
-        # if individual:
-        #     np.savetxt('intersectionPoints{0}.csv'.format(i), intersectionPoints, delimiter=',', header='x,y,z', comments='')
 
     # construction du json
     maxPoints = max ( list(map(lambda x: len(x['y']), datas) ) )
@@ -335,8 +332,8 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
     global_json = { "L": dx, "B": dy, "H": dz, "datas": list(filter_datas) }
     s = json.dumps(global_json, indent=4)
 
-    if outputCsvFilename is not None:
-        with open(outputCsvFilename, "w") as out:
+    if outputJsonFilename is not None:
+        with open(outputJsonFilename, "w") as out:
             out.write(s)
 
     return intersectionPointsAll
@@ -387,7 +384,7 @@ def main(cli=None):
         nx=args.nx,
         ny=args.ny,
         intersection_direction=args.intersection_direction,
-        outputCsvFilename=args.output,
+        outputJsonFilename=args.output,
         lx=lxx
         )
 
