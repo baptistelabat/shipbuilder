@@ -1,10 +1,13 @@
-.PHONY: all build clean artifacts
+.PHONY: all build clean artifacts json
 
 VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points-at HEAD),$(shell git rev-parse --short=8 HEAD))
 
-all: build
+all: build json
 
 build: shipBuilder/js/elm.js shipBuilder/index.html
+
+json:
+	cd buildHull && make
 
 shipBuilder/js/elm.js: src/*
 	rm -rf elm-stuff/generated-code || true
