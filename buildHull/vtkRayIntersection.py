@@ -18,24 +18,7 @@ def createMeshGridAsAMatrix(vx=[0, 1], vy=[2, 3], vz=[4, 5, 6]):
     XYZ = np.concatenate((x, y, z), 1)
     return XYZ
 
-
-def getMeshBounds(filename='hull.stl'):
-    mesh = vtkRead3dFile(filename)
-    bounds = np.array(mesh.GetBounds())
-    return bounds
-
-
-def generateGridPointsFromAStlFile(filename='hull.stl', scale=0.0, nPoints=10):
-    gridPointsInsideLidarPortee = vtkRead3dFile(filename)
-    bounds = np.array(gridPointsInsideLidarPortee.GetBounds()) + scale * np.array([-1, 1, -1, 1, -1, 1])
-    vx = np.linspace(bounds[0], bounds[1], nPoints)
-    vy = np.linspace(bounds[2], bounds[3], nPoints)
-    vz = np.linspace(bounds[4], bounds[5], nPoints)
-    gridPoints = createMeshGridAsAMatrix(vx, vy, vz)
-    return gridPoints
-
-
-def vtkRead3dFile(filename, getVtkReader=False):
+def vtkRead3dFile(filename):
     def _read(filename, reader, getVtkReader):
         reader.SetFileName(filename)
         reader.Update()
@@ -47,6 +30,7 @@ def vtkRead3dFile(filename, getVtkReader=False):
         raise IOError('Input file "{0}" was not found'.format(filename))
     filenameLower = filename.lower()
     extension = vtkGetFileExtension(filenameLower)
+    getVtkReader=False
     if extension == 'stl':
         reader = vtk.vtkSTLReader()
         sm = _read(filename, reader, getVtkReader)
@@ -69,30 +53,17 @@ def vtkRead3dFile(filename, getVtkReader=False):
     return sm
 
 
-class Slicer(object):
-    def __init__(self, fileName='Config_Patrouilleur_LHT75_Oriente.stl', verbose=False):
-
-        self.filename = fileName
-        if fileName.lower().endswith('.stl'):
-            self.surface = vtk.vtkSTLReader()
-            self.surface.SetFileName(fileName)
-            self.surface.Update()
-        elif fileName.lower().endswith('.vtk'):
-            self.surface = vtk.vtkPolyDataReader()
-            self.surface.SetFileName(fileName)
-            self.surface.Update()
-        else:
-            raise Exception
-
+class Slicer():
+    def __init__(self, mesh, verbose=False):
         self.cpd = vtk.vtkCleanPolyData()
         self.cpd.ConvertLinesToPointsOn()
         self.cpd.ConvertPolysToLinesOn()
-        self.cpd.SetInputConnection(self.surface.GetOutputPort())
+        self.cpd.SetInputData(mesh)
 
         self.surfaceN = vtk.vtkPolyDataNormals()
         self.surfaceN.SetInputConnection(self.cpd.GetOutputPort())
 
-        self.bounds = self.surface.GetOutput().GetBounds()
+        self.bounds = mesh.GetBounds()
         self.verbose = verbose
         if verbose:
             print("Bounds {0}".format(self.bounds))
@@ -193,17 +164,9 @@ class Slicer(object):
 
 
 class RayIntersection():
-    def __init__(self, geometricMesh='hull.stl', tolerance = .001):
-        self.geometricMesh = geometricMesh
-        if isinstance(geometricMesh, (str)):
-            if os.path.splitext(geometricMesh)[1][1:].lower() == 'stl':
-                s = vtkRead3dFile(geometricMesh)
-            else:
-                raise Exception('Not known')
-        else:
-            s = geometricMesh
+    def __init__(self, mesh, tolerance = .001):
         self.bspTree = vtk.vtkModifiedBSPTree()
-        self.bspTree.SetDataSet(s)
+        self.bspTree.SetDataSet(mesh)
         self.bspTree.BuildLocator()
         self.tolerance = tolerance
 
@@ -253,9 +216,11 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
 
     outputJsonFilename = kwargs.get('outputJsonFilename', None)
 
-    bounds = getMeshBounds(filename)
 
+    mesh = vtkRead3dFile(filename)
+    slicer = Slicer(mesh)
 
+    bounds = slicer.bounds
     vx = np.linspace(bounds[0], bounds[1], nx)
     vx[0] += offset
     vx[-1] -= offset
@@ -264,8 +229,7 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
         vx = lx
 
 
-    slicer = Slicer(fileName=filename)
-    ri = RayIntersection(geometricMesh=filename)
+    ri = RayIntersection(mesh)
     intersectionPointsAll = np.zeros((0, 3))
 
     dx = (bounds[1] - bounds[0])
