@@ -242,7 +242,7 @@ class RayIntersection():
 
 def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
     """
-    creates a intersection points on a surfacic mesh that
+    Creates intersection points on a surfacic mesh that
     """
     intersection_direction = kwargs.get('intersection_direction', 'z-')
     offset = kwargs.get('offset', 1e-5)
