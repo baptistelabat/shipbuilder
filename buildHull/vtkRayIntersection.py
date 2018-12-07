@@ -345,38 +345,34 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
 def main(cli=None):
     import argparse
     parser = argparse.ArgumentParser(
-                description='Extract N Points On Slices Of A surface Mesh',
+                description='Sample an STL (or OBJ, PLY or VTK file) surface mesh at regular intervals (x=cst planes) by tracing rays parallel to the z-axis. Output the result in a JSON file.',
                 add_help=True)
     pa = parser.add_argument
     pa("-f", "--filename",
-       help="Name of the 3D file",
+       help="Path to the file (STL, OBJ, PLY or VTK) to use.",
        default=r'')
     pa("-o", "--output",
-       help="Name of the output CSV",
+       help="Name of the output JSON file.",
        default='result.json')
-    pa("-i", "--individual",
-       action="store_true",
-       default=False,
-       help="")
     pa("-v", "--verbose",
        action="store_true",
        default=False,
-       help="")
+       help="Display extra information during processing (for debugging).")
     pa("--nx",
-       help="Number of slices", type=int,
+       help="Number of slices (on x-axis)", type=int,
        default=30)
     pa("--ny",
-       help="Number of points on a slice", type=int,
+       help="Number of points per slice", type=int,
        default=10)
     pa("-d", "--intersection_direction",
-       help="Direction for intersection. z+ is for an intersection front coming from z+, and z- from z-", type=str,
+       help="We use rays to compute the slices. If you want the rays to come from the \"top\" of the mesh, set this option to z+. Otherwise, the rays will be coming from \"beneath\" the mesh ('z-').", type=str,
        default='z-')
     pa("--offset",
-       help="offset", type=float,
-       default=0.5)
+       help="First slice's x-coordinate is xmin+offset. Last slice is at xmax-offset. Setting this to 0 would result in a cut right at the back of the mesh (i.e. singular).", type=float,
+       default=1E-5)
 
     pa('--lx',
-        help='lx',
+        help='Specify the x-coordinate of each cut. If not given (default is an empty list), will sample nx cuts at regular intervals between xmin+offset and xmax-offset',
         nargs='+', type=float,
         default=[])
 
