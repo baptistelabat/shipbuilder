@@ -1,5 +1,16 @@
-* construction fichier json
-	python3 vtkRayIntersection.py -f anthineas.stl -o outxxl.json -v --nx 20 --ny 10 -d y- --offset 0.1 --lx 0.1 0.5 1.0 5.0 10.0 20.0 21.0 22.0
+This module generates JSON cuts from an STL hull: given an STL file, it
+generates a JSON file containing a list of points on that hull. That JSON can
+then be used to build splines for interpolation (eg. find all the points lying
+on a z = cst plane).
 
-	python3 vtkRayIntersection.py --help
-	
+To generate the JSON files from the STL files in this repository, run:
+
+~~~~{.bash}
+make
+~~~~
+
+Otherwise, if you already have an STL file (or an OBJ, PLY or VTK file), use:
+
+~~~~{.bash}
+docker run --rm -it -v $(pwd):/app -w /app -u $(id -u):$(id -g) stl2json -f mystlfile.stl -o output.json -v --nx 10 --ny 10 -d y- --offset 0.1
+~~~~
