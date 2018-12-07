@@ -82,6 +82,9 @@ app.ports.toJs.subscribe(function (message) {
         case "remove-block":
             removeObject(data);
             break;
+        case "remove-blocks":
+            removeObjects(data);
+            break;
         case "remove-block-from-selection": // unselect one in multiple select
             removeBlockFromSelectionFromElm(data);
             break;
@@ -482,7 +485,7 @@ let restoreBlock = function (uuid, color, position, size, visible = true) {
 // input : size in threejs coordinates
 let restoreCubeGeometry = function (size) {
     const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
-    geometry.translate(size.x / 2, size.y / 2, size.z / 2); // set the origin in the bottom left 
+    geometry.translate(size.x / 2, size.y / 2, size.z / 2); // set the origin in the bottom left
     return geometry;
 }
 
@@ -527,6 +530,12 @@ let makeCube = function (sizeX, sizeY, sizeZ, x, y, z, color) {
     return cube;
 }
 
+let removeObjects = function (data) {
+    data.forEach(block => {
+      removeObject(block);
+    });
+}
+
 // remove an object from the scene
 let removeObject = function (block) {
     const objectToRemove = findObjectByUUID(block.uuid);
@@ -535,6 +544,18 @@ let removeObject = function (block) {
             // reset hovered
             hovered = null;
         }
+
+        views.forEach(view => {
+          if(view.control != null)
+          {
+            if(view.control.object != null)
+            {
+              if(view.control.object.uuid === block.uuid )
+                detachControls(); // detach gizmo
+            }
+          }
+        });
+
         if (isObjectSelected(objectToRemove)) {
             // remove object from selection
             removeFromSelection(objectToRemove);
@@ -595,7 +616,7 @@ let addBlockToSelectionFromElm = function (elmBlock) {
     addToSelection(block);
 }
 
-// handle unselecting a block in a multiple select in Elm : Elm sends the uuid of the block 
+// handle unselecting a block in a multiple select in Elm : Elm sends the uuid of the block
 let removeBlockFromSelectionFromElm = function (elmBlock) {
     const block = getBlockByUuid(elmBlock.uuid);
     removeFromSelection(block);

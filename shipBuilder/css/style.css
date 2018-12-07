@@ -147,7 +147,7 @@ header .header-menu-item+.header-menu-item {
     color: #e11f5b;
 }
 
- 
+
 @keyframes rotating {
     from{
         -webkit-transform: rotate(0deg);
@@ -161,7 +161,7 @@ header .header-menu-item+.header-menu-item {
     color: white;
     animation: rotating 1.5s linear infinite;
 }
- 
+
 .content-wrapper {
     display: flex;
     min-height: 0px;
@@ -532,7 +532,9 @@ input.block-label {
     color: var(--primary-color__contrast);
 }
 
-.blocks-panel h2 .blocks-visibility svg {
+.blocks-panel h2 .blocks-visibility svg
+, .blocks-panel h2 .delete-block svg 
+{
     height: 16px;
     width: 20px;
     margin-left: 8px;
@@ -809,7 +811,7 @@ p.block-volume-label,
     margin-right: -1px;
 }
 
-.custom-property p { 
+.custom-property p {
     margin: 0;
     padding: 0;
 }
@@ -835,7 +837,7 @@ p.block-volume-label::first-letter {
     text-transform: uppercase;
 }
 
-.input-group input, 
+.input-group input,
 p.block-volume-value {
     width: 100%;
     border: none;
@@ -914,7 +916,7 @@ p.block-volume-value,
     text-align: center;
 }
 
-.showing-partitions, 
+.showing-partitions,
 .selected-blocks-summary__visible {
     background: var(--contrast-color);
     color: var(--on-contrast-color);
@@ -958,7 +960,7 @@ p.block-volume-value,
     margin: 4px 0 12px;
 }
 
-.spacing-item { 
+.spacing-item {
     margin: 0;
     display: flex;
     justify-content: space-between;
@@ -1027,7 +1029,7 @@ p.block-volume-value,
 .block-color .sir-color-item {
     width: calc(100% / 9);
 }
-/* the next two rules make the sir-color-item square */ 
+/* the next two rules make the sir-color-item square */
 .block-color .sir-color-item::before {
   content: '';
   padding-top: 100%;

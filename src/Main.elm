@@ -110,7 +110,7 @@ newBlockDecoder =
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded { value = 0, string = "0" }
         |> Pipeline.hardcoded True
-        |> Pipeline.hardcoded Computed
+        |> Pipeline.hardcoded initPosition
 
 
 type alias SyncPosition =
@@ -240,12 +240,7 @@ decodeBlock =
         |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "visible" Decode.bool True
-        |> Pipeline.optional "centerOfGravity" decodeCenterOfGravity Computed
-
-
-decodeCenterOfGravity : Decode.Decoder CenterOfGravity
-decodeCenterOfGravity =
-    Decode.oneOf [ Decode.map UserInput decodePosition, Decode.null Computed ]
+        |> Pipeline.optional "centerOfGravity" decodePosition initPosition
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -780,13 +775,20 @@ initBlock uuid label color position size =
     , mass = numberToNumberInput 0.0
     , density = numberToNumberInput 0.0
     , visible = True
-    , centerOfGravity = Computed
+    , centerOfGravity = initPosition
     }
 
 
-type CenterOfGravity
-    = Computed
-    | UserInput Position
+type alias CenterOfGravity =
+    Position
+
+
+cogToPoint : CenterOfGravity -> Point
+cogToPoint p =
+    { x = p.x.value
+    , y = p.y.value
+    , z = p.z.value
+    }
 
 
 getCenterOfVolume : Block -> Point
@@ -799,15 +801,19 @@ getCenterOfVolume block =
 
 getCenterOfGravity : Block -> Point
 getCenterOfGravity block =
-    case block.centerOfGravity of
-        Computed ->
-            getCenterOfVolume block
+    cogToPoint block.centerOfGravity
 
-        UserInput position ->
-            { x = position.x.value
-            , y = position.y.value
-            , z = position.z.value
-            }
+
+getAbsoluteCenterOfGravity : Block -> Point
+getAbsoluteCenterOfGravity block =
+    let
+        p1 =
+            getCenterOfVolume block
+    in
+        { x = p1.x + block.centerOfGravity.x.value
+        , y = p1.y + block.centerOfGravity.y.value
+        , z = p1.z + block.centerOfGravity.z.value
+        }
 
 
 getCentroidOfBlocks : Blocks -> Point
@@ -822,7 +828,7 @@ getCentroidOfBlocks blocks =
             let
                 cog : Point
                 cog =
-                    getCenterOfGravity block
+                    getAbsoluteCenterOfGravity block
             in
                 { x = block.mass.value * cog.x
                 , y = block.mass.value * cog.y
@@ -860,6 +866,11 @@ type ReferenceForMass
 
 type alias Position =
     { x : FloatInput, y : FloatInput, z : FloatInput }
+
+
+initPosition : Position
+initPosition =
+    { x = numberToNumberInput 0, y = numberToNumberInput 0, z = numberToNumberInput 0 }
 
 
 type alias Size =
@@ -992,9 +1003,14 @@ stringifyEncodeValue value =
     Encode.encode 4 value
 
 
+encodeListBlocks : List Block -> Encode.Value
+encodeListBlocks blocks =
+    Encode.list <| List.map encodeBlock blocks
+
+
 encodeBlocks : Blocks -> Encode.Value
 encodeBlocks blocks =
-    Encode.list <| List.map encodeBlock (toList blocks)
+    encodeListBlocks (toList blocks)
 
 
 encodeModelForSave : Model -> Encode.Value
@@ -1038,14 +1054,7 @@ encodeBlock block =
         , ( "mass", Encode.float block.mass.value )
         , ( "density", Encode.float block.density.value )
         , ( "visible", Encode.bool block.visible )
-        , ( "centerOfGravity"
-          , case block.centerOfGravity of
-                Computed ->
-                    Encode.null
-
-                UserInput position ->
-                    encodePosition position
-          )
+        , ( "centerOfGravity", encodePosition block.centerOfGravity )
         ]
 
 
@@ -1286,6 +1295,16 @@ getSumOfVolumesForColor blocks color =
 removeBlockFrom : Blocks -> Block -> Blocks
 removeBlockFrom blocks block =
     DictList.remove block.uuid blocks
+
+
+removeListBlocksFrom : Blocks -> List Block -> Blocks
+removeListBlocksFrom blocks list =
+    case list of
+        [] ->
+            blocks
+
+        x :: xs ->
+            removeListBlocksFrom (removeBlockFrom blocks x) xs
 
 
 renameBlock : String -> Block -> Block
@@ -1717,6 +1736,7 @@ type ToJsMsg
     | KeyDownOnPartitionSpacingInput PartitionType KeyEvent
     | OpenSaveFile
     | RemoveBlock Block
+    | RemoveBlocks (List Block)
     | SelectBlock Block
     | SelectHullReference HullReference
     | SetSpacingException PartitionType Int String
@@ -1795,11 +1815,10 @@ updateNoJs msg model =
                 updatedBlock =
                     { block
                         | centerOfGravity =
-                            UserInput <|
-                                { x = numberToNumberInput centerOfVolume.x
-                                , y = numberToNumberInput centerOfVolume.y
-                                , z = numberToNumberInput centerOfVolume.z
-                                }
+                            { x = numberToNumberInput centerOfVolume.x
+                            , y = numberToNumberInput centerOfVolume.y
+                            , z = numberToNumberInput centerOfVolume.z
+                            }
                     }
             in
                 { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
@@ -1809,7 +1828,7 @@ updateNoJs msg model =
                 updatedBlock : Block
                 updatedBlock =
                     { block
-                        | centerOfGravity = Computed
+                        | centerOfGravity = initPosition
                     }
             in
                 { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
@@ -1923,16 +1942,10 @@ updateNoJs msg model =
 
                 syncedCenterOfGravity : CenterOfGravity
                 syncedCenterOfGravity =
-                    case block.centerOfGravity of
-                        Computed ->
-                            Computed
-
-                        UserInput position ->
-                            UserInput <|
-                                { x = syncNumberInput position.x
-                                , y = syncNumberInput position.y
-                                , z = syncNumberInput position.z
-                                }
+                    { x = syncNumberInput block.centerOfGravity.x
+                    , y = syncNumberInput block.centerOfGravity.y
+                    , z = syncNumberInput block.centerOfGravity.z
+                    }
 
                 syncedBlock : Block
                 syncedBlock =
@@ -2004,35 +2017,33 @@ updateNoJs msg model =
                 { model | uiState = newUiState } ! []
 
         UpdateCenterOfGravity axis block input ->
-            case block.centerOfGravity of
-                Computed ->
-                    model ! []
+            let
+                position =
+                    block.centerOfGravity
 
-                UserInput position ->
-                    let
-                        axisFloatInput : FloatInput
-                        axisFloatInput =
-                            position |> axisAccessor axis
+                axisFloatInput : FloatInput
+                axisFloatInput =
+                    position |> axisAccessor axis
 
-                        updatedBlock : Block
-                        updatedBlock =
-                            { block
-                                | centerOfGravity =
-                                    (case String.toFloat input of
-                                        Ok value ->
-                                            value
-                                                |> asValueInNumberInput axisFloatInput
-                                                |> flip asStringInNumberInput input
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | centerOfGravity =
+                            (case String.toFloat input of
+                                Ok value ->
+                                    value
+                                        |> asValueInNumberInput axisFloatInput
+                                        |> flip asStringInNumberInput input
 
-                                        Err error ->
-                                            input
-                                                |> asStringInNumberInput axisFloatInput
-                                    )
-                                        |> (asAxisInPosition axis) position
-                                        |> UserInput
-                            }
-                    in
-                        updateBlockInModel updatedBlock model ! []
+                                Err error ->
+                                    input
+                                        |> asStringInNumberInput axisFloatInput
+                            )
+                                |> (asAxisInPosition axis) position
+                            -- |> UserInput
+                    }
+            in
+                updateBlockInModel updatedBlock model ! []
 
         UpdateCustomPropertyLabel property newLabel ->
             { model
@@ -2358,6 +2369,16 @@ updateModelToJs msg model =
                     removeBlockFrom model.blocks block
             in
                 { model | blocks = blocks }
+
+        RemoveBlocks blocks ->
+            let
+                _ =
+                    Debug.log "remove blocks " (List.length blocks)
+
+                nblocks =
+                    removeListBlocksFrom model.blocks blocks
+            in
+                { model | blocks = nblocks }
 
         SelectBlock block ->
             if model.multipleSelect == False then
@@ -2708,6 +2729,10 @@ msg2json model action =
 
         RemoveBlock block ->
             Just { tag = "remove-block", data = encodeBlock block }
+
+        RemoveBlocks blocks ->
+            Just
+                { tag = "remove-blocks", data = encodeListBlocks blocks }
 
         SelectBlock block ->
             Just <|
@@ -3925,6 +3950,7 @@ viewWholeList model =
                     [ viewShowBlocksAction (toList model.blocks)
                     , viewHideBlocksAction (toList model.blocks)
                     ]
+                , viewDeleteBlocksAction (toList model.blocks)
                 ]
             , viewSelectedBlocksSummary model
             ]
@@ -4030,6 +4056,7 @@ viewSelectedBlocksSummary model =
                     [ class "blocks-visibility" ]
                     [ viewShowBlocksAction selectedBlocks
                     , viewHideBlocksAction selectedBlocks
+                    , viewDeleteBlocksAction selectedBlocks
                     ]
                 ]
             ]
@@ -4245,59 +4272,7 @@ viewBlockMassInfo block =
 viewBlockCenterOfGravity : Block -> Html Msg
 viewBlockCenterOfGravity block =
     div [ class "block-cog form-group" ] <|
-        case block.centerOfGravity of
-            Computed ->
-                viewBlockCenterOfGravityComputed block
-
-            UserInput position ->
-                viewBlockCenterOfGravityUserInput block position
-
-
-viewBlockCenterOfGravityComputed : Block -> List (Html Msg)
-viewBlockCenterOfGravityComputed block =
-    let
-        cog : Point
-        cog =
-            getCenterOfVolume block
-    in
-        [ div
-            [ class "form-group-title" ]
-            [ text "Center of gravity"
-            , div
-                [ class "form-group-action form-group-action__active"
-                , title "Stop tracking the center of the volume"
-                , onClick <| NoJs <| FreeCenterOfGravity block
-                ]
-                [ FASolid.crosshairs ]
-            ]
-        , viewCenterOfGravityComputedCoordinate X cog.x
-        , viewCenterOfGravityComputedCoordinate Y cog.y
-        , viewCenterOfGravityComputedCoordinate Z cog.z
-        ]
-
-
-viewCenterOfGravityComputedCoordinate : Axis -> Float -> Html Msg
-viewCenterOfGravityComputedCoordinate axis coordinateValue =
-    let
-        axisLabel : String
-        axisLabel =
-            String.toLower <| toString axis
-    in
-        div
-            [ class "input-group cog-coordinate" ]
-            [ label
-                [ for <| "block-cog-" ++ axisLabel ++ "-input"
-                , title <| "Center of gravity: " ++ axisLabel ++ " coordinate"
-                ]
-                [ text "CoG", sub [] [ text axisLabel ] ]
-            , input
-                [ type_ "text"
-                , id <| "block-cog-" ++ axisLabel ++ "-input"
-                , disabled True
-                , value <| toString coordinateValue
-                ]
-                []
-            ]
+        viewBlockCenterOfGravityUserInput block block.centerOfGravity
 
 
 viewBlockCenterOfGravityUserInput : Block -> Position -> List (Html Msg)
@@ -4307,7 +4282,7 @@ viewBlockCenterOfGravityUserInput block cog =
         [ text "Center of gravity"
         , div
             [ class "form-group-action"
-            , title "Track the center of the volume"
+            , title "Set to the center of the volume"
             , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
             ]
             [ FASolid.crosshairs ]
@@ -4630,6 +4605,16 @@ viewFocusBlockAction block =
         ]
         [ FASolid.arrow_right
         ]
+
+
+viewDeleteBlocksAction : List Block -> Html Msg
+viewDeleteBlocksAction blocks =
+    div
+        [ class "blocks-action delete-block"
+        , onClick <| ToJs <| RemoveBlocks blocks
+        , title "Delete all blocks"
+        ]
+        [ FASolid.trash ]
 
 
 viewDeleteBlockAction : Block -> Html Msg
