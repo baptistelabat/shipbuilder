@@ -233,9 +233,6 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
                                          output_JSON_filename,
                                          offset
                                          ):
-    print('lx', lx)
-
-
 
     mesh = read_3D_file(filename)
     slicer = Slicer(mesh)
