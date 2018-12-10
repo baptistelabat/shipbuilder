@@ -185,21 +185,21 @@ class RayIntersection():
         self.bspTree.BuildLocator()
         self.tolerance = tolerance
 
-    def see(self, startPoints, endPoints):
+    def see(self, start_points, end_points):
         x = [0.0, 0.0, 0.0]   # The coordinate of the intersection
         # Parametric coordinate of intersection (0 (corresponding to p1) to 1
         # (corresponding to p2))
         t = vtk.mutable(0)
         subId = vtk.mutable(0)
         pcoords = [0.0, 0.0, 0.0]
-        intersectionPoints = np.zeros(endPoints.shape)
+        intersectionPoints = np.zeros(end_points.shape)
         intersectionId = []
-        for i in range(endPoints.shape[0]):
-            startPoint = startPoints[i, :]
-            endPoint = endPoints[i, :]
-            # print(i, startPoint, endPoint)
+        for i in range(end_points.shape[0]):
+            start_point = start_points[i, :]
+            end_point = end_points[i, :]
+            # print(i, start_point, end_point)
             iD = self.bspTree.IntersectWithLine(
-                startPoint, endPoint, self.tolerance, t, x, pcoords, subId)
+                start_point, end_point, self.tolerance, t, x, pcoords, subId)
             intersectionPoints[i, :] = x
             if iD == 1:
                 intersectionId.append(i)
@@ -292,18 +292,18 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
             raise Exception('Unknown direction')
         grid = createMeshGridAsAMatrix(vx=vx, vy=vy, vz=vz)
         startPoints = np.copy(grid)
-        endPoints = np.copy(grid)
+        end_points = np.copy(grid)
         if intersection_direction == 'z+':
-            endPoints[:,2] += 3 * dz
+            end_points[:,2] += 3 * dz
         elif intersection_direction == 'z-':
-            endPoints[:,2] -= 3 * dz
+            end_points[:,2] -= 3 * dz
         elif intersection_direction == 'y+':
-            endPoints[:,1] += 3 * dy
+            end_points[:,1] += 3 * dy
         elif intersection_direction == 'y-':
-            endPoints[:,1] -= 3 * dy
+            end_points[:,1] -= 3 * dy
         else:
             raise Exception('Unknown direction')
-        intersection_points = ri.see(startPoints, endPoints)
+        intersection_points = ri.see(startPoints, end_points)
         intersection_points_all = np.concatenate((intersection_points_all, intersection_points), axis=0)
 
         to_json = slice2json(intersection_points, x)
