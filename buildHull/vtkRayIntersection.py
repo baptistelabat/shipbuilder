@@ -1,3 +1,9 @@
+# pylint: disable-msg=C0103
+"""
+This module takes an STL file(or OBJ, PLY or VTK) and makes "cuts" on x = cst
+planes.
+"""
+
 import os
 import vtk
 import numpy as np
