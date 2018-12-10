@@ -24,8 +24,7 @@ def vtkRead3dFile(filename):
         reader.Update()
         if getVtkReader:
             return reader
-        else:
-            return reader.GetOutput()
+        return reader.GetOutput()
     if not os.path.exists(filename):
         raise IOError('Input file "{0}" was not found'.format(filename))
     filenameLower = filename.lower()
