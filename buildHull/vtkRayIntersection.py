@@ -294,13 +294,13 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
         start_points = np.copy(grid)
         end_points = np.copy(grid)
         if intersection_direction == 'z+':
-            end_points[:,2] += 3 * dz
+            end_points[:, 2] += 3 * dz
         elif intersection_direction == 'z-':
-            end_points[:,2] -= 3 * dz
+            end_points[:, 2] -= 3 * dz
         elif intersection_direction == 'y+':
-            end_points[:,1] += 3 * dy
+            end_points[:, 1] += 3 * dy
         elif intersection_direction == 'y-':
-            end_points[:,1] -= 3 * dy
+            end_points[:, 1] -= 3 * dy
         else:
             raise Exception('Unknown direction')
         intersection_points = ri.see(start_points, end_points)
