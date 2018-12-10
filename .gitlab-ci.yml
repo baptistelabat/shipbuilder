@@ -30,6 +30,14 @@ build-json:
         - buildHull/KCS.json
         - buildHull/DTMB_5415.json
 
+build-js:
+    stage: build
+    script:
+    - cd rebuildHull && make
+    artifacts:
+      paths:
+        - rebuildHull/js/hull.js
+
 babel:
     stage: babel
     dependencies:
