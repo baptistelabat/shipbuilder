@@ -309,9 +309,9 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
         intersection_points = ri.see(start_points, end_points)
         intersection_points_all = np.concatenate((intersection_points_all, intersection_points), axis=0)
 
-        to_json = slice2json(intersection_points, x)
-        slices.append (to_json)
 
+        json_slice = slice2json(intersection_points, x)
+        slices.append(json_slice)
 
     # construction du json
     max_points = max(list(map(lambda x: len(x['y']), slices)))
