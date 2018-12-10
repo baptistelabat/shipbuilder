@@ -4,7 +4,13 @@ VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points
 
 all: build json
 
-build: shipBuilder/js/elm.js shipBuilder/index.html
+build: shipBuilder/js/elm.js shipBuilder/index.html shipBuilder/js/hull.js
+
+shipBuilder/js/hull.js: rebuildHull/js/hull.js
+	cp rebuildHull/js/hull.js shipBuilder/js/
+
+rebuildHull/js/hull.js: rebuildHull/src/hull.js
+	cd rebuildHull && make
 
 json:
 	cd buildHull && make
