@@ -207,19 +207,19 @@ class RayIntersection():
         return intersectionPoints
 
 
-def slice2json(input, x0):
-    zdatas = []
-    ydatas = []
-    for pt in input:
-        zdatas.append(pt[2])
-        ydatas.append(pt[1])
-    if len(zdatas):
-        zmin = np.min(zdatas)
-        zmax = np.max(zdatas)
+def slice2json(points_on_slice, x_coordinate_of_slice):
+    zs = []
+    ys = []
+    for pt in points_on_slice:
+        zs.append(pt[2])
+        ys.append(pt[1])
+    if len(zs):
+        zmin = np.min(zs)
+        zmax = np.max(zs)
     else:
         zmin = -999
         zmax = 999
-    return {"x": x0, "y": ydatas, "zmin": zmin, "zmax": zmax, "z": zdatas}
+    return {"x": x_coordinate_of_slice, "y": ys, "zmin": zmin, "zmax": zmax, "z": zs}
 
 
 def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
