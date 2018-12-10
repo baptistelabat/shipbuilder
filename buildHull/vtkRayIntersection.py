@@ -313,9 +313,9 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
     # construction du json
     max_points = max ( list(map(lambda x: len(x['y']), slices) ) )
     print('max', max_points)
-    filter_slices = filter(lambda x: len(x['y']) == max_points, slices)
+    filtered_slices = filter(lambda x: len(x['y']) == max_points, slices)
 
-    global_json = {"L": dx, "B": dy, "H": dz, "slices": list(filter_slices)}
+    global_json = {"L": dx, "B": dy, "H": dz, "slices": list(filtered_slices)}
     s = json.dumps(global_json, indent=4)
 
     if output_JSON_filename is not None:
