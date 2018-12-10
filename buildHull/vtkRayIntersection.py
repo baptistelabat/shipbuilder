@@ -313,7 +313,7 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
     print('max', maxPoints)
     filter_datas = filter(lambda x: len(x['y']) == maxPoints, datas)
 
-    global_json = { "L": dx, "B": dy, "H": dz, "datas": list(filter_datas) }
+    global_json = {"L": dx, "B": dy, "H": dz, "slices": list(filter_datas)}
     s = json.dumps(global_json, indent=4)
 
     if outputJsonFilename is not None:

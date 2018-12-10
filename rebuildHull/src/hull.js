@@ -11,7 +11,7 @@ var Hull = {
 		var H = json['H'];
 		var B = json['B'];
 		var L = json['L'];
-		var datas = json['datas'];
+		var datas = json['slices'];
 
 		console.log( 'H: ' + H.toFixed(2));
 		console.log( 'B: ' + B.toFixed(2));
