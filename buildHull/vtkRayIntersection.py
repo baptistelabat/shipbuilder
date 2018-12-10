@@ -10,8 +10,7 @@ import vtk
 import numpy as np
 
 
-
-def vtkGetFileExtension(filename):
+def get_filename_extension(filename):
     """
     Returns the extention of the file(without the dot).
     """
@@ -37,8 +36,8 @@ def vtkRead3dFile(filename):
     if not os.path.exists(filename):
         raise IOError('Input file "{0}" was not found'.format(filename))
     filenameLower = filename.lower()
-    extension = vtkGetFileExtension(filenameLower)
     getVtkReader=False
+    extension = get_filename_extension(filenameLower)
     if extension == 'stl':
         reader = vtk.vtkSTLReader()
         sm = _read(filename, reader, getVtkReader)
