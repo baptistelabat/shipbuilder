@@ -337,6 +337,10 @@ def normalize(hull_slice, bounds):
     ymax = bounds[3]
     zmin = bounds[4]
     zmax = bounds[5]
+    hull_slice['x'] = (hull_slice['x'] - xmin)/(xmax - xmin)
+    hull_slice['y'] = [(y-ymin)/(ymax-ymin) for y in hull_slice['y']]
+    hull_slice['zmin'] = (hull_slice['zmin'] - zmin)/(zmax-zmin)
+    hull_slice['zmax'] = (hull_slice['zmax'] - zmin)/(zmax-zmin)
     return hull_slice
 
 

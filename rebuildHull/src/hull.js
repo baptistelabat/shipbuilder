@@ -40,7 +40,7 @@ var Hull = {
 			{
 				var z = zmin_slice + dz*i;
 				i=i+1;
-				geometry.vertices.push(new THREE.Vector3( x,y,z ));
+				geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin,z*H+zmin ));
 			});
 		});
 
