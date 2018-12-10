@@ -187,17 +187,20 @@ class RayIntersection():
 
     def see(self, startPoints, endPoints):
         x = [0.0, 0.0, 0.0]   # The coordinate of the intersection
-        t = vtk.mutable(0)    # Parametric coordinate of intersection (0 (corresponding to p1) to 1 (corresponding to p2))
+        # Parametric coordinate of intersection (0 (corresponding to p1) to 1
+        # (corresponding to p2))
+        t = vtk.mutable(0)
         subId = vtk.mutable(0)
         pcoords = [0.0, 0.0, 0.0]
         intersectionPoints = np.zeros(endPoints.shape)
         intersectionId = []
         for i in range(endPoints.shape[0]):
-            startPoint = startPoints[i,:]
-            endPoint = endPoints[i,:]
+            startPoint = startPoints[i, :]
+            endPoint = endPoints[i, :]
             # print(i, startPoint, endPoint)
-            iD = self.bspTree.IntersectWithLine(startPoint, endPoint, self.tolerance, t, x, pcoords, subId)
-            intersectionPoints[i,:] = x
+            iD = self.bspTree.IntersectWithLine(
+                startPoint, endPoint, self.tolerance, t, x, pcoords, subId)
+            intersectionPoints[i, :] = x
             if iD == 1:
                 intersectionId.append(i)
         intersectionPoints = intersectionPoints[intersectionId, :]
