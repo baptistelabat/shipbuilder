@@ -208,6 +208,11 @@ class RayIntersection():
 
 
 def slice2json(points_on_slice, x_coordinate_of_slice):
+    """
+    Given the list of intersection points(points on slice) and the
+    position of the slice on the x-axis, returs a JSON object suitable
+    for serialization.
+    """
     zs = []
     ys = []
     for pt in points_on_slice:
@@ -223,11 +228,6 @@ def slice2json(points_on_slice, x_coordinate_of_slice):
 
 
 def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
-    """
-    Given the list of intersection points(points on slice) and the
-    position of the slice on the x-axis, returs a JSON object suitable
-    for serialization.
-    """
     intersection_direction = kwargs.get('intersection_direction', 'z-')
     offset = kwargs.get('offset', 1e-5)
     nx = kwargs.get('nx', 10)
