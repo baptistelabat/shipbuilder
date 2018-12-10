@@ -215,16 +215,17 @@ def slice2json(points_on_slice, x_coordinate_of_slice):
     """
     zs = []
     ys = []
-    for pt in points_on_slice:
-        zs.append(pt[2])
-        ys.append(pt[1])
-    if len(zs):
+    for xyz in points_on_slice:
+        zs.append(xyz[2])
+        ys.append(xyz[1])
+    if zs:
         zmin = np.min(zs)
         zmax = np.max(zs)
     else:
         zmin = -999
         zmax = 999
-    return {"x": x_coordinate_of_slice, "y": ys, "zmin": zmin, "zmax": zmax, "z": zs}
+    return {"x": x_coordinate_of_slice, "y": ys, "zmin": zmin,
+            "zmax": zmax, "z": zs}
 
 
 def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
