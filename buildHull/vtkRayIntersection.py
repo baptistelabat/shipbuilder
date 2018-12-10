@@ -228,15 +228,13 @@ def slice2json(points_on_slice, x_coordinate_of_slice):
             "zmax": zmax, "z": zs}
 
 
-def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
-    intersection_direction = kwargs.get('intersection_direction', 'z-')
-    offset = kwargs.get('offset', 1e-5)
-    nx = kwargs.get('nx', 10)
-    ny = kwargs.get('ny', 20)
-    lx = kwargs.get('lx', [])
+def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
+                                         intersection_direction,
+                                         output_JSON_filename,
+                                         offset
+                                         ):
     print('lx', lx)
 
-    outputJsonFilename = kwargs.get('outputJsonFilename', None)
 
 
     mesh = read_3D_file(filename)
@@ -318,8 +316,8 @@ def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
     global_json = {"L": dx, "B": dy, "H": dz, "slices": list(filter_slices)}
     s = json.dumps(global_json, indent=4)
 
-    if outputJsonFilename is not None:
-        with open(outputJsonFilename, "w") as out:
+    if output_JSON_filename is not None:
+        with open(output_JSON_filename, "w") as out:
             out.write(s)
 
     return intersection_points_all
@@ -372,13 +370,13 @@ def main(cli=None):
     lxx = args.lx
     if(args.lx==None):
         lxx = []
-
     extract_n_points_on_slices_of_a_mesh(filename=args.filename,
         nx=args.nx,
         ny=args.ny,
         intersection_direction=args.intersection_direction,
-        outputJsonFilename=args.output,
-        lx=lxx
+        output_JSON_filename=args.output,
+        lx=lxx,
+        offset = args.offset
         )
 
 
