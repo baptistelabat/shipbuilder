@@ -30,7 +30,8 @@ def createMeshGridAsAMatrix(vx=[0, 1], vy=[2, 3], vz=[4, 5, 6]):
     XYZ = np.concatenate((x, y, z), 1)
     return XYZ
 
-def vtkRead3dFile(filename):
+
+def read_3D_file(filename):
     """
     Read a mesh from an STL, OBJ, PLY or VTK file.
     """
@@ -231,7 +232,7 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
     outputJsonFilename = kwargs.get('outputJsonFilename', None)
 
 
-    mesh = vtkRead3dFile(filename)
+    mesh = read_3D_file(filename)
     slicer = Slicer(mesh)
 
     bounds = slicer.bounds
