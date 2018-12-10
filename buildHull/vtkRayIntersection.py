@@ -252,7 +252,7 @@ def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
         vx[-1] -= offset
 
     ri = RayIntersection(mesh)
-    intersectionPointsAll = np.zeros((0, 3))
+    intersection_points_all = np.zeros((0, 3))
 
     dx = (bounds[1] - bounds[0])
     dy = (bounds[3] - bounds[2])
@@ -304,7 +304,7 @@ def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
         else:
             raise Exception('Unknown direction')
         intersectionPoints = ri.see(startPoints, endPoints)
-        intersectionPointsAll = np.concatenate((intersectionPointsAll, intersectionPoints), axis=0)
+        intersection_points_all = np.concatenate((intersection_points_all, intersectionPoints), axis=0)
 
         to_json = slice2json(intersectionPoints, x)
         datas.append (to_json)
@@ -322,7 +322,7 @@ def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
         with open(outputJsonFilename, "w") as out:
             out.write(s)
 
-    return intersectionPointsAll
+    return intersection_points_all
 
 
 def main(cli=None):
