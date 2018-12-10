@@ -218,14 +218,8 @@ def slice2json(points_on_slice, x_coordinate_of_slice):
     for xyz in points_on_slice:
         zs.append(xyz[2])
         ys.append(xyz[1])
-    if zs:
-        zmin = np.min(zs)
-        zmax = np.max(zs)
-    else:
-        zmin = -999
-        zmax = 999
-    return {"x": x_coordinate_of_slice, "y": ys, "zmin": zmin,
-            "zmax": zmax}
+    return {"x": x_coordinate_of_slice, "y": ys, "zmin": np.min(zs),
+            "zmax": np.max(zs)}
 
 
 def intersect(slice_bounds, offset, intersection_direction, ny, bounds):
