@@ -223,28 +223,28 @@ def slice2json(points_on_slice, x_coordinate_of_slice):
 
 
 def intersect(slice_bounds, offset, intersection_direction, ny, bounds):
-    dy = bounds[3] - bounds[2]
-    dz = bounds[5] - bounds[4]
+    B = bounds[3] - bounds[2]
+    moulded_depth = bounds[5] - bounds[4]
     if intersection_direction == 'z+':
         y_min = slice_bounds[2] + offset
         y_max = slice_bounds[3] - offset
         vy = np.linspace(y_min, y_max, ny)
-        vz = [bounds[4] - dz]
+        vz = [bounds[4] - moulded_depth]
     elif intersection_direction == 'z-':
         y_min = slice_bounds[2] + offset
         y_max = slice_bounds[3] - offset
         vy = np.linspace(y_min, y_max, ny)
-        vz = [bounds[5] + dz]
+        vz = [bounds[5] + moulded_depth]
     elif intersection_direction == 'y+':
         z_min = slice_bounds[4] + offset
         z_max = slice_bounds[5] - offset
         vz = np.linspace(z_min, z_max, ny)
-        vy = [bounds[3] + dy]
+        vy = [bounds[3] + B]
     elif intersection_direction == 'y-':
         z_min = slice_bounds[4] + offset
         z_max = slice_bounds[5] - offset
         vz = np.linspace(z_min, z_max, ny)
-        vy = [bounds[3] + dz]
+        vy = [bounds[3] + moulded_depth]
     else:
         raise Exception('Unknown direction')
     return vy, vz
@@ -276,9 +276,9 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
     ri = RayIntersection(mesh)
     intersection_points_all = np.zeros((0, 3))
 
-    dx = (bounds[1] - bounds[0])
-    dy = (bounds[3] - bounds[2])
-    dz = (bounds[5] - bounds[4])
+    L = bounds[1] - bounds[0]
+    B = bounds[3] - bounds[2]
+    moulded_depth = bounds[5] - bounds[4]
 
     slices = []
 
@@ -291,13 +291,13 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
         start_points = np.copy(grid)
         end_points = np.copy(grid)
         if intersection_direction == 'z+':
-            end_points[:, 2] += 3 * dz
+            end_points[:, 2] += 3 * moulded_depth
         elif intersection_direction == 'z-':
-            end_points[:, 2] -= 3 * dz
+            end_points[:, 2] -= 3 * moulded_depth
         elif intersection_direction == 'y+':
-            end_points[:, 1] += 3 * dy
+            end_points[:, 1] += 3 * B
         elif intersection_direction == 'y-':
-            end_points[:, 1] -= 3 * dy
+            end_points[:, 1] -= 3 * B
         else:
             raise Exception('Unknown direction')
         intersection_points = ri.see(start_points, end_points)
@@ -312,7 +312,7 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
     print('max', max_points)
     filtered_slices = filter(lambda x: len(x['y']) == max_points, slices)
 
-    global_json = {"L": dx, "B": dy, "H": dz, "slices": list(filtered_slices)}
+    global_json = {"length": L, "breadth": B, "mouldedDepth": moulded_depth, "slices": list(filtered_slices)}
     s = json.dumps(global_json, indent=4)
 
     if output_JSON_filename is not None:

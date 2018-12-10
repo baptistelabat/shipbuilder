@@ -8,9 +8,9 @@ var Hull = {
 	 * @return {THREE.Mesh} The hull mesh
 	 **/
 	buildHull: function ( json ) {
-		var H = json['H'];
-		var B = json['B'];
-		var L = json['L'];
+		var H = json['mouldedDepth'];
+		var B = json['breadth'];
+		var L = json['length'];
 		var datas = json['slices'];
 
 		console.log( 'H: ' + H.toFixed(2));
