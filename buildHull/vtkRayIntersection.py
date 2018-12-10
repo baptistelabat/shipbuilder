@@ -260,7 +260,7 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
 
     slices = []
 
-    for i, x in enumerate(vx):
+    for _, x in enumerate(vx):
         slice_bounds = slicer.get_slice_bounds(x)
         if intersection_direction == 'z+':
             y_min = slice_bounds[2] + offset
