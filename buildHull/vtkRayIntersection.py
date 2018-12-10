@@ -12,6 +12,9 @@ import numpy as np
 
 
 def vtkGetFileExtension(filename):
+    """
+    Returns the extention of the file(without the dot).
+    """
     return os.path.splitext(filename)[1][1:]
 
 
