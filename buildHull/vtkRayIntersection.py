@@ -245,7 +245,7 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
     vx[0] += offset
     vx[-1] -= offset
 
-    if(len(lx)):
+    if lx:
         vx = lx
 
 
