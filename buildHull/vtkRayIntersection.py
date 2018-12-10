@@ -192,7 +192,7 @@ class RayIntersection():
         t = vtk.mutable(0)
         subId = vtk.mutable(0)
         pcoords = [0.0, 0.0, 0.0]
-        intersectionPoints = np.zeros(endPoints.shape)
+        intersection_points = np.zeros(endPoints.shape)
         intersectionId = []
         for i in range(endPoints.shape[0]):
             startPoint = startPoints[i, :]
@@ -200,11 +200,11 @@ class RayIntersection():
             # print(i, startPoint, endPoint)
             iD = self.bspTree.IntersectWithLine(
                 startPoint, endPoint, self.tolerance, t, x, pcoords, subId)
-            intersectionPoints[i, :] = x
+            intersection_points[i, :] = x
             if iD == 1:
                 intersectionId.append(i)
-        intersectionPoints = intersectionPoints[intersectionId, :]
-        return intersectionPoints
+        intersection_points = intersection_points[intersectionId, :]
+        return intersection_points
 
 
 def slice2json(points_on_slice, x_coordinate_of_slice):
@@ -303,10 +303,10 @@ def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
             endPoints[:,1] -= 3 * dy
         else:
             raise Exception('Unknown direction')
-        intersectionPoints = ri.see(startPoints, endPoints)
-        intersection_points_all = np.concatenate((intersection_points_all, intersectionPoints), axis=0)
+        intersection_points = ri.see(startPoints, endPoints)
+        intersection_points_all = np.concatenate((intersection_points_all, intersection_points), axis=0)
 
-        to_json = slice2json(intersectionPoints, x)
+        to_json = slice2json(intersection_points, x)
         datas.append (to_json)
 
 
