@@ -243,13 +243,13 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
     slicer = Slicer(mesh)
 
     bounds = slicer.bounds
-    vx = np.linspace(bounds[0], bounds[1], nx)
-    vx[0] += offset
-    vx[-1] -= offset
 
     if lx:
         vx = lx
-
+    else:
+        vx = np.linspace(bounds[0], bounds[1], nx)
+        vx[0] += offset
+        vx[-1] -= offset
 
     ri = RayIntersection(mesh)
     intersectionPointsAll = np.zeros((0, 3))
