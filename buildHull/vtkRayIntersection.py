@@ -228,7 +228,7 @@ def slice2json(points_on_slice, x_coordinate_of_slice):
             "zmax": zmax, "z": zs}
 
 
-def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
+def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
     intersection_direction = kwargs.get('intersection_direction', 'z-')
     offset = kwargs.get('offset', 1e-5)
     nx = kwargs.get('nx', 10)
@@ -373,7 +373,7 @@ def main(cli=None):
     if(args.lx==None):
         lxx = []
 
-    extractNPointsOnSlicesOfAMesh(filename=args.filename,
+    extract_n_points_on_slices_of_a_mesh(filename=args.filename,
         nx=args.nx,
         ny=args.ny,
         intersection_direction=args.intersection_direction,
