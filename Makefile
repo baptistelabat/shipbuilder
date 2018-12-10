@@ -27,7 +27,7 @@ shipBuilder/index.html: shipBuilder/index.template.html
 
 artifacts: shipBuilder.zip
 
-shipBuilder.zip: shipBuilder/index.html shipBuilder/js/elm.js shipBuilder/*.css shipBuilder/assets/*
+shipBuilder.zip: shipBuilder/index.html shipBuilder/js/hull.js shipBuilder/js/main.js shipBuilder/js/elm.js shipBuilder/*.css shipBuilder/assets/*
 	zip -r -9 shipBuilder.zip shipBuilder/index.html shipBuilder/js shipBuilder/css shipBuilder/assets
 
 clean:
