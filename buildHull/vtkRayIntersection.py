@@ -324,10 +324,17 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
 
 
 def main(cli=None):
+    """
+    Entrypoint.
+    """
     import argparse
     parser = argparse.ArgumentParser(
-                description='Sample an STL (or OBJ, PLY or VTK file) surface mesh at regular intervals (x=cst planes) by tracing rays parallel to the z-axis. Output the result in a JSON file.',
-                add_help=True)
+        description="""
+        Sample an STL (or OBJ, PLY or VTK file) surface mesh at
+        regular intervals (x=cst planes) by tracing rays parallel
+        to the z-axis. Output the result in a JSON file.
+        """,
+        add_help=True)
     pa = parser.add_argument
     pa("-f", "--filename",
        help="Path to the file (STL, OBJ, PLY or VTK) to use.",
