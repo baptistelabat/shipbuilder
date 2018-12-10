@@ -31,6 +31,9 @@ def createMeshGridAsAMatrix(vx=[0, 1], vy=[2, 3], vz=[4, 5, 6]):
     return XYZ
 
 def vtkRead3dFile(filename):
+    """
+    Read a mesh from an STL, OBJ, PLY or VTK file.
+    """
     def _read(filename, reader, getVtkReader):
         reader.SetFileName(filename)
         reader.Update()
