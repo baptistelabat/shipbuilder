@@ -291,7 +291,7 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
         else:
             raise Exception('Unknown direction')
         grid = createMeshGridAsAMatrix(vx=vx, vy=vy, vz=vz)
-        startPoints = np.copy(grid)
+        start_points = np.copy(grid)
         end_points = np.copy(grid)
         if intersection_direction == 'z+':
             end_points[:,2] += 3 * dz
@@ -303,7 +303,7 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
             end_points[:,1] -= 3 * dy
         else:
             raise Exception('Unknown direction')
-        intersection_points = ri.see(startPoints, end_points)
+        intersection_points = ri.see(start_points, end_points)
         intersection_points_all = np.concatenate((intersection_points_all, intersection_points), axis=0)
 
         to_json = slice2json(intersection_points, x)
