@@ -5,10 +5,10 @@ planes.
 """
 
 import os
+import json
 import vtk
 import numpy as np
 
-import json
 
 
 def vtkGetFileExtension(filename):
