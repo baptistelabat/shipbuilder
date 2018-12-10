@@ -11,6 +11,9 @@ var Hull = {
 		var H = json['mouldedDepth'];
 		var B = json['breadth'];
 		var L = json['length'];
+        var xmin = json['xmin'];
+        var ymin = json['ymin'];
+        var zmin = json['zmin'];
 		var slices = json['slices'];
 
 		console.log( 'H: ' + H.toFixed(2));

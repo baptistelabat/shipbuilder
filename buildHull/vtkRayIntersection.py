@@ -311,7 +311,13 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
     max_points = max(list(map(lambda x: len(x['y']), slices)))
     filtered_slices = filter(lambda x: len(x['y']) == max_points, slices)
 
-    global_json = {"length": L, "breadth": B, "mouldedDepth": moulded_depth, "slices": list(filtered_slices)}
+    global_json = {"length": L, "breadth": B, "mouldedDepth": moulded_depth,
+                   "slices":
+                   [normalize(slice, bounds) for slice in filtered_slices],
+                   "xmin": bounds[0],
+                   "ymin": bounds[2],
+                   "zmin": bounds[4]
+                   }
     s = json.dumps(global_json, indent=4)
 
     if output_JSON_filename is not None:
@@ -319,6 +325,19 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
             out.write(s)
 
     return intersection_points_all
+
+
+def normalize(hull_slice, bounds):
+    """
+    Make sure all x, y & z values are between 0 and 1.
+    """
+    xmin = bounds[0]
+    xmax = bounds[1]
+    ymin = bounds[2]
+    ymax = bounds[3]
+    zmin = bounds[4]
+    zmax = bounds[5]
+    return hull_slice
 
 
 def main(cli=None):
