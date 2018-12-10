@@ -11,26 +11,26 @@ var Hull = {
 		var H = json['mouldedDepth'];
 		var B = json['breadth'];
 		var L = json['length'];
-		var datas = json['slices'];
+		var slices = json['slices'];
 
 		console.log( 'H: ' + H.toFixed(2));
 		console.log( 'B: ' + B.toFixed(2));
 
 		var geometry = new THREE.Geometry();
 
-		var nx = datas.length;
-		var ny = datas[0]['y'].length;
+		var nx = slices.length;
+		var ny = slices[0]['y'].length;
 		console.log( 'nx: ' + nx.toFixed(0));
 		console.log( 'ny: ' + ny.toFixed(0));
 
-		datas.forEach(function (s)
+		slices.forEach(function (slice)
 		{
-			var x = s['x'];
-			var zs = s['z'];
+			var x = slice['x'];
+			var zs = slice['z'];
 			var y = 0;
-			var ys = s['y'];
-			var zmin = s['zmin'];
-			var zmax = s['zmax'];
+			var ys = slice['y'];
+			var zmin = slice['zmin'];
+			var zmax = slice['zmax'];
 			var dz = (zmax - zmin) / (ny-1);
 			var z = 0;
 
