@@ -228,6 +228,34 @@ def slice2json(points_on_slice, x_coordinate_of_slice):
             "zmax": zmax, "z": zs}
 
 
+def intersect(slice_bounds, offset, intersection_direction, ny, bounds):
+    dy = bounds[3] - bounds[2]
+    dz = bounds[5] - bounds[4]
+    if intersection_direction == 'z+':
+        y_min = slice_bounds[2] + offset
+        y_max = slice_bounds[3] - offset
+        vy = np.linspace(y_min, y_max, ny)
+        vz = [bounds[4] - dz]
+    elif intersection_direction == 'z-':
+        y_min = slice_bounds[2] + offset
+        y_max = slice_bounds[3] - offset
+        vy = np.linspace(y_min, y_max, ny)
+        vz = [bounds[5] + dz]
+    elif intersection_direction == 'y+':
+        z_min = slice_bounds[4] + offset
+        z_max = slice_bounds[5] - offset
+        vz = np.linspace(z_min, z_max, ny)
+        vy = [bounds[3] + dy]
+    elif intersection_direction == 'y-':
+        z_min = slice_bounds[4] + offset
+        z_max = slice_bounds[5] - offset
+        vz = np.linspace(z_min, z_max, ny)
+        vy = [bounds[3] + dz]
+    else:
+        raise Exception('Unknown direction')
+    return vy, vz
+
+
 def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
                                          intersection_direction,
                                          output_JSON_filename,
@@ -262,34 +290,9 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
 
     for _, x in enumerate(vx):
         slice_bounds = slicer.get_slice_bounds(x)
-        if intersection_direction == 'z+':
-            y_min = slice_bounds[2] + offset
-            y_max = slice_bounds[3] - offset
-            vy = np.linspace(y_min, y_max, ny)
-            vz = [bounds[4] - dz]
-            vx = [x]
-        elif intersection_direction == 'z-':
-            y_min = slice_bounds[2] + offset
-            y_max = slice_bounds[3] - offset
-            vy = np.linspace(y_min, y_max, ny)
-            vz = [bounds[5] + dz]
-            vx = [x]
-        elif intersection_direction == 'y+':
-            # raise NotImplementedError
-            z_min = slice_bounds[4] + offset
-            z_max = slice_bounds[5] - offset
-            vz = np.linspace(z_min, z_max, ny)
-            vy = [bounds[3] + dy]
-            vx = [x]
-
-        elif intersection_direction == 'y-':
-            z_min = slice_bounds[4] + offset
-            z_max = slice_bounds[5] - offset
-            vz = np.linspace(z_min, z_max, ny)
-            vy = [bounds[3] + dz]
-            vx = [x]
-        else:
-            raise Exception('Unknown direction')
+        vx = [x]
+        vy, vz = intersect(slice_bounds, offset, intersection_direction, ny,
+                           bounds)
         grid = create_mesh_grid_as_a_matrix(vx=vx, vy=vy, vz=vz)
         start_points = np.copy(grid)
         end_points = np.copy(grid)
