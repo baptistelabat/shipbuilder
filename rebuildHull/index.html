@@ -7,7 +7,7 @@
     <script src="./js/FileSaver.js"></script>
     <script src="./js/three.js"></script>
     <script src="./js/stlExporter.js"></script>
-    <script src="./js/test.js"></script>
+    <script src="./js/hull.js"></script>
   </head>
   <!-- <body onload="doSaveSTL()"> -->
   <body onload="doIt()">
@@ -46,7 +46,7 @@
         var contents = e.target.result;
         var json = JSON.parse(contents);
 		
-        mesh = TEST.Hull.buildHull(json);
+        mesh = Hull.Hull.buildHull(json);
 
         var outfilename=file.name.split('.')[0] + '.stl';
         toStl(mesh, outfilename);
