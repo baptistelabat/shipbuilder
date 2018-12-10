@@ -17,7 +17,7 @@ def get_filename_extension(filename):
     return os.path.splitext(filename)[1][1:]
 
 
-def createMeshGridAsAMatrix(vx=[0, 1], vy=[2, 3], vz=[4, 5, 6]):
+def create_mesh_grid_as_a_matrix(vx=[0, 1], vy=[2, 3], vz=[4, 5, 6]):
     """
     Returns a numpy array containing 3 columns
     (one for X, one for Y & one for Z).
@@ -290,7 +290,7 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
             vx = [x]
         else:
             raise Exception('Unknown direction')
-        grid = createMeshGridAsAMatrix(vx=vx, vy=vy, vz=vz)
+        grid = create_mesh_grid_as_a_matrix(vx=vx, vy=vy, vz=vz)
         start_points = np.copy(grid)
         end_points = np.copy(grid)
         if intersection_direction == 'z+':
