@@ -258,7 +258,7 @@ def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
     dy = (bounds[3] - bounds[2])
     dz = (bounds[5] - bounds[4])
 
-    datas = []
+    slices = []
 
     for i, x in enumerate(vx):
         slice_bounds = slicer.get_slice_bounds(x)
@@ -307,15 +307,15 @@ def extract_n_points_on_slices_of_a_mesh(filename='carene_fremm.stl', **kwargs):
         intersection_points_all = np.concatenate((intersection_points_all, intersection_points), axis=0)
 
         to_json = slice2json(intersection_points, x)
-        datas.append (to_json)
+        slices.append (to_json)
 
 
     # construction du json
-    maxPoints = max ( list(map(lambda x: len(x['y']), datas) ) )
+    maxPoints = max ( list(map(lambda x: len(x['y']), slices) ) )
     print('max', maxPoints)
-    filter_datas = filter(lambda x: len(x['y']) == maxPoints, datas)
+    filter_slices = filter(lambda x: len(x['y']) == maxPoints, slices)
 
-    global_json = {"L": dx, "B": dy, "H": dz, "slices": list(filter_datas)}
+    global_json = {"L": dx, "B": dy, "H": dz, "slices": list(filter_slices)}
     s = json.dumps(global_json, indent=4)
 
     if outputJsonFilename is not None:
