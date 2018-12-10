@@ -192,7 +192,7 @@ class RayIntersection():
         t = vtk.mutable(0)
         subId = vtk.mutable(0)
         pcoords = [0.0, 0.0, 0.0]
-        intersection_points = np.zeros(endPoints.shape)
+        intersectionPoints = np.zeros(endPoints.shape)
         intersectionId = []
         for i in range(endPoints.shape[0]):
             startPoint = startPoints[i, :]
@@ -200,11 +200,11 @@ class RayIntersection():
             # print(i, startPoint, endPoint)
             iD = self.bspTree.IntersectWithLine(
                 startPoint, endPoint, self.tolerance, t, x, pcoords, subId)
-            intersection_points[i, :] = x
+            intersectionPoints[i, :] = x
             if iD == 1:
                 intersectionId.append(i)
-        intersection_points = intersection_points[intersectionId, :]
-        return intersection_points
+        intersectionPoints = intersectionPoints[intersectionId, :]
+        return intersectionPoints
 
 
 def slice2json(points_on_slice, x_coordinate_of_slice):
