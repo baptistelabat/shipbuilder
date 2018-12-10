@@ -233,6 +233,11 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
                                          output_JSON_filename,
                                          offset
                                          ):
+    """
+    Creates intersection points using rays parallel to the y or z axis.
+    Same number of points for all slices. Equal spacing for abscicae of each
+    slice.
+    """
 
     mesh = read_3D_file(filename)
     slicer = Slicer(mesh)
