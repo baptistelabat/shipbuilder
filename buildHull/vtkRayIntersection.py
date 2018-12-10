@@ -206,19 +206,20 @@ class RayIntersection():
         intersectionPoints = intersectionPoints[intersectionId, :]
         return intersectionPoints
 
-    def tojson(self, input, x0):
-        zdatas = []
-        ydatas = []
-        for pt in input:
-            zdatas.append(pt[2])
-            ydatas.append(pt[1])
-        if len(zdatas):
-            zmin = np.min(zdatas)
-            zmax = np.max(zdatas)
-        else:
-            zmin=-999
-            zmax=999
-        return {"x": x0, "y": ydatas, "zmin": zmin, "zmax": zmax, "z": zdatas }
+
+def slice2json(input, x0):
+    zdatas = []
+    ydatas = []
+    for pt in input:
+        zdatas.append(pt[2])
+        ydatas.append(pt[1])
+    if len(zdatas):
+        zmin = np.min(zdatas)
+        zmax = np.max(zdatas)
+    else:
+        zmin = -999
+        zmax = 999
+    return {"x": x0, "y": ydatas, "zmin": zmin, "zmax": zmax, "z": zdatas}
 
 
 def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
@@ -304,7 +305,7 @@ def extractNPointsOnSlicesOfAMesh(filename='carene_fremm.stl', **kwargs):
         intersectionPoints = ri.see(startPoints, endPoints)
         intersectionPointsAll = np.concatenate((intersectionPointsAll, intersectionPoints), axis=0)
 
-        to_json = ri.tojson(intersectionPoints, x)
+        to_json = slice2json(intersectionPoints, x)
         datas.append (to_json)
 
 
