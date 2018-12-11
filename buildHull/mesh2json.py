@@ -96,52 +96,6 @@ class Slicer():
         clipper.Update()
         self.surfaceN = clipper
 
-    def add(self, origin=0.0, isOriginRelative=False, color='k', linestyle='-'):
-        # Plane used to cut
-        plane = vtk.vtkPlane()
-        if isOriginRelative:
-            xmin, xmax, _, _, _, _ = self.bounds
-            origin = origin * (xmax - xmin) + xmin
-        if self.verbose:
-            print(origin)
-        plane.SetOrigin([origin, 0.0, 0.0])
-        plane.SetNormal([1.0, 0.0, 0.0])
-
-        # Cut a slice out of the surface and convert it to a PolyData object
-        cutEdges = vtk.vtkCutter()
-        cutEdges.SetInputConnection(self.surfaceN.GetOutputPort())
-        cutEdges.SetCutFunction(plane)
-        cutEdges.GenerateTrianglesOff()
-        cutEdges.GenerateCutScalarsOff()
-        cutEdges.SetValue(0, 0.0)
-        cutStrips = vtk.vtkStripper()
-        cutStrips.SetInputConnection(cutEdges.GetOutputPort())
-        cutStrips.Update()
-        points = cutStrips.GetOutput().GetPoints()
-        for i in range(points.GetNumberOfPoints()):
-            pt = points.GetPoint(i)
-            points.SetPoint(i, (0.0, pt[1], pt[2]))
-        cutStrips.GetOutput().SetPoints(points)
-        lines = cutStrips.GetOutput().GetLines()
-        points = cutStrips.GetOutput().GetPoints()
-
-        cutPoly = vtk.vtkPolyData()
-        cutPoly.SetPoints(points)
-        cutPoly.SetLines(lines)
-
-        resPoly = cutPoly
-        cells = resPoly.GetLines()
-        cells.InitTraversal()
-        idList = vtk.vtkIdList()
-        while cells.GetNextCell(idList):
-            n = idList.GetNumberOfIds()
-            x, y = [0.0] * n, [0.0] * n
-            for i in range(n):
-                idPoint = idList.GetId(i)
-                pt = resPoly.GetPoint(idPoint)
-                x[i], y[i] = pt[1], pt[2]
-            self.ax1.plot(x, y, color=color, linestyle=linestyle)
-
     def get_slice_bounds(self, origin=0.0, isOriginRelative=False):
         # Plane used to cut
         plane = vtk.vtkPlane()
