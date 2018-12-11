@@ -44,7 +44,7 @@ def read_3D_file(filename):
     if not os.path.exists(filename):
         raise IOError('Input file "{0}" was not found'.format(filename))
     filenameLower = filename.lower()
-    getVtkReader=False
+    getVtkReader = False
     extension = get_filename_extension(filenameLower)
     if extension == 'stl':
         reader = vtk.vtkSTLReader()
@@ -96,7 +96,7 @@ class Slicer():
         clipper.Update()
         self.surfaceN = clipper
 
-    def add(self, origin = 0.0, isOriginRelative=False, color='k', linestyle='-'):
+    def add(self, origin=0.0, isOriginRelative=False, color='k', linestyle='-'):
         # Plane used to cut
         plane = vtk.vtkPlane()
         if isOriginRelative:
@@ -142,7 +142,7 @@ class Slicer():
                 x[i], y[i] = pt[1], pt[2]
             self.ax1.plot(x, y, color=color, linestyle=linestyle)
 
-    def get_slice_bounds(self, origin = 0.0, isOriginRelative=False):
+    def get_slice_bounds(self, origin=0.0, isOriginRelative=False):
         # Plane used to cut
         plane = vtk.vtkPlane()
         if isOriginRelative:
@@ -179,7 +179,7 @@ class Slicer():
 
 
 class RayIntersection():
-    def __init__(self, mesh, tolerance = .001):
+    def __init__(self, mesh, tolerance=.001):
         self.bspTree = vtk.vtkModifiedBSPTree()
         self.bspTree.SetDataSet(mesh)
         self.bspTree.BuildLocator()
@@ -385,20 +385,19 @@ def main(cli=None):
         nargs='+', type=float,
         default=[])
 
-
     args = parser.parse_args(cli)
 
     lxx = args.lx
-    if(args.lx==None):
+    if(args.lx == None):
         lxx = []
     extract_n_points_on_slices_of_a_mesh(filename=args.filename,
-        nx=args.nx,
-        ny=args.ny,
-        intersection_direction=args.intersection_direction,
-        output_JSON_filename=args.output,
-        lx=lxx,
-        offset = args.offset
-        )
+                                         nx=args.nx,
+                                         ny=args.ny,
+                                         intersection_direction=args.intersection_direction,
+                                         output_JSON_filename=args.output,
+                                         lx=lxx,
+                                         offset=args.offset
+                                         )
 
 
 if __name__ == "__main__":
