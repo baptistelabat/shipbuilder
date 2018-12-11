@@ -3,7 +3,7 @@
 const ArgumentParser = require('argparse').ArgumentParser;
 const fs = require('fs');
 const exportSTL = require('threejs-export-stl');
-const TEST = require('./js/test.js');
+const Hull = require('./js/hull.js');
 // const VTK = require('vtk.js');
 
 function readInputFile(name) {
@@ -24,7 +24,7 @@ function saveSTL( scene, name ){
 function main(filename){
 	
 	const json = readInputFile(filename);
-	const mesh = TEST.Hull.buildHull(json);
+	const mesh = Hull.Hull.buildHull(json);
 	const outfilename=filename.split('.')[0] + '.stl';
 	saveSTL(mesh, outfilename);
 	return 0;
