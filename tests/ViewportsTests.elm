@@ -9,7 +9,6 @@ import Viewports
         , CameraType(..)
         )
 import Expect exposing (..)
-import Json.Encode as Encode
 import Test exposing (..)
 import TestData exposing (..)
 
