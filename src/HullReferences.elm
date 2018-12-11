@@ -2,6 +2,8 @@ module HullReferences
     exposing
         ( HullReferences
         , HullReference
+        , HullSlices
+        , HullSlice
         , viewHullStudioPanel
         , viewHullStudioPanelWithSelection
         )
@@ -18,6 +20,25 @@ type alias HullReferences =
 type alias HullReference =
     { label : String
     , path : String
+    }
+
+
+type alias HullSlices =
+    { length : Float
+    , breadth : Float
+    , mouldedDepth : Float
+    , xmin : Float
+    , ymin : Float
+    , zmin : Float
+    , slices : List HullSlice
+    }
+
+
+type alias HullSlice =
+    { x : Float
+    , zmin : Float
+    , zmax : Float
+    , y : List Float
     }
 
 
