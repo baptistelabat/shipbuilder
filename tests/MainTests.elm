@@ -13,6 +13,7 @@ import Test.Html.Event as Event
 import Test.Html.Selector as Selector
 import TestData exposing (..)
 import HullReferences
+import HullSlices
 import Json.Decode exposing (decodeString, decodeValue)
 import Json.Encode exposing (encode)
 
@@ -1329,24 +1330,24 @@ suite =
         ]
 
 
-testHullSliceEncoding : (HullReferences.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSliceEncoding : (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
 testHullSliceEncoding =
     let
         json : String
         json =
-            case Result.map (encode 0 << HullReferences.hullSlicesEncoder) (decodeString HullReferences.hullSlicesDecoder TestData.hullSliceJson) of
+            case Result.map (encode 0 << HullSlices.encoder) (decodeString HullSlices.decoder TestData.hullSliceJson) of
                 Err e ->
                     e
 
                 Ok s ->
                     s
     in
-        testField HullReferences.hullSlicesDecoder json
+        testField HullSlices.decoder json
 
 
-testHullSliceDecoding : (HullReferences.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSliceDecoding : (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
 testHullSliceDecoding =
-    testField HullReferences.hullSlicesDecoder TestData.hullSliceJson
+    testField HullSlices.decoder TestData.hullSliceJson
 
 
 testField : Json.Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)

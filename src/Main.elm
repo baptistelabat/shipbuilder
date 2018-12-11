@@ -50,6 +50,7 @@ import Http exposing (encodeUri)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import HullSlices exposing (HullSlices)
 import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -610,7 +611,7 @@ restoreSaveInModel model saveFile =
         cleanModel =
             initModel
                 { buildSHA = model.build
-                , hullsJSON = Encode.encode 0 <| HullReferences.hullSlicesDictEncoder model.slices
+                , hullsJSON = Encode.encode 0 <| HullSlices.dictEncoder model.slices
                 }
     in
         case maybeCoordinatesTransform of
@@ -678,7 +679,7 @@ type alias Model =
     , uiState : UiState
     , tags : Tags
     , customProperties : List CustomProperty
-    , slices : Dict String HullReferences.HullSlices
+    , slices : Dict String HullSlices.HullSlices
     }
 
 
@@ -1383,7 +1384,7 @@ initModel flag =
         , slices =
             let
                 cuts =
-                    case Decode.decodeString HullReferences.hullSlicesDictDecoder flag.hullsJSON of
+                    case Decode.decodeString HullSlices.dictDecoder flag.hullsJSON of
                         Ok c ->
                             let
                                 _ =
@@ -2779,7 +2780,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = HullReferences.hullSlicesEncoder hullSlices }
+                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }

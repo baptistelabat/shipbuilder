@@ -1,13 +1,7 @@
 module HullReferences
     exposing
-        ( hullSlicesDecoder
-        , hullSlicesEncoder
-        , hullSlicesDictDecoder
-        , hullSlicesDictEncoder
-        , HullReferences
+        ( HullReferences
         , HullReference
-        , HullSlices
-        , HullSlice
         , viewHullStudioPanel
         , viewHullStudioPanelWithSelection
         )
@@ -29,79 +23,6 @@ type alias HullReference =
     { label : String
     , path : String
     }
-
-
-type alias HullSlices =
-    { length : Float
-    , breadth : Float
-    , mouldedDepth : Float
-    , xmin : Float
-    , ymin : Float
-    , zmin : Float
-    , slices : List HullSlice
-    }
-
-
-type alias HullSlice =
-    { x : Float
-    , zmin : Float
-    , zmax : Float
-    , y : List Float
-    }
-
-
-hullSliceDecoder : Decode.Decoder HullSlice
-hullSliceDecoder =
-    Pipeline.decode HullSlice
-        |> Pipeline.required "x" Decode.float
-        |> Pipeline.required "zmin" Decode.float
-        |> Pipeline.required "zmax" Decode.float
-        |> Pipeline.required "y" (Decode.list Decode.float)
-
-
-hullSlicesDecoder : Decode.Decoder HullSlices
-hullSlicesDecoder =
-    Pipeline.decode HullSlices
-        |> Pipeline.required "length" Decode.float
-        |> Pipeline.required "breadth" Decode.float
-        |> Pipeline.required "mouldedDepth" Decode.float
-        |> Pipeline.required "xmin" Decode.float
-        |> Pipeline.required "ymin" Decode.float
-        |> Pipeline.required "zmin" Decode.float
-        |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
-
-
-hullSlicesDictDecoder : Decode.Decoder (Dict String HullSlices)
-hullSlicesDictDecoder =
-    Decode.dict hullSlicesDecoder
-
-
-hullSlicesDictEncoder : Dict String HullSlices -> Encode.Value
-hullSlicesDictEncoder hullDict =
-    Encode.object <| List.map (\( key, slices ) -> ( key, hullSlicesEncoder slices )) <| Dict.toList hullDict
-
-
-hullSliceEncoder : HullSlice -> Encode.Value
-hullSliceEncoder hullSlice =
-    Encode.object
-        [ ( "x", Encode.float hullSlice.x )
-        , ( "zmin", Encode.float hullSlice.zmin )
-        , ( "zmax", Encode.float hullSlice.zmax )
-        , ( "y", Encode.list <| List.map Encode.float hullSlice.y )
-        ]
-
-
-hullSlicesEncoder : HullSlices -> Encode.Value
-hullSlicesEncoder hullSlices =
-    Encode.object
-        [ ( "length", Encode.float hullSlices.length )
-        , ( "breadth", Encode.float hullSlices.breadth )
-        , ( "mouldedDepth", Encode.float hullSlices.mouldedDepth )
-        , ( "xmin", Encode.float hullSlices.xmin )
-        , ( "ymin", Encode.float hullSlices.ymin )
-        , ( "zmin", Encode.float hullSlices.zmin )
-        , ( "slices", Encode.list <| List.map hullSliceEncoder hullSlices.slices )
-        ]
 
 
 viewHullStudioPanelWithSelection : List String -> (String -> msg) -> msg -> String -> Html msg
