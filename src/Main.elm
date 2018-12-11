@@ -1480,7 +1480,8 @@ encodeAddBlockCommand label =
     Encode.object
         [ ( "label", Encode.string label )
         , ( "color", encodeColor SIRColorPicker.indigo )
-          -- blue
+
+        -- blue
         ]
 
 
@@ -2040,7 +2041,8 @@ updateNoJs msg model =
                                         |> asStringInNumberInput axisFloatInput
                             )
                                 |> (asAxisInPosition axis) position
-                            -- |> UserInput
+
+                        -- |> UserInput
                     }
             in
                 updateBlockInModel updatedBlock model ! []
@@ -3513,7 +3515,8 @@ kpisAsCsv blocks tags =
                         [ toString <| blocksBoundingBoxSize.length
                         , toString <| blocksBoundingBoxSize.width
                         , toString <| blocksBoundingBoxSize.height
-                          -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+
+                        -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
                         , toString <| cog.x
                         , toString <| cog.y
                         , toString <| cog.z
@@ -3525,8 +3528,7 @@ kpisAsCsv blocks tags =
                             kpiSummaryToStringList tags summary
                                 |> flip (++) [ "", "", "", "", "", "" ]
                                 -- We add empty values for the color groups because length, width, height and the center of gravity don't apply
-                                |>
-                                    listToCsvLine
+                                |> listToCsvLine
                         )
                         summaryList
                )
