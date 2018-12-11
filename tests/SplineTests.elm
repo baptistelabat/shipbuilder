@@ -1,18 +1,18 @@
 module SplineTests exposing (suite)
 
 import Expect exposing (..)
-import Spline exposing (Spline)
 import Test exposing (..)
+import Interpolate.Cubic
 
 
-s : Spline
+s : Interpolate.Cubic.Spline
 s =
-    Spline.make 10 16 [ 12, 23, 34, 45, 56, 67, 78 ]
+    Interpolate.Cubic.withRange 10 16 [ 12, 23, 34, 45, 56, 67, 78 ]
 
 
 testSpline : Float -> Float -> (() -> Expect.Expectation)
 testSpline x y =
-    \_ -> Expect.equal y <| Spline.evaluate s x
+    \_ -> Expect.equal y <| Interpolate.Cubic.valueAt x s
 
 
 suite : Test
@@ -20,9 +20,19 @@ suite =
     describe "Splines"
         [ test "Stub" <|
             \_ ->
-                Expect.equal 12 <| Spline.evaluate s 10
+                Expect.equal 12 <| Interpolate.Cubic.valueAt 10 s
         , describe "Should get original values back"
             [ test "11 -> 23" <|
                 testSpline 11 23
+            , test "12 -> 34" <|
+                testSpline 12 34
+            , test "13 -> 45" <|
+                testSpline 13 45
+            , test "14 -> 56" <|
+                testSpline 14 56
+            , test "15 -> 67" <|
+                testSpline 15 67
+            , test "16 -> 78" <|
+                testSpline 16 78
             ]
         ]
