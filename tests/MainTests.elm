@@ -1258,6 +1258,16 @@ suite =
         , describe "Parse JSON slices"
             [ test "Can parse 'length'" <|
                 testHullSlice .length 22.84600067138672
+            , test "Can parse 'breadth'" <|
+                testHullSlice .breadth 6.8935699462890625
+            , test "Can parse 'mouldedDepth'" <|
+                testHullSlice .mouldedDepth 6.83698582649231
+            , test "Can parse 'xmin'" <|
+                testHullSlice .xmin -1
+            , test "Can parse 'ymin'" <|
+                testHullSlice .ymin -3.4467999935150146
+            , test "Can parse 'zmin'" <|
+                testHullSlice .zmin -6.146999835968018
             ]
         ]
 
