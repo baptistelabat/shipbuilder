@@ -17,7 +17,7 @@ def get_filename_extension(filename):
     return os.path.splitext(filename)[1][1:]
 
 
-def create_mesh_grid_as_a_matrix(vx=[0, 1], vy=[2, 3], vz=[4, 5, 6]):
+def create_mesh_grid_as_a_matrix(vx, vy, vz):
     """
     Returns a numpy array containing 3 columns
     (one for X, one for Y & one for Z).
