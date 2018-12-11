@@ -1,6 +1,7 @@
 module HullReferences
     exposing
-        ( HullReferences
+        ( hullSlicesDecoder
+        , HullReferences
         , HullReference
         , HullSlices
         , HullSlice
@@ -11,6 +12,8 @@ module HullReferences
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as Decode
+import Json.Decode.Pipeline as Pipeline
 
 
 type alias HullReferences =
@@ -40,6 +43,27 @@ type alias HullSlice =
     , zmax : Float
     , y : List Float
     }
+
+
+hullSliceDecoder : Decode.Decoder HullSlice
+hullSliceDecoder =
+    Pipeline.decode HullSlice
+        |> Pipeline.required "x" Decode.float
+        |> Pipeline.required "zmin" Decode.float
+        |> Pipeline.required "zmax" Decode.float
+        |> Pipeline.required "y" (Decode.list Decode.float)
+
+
+hullSlicesDecoder : Decode.Decoder HullSlices
+hullSlicesDecoder =
+    Pipeline.decode HullSlices
+        |> Pipeline.required "length" Decode.float
+        |> Pipeline.required "breadth" Decode.float
+        |> Pipeline.required "mouldedDepth" Decode.float
+        |> Pipeline.required "xmin" Decode.float
+        |> Pipeline.required "ymin" Decode.float
+        |> Pipeline.required "zmin" Decode.float
+        |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
 
 
 viewHullStudioPanelWithSelection : HullReferences -> (HullReference -> msg) -> msg -> String -> Html msg

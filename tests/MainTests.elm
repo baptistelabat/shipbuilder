@@ -13,6 +13,7 @@ import Test.Html.Event as Event
 import Test.Html.Selector as Selector
 import TestData exposing (..)
 import HullReferences
+import Json.Decode exposing (decodeString)
 
 
 setView : List Msg -> Html Msg
@@ -1254,4 +1255,14 @@ suite =
                                 (Expect.all [ Query.has [ Selector.text "0" ] ])
                 ]
             ]
+        , describe "Parse JSON slices"
+            [ test "Can parse 'length'" <|
+                testField HullReferences.hullSlicesDecoder TestData.hullSliceJson .length 22.84600067138672
+            ]
         ]
+
+
+testField : Json.Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)
+testField decoder json extractor expectedValue =
+    \() ->
+        Expect.equal (Ok expectedValue) <| Result.map extractor <| (decodeString decoder json)
