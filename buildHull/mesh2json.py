@@ -374,14 +374,26 @@ def main(cli=None):
        help="Number of points per slice", type=int,
        default=10)
     pa("-d", "--intersection_direction",
-       help="We use rays to compute the slices. If you want the rays to come from the \"top\" of the mesh, set this option to z+. Otherwise, the rays will be coming from \"beneath\" the mesh ('z-').", type=str,
+       help="""
+       We use rays to compute the slices. If you want the rays to come from the
+       \"top\" of the mesh, set this option to z+. Otherwise, the rays will be
+       coming from \"beneath\" the mesh ('z-').
+       """, type=str,
        default='z-')
     pa("--offset",
-       help="First slice's x-coordinate is xmin+offset. Last slice is at xmax-offset. Setting this to 0 would result in a cut right at the back of the mesh (i.e. singular).", type=float,
+       help="""
+       First slice's x-coordinate is xmin+offset. Last slice is at xmax-offset.
+       Setting this to 0 would result in a cut right at the back of the mesh
+       (i.e. singular).
+       """, type=float,
        default=1E-5)
 
     pa('--lx',
-        help='Specify the x-coordinate of each cut. If not given (default is an empty list), will sample nx cuts at regular intervals between xmin+offset and xmax-offset',
+        help="""
+        Specify the x-coordinate of each cut. If not given (default is an empty
+        list), will sample nx cuts at regular intervals between xmin+offset and
+        xmax-offset.
+        """,
         nargs='+', type=float,
         default=[])
 
