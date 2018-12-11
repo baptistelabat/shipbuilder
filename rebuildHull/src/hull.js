@@ -26,7 +26,6 @@ var Hull = {
 		slices.forEach(function (slice)
 		{
 			var x = slice['x'];
-			var y = 0;
 			var ys = slice['y'];
 			var zmin_slice = slice['zmin'];
 			var zmax_slice = slice['zmax'];
