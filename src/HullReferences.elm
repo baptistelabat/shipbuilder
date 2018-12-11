@@ -1,4 +1,10 @@
-module HullReferences exposing (HullReferences, HullReference, viewHullStudioPanel, viewHullStudioPanelWithSelection)
+module HullReferences
+    exposing
+        ( HullReferences
+        , HullReference
+        , viewHullStudioPanel
+        , viewHullStudioPanelWithSelection
+        )
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -28,7 +34,8 @@ viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg unselectMsg sele
 viewHullReferencesWithSelection : HullReferences -> (HullReference -> msg) -> msg -> String -> Html msg
 viewHullReferencesWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
     ul [ class "hull-references" ] <|
-        (viewUnselectHullReference True unselectMsg) :: List.map (viewHullReferenceWithSelection referenceSelectionMsg selectedHullReferencePath) hullRefs
+        (viewUnselectHullReference True unselectMsg)
+            :: List.map (viewHullReferenceWithSelection referenceSelectionMsg selectedHullReferencePath) hullRefs
 
 
 viewHullReferenceWithSelection : (HullReference -> msg) -> String -> HullReference -> Html msg
@@ -64,7 +71,8 @@ viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg =
 viewHullReferences : HullReferences -> (HullReference -> msg) -> msg -> Html msg
 viewHullReferences hullRefs referenceSelectionMsg unselectMsg =
     ul [ class "hull-references" ] <|
-        (viewUnselectHullReference False unselectMsg):: List.map (viewHullReference referenceSelectionMsg) hullRefs
+        (viewUnselectHullReference False unselectMsg)
+            :: List.map (viewHullReference referenceSelectionMsg) hullRefs
 
 
 viewHullReference : (HullReference -> msg) -> HullReference -> Html msg
@@ -76,9 +84,10 @@ viewHullReference referenceSelectionMsg ref =
             ]
         ]
 
+
 viewUnselectHullReference : Bool -> msg -> Html msg
 viewUnselectHullReference isAHullSelected unselectMsg =
-    li 
+    li
         (if isAHullSelected then
             [ class "hull-reference"
             , onClick <| unselectMsg
