@@ -75,7 +75,9 @@ type alias JsData =
 
 
 type alias Flag =
-    String
+    { buildSHA : String
+    , hullsJSON : String
+    }
 
 
 main : Program Flag Model Msg
@@ -606,7 +608,10 @@ restoreSaveInModel model saveFile =
 
         cleanModel : Model
         cleanModel =
-            initModel model.build
+            initModel
+                { buildSHA = model.build
+                , hullsJSON = Encode.encode 0 <| HullReferences.hullSlicesDictEncoder model.slices
+                }
     in
         case maybeCoordinatesTransform of
             Just savedCoordinatesTransform ->
@@ -1358,7 +1363,7 @@ initModel flag =
         viewMode =
             HullStudio
     in
-        { build = flag
+        { build = flag.buildSHA
         , currentDate = Date.fromTime 0
         , viewMode = viewMode
         , viewports = viewports
@@ -1375,7 +1380,25 @@ initModel flag =
             }
         , tags = []
         , customProperties = []
-        , slices = Dict.empty
+        , slices =
+            let
+                cuts =
+                    case Decode.decodeString HullReferences.hullSlicesDictDecoder flag.hullsJSON of
+                        Ok c ->
+                            let
+                                _ =
+                                    Debug.log "Decoded JSON" "OK"
+                            in
+                                c
+
+                        Err e ->
+                            let
+                                _ =
+                                    Debug.log "Error decoding JSON" e
+                            in
+                                Dict.empty
+            in
+                cuts
         }
 
 
@@ -1741,7 +1764,7 @@ type ToJsMsg
     | RemoveBlock Block
     | RemoveBlocks (List Block)
     | SelectBlock Block
-    | SelectHullReference HullReference
+    | SelectHullReference String
     | SetSpacingException PartitionType Int String
     | SwitchViewMode ViewMode
     | ToggleBlocksVisibility (List Block) Bool
@@ -2396,7 +2419,7 @@ updateModelToJs msg model =
                 { model | selectedBlocks = model.selectedBlocks ++ [ block.uuid ] }
 
         SelectHullReference hullReference ->
-            { model | selectedHullReference = Just hullReference.path }
+            { model | selectedHullReference = Just hullReference }
 
         UnselectHullReference ->
             { model | selectedHullReference = Nothing }
@@ -2751,7 +2774,12 @@ msg2json model action =
                     { tag = "add-block-to-selection", data = encodeBlock block }
 
         SelectHullReference hullReference ->
-            Just { tag = "load-hull", data = Encode.string hullReference.path }
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just { tag = "load-hull", data = HullReferences.hullSlicesEncoder hullSlices }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3344,14 +3372,14 @@ viewHullStudioPanel model =
     case model.selectedHullReference of
         Just selectedHullReferencePath ->
             HullReferences.viewHullStudioPanelWithSelection
-                hullReferences
+                (Dict.keys model.slices)
                 (ToJs << SelectHullReference)
                 (ToJs <| UnselectHullReference)
                 selectedHullReferencePath
 
         Nothing ->
             HullReferences.viewHullStudioPanel
-                hullReferences
+                (Dict.keys model.slices)
                 (ToJs << SelectHullReference)
                 (ToJs <| UnselectHullReference)
 

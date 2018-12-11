@@ -133,14 +133,14 @@ suite =
         , describe "init"
             [ test "init with initModel" <|
                 \_ ->
-                    init "1.0.0"
+                    init flags
                         |> Tuple.first
                         |> Expect.equal initialModel
             , test "init has side effects" <|
                 \_ ->
                     let
                         ( model, cmd ) =
-                            init "1.0.0"
+                            init { buildSHA = "1.0.0", hullsJSON = "" }
                     in
                         Expect.notEqual cmd Cmd.none
             , test "initCmd is init-three" <|
@@ -549,18 +549,18 @@ suite =
                     , test "None unselected if a hull-reference is selected" <|
                         \_ ->
                             setView
-                                [ ToJs <| SelectHullReference hullRef ]
+                                [ ToJs <| SelectHullReference "anthineas" ]
                                 |> Query.fromHtml
                                 |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-none" ] ]
                                 |> Query.hasNot [ Selector.class "hull-reference__selected" ]
                     , test "Selected HullReference correctly displayed" <|
                         \_ ->
                             setView
-                                [ ToJs <| SelectHullReference hullRef ]
+                                [ ToJs <| SelectHullReference "anthineas" ]
                                 |> Query.fromHtml
                                 |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
                                 |> Query.find [ Selector.class "hull-label" ]
-                                |> Query.has [ Selector.text hullRef.label ]
+                                |> Query.has [ Selector.text "anthineas" ]
                     , test "Clicking a hull reference selects it" <|
                         \_ ->
                             initialView
@@ -568,7 +568,7 @@ suite =
                                 |> Query.findAll [ Selector.class "hull-reference" ]
                                 |> Query.index 1
                                 |> Event.simulate Event.click
-                                |> Event.expect (ToJs <| SelectHullReference hullRef)
+                                |> Event.expect (ToJs <| SelectHullReference "anthineas")
                     ]
             , describe "Partitions" <|
                 [ test "Show/hide partitions triggers the right event" <|
