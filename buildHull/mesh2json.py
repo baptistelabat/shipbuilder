@@ -388,7 +388,7 @@ def main(cli=None):
     args = parser.parse_args(cli)
 
     lxx = args.lx
-    if(args.lx == None):
+    if args.lx is None:
         lxx = []
     extract_n_points_on_slices_of_a_mesh(filename=args.filename,
                                          nx=args.nx,
