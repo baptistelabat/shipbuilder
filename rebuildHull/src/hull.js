@@ -32,13 +32,13 @@ var Hull = {
 			var zs = slice['z'];
 			var y = 0;
 			var ys = slice['y'];
-			var zmin = slice['zmin'];
-			var zmax = slice['zmax'];
-			var dz = (zmax - zmin) / (ny-1);
+			var zmin_slice = slice['zmin'];
+			var zmax_slice = slice['zmax'];
+			var dz = (zmax_slice - zmin_slice) / (ny-1);
 			var i=0;
 			ys.forEach(function (y)
 			{
-				var z = zmin + dz*i;
+				var z = zmin_slice + dz*i;
 				i=i+1;
 				geometry.vertices.push(new THREE.Vector3( x,y,z ));
 			});
