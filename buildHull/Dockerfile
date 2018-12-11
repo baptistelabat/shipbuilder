@@ -16,7 +16,7 @@ RUN pip install \
     vtk
 
 WORKDIR /work
-ADD vtkRayIntersection.py /work
+ADD mesh2json.py /work
 
 
-ENTRYPOINT ["python3", "vtkRayIntersection.py"]
+ENTRYPOINT ["python3", "mesh2json.py"]
