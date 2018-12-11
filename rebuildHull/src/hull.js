@@ -29,7 +29,6 @@ var Hull = {
 		slices.forEach(function (slice)
 		{
 			var x = slice['x'];
-			var zs = slice['z'];
 			var y = 0;
 			var ys = slice['y'];
 			var zmin_slice = slice['zmin'];
