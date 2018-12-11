@@ -673,6 +673,7 @@ type alias Model =
     , uiState : UiState
     , tags : Tags
     , customProperties : List CustomProperty
+    , slices : Dict String HullReferences.HullSlices
     }
 
 
@@ -1374,6 +1375,7 @@ initModel flag =
             }
         , tags = []
         , customProperties = []
+        , slices = Dict.empty
         }
 
 
