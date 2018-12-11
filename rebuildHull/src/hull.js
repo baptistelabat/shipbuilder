@@ -35,17 +35,12 @@ var Hull = {
 			var zmin = slice['zmin'];
 			var zmax = slice['zmax'];
 			var dz = (zmax - zmin) / (ny-1);
-			var z = 0;
-
 			var i=0;
 			ys.forEach(function (y)
 			{
-				//z = zs[i];
-				var z1 = zmin + dz*i;
-				z = z1;
+				var z = zmin + dz*i;
 				i=i+1;
 				geometry.vertices.push(new THREE.Vector3( x,y,z ));
-				//console.log( x.toFixed(2) + ',' + y.toFixed(2) + ',' + z.toFixed(2));
 			});
 		});
 
