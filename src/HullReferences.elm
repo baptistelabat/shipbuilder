@@ -1,6 +1,9 @@
 module HullReferences
     exposing
         ( hullSlicesDecoder
+        , hullSlicesEncoder
+        , hullSlicesDictDecoder
+        , hullSlicesDictEncoder
         , HullReferences
         , HullReference
         , HullSlices
@@ -9,11 +12,13 @@ module HullReferences
         , viewHullStudioPanelWithSelection
         )
 
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
+import Json.Encode as Encode
 
 
 type alias HullReferences =
@@ -64,6 +69,39 @@ hullSlicesDecoder =
         |> Pipeline.required "ymin" Decode.float
         |> Pipeline.required "zmin" Decode.float
         |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
+
+
+hullSlicesDictDecoder : Decode.Decoder (Dict String HullSlices)
+hullSlicesDictDecoder =
+    Decode.dict hullSlicesDecoder
+
+
+hullSlicesDictEncoder : Dict String HullSlices -> Encode.Value
+hullSlicesDictEncoder hullDict =
+    Encode.object <| List.map (\( key, slices ) -> ( key, hullSlicesEncoder slices )) <| Dict.toList hullDict
+
+
+hullSliceEncoder : HullSlice -> Encode.Value
+hullSliceEncoder hullSlice =
+    Encode.object
+        [ ( "x", Encode.float hullSlice.x )
+        , ( "zmin", Encode.float hullSlice.zmin )
+        , ( "zmax", Encode.float hullSlice.zmax )
+        , ( "y", Encode.list <| List.map Encode.float hullSlice.y )
+        ]
+
+
+hullSlicesEncoder : HullSlices -> Encode.Value
+hullSlicesEncoder hullSlices =
+    Encode.object
+        [ ( "length", Encode.float hullSlices.length )
+        , ( "breadth", Encode.float hullSlices.breadth )
+        , ( "mouldedDepth", Encode.float hullSlices.mouldedDepth )
+        , ( "xmin", Encode.float hullSlices.xmin )
+        , ( "ymin", Encode.float hullSlices.ymin )
+        , ( "zmin", Encode.float hullSlices.zmin )
+        , ( "slices", Encode.list <| List.map hullSliceEncoder hullSlices.slices )
+        ]
 
 
 viewHullStudioPanelWithSelection : HullReferences -> (HullReference -> msg) -> msg -> String -> Html msg

@@ -13,7 +13,8 @@ import Test.Html.Event as Event
 import Test.Html.Selector as Selector
 import TestData exposing (..)
 import HullReferences
-import Json.Decode exposing (decodeString)
+import Json.Decode exposing (decodeString, decodeValue)
+import Json.Encode exposing (encode)
 
 
 setView : List Msg -> Html Msg
@@ -1257,25 +1258,60 @@ suite =
             ]
         , describe "Parse JSON slices"
             [ test "Can parse 'length'" <|
-                testHullSlice .length 22.84600067138672
+                testHullSliceDecoding .length 22.84600067138672
             , test "Can parse 'breadth'" <|
-                testHullSlice .breadth 6.8935699462890625
+                testHullSliceDecoding .breadth 6.8935699462890625
             , test "Can parse 'mouldedDepth'" <|
-                testHullSlice .mouldedDepth 6.83698582649231
+                testHullSliceDecoding .mouldedDepth 6.83698582649231
             , test "Can parse 'xmin'" <|
-                testHullSlice .xmin -1
+                testHullSliceDecoding .xmin -1
             , test "Can parse 'ymin'" <|
-                testHullSlice .ymin -3.4467999935150146
+                testHullSliceDecoding .ymin -3.4467999935150146
             , test "Can parse 'zmin'" <|
-                testHullSlice .zmin -6.146999835968018
+                testHullSliceDecoding .zmin -6.146999835968018
             , test "Can parse 'slices/x'" <|
-                testHullSlice (.slices >> List.map .x) [ 0.00437713372412022, 0.1111111111111111 ]
+                testHullSliceDecoding (.slices >> List.map .x) [ 0.00437713372412022, 0.1111111111111111 ]
             , test "Can parse 'slices/zmin'" <|
-                testHullSlice (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
+                testHullSliceDecoding (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
             , test "Can parse 'slices/zmax'" <|
-                testHullSlice (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
+                testHullSliceDecoding (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
             , test "Can parse 'slices/y'" <|
-                testHullSlice (.slices >> List.map .y >> List.head)
+                testHullSliceDecoding (.slices >> List.map .y >> List.head)
+                    (Just
+                        [ 0.964899527258786
+                        , 0.9648943694688346
+                        , 0.9629765202249831
+                        , 0.9592250480632435
+                        , 0.955473575901504
+                        , 0.9502377948034448
+                        , 0.9394176761317832
+                        , 0.9282437133662546
+                        , 0.9102579602794127
+                        , 0.742320749879794
+                        ]
+                    )
+            ]
+        , describe "Encode JSON slices"
+            [ test "Can encode 'length'" <|
+                testHullSliceEncoding .length 22.84600067138672
+            , test "Can encode 'breadth'" <|
+                testHullSliceEncoding .breadth 6.8935699462890625
+            , test "Can encode 'mouldedDepth'" <|
+                testHullSliceEncoding .mouldedDepth 6.83698582649231
+            , test "Can encode 'xmin'" <|
+                testHullSliceEncoding .xmin -1
+            , test "Can encode 'ymin'" <|
+                testHullSliceEncoding .ymin -3.4467999935150146
+            , test "Can encode 'zmin'" <|
+                testHullSliceEncoding .zmin -6.146999835968018
+            , test "Can encode 'slices/x'" <|
+                testHullSliceEncoding (.slices >> List.map .x) [ 0.00437713372412022, 0.1111111111111111 ]
+            , test "Can encode 'slices/zmin'" <|
+                testHullSliceEncoding (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
+            , test "Can encode 'slices/zmax'" <|
+                testHullSliceEncoding (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
+            , test "Can encode 'slices/y'" <|
+                testHullSliceEncoding (.slices >> List.map .y >> List.head)
                     (Just
                         [ 0.964899527258786
                         , 0.9648943694688346
@@ -1293,8 +1329,23 @@ suite =
         ]
 
 
-testHullSlice : (HullReferences.HullSlices -> b) -> b -> (() -> Expect.Expectation)
-testHullSlice =
+testHullSliceEncoding : (HullReferences.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSliceEncoding =
+    let
+        json : String
+        json =
+            case Result.map (encode 0 << HullReferences.hullSlicesEncoder) (decodeString HullReferences.hullSlicesDecoder TestData.hullSliceJson) of
+                Err e ->
+                    e
+
+                Ok s ->
+                    s
+    in
+        testField HullReferences.hullSlicesDecoder json
+
+
+testHullSliceDecoding : (HullReferences.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSliceDecoding =
     testField HullReferences.hullSlicesDecoder TestData.hullSliceJson
 
 
