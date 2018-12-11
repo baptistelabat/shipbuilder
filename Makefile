@@ -16,7 +16,7 @@ json:
 	cd buildHull && make
 	cp buildHull/*.json shipBuilder/assets
 
-shipBuilder/js/elm.js: src/*
+shipBuilder/js/elm.js: src/* tests/*
 	rm -rf elm-stuff/generated-code || true
 	docker build -t shipbuilder-build .
 	docker run -t --rm --name shipbuilder-build -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work shipbuilder-build
