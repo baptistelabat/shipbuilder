@@ -17,5 +17,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Need that exact version of elm-test otherwise it hangs indefinitely on Docker (as per https://github.com/rtfeldman/node-test-runner/issues/219#issuecomment-345037285)
 RUN npm config set unsafe-perm=true && npm install -g elm@0.18.0 elm-test@0.18.12 elm-verify-examples inliner
 
-ENTRYPOINT /sysconfcpus/bin/sysconfcpus -n 2 elm-make --yes --warn src/Main.elm --output shipBuilder/js/elm.js \
- && elm-test
+ENTRYPOINT ["elm"]
