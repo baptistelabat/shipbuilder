@@ -1268,6 +1268,8 @@ suite =
                 testHullSlice .ymin -3.4467999935150146
             , test "Can parse 'zmin'" <|
                 testHullSlice .zmin -6.146999835968018
+            , test "Can parse 'slices/x'" <|
+                testHullSlice (.slices >> List.map .x) [ 0.00437713372412022, 0.1111111111111111 ]
             ]
         ]
 
