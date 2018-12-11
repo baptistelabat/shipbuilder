@@ -1257,9 +1257,14 @@ suite =
             ]
         , describe "Parse JSON slices"
             [ test "Can parse 'length'" <|
-                testField HullReferences.hullSlicesDecoder TestData.hullSliceJson .length 22.84600067138672
+                testHullSlice .length 22.84600067138672
             ]
         ]
+
+
+testHullSlice : (HullReferences.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSlice =
+    testField HullReferences.hullSlicesDecoder TestData.hullSliceJson
 
 
 testField : Json.Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)
