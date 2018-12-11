@@ -16,15 +16,12 @@ var Hull = {
         var zmin = json['zmin'];
 		var slices = json['slices'];
 
-		console.log( 'H: ' + H.toFixed(2));
-		console.log( 'B: ' + B.toFixed(2));
-
 		var geometry = new THREE.Geometry();
 
 		var nx = slices.length;
 		var ny = slices[0]['y'].length;
-		console.log( 'nx: ' + nx.toFixed(0));
-		console.log( 'ny: ' + ny.toFixed(0));
+        var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
+        var symmetric_slices = slices.map(function(slice){slice['y'] = make_symmetric(slice['y']); return slice;});
 
 		slices.forEach(function (slice)
 		{
