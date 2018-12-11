@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all clean
 
 all: anthineas.json OPV.json KCS.json DTMB_5415.json
 
@@ -26,3 +26,6 @@ DTMB_5415.json: ../shipBuilder/assets/DTMB_5415.stl mesh2json.py
 	docker build -t stl2json .
 	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f DTMB_5415.stl -o DTMB_5415.json -v --nx 10 --ny 10 -d y- --offset 0.1
 	rm DTMB_5415.stl
+
+clean:
+	rm *.json
