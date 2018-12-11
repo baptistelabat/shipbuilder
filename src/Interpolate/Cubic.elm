@@ -8,6 +8,7 @@ module Interpolate.Cubic
         , slopeAt
         , concavityAt
         , curveAt
+        , integrate
         )
 
 {-| This library interpolates cubic splines for one-dimensional sets of data.
@@ -18,11 +19,21 @@ is set to zero.
 For more information on the mathematics used, check out
 [this paper.](http://web.archive.org/web/20090408054627/http://online.redwoods.cc.ca.us/instruct/darnold/laproj/Fall98/SkyMeg/Proj.PDF)
 
+
 # Creating splines
+
 @docs withRange, withDelta, Spline
 
+
 # Interpolating
+
 @docs valueAt, slopeAt, concavityAt, curveAt, LocalCurve
+
+
+# Integration
+
+@docs integrate
+
 -}
 
 import Array exposing (Array)
@@ -62,6 +73,45 @@ curveAt =
             }
     in
         evaluate curve
+
+
+{-| Integrates a spline between two bounds
+-}
+integrate : Spline -> Float -> Float -> Float
+integrate (Spline spline) x0 x1 =
+    let
+        n : Int
+        n =
+            Array.length spline.coefficients
+
+        primitive : Float -> Coefficients -> Float
+        primitive x { a, b, c, d } =
+            (a * x ^ 4) / 4 + (b * x ^ 3) / 3 + (c * x ^ 2) / 2 + d * x
+
+        f : ( Int, Coefficients ) -> Float -> Float
+        f ( idx, coeffs ) sum =
+            let
+                a : Float
+                a =
+                    spline.start + (toFloat idx) * spline.dx
+
+                b : Float
+                b =
+                    spline.start + (toFloat <| min n (idx + 1)) * spline.dx
+
+                xmin : Float
+                xmin =
+                    min b <| max a x0
+
+                xmax : Float
+                xmax =
+                    max a <| min b x1
+            in
+                sum + (primitive xmax coeffs) - (primitive xmin coeffs)
+    in
+        spline.coefficients
+            |> Array.toIndexedList
+            |> List.foldl f 0
 
 
 cubic : Float -> Coefficients -> Float
@@ -115,18 +165,24 @@ increasing `x`.
 
 For example, if we have the data
 
-    f(2) = 1
-    f(3) = 5.2
-    f(4) = 3.2
-    f(5) = 0.8
+    f 2 =
+        1
+    f 3 =
+        5.2
+    f 4 =
+        3.2
+    f 5 =
+        0.8
 
 Then we would generate a spline by calling
 
-    fSpline = withRange 2 6 [ 1, 5.2, 3.2, 0.8 ]
+    fSpline =
+        withRange 2 6 [ 1, 5.2, 3.2, 0.8 ]
 
 If there is only one data point, then the spline will be a horizontal line
 passing through that point. If the data is empty, the spline will be zero
 everywhere.
+
 -}
 withRange : Float -> Float -> List Float -> Spline
 withRange start end heights =
@@ -150,8 +206,12 @@ withRange start end heights =
 {-| Same as `withRange`, except instead of passing the endpoint as the
 second argument, you pass the x-distance between data points.
 
-    fSpline = withDelta 2 1 [ 1, 5.2, 3.2, 0.8 ]
+    fSpline =
+        withDelta 2 1 [ 1, 5.2, 3.2, 0.8 ]
+
+
     -- equivalent to withRange 2 6 [ 1, 5.2, 3.2, 0.8 ]
+
 -}
 withDelta : Float -> Float -> List Float -> Spline
 withDelta start dx heights =

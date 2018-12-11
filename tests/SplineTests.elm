@@ -35,4 +35,15 @@ suite =
             , test "16 -> 78" <|
                 testSpline 16 78
             ]
+        , describe "Integrate"
+            [ test "Integrating outside the spline bounds should give 0" <|
+                \_ ->
+                    Expect.equal 0 <| Interpolate.Cubic.integrate s 8 9
+            , test "Integrating within the bounds" <|
+                \_ ->
+                    Expect.equal 127.5 <| Interpolate.Cubic.integrate s 8 11
+            , test "Integrating a bit outside, a bit within the bounds" <|
+                \_ ->
+                    Expect.equal 127.5 <| Interpolate.Cubic.integrate s 10 11
+            ]
         ]

@@ -7,7 +7,6 @@
     "elm-lang/keyboard": "1.0.1",
     "elm-lang/http": "1.0.0",
     "elm-community/list-extra": "7.1.0",
-    "nphollon/interpolate": "3.0.4",
     "elm-lang/svg": "2.0.0",
     "rluiten/elm-date-extra": "9.4.0",
     "NoRedInk/elm-decode-pipeline": "3.0.1",
