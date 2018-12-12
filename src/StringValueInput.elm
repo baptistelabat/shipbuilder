@@ -5,7 +5,7 @@ module StringValueInput
         , addToFloatInput
         , decodeSpacingExceptions
         , floatInputDecoder
-        , numberToNumberInput
+        , fromNumber
         )
 
 import Dict exposing (Dict)
@@ -27,7 +27,7 @@ type alias IntInput =
 
 floatInputDecoder : Decode.Decoder FloatInput
 floatInputDecoder =
-    Decode.map numberToNumberInput Decode.float
+    Decode.map fromNumber Decode.float
 
 
 decodeFloatInput : Decode.Decoder FloatInput
@@ -37,8 +37,8 @@ decodeFloatInput =
         |> Pipeline.required "string" Decode.string
 
 
-numberToNumberInput : a -> { value : a, string : String }
-numberToNumberInput number =
+fromNumber : a -> { value : a, string : String }
+fromNumber number =
     { value = number, string = toString number }
 
 
@@ -49,7 +49,7 @@ decodeSpacingExceptions =
         makeException key value dict =
             case String.toInt key of
                 Ok intKey ->
-                    Dict.insert intKey (numberToNumberInput value) dict
+                    Dict.insert intKey (fromNumber value) dict
 
                 Err message ->
                     -- TODO: handle failure or only ignore ?

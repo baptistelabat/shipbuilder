@@ -317,7 +317,7 @@ decodePartitions =
 decodeDecks : Decode.Decoder Decks
 decodeDecks =
     Pipeline.decode Decks
-        |> Pipeline.required "number" (Decode.map StringValueInput.numberToNumberInput Decode.int)
+        |> Pipeline.required "number" (Decode.map StringValueInput.fromNumber Decode.int)
         |> Pipeline.required "spacing" StringValueInput.floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
         |> Pipeline.optional "spacingExceptions" StringValueInput.decodeSpacingExceptions Dict.empty
@@ -326,7 +326,7 @@ decodeDecks =
 decodeBulkheads : Decode.Decoder Bulkheads
 decodeBulkheads =
     Pipeline.decode Bulkheads
-        |> Pipeline.required "number" (Decode.map StringValueInput.numberToNumberInput Decode.int)
+        |> Pipeline.required "number" (Decode.map StringValueInput.fromNumber Decode.int)
         |> Pipeline.required "spacing" StringValueInput.floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
         |> Pipeline.optional "spacingExceptions" StringValueInput.decodeSpacingExceptions Dict.empty
@@ -652,7 +652,7 @@ type alias Frame =
 
 initFrame : Frame
 initFrame =
-    { x = StringValueInput.numberToNumberInput 0.0
+    { x = StringValueInput.fromNumber 0.0
     , points = Dict.fromList [ ( 0, initFramePoint ), ( 1, initFramePoint ), ( 2, initFramePoint ), ( 3, initFramePoint ), ( 4, initFramePoint ) ]
     }
 
@@ -665,8 +665,8 @@ type alias FramePoint =
 
 initFramePoint : FramePoint
 initFramePoint =
-    { y = StringValueInput.numberToNumberInput 0.0
-    , z = StringValueInput.numberToNumberInput 0.0
+    { y = StringValueInput.fromNumber 0.0
+    , z = StringValueInput.fromNumber 0.0
     }
 
 
@@ -731,8 +731,8 @@ initBlock uuid label color position size =
     , position = position
     , size = size
     , referenceForMass = None
-    , mass = StringValueInput.numberToNumberInput 0.0
-    , density = StringValueInput.numberToNumberInput 0.0
+    , mass = StringValueInput.fromNumber 0.0
+    , density = StringValueInput.fromNumber 0.0
     , visible = True
     , centerOfGravity = initPosition
     }
@@ -829,7 +829,7 @@ type alias Position =
 
 initPosition : Position
 initPosition =
-    { x = StringValueInput.numberToNumberInput 0, y = StringValueInput.numberToNumberInput 0, z = StringValueInput.numberToNumberInput 0 }
+    { x = StringValueInput.fromNumber 0, y = StringValueInput.fromNumber 0, z = StringValueInput.fromNumber 0 }
 
 
 type alias Size =
@@ -1358,20 +1358,20 @@ initModel flag =
 initPartitions : PartitionsData
 initPartitions =
     { decks =
-        { number = StringValueInput.numberToNumberInput 0
-        , spacing = StringValueInput.numberToNumberInput 3.0
+        { number = StringValueInput.fromNumber 0
+        , spacing = StringValueInput.fromNumber 3.0
         , zero =
             { index = 0
-            , position = StringValueInput.numberToNumberInput 0.0
+            , position = StringValueInput.fromNumber 0.0
             }
         , spacingExceptions = Dict.empty
         }
     , bulkheads =
-        { number = StringValueInput.numberToNumberInput 0
-        , spacing = StringValueInput.numberToNumberInput 5.0
+        { number = StringValueInput.fromNumber 0
+        , spacing = StringValueInput.fromNumber 5.0
         , zero =
             { index = 0
-            , position = StringValueInput.numberToNumberInput 0.0
+            , position = StringValueInput.fromNumber 0.0
             }
         , spacingExceptions = Dict.empty
         }
@@ -1590,10 +1590,10 @@ updateBlockMassAndDensity block =
             block
 
         Mass ->
-            { block | density = StringValueInput.numberToNumberInput <| block.mass.value / (computeVolume block) }
+            { block | density = StringValueInput.fromNumber <| block.mass.value / (computeVolume block) }
 
         Density ->
-            { block | mass = StringValueInput.numberToNumberInput <| block.density.value * (computeVolume block) }
+            { block | mass = StringValueInput.fromNumber <| block.density.value * (computeVolume block) }
 
 
 type alias BoundingBox =
@@ -1794,9 +1794,9 @@ updateNoJs msg model =
                 updatedBlock =
                     { block
                         | centerOfGravity =
-                            { x = StringValueInput.numberToNumberInput centerOfVolume.x
-                            , y = StringValueInput.numberToNumberInput centerOfVolume.y
-                            , z = StringValueInput.numberToNumberInput centerOfVolume.z
+                            { x = StringValueInput.fromNumber centerOfVolume.x
+                            , y = StringValueInput.fromNumber centerOfVolume.y
+                            , z = StringValueInput.fromNumber centerOfVolume.z
                             }
                     }
             in
@@ -2156,7 +2156,7 @@ updateFromJs jsmsg model =
                                 | partitions =
                                     updatePartition <|
                                         asZeroInPartition (partition model) <|
-                                            flip asPositionInPartitionZero (StringValueInput.numberToNumberInput position) <|
+                                            flip asPositionInPartitionZero (StringValueInput.fromNumber position) <|
                                                 asIndexInPartitionZero (.zero <| partition model) index
                                 , viewMode = Partitioning PropertiesEdition
                             }
@@ -2802,7 +2802,7 @@ msg2json model action =
                             , data =
                                 encodeComputedPartitions <|
                                     computePartition
-                                        { partition | number = StringValueInput.numberToNumberInput <| abs value }
+                                        { partition | number = StringValueInput.fromNumber <| abs value }
                             }
 
                     Err error ->
@@ -2825,7 +2825,7 @@ msg2json model action =
                             , data =
                                 encodeComputedPartitions <|
                                     computePartition
-                                        { partition | spacing = StringValueInput.numberToNumberInput <| abs value }
+                                        { partition | spacing = StringValueInput.fromNumber <| abs value }
                             }
 
                     Err error ->
@@ -2850,7 +2850,7 @@ msg2json model action =
                                     computePartition <|
                                         asZeroInPartition partition <|
                                             asPositionInPartitionZero partition.zero <|
-                                                StringValueInput.numberToNumberInput value
+                                                StringValueInput.fromNumber value
                             }
 
                     Err error ->
