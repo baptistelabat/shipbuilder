@@ -1494,16 +1494,6 @@ updateBlockInModel block model =
     { model | blocks = updateBlockInBlocks block model.blocks }
 
 
-asValueInNumberInput : { value : a, string : String } -> a -> { value : a, string : String }
-asValueInNumberInput numberInput value =
-    { numberInput | value = value }
-
-
-asStringInNumberInput : { value : a, string : String } -> String -> { value : a, string : String }
-asStringInNumberInput numberInput string =
-    { numberInput | string = string }
-
-
 asAxisInPosition : Axis -> (Position -> StringValueInput.FloatInput -> Position)
 asAxisInPosition axis =
     case axis of
@@ -2014,12 +2004,12 @@ updateNoJs msg model =
                             (case String.toFloat input of
                                 Ok value ->
                                     value
-                                        |> asValueInNumberInput axisFloatInput
-                                        |> flip asStringInNumberInput input
+                                        |> StringValueInput.asValueIn axisFloatInput
+                                        |> flip StringValueInput.asStringIn input
 
                                 Err error ->
                                     input
-                                        |> asStringInNumberInput axisFloatInput
+                                        |> StringValueInput.asStringIn axisFloatInput
                             )
                                 |> (asAxisInPosition axis) position
 
@@ -2413,12 +2403,12 @@ updateModelToJs msg model =
                 (case parsedInput of
                     Ok value ->
                         abs value
-                            |> asValueInNumberInput previousException
-                            |> flip asStringInNumberInput input
+                            |> StringValueInput.asValueIn previousException
+                            |> flip StringValueInput.asStringIn input
 
                     Err error ->
                         input
-                            |> asStringInNumberInput previousException
+                            |> StringValueInput.asStringIn previousException
                 )
                     |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
                     |> asSpacingExceptionsInPartition partition
@@ -2466,12 +2456,12 @@ updateModelToJs msg model =
                 (case String.toInt input of
                     Ok value ->
                         abs value
-                            |> asValueInNumberInput (.number <| getPartition model.partitions)
-                            |> flip asStringInNumberInput input
+                            |> StringValueInput.asValueIn (.number <| getPartition model.partitions)
+                            |> flip StringValueInput.asStringIn input
 
                     Err error ->
                         input
-                            |> asStringInNumberInput (.number <| getPartition model.partitions)
+                            |> StringValueInput.asStringIn (.number <| getPartition model.partitions)
                 )
                     |> asNumberInPartition (getPartition model.partitions)
                     |> asPartitionInPartitions model.partitions
@@ -2490,12 +2480,12 @@ updateModelToJs msg model =
                 (case String.toFloat input of
                     Ok value ->
                         abs value
-                            |> asValueInNumberInput (.spacing <| getPartition model.partitions)
-                            |> flip asStringInNumberInput input
+                            |> StringValueInput.asValueIn (.spacing <| getPartition model.partitions)
+                            |> flip StringValueInput.asStringIn input
 
                     Err error ->
                         input
-                            |> asStringInNumberInput (.spacing <| getPartition model.partitions)
+                            |> StringValueInput.asStringIn (.spacing <| getPartition model.partitions)
                 )
                     |> asSpacingInPartition (getPartition model.partitions)
                     |> asPartitionInPartitions model.partitions
@@ -2514,12 +2504,12 @@ updateModelToJs msg model =
                 (case String.toFloat input of
                     Ok value ->
                         value
-                            |> asValueInNumberInput (.spacing <| getPartition model.partitions)
-                            |> flip asStringInNumberInput input
+                            |> StringValueInput.asValueIn (.spacing <| getPartition model.partitions)
+                            |> flip StringValueInput.asStringIn input
 
                     Err error ->
                         input
-                            |> asStringInNumberInput (.spacing <| getPartition model.partitions)
+                            |> StringValueInput.asStringIn (.spacing <| getPartition model.partitions)
                 )
                     |> asPositionInPartitionZero (.zero <| getPartition model.partitions)
                     |> asZeroInPartition (getPartition model.partitions)
@@ -2542,8 +2532,8 @@ updateModelToJs msg model =
                             updatedBlock : Block
                             updatedBlock =
                                 value
-                                    |> asValueInNumberInput axisFloatInput
-                                    |> flip asStringInNumberInput input
+                                    |> StringValueInput.asValueIn axisFloatInput
+                                    |> flip StringValueInput.asStringIn input
                                     |> (asAxisInPosition axis) blockInModel.position
                                     |> asPositionInBlock blockInModel
                         in
@@ -2551,7 +2541,7 @@ updateModelToJs msg model =
 
                     Err error ->
                         input
-                            |> asStringInNumberInput axisFloatInput
+                            |> StringValueInput.asStringIn axisFloatInput
                             |> (asAxisInPosition axis) blockInModel.position
                             |> asPositionInBlock blockInModel
                             |> flip updateBlockInModel model
@@ -2578,8 +2568,8 @@ updateModelToJs msg model =
                             updatedBlock : Block
                             updatedBlock =
                                 newValue
-                                    |> asValueInNumberInput dimensionFloatInput
-                                    |> flip asStringInNumberInput input
+                                    |> StringValueInput.asValueIn dimensionFloatInput
+                                    |> flip StringValueInput.asStringIn input
                                     |> (asDimensionInSize dimension) blockInModel.size
                                     |> asSizeInBlock blockInModel
                                     |> updateBlockMassAndDensity
@@ -2588,7 +2578,7 @@ updateModelToJs msg model =
 
                     Err message ->
                         input
-                            |> asStringInNumberInput dimensionFloatInput
+                            |> StringValueInput.asStringIn dimensionFloatInput
                             |> (asDimensionInSize dimension) blockInModel.size
                             |> asSizeInBlock blockInModel
                             |> flip updateBlockInModel model
@@ -2784,8 +2774,8 @@ msg2json model action =
                             { tag = tag
                             , data =
                                 abs value
-                                    |> asValueInNumberInput previousException
-                                    |> flip asStringInNumberInput input
+                                    |> StringValueInput.asValueIn previousException
+                                    |> flip StringValueInput.asStringIn input
                                     |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
                                     |> asSpacingExceptionsInPartition partition
                                     |> computePartition
@@ -2890,8 +2880,8 @@ msg2json model action =
                         updatedBlock : Block
                         updatedBlock =
                             value
-                                |> asValueInNumberInput axisFloatInput
-                                |> flip asStringInNumberInput input
+                                |> StringValueInput.asValueIn axisFloatInput
+                                |> flip StringValueInput.asStringIn input
                                 |> (asAxisInPosition axis) blockInModel.position
                                 |> asPositionInBlock blockInModel
                     in
@@ -2923,8 +2913,8 @@ msg2json model action =
                         updatedBlock : Block
                         updatedBlock =
                             newValue
-                                |> asValueInNumberInput dimensionFloatInput
-                                |> flip asStringInNumberInput input
+                                |> StringValueInput.asValueIn dimensionFloatInput
+                                |> flip StringValueInput.asStringIn input
                                 |> (asDimensionInSize dimension) blockInModel.size
                                 |> asSizeInBlock blockInModel
                     in

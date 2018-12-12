@@ -3,6 +3,8 @@ module StringValueInput
         ( FloatInput
         , IntInput
         , addToFloatInput
+        , asStringIn
+        , asValueIn
         , decodeSpacingExceptions
         , emptyFloat
         , floatInputDecoder
@@ -90,3 +92,13 @@ addToFloatInput toAdd floatInput =
             (toFloat (round ((floatInput.value + toAdd) * 100))) / 100
     in
         { value = newValue, string = toString newValue }
+
+
+asValueIn : { a | value : b, string : String } -> b -> { a | value : b, string : String }
+asValueIn numberInput value =
+    { numberInput | value = value }
+
+
+asStringIn : { a | value : b, string : String } -> String -> { a | value : b, string : String }
+asStringIn numberInput string =
+    { numberInput | string = string }
