@@ -1271,6 +1271,14 @@ suite =
                                 |> Query.fromHtml
                                 |> Query.findAll [ Selector.id "length-over-all" ]
                                 |> Query.count (Expect.equal 1)
+                    , test "Length over all input triggers SetLengthOverAll" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "length-over-all" ]
+                                |> Query.first
+                                |> Event.simulate (Event.input "123.4")
+                                |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "123.4")
                     ]
             ]
         , describe "Parse JSON slices"

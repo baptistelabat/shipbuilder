@@ -1719,6 +1719,7 @@ type ToJsMsg
     | SelectBlock Block
     | SelectHullReference String
     | SetSpacingException PartitionType Int String
+    | SetLengthOverAll String String
     | SwitchViewMode ViewMode
     | ToggleBlocksVisibility (List Block) Bool
     | TogglePartitions
@@ -2377,6 +2378,9 @@ updateModelToJs msg model =
         UnselectHullReference ->
             { model | selectedHullReference = Nothing }
 
+        SetLengthOverAll _ _ ->
+            model
+
         SetSpacingException partitionType index input ->
             let
                 ( partition, asPartitionInPartitions ) =
@@ -2733,6 +2737,9 @@ msg2json model action =
 
                 Just hullSlices ->
                     Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
+
+        SetLengthOverAll hullReference newLengthOverAll ->
+            Nothing
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3389,6 +3396,7 @@ viewModeller model =
                             [ type_ "text"
                             , id "length-over-all"
                             , value <| toString slices.length
+                            , onInput <| ToJs << SetLengthOverAll hullReference
                             ]
                             []
                         ]
