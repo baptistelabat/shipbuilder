@@ -2,9 +2,9 @@
 
 VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points-at HEAD),$(shell git rev-parse --short=8 HEAD))
 
-all: test json
+all: test
 
-build: shipBuilder/js/elm.js shipBuilder/index.html shipBuilder/js/hull.js
+build: shipBuilder/js/elm.js shipBuilder/index.html
 
 shipBuilder/js/hull.js: rebuildHull/js/hull.js
 	cp rebuildHull/js/hull.js shipBuilder/js/
