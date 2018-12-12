@@ -3048,10 +3048,8 @@ updateBlockLength : Block -> StringValueInput.FloatInput -> Block
 updateBlockLength block floatInput =
     let
         validFloatInput =
-            if floatInput.value <= 0.1 then
-                { value = 0.1, string = "0.1" }
-            else
-                floatInput
+            Basics.max 0.1 floatInput.value
+                |> StringValueInput.fromNumber
     in
         validFloatInput
             |> asLengthInSize block.size
