@@ -1,6 +1,7 @@
 module HullSlices
     exposing
         ( decoder
+        , empty
         , encoder
         , dictDecoder
         , dictEncoder
@@ -23,6 +24,19 @@ type alias HullSlices =
     , zmin : Float
     , slices : List HullSlice
     , draught : Float
+    }
+
+
+empty : HullSlices
+empty =
+    { length = 0
+    , breadth = 0
+    , mouldedDepth = 0
+    , xmin = 0
+    , ymin = 0
+    , zmin = 0
+    , slices = []
+    , draught = 0
     }
 
 
