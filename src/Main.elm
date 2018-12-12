@@ -61,6 +61,7 @@ import Debug
 import Viewports exposing (Viewports, encodeViewports)
 import CoordinatesTransform exposing (CoordinatesTransform)
 import HullReferences exposing (HullReference, HullReferences)
+import StringValueInput
 
 
 port toJs : JsData -> Cmd msg
@@ -282,7 +283,7 @@ syncSizeDecoder =
         |> Pipeline.required "size" decodeSize
 
 
-floatInputDecoder : Decode.Decoder FloatInput
+floatInputDecoder : Decode.Decoder StringValueInput.FloatInput
 floatInputDecoder =
     Decode.map numberToNumberInput Decode.float
 
@@ -303,9 +304,9 @@ decodeSize =
         |> Pipeline.required "z" floatInputDecoder
 
 
-decodeFloatInput : Decode.Decoder FloatInput
+decodeFloatInput : Decode.Decoder StringValueInput.FloatInput
 decodeFloatInput =
-    Pipeline.decode FloatInput
+    Pipeline.decode StringValueInput.FloatInput
         |> Pipeline.required "value" Decode.float
         |> Pipeline.required "string" Decode.string
 
@@ -340,10 +341,10 @@ decodeDecks =
         |> Pipeline.optional "spacingExceptions" decodeSpacingExceptions Dict.empty
 
 
-decodeSpacingExceptions : Decode.Decoder (Dict Int FloatInput)
+decodeSpacingExceptions : Decode.Decoder (Dict Int StringValueInput.FloatInput)
 decodeSpacingExceptions =
     let
-        makeException : String -> Float -> Dict Int FloatInput -> Dict Int FloatInput
+        makeException : String -> Float -> Dict Int StringValueInput.FloatInput -> Dict Int StringValueInput.FloatInput
         makeException key value dict =
             case String.toInt key of
                 Ok intKey ->
@@ -353,7 +354,7 @@ decodeSpacingExceptions =
                     -- TODO: handle failure or only ignore ?
                     dict
 
-        parse : Dict String Float -> Dict Int FloatInput
+        parse : Dict String Float -> Dict Int StringValueInput.FloatInput
         parse dict =
             Dict.foldl makeException Dict.empty dict
     in
@@ -563,7 +564,7 @@ jsMsgToMsg js =
             FromJs <| JSError <| "Unknown tag received from JS: " ++ unknownTag
 
 
-addToFloatInput : Float -> FloatInput -> FloatInput
+addToFloatInput : Float -> StringValueInput.FloatInput -> StringValueInput.FloatInput
 addToFloatInput toAdd floatInput =
     let
         newValue : Float
@@ -693,7 +694,7 @@ initFrames =
 
 
 type alias Frame =
-    { x : FloatInput
+    { x : StringValueInput.FloatInput
     , points : Dict Int FramePoint
     }
 
@@ -706,8 +707,8 @@ initFrame =
 
 
 type alias FramePoint =
-    { y : FloatInput
-    , z : FloatInput
+    { y : StringValueInput.FloatInput
+    , z : StringValueInput.FloatInput
     }
 
 
@@ -764,8 +765,8 @@ type alias Block =
     , position : Position
     , size : Size
     , referenceForMass : ReferenceForMass
-    , mass : FloatInput
-    , density : FloatInput
+    , mass : StringValueInput.FloatInput
+    , density : StringValueInput.FloatInput
     , visible : Bool
     , centerOfGravity : CenterOfGravity
     }
@@ -872,7 +873,7 @@ type ReferenceForMass
 
 
 type alias Position =
-    { x : FloatInput, y : FloatInput, z : FloatInput }
+    { x : StringValueInput.FloatInput, y : StringValueInput.FloatInput, z : StringValueInput.FloatInput }
 
 
 initPosition : Position
@@ -881,7 +882,7 @@ initPosition =
 
 
 type alias Size =
-    { length : FloatInput, width : FloatInput, height : FloatInput }
+    { length : StringValueInput.FloatInput, width : StringValueInput.FloatInput, height : StringValueInput.FloatInput }
 
 
 type alias Blocks =
@@ -938,39 +939,39 @@ type PartitionType
 
 
 type alias Decks =
-    { number : IntInput
-    , spacing : FloatInput
+    { number : StringValueInput.IntInput
+    , spacing : StringValueInput.FloatInput
     , zero : PartitionZero
-    , spacingExceptions : Dict Int FloatInput
+    , spacingExceptions : Dict Int StringValueInput.FloatInput
     }
 
 
 type alias PartitionZero =
     { -- the index of the partition n° 0
       index : Int
-    , position : FloatInput
+    , position : StringValueInput.FloatInput
     }
 
 
 type alias Bulkheads =
-    { number : IntInput
-    , spacing : FloatInput
+    { number : StringValueInput.IntInput
+    , spacing : StringValueInput.FloatInput
     , zero : PartitionZero
-    , spacingExceptions : Dict Int FloatInput
+    , spacingExceptions : Dict Int StringValueInput.FloatInput
     }
 
 
-asSpacingExceptionsInPartition : { a | spacingExceptions : Dict Int FloatInput } -> Dict Int FloatInput -> { a | spacingExceptions : Dict Int FloatInput }
+asSpacingExceptionsInPartition : { a | spacingExceptions : Dict Int StringValueInput.FloatInput } -> Dict Int StringValueInput.FloatInput -> { a | spacingExceptions : Dict Int StringValueInput.FloatInput }
 asSpacingExceptionsInPartition partition newSpacingExceptions =
     { partition | spacingExceptions = newSpacingExceptions }
 
 
-asNumberInPartition : { a | number : IntInput } -> IntInput -> { a | number : IntInput }
+asNumberInPartition : { a | number : StringValueInput.IntInput } -> StringValueInput.IntInput -> { a | number : StringValueInput.IntInput }
 asNumberInPartition partition newNumber =
     { partition | number = newNumber }
 
 
-asSpacingInPartition : { a | spacing : FloatInput } -> FloatInput -> { a | spacing : FloatInput }
+asSpacingInPartition : { a | spacing : StringValueInput.FloatInput } -> StringValueInput.FloatInput -> { a | spacing : StringValueInput.FloatInput }
 asSpacingInPartition partition newSpacing =
     { partition | spacing = newSpacing }
 
@@ -980,7 +981,7 @@ asIndexInPartitionZero zero newIndex =
     { zero | index = newIndex }
 
 
-asPositionInPartitionZero : { a | position : FloatInput } -> FloatInput -> { a | position : FloatInput }
+asPositionInPartitionZero : { a | position : StringValueInput.FloatInput } -> StringValueInput.FloatInput -> { a | position : StringValueInput.FloatInput }
 asPositionInPartitionZero zero newPosition =
     { zero | position = newPosition }
 
@@ -1182,22 +1183,22 @@ computeDecks decks =
         List.indexedMap computeDeck initialDeckList
 
 
-getPartitionOffset : { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Int -> Float
+getPartitionOffset : { a | number : StringValueInput.IntInput, spacing : StringValueInput.FloatInput, zero : PartitionZero, spacingExceptions : Dict Int StringValueInput.FloatInput } -> Int -> Float
 getPartitionOffset partitionSummary index =
     let
         number : Int
         number =
             index - partitionSummary.zero.index
 
-        exceptionsToAccountFor : Int -> Int -> Dict Int FloatInput
+        exceptionsToAccountFor : Int -> Int -> Dict Int StringValueInput.FloatInput
         exceptionsToAccountFor minKey maxKey =
             Dict.filter (\key value -> key < (maxKey + partitionSummary.zero.index) && key >= (minKey + partitionSummary.zero.index)) partitionSummary.spacingExceptions
 
-        total : Dict Int FloatInput -> Float
+        total : Dict Int StringValueInput.FloatInput -> Float
         total exceptions =
             Dict.foldl (\key value currentTotal -> currentTotal + value.value) 0.0 exceptions
 
-        exceptions : Dict Int FloatInput
+        exceptions : Dict Int StringValueInput.FloatInput
         exceptions =
             if number > 0 then
                 exceptionsToAccountFor 0 number
@@ -1550,7 +1551,7 @@ asStringInNumberInput numberInput string =
     { numberInput | string = string }
 
 
-asAxisInPosition : Axis -> (Position -> FloatInput -> Position)
+asAxisInPosition : Axis -> (Position -> StringValueInput.FloatInput -> Position)
 asAxisInPosition axis =
     case axis of
         X ->
@@ -1563,17 +1564,17 @@ asAxisInPosition axis =
             asZInPosition
 
 
-asXInPosition : Position -> FloatInput -> Position
+asXInPosition : Position -> StringValueInput.FloatInput -> Position
 asXInPosition position x =
     { position | x = x }
 
 
-asYInPosition : Position -> FloatInput -> Position
+asYInPosition : Position -> StringValueInput.FloatInput -> Position
 asYInPosition position y =
     { position | y = y }
 
 
-asZInPosition : Position -> FloatInput -> Position
+asZInPosition : Position -> StringValueInput.FloatInput -> Position
 asZInPosition position z =
     { position | z = z }
 
@@ -1583,12 +1584,12 @@ asPositionInBlock block position =
     { block | position = position }
 
 
-asWidthInSize : Size -> FloatInput -> Size
+asWidthInSize : Size -> StringValueInput.FloatInput -> Size
 asWidthInSize size width =
     { size | width = width }
 
 
-asDimensionInSize : Dimension -> Size -> FloatInput -> Size
+asDimensionInSize : Dimension -> Size -> StringValueInput.FloatInput -> Size
 asDimensionInSize dimension =
     case dimension of
         Length ->
@@ -1601,12 +1602,12 @@ asDimensionInSize dimension =
             asHeightInSize
 
 
-asHeightInSize : Size -> FloatInput -> Size
+asHeightInSize : Size -> StringValueInput.FloatInput -> Size
 asHeightInSize size height =
     { size | height = height }
 
 
-asLengthInSize : Size -> FloatInput -> Size
+asLengthInSize : Size -> StringValueInput.FloatInput -> Size
 asLengthInSize size length =
     { size | length = length }
 
@@ -1959,11 +1960,11 @@ updateNoJs msg model =
                     , z = syncNumberInput block.position.z
                     }
 
-                syncedMass : FloatInput
+                syncedMass : StringValueInput.FloatInput
                 syncedMass =
                     syncNumberInput block.mass
 
-                syncedDensity : FloatInput
+                syncedDensity : StringValueInput.FloatInput
                 syncedDensity =
                     syncNumberInput block.density
 
@@ -2048,7 +2049,7 @@ updateNoJs msg model =
                 position =
                     block.centerOfGravity
 
-                axisFloatInput : FloatInput
+                axisFloatInput : StringValueInput.FloatInput
                 axisFloatInput =
                     position |> axisAccessor axis
 
@@ -2312,7 +2313,7 @@ updateModelToJs msg model =
                                 Bulkhead ->
                                     ( model.partitions.bulkheads, asBulkheadsInPartitions )
 
-                        newFloatInput : FloatInput
+                        newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
                             addToFloatInput increment (partition.zero.position)
 
@@ -2340,7 +2341,7 @@ updateModelToJs msg model =
                                 Bulkhead ->
                                     ( model.partitions.bulkheads, asBulkheadsInPartitions )
 
-                        newFloatInput : FloatInput
+                        newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
                             addToFloatInput increment (partition.spacing)
 
@@ -2359,7 +2360,7 @@ updateModelToJs msg model =
             case toIncrement keyEvent of
                 Just increment ->
                     let
-                        newFloatInput : FloatInput
+                        newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
                             addToFloatInput increment (block.position |> axisAccessor axis)
 
@@ -2376,7 +2377,7 @@ updateModelToJs msg model =
             case toIncrement keyEvent of
                 Just increment ->
                     let
-                        newFloatInput : FloatInput
+                        newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
                             addToFloatInput increment (block.size |> dimensionAccessor dimension)
 
@@ -2435,7 +2436,7 @@ updateModelToJs msg model =
                         Bulkhead ->
                             ( model.partitions.bulkheads, asBulkheadsInPartitions )
 
-                previousException : FloatInput
+                previousException : StringValueInput.FloatInput
                 previousException =
                     Maybe.withDefault (.spacing partition) <| Dict.get index <| .spacingExceptions partition
 
@@ -2565,7 +2566,7 @@ updateModelToJs msg model =
 
         UpdatePosition axis block input ->
             let
-                axisFloatInput : FloatInput
+                axisFloatInput : StringValueInput.FloatInput
                 axisFloatInput =
                     block.position |> axisAccessor axis
 
@@ -2671,7 +2672,7 @@ msg2json model action =
                                 Bulkhead ->
                                     ( .partitions >> .bulkheads, asBulkheadsInPartitions, "make-bulkheads", computeBulkheads )
 
-                        newFloatInput : FloatInput
+                        newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
                             addToFloatInput increment (partition model |> .zero >> .position)
 
@@ -2701,7 +2702,7 @@ msg2json model action =
                                 Bulkhead ->
                                     ( model.partitions.bulkheads, asBulkheadsInPartitions, "make-bulkheads", computeBulkheads )
 
-                        newFloatInput : FloatInput
+                        newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
                             addToFloatInput increment (partition.spacing)
 
@@ -2722,7 +2723,7 @@ msg2json model action =
             Maybe.map
                 (\increment ->
                     let
-                        newFloatInput : FloatInput
+                        newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
                             addToFloatInput increment (block.position |> axisAccessor axis)
 
@@ -2739,7 +2740,7 @@ msg2json model action =
             Maybe.map
                 (\increment ->
                     let
-                        newFloatInput : FloatInput
+                        newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
                             addToFloatInput increment (block.size |> dimensionAccessor dimension)
 
@@ -2795,7 +2796,7 @@ msg2json model action =
                         Bulkhead ->
                             ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
 
-                previousException : FloatInput
+                previousException : StringValueInput.FloatInput
                 previousException =
                     Maybe.withDefault (.spacing partition) <| Dict.get index <| .spacingExceptions partition
 
@@ -2908,7 +2909,7 @@ msg2json model action =
             Maybe.map
                 (\value ->
                     let
-                        axisFloatInput : FloatInput
+                        axisFloatInput : StringValueInput.FloatInput
                         axisFloatInput =
                             block.position |> axisAccessor axis
 
@@ -2934,7 +2935,7 @@ msg2json model action =
             Maybe.map
                 (\value ->
                     let
-                        dimensionFloatInput : FloatInput
+                        dimensionFloatInput : StringValueInput.FloatInput
                         dimensionFloatInput =
                             block.size |> dimensionAccessor dimension
 
@@ -3065,7 +3066,7 @@ type alias KeyEvent =
     }
 
 
-updateBlockSizeForDimension : Dimension -> Block -> FloatInput -> Block
+updateBlockSizeForDimension : Dimension -> Block -> StringValueInput.FloatInput -> Block
 updateBlockSizeForDimension dimension block floatInput =
     let
         validFloatInput =
@@ -3079,7 +3080,7 @@ updateBlockSizeForDimension dimension block floatInput =
             |> asSizeInBlock block
 
 
-updateSpacingOfPartition : { a | spacing : FloatInput } -> FloatInput -> { a | spacing : FloatInput }
+updateSpacingOfPartition : { a | spacing : StringValueInput.FloatInput } -> StringValueInput.FloatInput -> { a | spacing : StringValueInput.FloatInput }
 updateSpacingOfPartition partition floatInput =
     let
         validFloatInput =
@@ -3092,7 +3093,7 @@ updateSpacingOfPartition partition floatInput =
             |> asSpacingInPartition partition
 
 
-updateBlockLength : Block -> FloatInput -> Block
+updateBlockLength : Block -> StringValueInput.FloatInput -> Block
 updateBlockLength block floatInput =
     let
         validFloatInput =
@@ -3821,7 +3822,7 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
         ]
 
 
-viewPartitionSpacingDetails : PartitionType -> Bool -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
+viewPartitionSpacingDetails : PartitionType -> Bool -> { a | number : StringValueInput.IntInput, spacing : StringValueInput.FloatInput, zero : PartitionZero, spacingExceptions : Dict Int StringValueInput.FloatInput } -> Html Msg
 viewPartitionSpacingDetails partitionType isDetailsOpen partitionSummary =
     let
         rootClass : String
@@ -3855,10 +3856,10 @@ viewPartitionSpacingDetails partitionType isDetailsOpen partitionSummary =
                 ]
 
 
-viewPartitionSpacingList : PartitionType -> { a | number : IntInput, spacing : FloatInput, zero : PartitionZero, spacingExceptions : Dict Int FloatInput } -> Html Msg
+viewPartitionSpacingList : PartitionType -> { a | number : StringValueInput.IntInput, spacing : StringValueInput.FloatInput, zero : PartitionZero, spacingExceptions : Dict Int StringValueInput.FloatInput } -> Html Msg
 viewPartitionSpacingList partitionType partitionSummary =
     let
-        getPartitionSpacingData : Int -> { number : Int, index : Int, maybeSpacing : Maybe FloatInput }
+        getPartitionSpacingData : Int -> { number : Int, index : Int, maybeSpacing : Maybe StringValueInput.FloatInput }
         getPartitionSpacingData index =
             { number = index - partitionSummary.zero.index
             , index = index
@@ -3873,7 +3874,7 @@ viewPartitionSpacingList partitionType partitionSummary =
         ul [ class "spacing-list" ] <| List.map (viewPartitionSpacingListItem partitionType partitionSummary.spacing.value) partitionList
 
 
-viewPartitionSpacingListItem : PartitionType -> Float -> { number : Int, index : Int, maybeSpacing : Maybe FloatInput } -> Html Msg
+viewPartitionSpacingListItem : PartitionType -> Float -> { number : Int, index : Int, maybeSpacing : Maybe StringValueInput.FloatInput } -> Html Msg
 viewPartitionSpacingListItem partitionType defaultSpacing partitionSpacingData =
     li
         [ class "spacing-item input-group" ]
@@ -4326,7 +4327,7 @@ viewBlockCenterOfGravityUserInput block cog =
     ]
 
 
-viewCenterOfGravityUserInputCoordinate : Axis -> Block -> FloatInput -> Html Msg
+viewCenterOfGravityUserInputCoordinate : Axis -> Block -> StringValueInput.FloatInput -> Html Msg
 viewCenterOfGravityUserInputCoordinate axis block coordinateInput =
     let
         axisLabel : String
@@ -4402,7 +4403,7 @@ viewPositionInputInput axis block axisLabel =
         []
 
 
-updateBlockPositionOnAxis : Axis -> Block -> FloatInput -> Block
+updateBlockPositionOnAxis : Axis -> Block -> StringValueInput.FloatInput -> Block
 updateBlockPositionOnAxis axis block floatInput =
     floatInput
         |> (asAxisInPosition axis) block.position
@@ -4467,18 +4468,6 @@ viewSizeInputInput dimension block dimensionLabel =
         , onKeyDown <| ToJs << KeyDownOnSizeInput dimension block
         ]
         []
-
-
-type alias FloatInput =
-    { value : Float
-    , string : String
-    }
-
-
-type alias IntInput =
-    { value : Int
-    , string : String
-    }
 
 
 viewEditableBlockName : Block -> Html Msg
