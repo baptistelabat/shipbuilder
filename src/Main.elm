@@ -112,8 +112,8 @@ newBlockDecoder =
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
         |> Pipeline.hardcoded None
-        |> Pipeline.hardcoded { value = 0, string = "0" }
-        |> Pipeline.hardcoded { value = 0, string = "0" }
+        |> Pipeline.hardcoded StringValueInput.emptyFloat
+        |> Pipeline.hardcoded StringValueInput.emptyFloat
         |> Pipeline.hardcoded True
         |> Pipeline.hardcoded initPosition
 
@@ -242,8 +242,8 @@ decodeBlock =
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
         |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
-        |> Pipeline.optional "mass" StringValueInput.floatInputDecoder { value = 0, string = "0" }
-        |> Pipeline.optional "density" StringValueInput.floatInputDecoder { value = 0, string = "0" }
+        |> Pipeline.optional "mass" StringValueInput.floatInputDecoder StringValueInput.emptyFloat
+        |> Pipeline.optional "density" StringValueInput.floatInputDecoder StringValueInput.emptyFloat
         |> Pipeline.optional "visible" Decode.bool True
         |> Pipeline.optional "centerOfGravity" decodePosition initPosition
 
