@@ -10,6 +10,7 @@ module StringValueInput
         , floatInputDecoder
         , fromNumber
         , setString
+        , syncNumberInput
         )
 
 import Dict exposing (Dict)
@@ -34,6 +35,11 @@ type alias IntInput =
     { value : Int
     , string : String
     }
+
+
+syncNumberInput : { a | value : b, string : String } -> { a | value : b, string : String }
+syncNumberInput input =
+    { input | string = toString input.value }
 
 
 floatInputDecoder : Decode.Decoder FloatInput

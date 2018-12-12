@@ -1560,11 +1560,6 @@ asSizeInBlock block size =
     { block | size = size }
 
 
-syncNumberInput : { a | value : b, string : String } -> { a | value : b, string : String }
-syncNumberInput input =
-    { input | string = toString input.value }
-
-
 computeVolume : Block -> Float
 computeVolume block =
     let
@@ -1892,31 +1887,31 @@ updateNoJs msg model =
             let
                 syncedSize : Size
                 syncedSize =
-                    { length = syncNumberInput block.size.length
-                    , width = syncNumberInput block.size.width
-                    , height = syncNumberInput block.size.height
+                    { length = StringValueInput.syncNumberInput block.size.length
+                    , width = StringValueInput.syncNumberInput block.size.width
+                    , height = StringValueInput.syncNumberInput block.size.height
                     }
 
                 syncedPosition : Position
                 syncedPosition =
-                    { x = syncNumberInput block.position.x
-                    , y = syncNumberInput block.position.y
-                    , z = syncNumberInput block.position.z
+                    { x = StringValueInput.syncNumberInput block.position.x
+                    , y = StringValueInput.syncNumberInput block.position.y
+                    , z = StringValueInput.syncNumberInput block.position.z
                     }
 
                 syncedMass : StringValueInput.FloatInput
                 syncedMass =
-                    syncNumberInput block.mass
+                    StringValueInput.syncNumberInput block.mass
 
                 syncedDensity : StringValueInput.FloatInput
                 syncedDensity =
-                    syncNumberInput block.density
+                    StringValueInput.syncNumberInput block.density
 
                 syncedCenterOfGravity : CenterOfGravity
                 syncedCenterOfGravity =
-                    { x = syncNumberInput block.centerOfGravity.x
-                    , y = syncNumberInput block.centerOfGravity.y
-                    , z = syncNumberInput block.centerOfGravity.z
+                    { x = StringValueInput.syncNumberInput block.centerOfGravity.x
+                    , y = StringValueInput.syncNumberInput block.centerOfGravity.y
+                    , z = StringValueInput.syncNumberInput block.centerOfGravity.z
                     }
 
                 syncedBlock : Block
@@ -1936,31 +1931,31 @@ updateNoJs msg model =
                 syncedDecks : Decks
                 syncedDecks =
                     { number =
-                        syncNumberInput model.partitions.decks.number
+                        StringValueInput.syncNumberInput model.partitions.decks.number
                     , spacing =
-                        syncNumberInput model.partitions.decks.spacing
+                        StringValueInput.syncNumberInput model.partitions.decks.spacing
                     , zero =
                         { index = model.partitions.decks.zero.index
-                        , position = syncNumberInput model.partitions.decks.zero.position
+                        , position = StringValueInput.syncNumberInput model.partitions.decks.zero.position
                         }
                     , spacingExceptions =
                         -- we want to remove useless exceptions => those equal to the default value
-                        Dict.map (\key input -> syncNumberInput input) model.partitions.decks.spacingExceptions
+                        Dict.map (\key input -> StringValueInput.syncNumberInput input) model.partitions.decks.spacingExceptions
                             |> Dict.filter (\key input -> input.value /= model.partitions.decks.spacing.value)
                     }
 
                 syncedBulkheads : Bulkheads
                 syncedBulkheads =
                     { number =
-                        syncNumberInput model.partitions.bulkheads.number
+                        StringValueInput.syncNumberInput model.partitions.bulkheads.number
                     , spacing =
-                        syncNumberInput model.partitions.bulkheads.spacing
+                        StringValueInput.syncNumberInput model.partitions.bulkheads.spacing
                     , zero =
                         { index = model.partitions.bulkheads.zero.index
-                        , position = syncNumberInput model.partitions.bulkheads.zero.position
+                        , position = StringValueInput.syncNumberInput model.partitions.bulkheads.zero.position
                         }
                     , spacingExceptions =
-                        Dict.map (\key input -> syncNumberInput input) model.partitions.bulkheads.spacingExceptions
+                        Dict.map (\key input -> StringValueInput.syncNumberInput input) model.partitions.bulkheads.spacingExceptions
                             |> Dict.filter (\key input -> input.value /= model.partitions.bulkheads.spacing.value)
                     }
 
