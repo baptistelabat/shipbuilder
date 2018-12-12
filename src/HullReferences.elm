@@ -6,13 +6,9 @@ module HullReferences
         , viewHullStudioPanelWithSelection
         )
 
-import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Json.Decode as Decode
-import Json.Decode.Pipeline as Pipeline
-import Json.Encode as Encode
 
 
 type alias HullReferences =
