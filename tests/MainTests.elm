@@ -1319,6 +1319,19 @@ suite =
                                     |> Dict.get "anthineas"
                                     |> Maybe.map (.length >> .value)
                                 )
+                    , test "SetLengthOverAll is properly sent to JS" <|
+                        \_ ->
+                            let
+                                msg =
+                                    SetLengthOverAll "anthineas" "123.4"
+                            in
+                                Expect.equal
+                                    (toJS [ ToJs msg ] msg (Json.Decode.map Just HullSlices.decoder))
+                                <|
+                                    Just
+                                        { tag = "load-hull"
+                                        , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
+                                        }
                     ]
             ]
         , describe "Parse JSON slices"

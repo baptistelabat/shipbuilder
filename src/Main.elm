@@ -2745,8 +2745,13 @@ msg2json model action =
                 Just hullSlices ->
                     Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
 
-        SetLengthOverAll hullReference newLengthOverAll ->
-            Nothing
+        SetLengthOverAll hullReference _ ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
