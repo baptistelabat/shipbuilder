@@ -1257,6 +1257,21 @@ suite =
                             |> Query.each
                                 (Expect.all [ Query.has [ Selector.text "0" ] ])
                 ]
+            , describe "Modeller" <|
+                let
+                    modellerView =
+                        setView
+                            [ ToJs <| SelectHullReference "anthineas"
+                            , ToJs <| SwitchViewMode <| Modeller
+                            ]
+                in
+                    [ test "Length over all input is present" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "length-over-all" ]
+                                |> Query.count (Expect.equal 1)
+                    ]
             ]
         , describe "Parse JSON slices"
             [ test "Can parse 'length'" <|

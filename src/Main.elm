@@ -3375,12 +3375,34 @@ viewPartitioning partitioningView model =
 
 viewModeller : Model -> Html Msg
 viewModeller model =
-    div
-        [ class "panel modeller-panel" ]
-        [ h2
-            [ class "modeller-panel-title" ]
-            [ text "Modeller" ]
-        ]
+    let
+        viewSlices : ( String, HullSlices ) -> Maybe (Html Msg)
+        viewSlices ( hullReference, slices ) =
+            if model.selectedHullReference == Just hullReference then
+                Just <|
+                    div
+                        [ class "input-group" ]
+                        [ label
+                            [ for "length-over-all" ]
+                            [ text "Length over all (m)" ]
+                        , input
+                            [ type_ "text"
+                            , id "length-over-all"
+                            , value <| toString slices.length
+                            ]
+                            []
+                        ]
+            else
+                Nothing
+    in
+        div
+            [ class "panel modeller-panel" ]
+            ([ h2
+                [ class "modeller-panel-title" ]
+                [ text "Modeller" ]
+             ]
+                ++ (model.slices |> Dict.toList |> List.filterMap viewSlices)
+            )
 
 
 viewKpiStudio : Model -> Html Msg
