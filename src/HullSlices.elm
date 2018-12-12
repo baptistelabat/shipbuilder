@@ -22,6 +22,7 @@ type alias HullSlices =
     , ymin : Float
     , zmin : Float
     , slices : List HullSlice
+    , draught : Float
     }
 
 
@@ -44,14 +45,21 @@ hullSliceDecoder =
 
 decoder : Decode.Decoder HullSlices
 decoder =
-    Pipeline.decode HullSlices
-        |> Pipeline.required "length" Decode.float
-        |> Pipeline.required "breadth" Decode.float
-        |> Pipeline.required "mouldedDepth" Decode.float
-        |> Pipeline.required "xmin" Decode.float
-        |> Pipeline.required "ymin" Decode.float
-        |> Pipeline.required "zmin" Decode.float
-        |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
+    let
+        helper : Float -> Decode.Decoder HullSlices
+        helper mouldedDepth =
+            Pipeline.decode HullSlices
+                |> Pipeline.required "length" Decode.float
+                |> Pipeline.required "breadth" Decode.float
+                |> Pipeline.hardcoded mouldedDepth
+                |> Pipeline.required "xmin" Decode.float
+                |> Pipeline.required "ymin" Decode.float
+                |> Pipeline.required "zmin" Decode.float
+                |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
+                |> Pipeline.hardcoded (mouldedDepth / 5)
+    in
+        Decode.field "mouldedDepth" Decode.float
+            |> Decode.andThen helper
 
 
 dictDecoder : Decode.Decoder (Dict String HullSlices)
