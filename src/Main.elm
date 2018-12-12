@@ -3030,10 +3030,8 @@ updateBlockSizeForDimension : Dimension -> Block -> StringValueInput.FloatInput 
 updateBlockSizeForDimension dimension block floatInput =
     let
         validFloatInput =
-            if floatInput.value <= 0.1 then
-                { value = 0.1, string = "0.1" }
-            else
-                floatInput
+            Basics.max 0.1 floatInput.value
+                |> StringValueInput.fromNumber
     in
         validFloatInput
             |> (asDimensionInSize dimension) block.size
@@ -3044,10 +3042,8 @@ updateSpacingOfPartition : { a | spacing : StringValueInput.FloatInput } -> Stri
 updateSpacingOfPartition partition floatInput =
     let
         validFloatInput =
-            if floatInput.value < 0 then
-                { value = 0, string = "0" }
-            else
-                floatInput
+            Basics.max 0 floatInput.value
+                |> StringValueInput.fromNumber
     in
         validFloatInput
             |> asSpacingInPartition partition
