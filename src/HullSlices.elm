@@ -6,6 +6,7 @@ module HullSlices
         , dictDecoder
         , dictEncoder
         , setBreadth
+        , setDraught
         , setLengthOverAll
         , HullSlices
         , HullSlice
@@ -119,3 +120,8 @@ setLengthOverAll loa hullSlices =
 setBreadth : Float -> HullSlices -> HullSlices
 setBreadth breadth hullSlices =
     { hullSlices | breadth = breadth }
+
+
+setDraught : Float -> HullSlices -> HullSlices
+setDraught draught hullSlices =
+    { hullSlices | draught = draught }

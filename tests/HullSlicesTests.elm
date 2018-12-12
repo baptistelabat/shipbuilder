@@ -62,5 +62,8 @@ suite =
             , fuzz Fuzz.float "Can set breadth" <|
                 \breadth ->
                     Expect.equal { hullSlices | breadth = breadth } (HullSlices.setBreadth breadth hullSlices)
+            , fuzz Fuzz.float "Can set draught" <|
+                \draught ->
+                    Expect.equal { hullSlices | draught = draught } (HullSlices.setDraught draught hullSlices)
             ]
         ]
