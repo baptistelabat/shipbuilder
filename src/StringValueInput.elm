@@ -97,7 +97,7 @@ addToFloatInput toAdd floatInput =
             -- rounded to .2f
             (toFloat (round ((floatInput.value + toAdd) * 100))) / 100
     in
-        { value = newValue, string = toString newValue }
+        { floatInput | value = newValue, string = toString newValue }
 
 
 asValueIn : { a | value : b, string : String } -> b -> { a | value : b, string : String }
