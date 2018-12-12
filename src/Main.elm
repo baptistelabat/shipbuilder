@@ -2097,7 +2097,7 @@ updateToJs msg model =
         updatedModel =
             updateModelToJs msg model
     in
-        ( updatedModel, sendCmdToJs model msg )
+        ( updatedModel, sendCmdToJs updatedModel msg )
 
 
 updateFromJs : FromJsMsg -> Model -> ( Model, Cmd Msg )
