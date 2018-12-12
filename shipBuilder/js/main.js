@@ -446,9 +446,6 @@ let loadHull = function (json) {
         hull.baseColor = hullColor;
         hull.sbType = "hull";
         scene.add(hull);
-
-        // send the hull geometry to Elm in case we want to manipulate it later (jumbo etc)
-        sendToElm("loaded-hull", { uuid: hull.uuid, faces: hull.geometry.faces, vertices: shipVertices });
 }
 
 // move an object according to the changes made in Elm
