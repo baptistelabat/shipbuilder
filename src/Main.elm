@@ -1560,7 +1560,7 @@ asSizeInBlock block size =
     { block | size = size }
 
 
-syncNumberInput : { value : a, string : String } -> { value : a, string : String }
+syncNumberInput : { a | value : b, string : String } -> { a | value : b, string : String }
 syncNumberInput input =
     { input | string = toString input.value }
 
