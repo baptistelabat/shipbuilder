@@ -3400,7 +3400,7 @@ viewModeller model =
                         , input
                             [ type_ "text"
                             , id "length-over-all"
-                            , value <| toString slices.length
+                            , value slices.length.string
                             , onInput <| ToJs << SetLengthOverAll hullReference
                             ]
                             []

@@ -1271,7 +1271,8 @@ suite =
                             modellerView
                                 |> Query.fromHtml
                                 |> Query.findAll [ Selector.id "length-over-all" ]
-                                |> Query.count (Expect.equal 1)
+                                |> Query.first
+                                |> Query.has [ Selector.attribute <| Attributes.value "22.84600067138672" ]
                     , test "Length over all input triggers SetLengthOverAll" <|
                         \_ ->
                             modellerView
