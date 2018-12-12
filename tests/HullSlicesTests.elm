@@ -1,4 +1,4 @@
-module SplineTests exposing (suite)
+module HullSlicesTests exposing (suite)
 
 import Expect exposing (..)
 import Test exposing (..)
