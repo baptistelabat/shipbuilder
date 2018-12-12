@@ -2,10 +2,12 @@ module StringValueInput
     exposing
         ( FloatInput
         , IntInput
+        , decodeSpacingExceptions
         , floatInputDecoder
         , numberToNumberInput
         )
 
+import Dict exposing (Dict)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 
@@ -37,3 +39,23 @@ decodeFloatInput =
 numberToNumberInput : a -> { value : a, string : String }
 numberToNumberInput number =
     { value = number, string = toString number }
+
+
+decodeSpacingExceptions : Decode.Decoder (Dict Int FloatInput)
+decodeSpacingExceptions =
+    let
+        makeException : String -> Float -> Dict Int FloatInput -> Dict Int FloatInput
+        makeException key value dict =
+            case String.toInt key of
+                Ok intKey ->
+                    Dict.insert intKey (numberToNumberInput value) dict
+
+                Err message ->
+                    -- TODO: handle failure or only ignore ?
+                    dict
+
+        parse : Dict String Float -> Dict Int FloatInput
+        parse dict =
+            Dict.foldl makeException Dict.empty dict
+    in
+        Decode.map parse (Decode.dict Decode.float)
