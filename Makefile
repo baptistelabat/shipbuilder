@@ -2,7 +2,7 @@
 
 VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points-at HEAD),$(shell git rev-parse --short=8 HEAD))
 
-all: test
+all: build test
 
 build: shipBuilder/js/elm.js shipBuilder/index.html
 
@@ -21,7 +21,7 @@ shipBuilder/js/elm.js: src/* tests/*
 	docker build -t elm .
 	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm make --yes --warn src/Main.elm --output shipBuilder/js/elm.js
 
-test: build
+test:
 	docker build -t elm .
 	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm test --skip-install --verbose
 

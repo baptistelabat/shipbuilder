@@ -1,1 +1,1 @@
-cmd: elm test --skip-install --verbose
+cmd: make test
