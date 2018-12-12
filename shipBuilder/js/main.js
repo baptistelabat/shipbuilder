@@ -440,7 +440,7 @@ let loadHull = function (json) {
         geometry.vertices = shipVertices.map(vertex => {
             return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
         });
-        const material = new THREE.MeshBasicMaterial({ color: hullColor });
+        const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
         const hull = new THREE.Mesh(geometry, material);
 
         hull.baseColor = hullColor;
