@@ -1,8 +1,12 @@
 module HullSlicesTests exposing (suite)
 
 import Expect exposing (..)
-import Test exposing (..)
+import Fuzz
+import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
+import Json.Decode as Decode
+import Test exposing (..)
+import TestData
 
 
 s : Interpolate.Cubic.Spline
@@ -15,10 +19,15 @@ testSpline x y =
     \_ -> Expect.equal y <| Interpolate.Cubic.valueAt x s
 
 
+hullSlices : HullSlices
+hullSlices =
+    Result.withDefault HullSlices.empty (Decode.decodeString HullSlices.decoder TestData.hullSliceJson)
+
+
 suite : Test
 suite =
-    describe "Splines"
-        [ test "Stub" <|
+    describe "Hull slices"
+        [ test "Interpolate" <|
             \_ ->
                 Expect.equal 12 <| Interpolate.Cubic.valueAt 10 s
         , describe "Should get original values back"
@@ -45,5 +54,10 @@ suite =
             , test "Integrating a bit outside, a bit within the bounds" <|
                 \_ ->
                     Expect.equal 127.5 <| Interpolate.Cubic.integrate s 10 11
+            ]
+        , describe "Setters"
+            [ fuzz Fuzz.float "Can set length over all" <|
+                \loa ->
+                    Expect.equal { hullSlices | length = loa } (HullSlices.setLengthOverAll loa hullSlices)
             ]
         ]

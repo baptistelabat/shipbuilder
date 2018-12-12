@@ -5,6 +5,7 @@ module HullSlices
         , encoder
         , dictDecoder
         , dictEncoder
+        , setLengthOverAll
         , HullSlices
         , HullSlice
         )
@@ -107,3 +108,8 @@ encoder hullSlices =
         , ( "zmin", Encode.float hullSlices.zmin )
         , ( "slices", Encode.list <| List.map hullSliceEncoder hullSlices.slices )
         ]
+
+
+setLengthOverAll : Float -> HullSlices -> HullSlices
+setLengthOverAll loa hullSlices =
+    { hullSlices | length = loa }
