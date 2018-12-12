@@ -1700,6 +1700,7 @@ type ToJsMsg
     | KeyDownOnSizeInput Dimension Block KeyEvent
     | KeyDownOnPartitionPositionInput PartitionType KeyEvent
     | KeyDownOnPartitionSpacingInput PartitionType KeyEvent
+    | KeyDownOnLengthOverAllInput String Float KeyEvent
     | OpenSaveFile
     | RemoveBlock Block
     | RemoveBlocks (List Block)
@@ -2268,6 +2269,19 @@ updateModelToJs msg model =
                 Nothing ->
                     model
 
+        KeyDownOnLengthOverAllInput hullReference originalValue keyEvent ->
+            case toIncrement keyEvent of
+                Nothing ->
+                    model
+
+                Just increment ->
+                    let
+                        updateSlice : HullSlices -> HullSlices
+                        updateSlice =
+                            HullSlices.setLengthOverAll <| toString <| originalValue + increment
+                    in
+                        { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
+
         KeyDownOnPartitionSpacingInput partitionType keyEvent ->
             case toIncrement keyEvent of
                 Just increment ->
@@ -2731,6 +2745,14 @@ msg2json model action =
                     Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
 
         SetLengthOverAll hullReference _ ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
+
+        KeyDownOnLengthOverAllInput hullReference _ _ ->
             case Dict.get hullReference model.slices of
                 Nothing ->
                     Nothing
@@ -3389,6 +3411,7 @@ viewModeller model =
                             [ type_ "text"
                             , id "length-over-all"
                             , value slices.length.string
+                            , onKeyDown <| ToJs << KeyDownOnLengthOverAllInput hullReference slices.length.value
                             , onInput <| ToJs << SetLengthOverAll hullReference
                             ]
                             []

@@ -16,7 +16,7 @@ import TestData exposing (..)
 import HullReferences
 import HullSlices
 import Json.Decode exposing (decodeString, decodeValue, Decoder)
-import Json.Encode exposing (encode)
+import Json.Encode as Encode exposing (encode)
 import StringValueInput
 
 
@@ -34,6 +34,48 @@ type alias ParsedJSData a =
     { tag : String
     , data : a
     }
+
+
+keyDown : Int -> ( Bool, Bool, Bool ) -> ( String, Encode.Value )
+keyDown key ( shift, alt, ctrl ) =
+    ( "keydown"
+    , Encode.object
+        [ ( "keyCode", Encode.int key )
+        , ( "shiftKey", Encode.bool shift )
+        , ( "altKey", Encode.bool alt )
+        , ( "ctrlKey", Encode.bool ctrl )
+        ]
+    )
+
+
+downArrow : ( Bool, Bool, Bool ) -> ( String, Encode.Value )
+downArrow =
+    keyDown 40
+
+
+upArrow : ( Bool, Bool, Bool ) -> ( String, Encode.Value )
+upArrow =
+    keyDown 38
+
+
+press : ( Bool, Bool, Bool )
+press =
+    ( False, False, False )
+
+
+shift : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
+shift ( _, alt, ctrl ) =
+    ( True, alt, ctrl )
+
+
+alt : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
+alt ( shift, _, ctrl ) =
+    ( shift, True, ctrl )
+
+
+ctrl : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
+ctrl ( shift, alt, _ ) =
+    ( shift, alt, True )
 
 
 toJS : List Msg -> ToJsMsg -> Decoder a -> Maybe (ParsedJSData a)
@@ -1332,6 +1374,22 @@ suite =
                                         { tag = "load-hull"
                                         , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
                                         }
+                    , test "Can press down arrow key to decrement length over all" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "length-over-all" ]
+                                |> Query.first
+                                |> Event.simulate (press |> downArrow)
+                                |> Event.expect (ToJs <| KeyDownOnLengthOverAllInput "anthineas" 22.84600067138672 { key = 40, shift = False, alt = False, ctrl = False })
+                    , test "Can press shift down arrow key to decrement length over all" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "length-over-all" ]
+                                |> Query.first
+                                |> Event.simulate (press |> shift |> downArrow)
+                                |> Event.expect (ToJs <| KeyDownOnLengthOverAllInput "anthineas" 22.84600067138672 { key = 40, shift = True, alt = False, ctrl = False })
                     ]
             ]
         , describe "Parse JSON slices"
