@@ -2,6 +2,7 @@ module StringValueInput
     exposing
         ( FloatInput
         , IntInput
+        , addToFloatInput
         , decodeSpacingExceptions
         , floatInputDecoder
         , numberToNumberInput
@@ -59,3 +60,14 @@ decodeSpacingExceptions =
             Dict.foldl makeException Dict.empty dict
     in
         Decode.map parse (Decode.dict Decode.float)
+
+
+addToFloatInput : Float -> FloatInput -> FloatInput
+addToFloatInput toAdd floatInput =
+    let
+        newValue : Float
+        newValue =
+            -- rounded to .2f
+            (toFloat (round ((floatInput.value + toAdd) * 100))) / 100
+    in
+        { value = newValue, string = toString newValue }

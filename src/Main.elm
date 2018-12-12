@@ -526,17 +526,6 @@ jsMsgToMsg js =
             FromJs <| JSError <| "Unknown tag received from JS: " ++ unknownTag
 
 
-addToFloatInput : Float -> StringValueInput.FloatInput -> StringValueInput.FloatInput
-addToFloatInput toAdd floatInput =
-    let
-        newValue : Float
-        newValue =
-            -- rounded to .2f
-            (toFloat (round ((floatInput.value + toAdd) * 100))) / 100
-    in
-        { value = newValue, string = toString newValue }
-
-
 type FromJsMsg
     = AddToSelection String
     | RemoveFromSelection String
@@ -2277,7 +2266,7 @@ updateModelToJs msg model =
 
                         newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
-                            addToFloatInput increment (partition.zero.position)
+                            StringValueInput.addToFloatInput increment (partition.zero.position)
 
                         updatedPartitions : PartitionsData
                         updatedPartitions =
@@ -2305,7 +2294,7 @@ updateModelToJs msg model =
 
                         newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
-                            addToFloatInput increment (partition.spacing)
+                            StringValueInput.addToFloatInput increment (partition.spacing)
 
                         updatedPartitions : PartitionsData
                         updatedPartitions =
@@ -2324,7 +2313,7 @@ updateModelToJs msg model =
                     let
                         newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
-                            addToFloatInput increment (block.position |> axisAccessor axis)
+                            StringValueInput.addToFloatInput increment (block.position |> axisAccessor axis)
 
                         updatedBlock : Block
                         updatedBlock =
@@ -2341,7 +2330,7 @@ updateModelToJs msg model =
                     let
                         newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
-                            addToFloatInput increment (block.size |> dimensionAccessor dimension)
+                            StringValueInput.addToFloatInput increment (block.size |> dimensionAccessor dimension)
 
                         updatedBlock : Block
                         updatedBlock =
@@ -2636,7 +2625,7 @@ msg2json model action =
 
                         newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
-                            addToFloatInput increment (partition model |> .zero >> .position)
+                            StringValueInput.addToFloatInput increment (partition model |> .zero >> .position)
 
                         updatedPartition =
                             newFloatInput
@@ -2666,7 +2655,7 @@ msg2json model action =
 
                         newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
-                            addToFloatInput increment (partition.spacing)
+                            StringValueInput.addToFloatInput increment (partition.spacing)
 
                         updatedPartition =
                             newFloatInput
@@ -2687,7 +2676,7 @@ msg2json model action =
                     let
                         newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
-                            addToFloatInput increment (block.position |> axisAccessor axis)
+                            StringValueInput.addToFloatInput increment (block.position |> axisAccessor axis)
 
                         updatedBlock : Block
                         updatedBlock =
@@ -2704,7 +2693,7 @@ msg2json model action =
                     let
                         newFloatInput : StringValueInput.FloatInput
                         newFloatInput =
-                            addToFloatInput increment (block.size |> dimensionAccessor dimension)
+                            StringValueInput.addToFloatInput increment (block.size |> dimensionAccessor dimension)
 
                         updatedBlock : Block
                         updatedBlock =
