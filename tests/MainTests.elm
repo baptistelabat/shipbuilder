@@ -16,6 +16,7 @@ import HullReferences
 import HullSlices
 import Json.Decode exposing (decodeString, decodeValue)
 import Json.Encode exposing (encode)
+import StringValueInput
 
 
 setView : List Msg -> Html Msg
@@ -312,15 +313,15 @@ suite =
 
                     updateX : Block -> Block
                     updateX block =
-                        { block | position = numberToNumberInput 1.0 |> asXInPosition block.position }
+                        { block | position = StringValueInput.numberToNumberInput 1.0 |> asXInPosition block.position }
 
                     updateY : Block -> Block
                     updateY block =
-                        { block | position = numberToNumberInput 2.0 |> asYInPosition block.position }
+                        { block | position = StringValueInput.numberToNumberInput 2.0 |> asYInPosition block.position }
 
                     updateZ : Block -> Block
                     updateZ block =
-                        { block | position = numberToNumberInput 3.3 |> asZInPosition block.position }
+                        { block | position = StringValueInput.numberToNumberInput 3.3 |> asZInPosition block.position }
 
                     updateXInAFromElm : Model
                     updateXInAFromElm =
@@ -380,15 +381,15 @@ suite =
 
                     updateLength : Block -> Block
                     updateLength block =
-                        { block | size = numberToNumberInput 20 |> asLengthInSize block.size }
+                        { block | size = StringValueInput.numberToNumberInput 20 |> asLengthInSize block.size }
 
                     updateWidth : Block -> Block
                     updateWidth block =
-                        { block | size = numberToNumberInput 1 |> asWidthInSize block.size }
+                        { block | size = StringValueInput.numberToNumberInput 1 |> asWidthInSize block.size }
 
                     updateHeight : Block -> Block
                     updateHeight block =
-                        { block | size = numberToNumberInput 150.8 |> asHeightInSize block.size }
+                        { block | size = StringValueInput.numberToNumberInput 150.8 |> asHeightInSize block.size }
 
                     updateLengthInAFromElm : Model
                     updateLengthInAFromElm =

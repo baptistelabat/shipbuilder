@@ -28,7 +28,6 @@ port module Main
         , asHeightInSize
         , Axis(..)
         , Dimension(..)
-        , numberToNumberInput
         , ViewMode(..)
         , PartitioningView(..)
         , PartitionType(..)
@@ -241,8 +240,8 @@ decodeBlock =
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
         |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
-        |> Pipeline.optional "mass" floatInputDecoder { value = 0, string = "0" }
-        |> Pipeline.optional "density" floatInputDecoder { value = 0, string = "0" }
+        |> Pipeline.optional "mass" StringValueInput.floatInputDecoder { value = 0, string = "0" }
+        |> Pipeline.optional "density" StringValueInput.floatInputDecoder { value = 0, string = "0" }
         |> Pipeline.optional "visible" Decode.bool True
         |> Pipeline.optional "centerOfGravity" decodePosition initPosition
 
@@ -283,37 +282,20 @@ syncSizeDecoder =
         |> Pipeline.required "size" decodeSize
 
 
-floatInputDecoder : Decode.Decoder StringValueInput.FloatInput
-floatInputDecoder =
-    Decode.map numberToNumberInput Decode.float
-
-
 decodePosition : Decode.Decoder Position
 decodePosition =
     Pipeline.decode Position
-        |> Pipeline.required "x" floatInputDecoder
-        |> Pipeline.required "y" floatInputDecoder
-        |> Pipeline.required "z" floatInputDecoder
+        |> Pipeline.required "x" StringValueInput.floatInputDecoder
+        |> Pipeline.required "y" StringValueInput.floatInputDecoder
+        |> Pipeline.required "z" StringValueInput.floatInputDecoder
 
 
 decodeSize : Decode.Decoder Size
 decodeSize =
     Pipeline.decode Size
-        |> Pipeline.required "x" floatInputDecoder
-        |> Pipeline.required "y" floatInputDecoder
-        |> Pipeline.required "z" floatInputDecoder
-
-
-decodeFloatInput : Decode.Decoder StringValueInput.FloatInput
-decodeFloatInput =
-    Pipeline.decode StringValueInput.FloatInput
-        |> Pipeline.required "value" Decode.float
-        |> Pipeline.required "string" Decode.string
-
-
-numberToNumberInput : a -> { value : a, string : String }
-numberToNumberInput number =
-    { value = number, string = toString number }
+        |> Pipeline.required "x" StringValueInput.floatInputDecoder
+        |> Pipeline.required "y" StringValueInput.floatInputDecoder
+        |> Pipeline.required "z" StringValueInput.floatInputDecoder
 
 
 decodeRgbRecord : Decode.Decoder Color
@@ -335,8 +317,8 @@ decodePartitions =
 decodeDecks : Decode.Decoder Decks
 decodeDecks =
     Pipeline.decode Decks
-        |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
-        |> Pipeline.required "spacing" floatInputDecoder
+        |> Pipeline.required "number" (Decode.map StringValueInput.numberToNumberInput Decode.int)
+        |> Pipeline.required "spacing" StringValueInput.floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
         |> Pipeline.optional "spacingExceptions" decodeSpacingExceptions Dict.empty
 
@@ -348,7 +330,7 @@ decodeSpacingExceptions =
         makeException key value dict =
             case String.toInt key of
                 Ok intKey ->
-                    Dict.insert intKey (numberToNumberInput value) dict
+                    Dict.insert intKey (StringValueInput.numberToNumberInput value) dict
 
                 Err message ->
                     -- TODO: handle failure or only ignore ?
@@ -364,8 +346,8 @@ decodeSpacingExceptions =
 decodeBulkheads : Decode.Decoder Bulkheads
 decodeBulkheads =
     Pipeline.decode Bulkheads
-        |> Pipeline.required "number" (Decode.map numberToNumberInput Decode.int)
-        |> Pipeline.required "spacing" floatInputDecoder
+        |> Pipeline.required "number" (Decode.map StringValueInput.numberToNumberInput Decode.int)
+        |> Pipeline.required "spacing" StringValueInput.floatInputDecoder
         |> Pipeline.required "zero" decodePartitionZero
         |> Pipeline.optional "spacingExceptions" decodeSpacingExceptions Dict.empty
 
@@ -374,7 +356,7 @@ decodePartitionZero : Decode.Decoder PartitionZero
 decodePartitionZero =
     Pipeline.decode PartitionZero
         |> Pipeline.required "index" Decode.int
-        |> Pipeline.required "position" floatInputDecoder
+        |> Pipeline.required "position" StringValueInput.floatInputDecoder
 
 
 type alias Toasts =
@@ -701,7 +683,7 @@ type alias Frame =
 
 initFrame : Frame
 initFrame =
-    { x = numberToNumberInput 0.0
+    { x = StringValueInput.numberToNumberInput 0.0
     , points = Dict.fromList [ ( 0, initFramePoint ), ( 1, initFramePoint ), ( 2, initFramePoint ), ( 3, initFramePoint ), ( 4, initFramePoint ) ]
     }
 
@@ -714,8 +696,8 @@ type alias FramePoint =
 
 initFramePoint : FramePoint
 initFramePoint =
-    { y = numberToNumberInput 0.0
-    , z = numberToNumberInput 0.0
+    { y = StringValueInput.numberToNumberInput 0.0
+    , z = StringValueInput.numberToNumberInput 0.0
     }
 
 
@@ -780,8 +762,8 @@ initBlock uuid label color position size =
     , position = position
     , size = size
     , referenceForMass = None
-    , mass = numberToNumberInput 0.0
-    , density = numberToNumberInput 0.0
+    , mass = StringValueInput.numberToNumberInput 0.0
+    , density = StringValueInput.numberToNumberInput 0.0
     , visible = True
     , centerOfGravity = initPosition
     }
@@ -878,7 +860,7 @@ type alias Position =
 
 initPosition : Position
 initPosition =
-    { x = numberToNumberInput 0, y = numberToNumberInput 0, z = numberToNumberInput 0 }
+    { x = StringValueInput.numberToNumberInput 0, y = StringValueInput.numberToNumberInput 0, z = StringValueInput.numberToNumberInput 0 }
 
 
 type alias Size =
@@ -1407,20 +1389,20 @@ initModel flag =
 initPartitions : PartitionsData
 initPartitions =
     { decks =
-        { number = numberToNumberInput 0
-        , spacing = numberToNumberInput 3.0
+        { number = StringValueInput.numberToNumberInput 0
+        , spacing = StringValueInput.numberToNumberInput 3.0
         , zero =
             { index = 0
-            , position = numberToNumberInput 0.0
+            , position = StringValueInput.numberToNumberInput 0.0
             }
         , spacingExceptions = Dict.empty
         }
     , bulkheads =
-        { number = numberToNumberInput 0
-        , spacing = numberToNumberInput 5.0
+        { number = StringValueInput.numberToNumberInput 0
+        , spacing = StringValueInput.numberToNumberInput 5.0
         , zero =
             { index = 0
-            , position = numberToNumberInput 0.0
+            , position = StringValueInput.numberToNumberInput 0.0
             }
         , spacingExceptions = Dict.empty
         }
@@ -1639,10 +1621,10 @@ updateBlockMassAndDensity block =
             block
 
         Mass ->
-            { block | density = numberToNumberInput <| block.mass.value / (computeVolume block) }
+            { block | density = StringValueInput.numberToNumberInput <| block.mass.value / (computeVolume block) }
 
         Density ->
-            { block | mass = numberToNumberInput <| block.density.value * (computeVolume block) }
+            { block | mass = StringValueInput.numberToNumberInput <| block.density.value * (computeVolume block) }
 
 
 type alias BoundingBox =
@@ -1843,9 +1825,9 @@ updateNoJs msg model =
                 updatedBlock =
                     { block
                         | centerOfGravity =
-                            { x = numberToNumberInput centerOfVolume.x
-                            , y = numberToNumberInput centerOfVolume.y
-                            , z = numberToNumberInput centerOfVolume.z
+                            { x = StringValueInput.numberToNumberInput centerOfVolume.x
+                            , y = StringValueInput.numberToNumberInput centerOfVolume.y
+                            , z = StringValueInput.numberToNumberInput centerOfVolume.z
                             }
                     }
             in
@@ -2205,7 +2187,7 @@ updateFromJs jsmsg model =
                                 | partitions =
                                     updatePartition <|
                                         asZeroInPartition (partition model) <|
-                                            flip asPositionInPartitionZero (numberToNumberInput position) <|
+                                            flip asPositionInPartitionZero (StringValueInput.numberToNumberInput position) <|
                                                 asIndexInPartitionZero (.zero <| partition model) index
                                 , viewMode = Partitioning PropertiesEdition
                             }
@@ -2851,7 +2833,7 @@ msg2json model action =
                             , data =
                                 encodeComputedPartitions <|
                                     computePartition
-                                        { partition | number = numberToNumberInput <| abs value }
+                                        { partition | number = StringValueInput.numberToNumberInput <| abs value }
                             }
 
                     Err error ->
@@ -2874,7 +2856,7 @@ msg2json model action =
                             , data =
                                 encodeComputedPartitions <|
                                     computePartition
-                                        { partition | spacing = numberToNumberInput <| abs value }
+                                        { partition | spacing = StringValueInput.numberToNumberInput <| abs value }
                             }
 
                     Err error ->
@@ -2899,7 +2881,7 @@ msg2json model action =
                                     computePartition <|
                                         asZeroInPartition partition <|
                                             asPositionInPartitionZero partition.zero <|
-                                                numberToNumberInput value
+                                                StringValueInput.numberToNumberInput value
                             }
 
                     Err error ->
