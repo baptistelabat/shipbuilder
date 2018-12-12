@@ -1,6 +1,7 @@
 module MainTests exposing (..)
 
 import Color
+import Dict
 import DictList
 import Expect exposing (Expectation)
 import Fuzz
@@ -1279,6 +1280,14 @@ suite =
                                 |> Query.first
                                 |> Event.simulate (Event.input "123.4")
                                 |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "123.4")
+                    , test "SetLengthOverAll sets length over all" <|
+                        \_ ->
+                            Expect.equal (Just 123.4)
+                                (setModel [ ToJs <| SetLengthOverAll "anthineas" "123.4" ]
+                                    |> .slices
+                                    |> Dict.get "anthineas"
+                                    |> Maybe.map (.length >> .value)
+                                )
                     ]
             ]
         , describe "Parse JSON slices"

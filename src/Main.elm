@@ -2378,8 +2378,13 @@ updateModelToJs msg model =
         UnselectHullReference ->
             { model | selectedHullReference = Nothing }
 
-        SetLengthOverAll _ _ ->
-            model
+        SetLengthOverAll hullReference newValue ->
+            let
+                updateSlice : HullSlices -> HullSlices
+                updateSlice =
+                    HullSlices.setLengthOverAll newValue
+            in
+                { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
 
         SetSpacingException partitionType index input ->
             let

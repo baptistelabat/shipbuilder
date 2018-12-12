@@ -7,6 +7,7 @@ module StringValueInput
         , emptyFloat
         , floatInputDecoder
         , fromNumber
+        , setString
         )
 
 import Dict exposing (Dict)
@@ -48,6 +49,16 @@ decodeFloatInput =
 fromNumber : a -> { value : a, string : String }
 fromNumber number =
     { value = number, string = toString number }
+
+
+setString : String -> FloatInput -> FloatInput
+setString s floatInput =
+    case String.toFloat s of
+        Ok value ->
+            { value = value, string = s }
+
+        Err e ->
+            { floatInput | string = s }
 
 
 decodeSpacingExceptions : Decode.Decoder (Dict Int FloatInput)
