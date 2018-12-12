@@ -15,7 +15,7 @@ import Test.Html.Selector as Selector
 import TestData exposing (..)
 import HullReferences
 import HullSlices
-import Json.Decode exposing (decodeString, decodeValue)
+import Json.Decode exposing (decodeString, decodeValue, Decoder)
 import Json.Encode exposing (encode)
 import StringValueInput
 
@@ -28,6 +28,36 @@ setView =
 discardCmd : ( Model, Cmd Msg ) -> Model
 discardCmd ( model, _ ) =
     model
+
+
+type alias ParsedJSData a =
+    { tag : String
+    , data : a
+    }
+
+
+toJS : List Msg -> ToJsMsg -> Decoder a -> Maybe (ParsedJSData a)
+toJS msgs msg decoder =
+    let
+        original : Maybe JsData
+        original =
+            msg2json (setModel msgs) msg
+    in
+        case original of
+            Nothing ->
+                Nothing
+
+            Just data ->
+                case decodeValue decoder data.data of
+                    Ok p ->
+                        Just { tag = data.tag, data = p }
+
+                    Err e ->
+                        let
+                            _ =
+                                Debug.log "In toJS, failed to parse:" e
+                        in
+                            Nothing
 
 
 setModel : List Msg -> Model

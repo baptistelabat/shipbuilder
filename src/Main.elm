@@ -14,6 +14,7 @@ port module Main
         , toJs
         , update
         , view
+        , msg2json
           --Blocks
         , Block
         , Blocks
@@ -33,6 +34,7 @@ port module Main
         , PartitionType(..)
         , SpaceReservationView(..)
         , hullReferences
+        , JsData
         )
 
 import Color exposing (Color)
