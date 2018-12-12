@@ -16,10 +16,11 @@ import Dict exposing (Dict)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import StringValueInput
 
 
 type alias HullSlices =
-    { length : Float
+    { length : StringValueInput.FloatInput
     , breadth : Float
     , mouldedDepth : Float
     , xmin : Float
@@ -32,7 +33,7 @@ type alias HullSlices =
 
 empty : HullSlices
 empty =
-    { length = 0
+    { length = StringValueInput.emptyFloat
     , breadth = 0
     , mouldedDepth = 0
     , xmin = 0
@@ -66,7 +67,7 @@ decoder =
         helper : Float -> Decode.Decoder HullSlices
         helper mouldedDepth =
             Pipeline.decode HullSlices
-                |> Pipeline.required "length" Decode.float
+                |> Pipeline.required "length" (Decode.map StringValueInput.fromNumber Decode.float)
                 |> Pipeline.required "breadth" Decode.float
                 |> Pipeline.hardcoded mouldedDepth
                 |> Pipeline.required "xmin" Decode.float
@@ -102,7 +103,7 @@ hullSliceEncoder hullSlice =
 encoder : HullSlices -> Encode.Value
 encoder hullSlices =
     Encode.object
-        [ ( "length", Encode.float hullSlices.length )
+        [ ( "length", Encode.float hullSlices.length.value )
         , ( "breadth", Encode.float hullSlices.breadth )
         , ( "mouldedDepth", Encode.float hullSlices.mouldedDepth )
         , ( "xmin", Encode.float hullSlices.xmin )
@@ -112,9 +113,9 @@ encoder hullSlices =
         ]
 
 
-setLengthOverAll : Float -> HullSlices -> HullSlices
+setLengthOverAll : String -> HullSlices -> HullSlices
 setLengthOverAll loa hullSlices =
-    { hullSlices | length = loa }
+    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa }
 
 
 setBreadth : Float -> HullSlices -> HullSlices

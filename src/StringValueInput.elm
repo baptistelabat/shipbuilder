@@ -4,6 +4,7 @@ module StringValueInput
         , IntInput
         , addToFloatInput
         , decodeSpacingExceptions
+        , emptyFloat
         , floatInputDecoder
         , fromNumber
         )
@@ -16,6 +17,13 @@ import Json.Decode.Pipeline as Pipeline
 type alias FloatInput =
     { value : Float
     , string : String
+    }
+
+
+emptyFloat : FloatInput
+emptyFloat =
+    { value = 0
+    , string = ""
     }
 
 

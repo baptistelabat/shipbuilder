@@ -1283,7 +1283,7 @@ suite =
             ]
         , describe "Parse JSON slices"
             [ test "Can parse 'length'" <|
-                testHullSliceDecoding .length 22.84600067138672
+                testHullSliceDecoding (.length >> .value) 22.84600067138672
             , test "Can parse 'breadth'" <|
                 testHullSliceDecoding .breadth 6.8935699462890625
             , test "Can parse 'mouldedDepth'" <|
@@ -1318,7 +1318,7 @@ suite =
             ]
         , describe "Encode JSON slices"
             [ test "Can encode 'length'" <|
-                testHullSliceEncoding .length 22.84600067138672
+                testHullSliceEncoding (.length >> .value) 22.84600067138672
             , test "Can encode 'breadth'" <|
                 testHullSliceEncoding .breadth 6.8935699462890625
             , test "Can encode 'mouldedDepth'" <|
