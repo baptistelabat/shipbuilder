@@ -20,6 +20,18 @@ import Json.Encode as Encode
 import StringValueInput
 
 
+type alias JsonHullSlices =
+    { length : StringValueInput.FloatInput
+    , breadth : StringValueInput.FloatInput
+    , mouldedDepth : StringValueInput.FloatInput
+    , xmin : Float
+    , ymin : Float
+    , zmin : Float
+    , slices : List HullSlice
+    , draught : StringValueInput.FloatInput
+    }
+
+
 type alias HullSlices =
     { length : StringValueInput.FloatInput
     , breadth : StringValueInput.FloatInput
@@ -65,9 +77,9 @@ hullSliceDecoder =
 decoder : Decode.Decoder HullSlices
 decoder =
     let
-        helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
+        helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder JsonHullSlices
         helper ( mouldedDepth, maybeDraught ) =
-            Pipeline.decode HullSlices
+            Pipeline.decode JsonHullSlices
                 |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)
                 |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth") Decode.float)
                 |> Pipeline.hardcoded mouldedDepth
