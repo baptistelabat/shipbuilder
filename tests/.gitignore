@@ -1,1 +1,3 @@
-elm-stuff/
+generated-code
+build-artifacts
+.elm-analyse

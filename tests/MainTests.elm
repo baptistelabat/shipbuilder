@@ -1,6 +1,7 @@
 module MainTests exposing (..)
 
 import Color
+import Dict
 import DictList
 import Expect exposing (Expectation)
 import Fuzz
@@ -13,6 +14,10 @@ import Test.Html.Event as Event
 import Test.Html.Selector as Selector
 import TestData exposing (..)
 import HullReferences
+import HullSlices
+import Json.Decode exposing (decodeString, decodeValue, Decoder)
+import Json.Encode as Encode exposing (encode)
+import StringValueInput
 
 
 setView : List Msg -> Html Msg
@@ -23,6 +28,78 @@ setView =
 discardCmd : ( Model, Cmd Msg ) -> Model
 discardCmd ( model, _ ) =
     model
+
+
+type alias ParsedJSData a =
+    { tag : String
+    , data : a
+    }
+
+
+keyDown : Int -> ( Bool, Bool, Bool ) -> ( String, Encode.Value )
+keyDown key ( shift, alt, ctrl ) =
+    ( "keydown"
+    , Encode.object
+        [ ( "keyCode", Encode.int key )
+        , ( "shiftKey", Encode.bool shift )
+        , ( "altKey", Encode.bool alt )
+        , ( "ctrlKey", Encode.bool ctrl )
+        ]
+    )
+
+
+downArrow : ( Bool, Bool, Bool ) -> ( String, Encode.Value )
+downArrow =
+    keyDown 40
+
+
+upArrow : ( Bool, Bool, Bool ) -> ( String, Encode.Value )
+upArrow =
+    keyDown 38
+
+
+press : ( Bool, Bool, Bool )
+press =
+    ( False, False, False )
+
+
+shift : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
+shift ( _, alt, ctrl ) =
+    ( True, alt, ctrl )
+
+
+alt : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
+alt ( shift, _, ctrl ) =
+    ( shift, True, ctrl )
+
+
+ctrl : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
+ctrl ( shift, alt, _ ) =
+    ( shift, alt, True )
+
+
+toJS : List Msg -> ToJsMsg -> Decoder a -> Maybe (ParsedJSData a)
+toJS msgs msg decoder =
+    let
+        original : Maybe JsData
+        original =
+            msg2json (setModel msgs) msg
+    in
+        case original of
+            Nothing ->
+                Nothing
+
+            Just data ->
+                case decodeValue decoder data.data of
+                    Ok p ->
+                        Just { tag = data.tag, data = p }
+
+                    Err e ->
+                        let
+                            _ =
+                                Debug.log "In toJS, failed to parse:" e
+                        in
+                            Nothing
 
 
 setModel : List Msg -> Model
@@ -131,14 +208,14 @@ suite =
         , describe "init"
             [ test "init with initModel" <|
                 \_ ->
-                    init "1.0.0"
+                    init flags
                         |> Tuple.first
                         |> Expect.equal initialModel
             , test "init has side effects" <|
                 \_ ->
                     let
                         ( model, cmd ) =
-                            init "1.0.0"
+                            init { buildSHA = "1.0.0", hullsJSON = "" }
                     in
                         Expect.notEqual cmd Cmd.none
             , test "initCmd is init-three" <|
@@ -309,15 +386,15 @@ suite =
 
                     updateX : Block -> Block
                     updateX block =
-                        { block | position = numberToNumberInput 1.0 |> asXInPosition block.position }
+                        { block | position = StringValueInput.fromNumber 1.0 |> asXInPosition block.position }
 
                     updateY : Block -> Block
                     updateY block =
-                        { block | position = numberToNumberInput 2.0 |> asYInPosition block.position }
+                        { block | position = StringValueInput.fromNumber 2.0 |> asYInPosition block.position }
 
                     updateZ : Block -> Block
                     updateZ block =
-                        { block | position = numberToNumberInput 3.3 |> asZInPosition block.position }
+                        { block | position = StringValueInput.fromNumber 3.3 |> asZInPosition block.position }
 
                     updateXInAFromElm : Model
                     updateXInAFromElm =
@@ -377,15 +454,15 @@ suite =
 
                     updateLength : Block -> Block
                     updateLength block =
-                        { block | size = numberToNumberInput 20 |> asLengthInSize block.size }
+                        { block | size = StringValueInput.fromNumber 20 |> asLengthInSize block.size }
 
                     updateWidth : Block -> Block
                     updateWidth block =
-                        { block | size = numberToNumberInput 1 |> asWidthInSize block.size }
+                        { block | size = StringValueInput.fromNumber 1 |> asWidthInSize block.size }
 
                     updateHeight : Block -> Block
                     updateHeight block =
-                        { block | size = numberToNumberInput 150.8 |> asHeightInSize block.size }
+                        { block | size = StringValueInput.fromNumber 150.8 |> asHeightInSize block.size }
 
                     updateLengthInAFromElm : Model
                     updateLengthInAFromElm =
@@ -547,18 +624,18 @@ suite =
                     , test "None unselected if a hull-reference is selected" <|
                         \_ ->
                             setView
-                                [ ToJs <| SelectHullReference hullRef ]
+                                [ ToJs <| SelectHullReference "anthineas" ]
                                 |> Query.fromHtml
                                 |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-none" ] ]
                                 |> Query.hasNot [ Selector.class "hull-reference__selected" ]
                     , test "Selected HullReference correctly displayed" <|
                         \_ ->
                             setView
-                                [ ToJs <| SelectHullReference hullRef ]
+                                [ ToJs <| SelectHullReference "anthineas" ]
                                 |> Query.fromHtml
                                 |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
                                 |> Query.find [ Selector.class "hull-label" ]
-                                |> Query.has [ Selector.text hullRef.label ]
+                                |> Query.has [ Selector.text "anthineas" ]
                     , test "Clicking a hull reference selects it" <|
                         \_ ->
                             initialView
@@ -566,7 +643,7 @@ suite =
                                 |> Query.findAll [ Selector.class "hull-reference" ]
                                 |> Query.index 1
                                 |> Event.simulate Event.click
-                                |> Event.expect (ToJs <| SelectHullReference hullRef)
+                                |> Event.expect (ToJs <| SelectHullReference "anthineas")
                     ]
             , describe "Partitions" <|
                 [ test "Show/hide partitions triggers the right event" <|
@@ -1181,35 +1258,35 @@ suite =
                     \_ ->
                         setView
                             [ ToJs <| SwitchViewMode KpiStudio ]
-                            |> Query.fromHtml 
+                            |> Query.fromHtml
                             |> Query.find [ Selector.class "panel" ]
                             |> Query.has [ Selector.classes [ "kpi", "length" ] ]
                 , test "KPIs Width is displayed" <|
                     \_ ->
                         setView
                             [ ToJs <| SwitchViewMode KpiStudio ]
-                            |> Query.fromHtml 
+                            |> Query.fromHtml
                             |> Query.find [ Selector.class "panel" ]
                             |> Query.has [ Selector.classes [ "kpi", "width" ] ]
                 , test "KPIs Height is displayed" <|
                     \_ ->
                         setView
                             [ ToJs <| SwitchViewMode KpiStudio ]
-                            |> Query.fromHtml 
+                            |> Query.fromHtml
                             |> Query.find [ Selector.class "panel" ]
                             |> Query.has [ Selector.classes [ "kpi", "height" ] ]
                 , test "KPIs Volume is displayed" <|
                     \_ ->
                         setView
                             [ ToJs <| SwitchViewMode KpiStudio ]
-                            |> Query.fromHtml 
+                            |> Query.fromHtml
                             |> Query.find [ Selector.class "panel" ]
                             |> Query.has [ Selector.classes [ "kpi", "volume" ] ]
                 , test "KPIs Mass is displayed" <|
                     \_ ->
                         setView
                             [ ToJs <| SwitchViewMode KpiStudio ]
-                            |> Query.fromHtml 
+                            |> Query.fromHtml
                             |> Query.find [ Selector.class "panel" ]
                             |> Query.has [ Selector.classes [ "kpi", "mass" ] ]
                 , test "KPIs by color for Volume are displayed after toggling the accordion" <|
@@ -1219,16 +1296,16 @@ suite =
                             , NoJs <| ToggleAccordion True "volume-kpi"
                             ]
                             |> Query.fromHtml
-                            |> Query.findAll [ Selector.classes ["kpi-group","volume"] ]
+                            |> Query.findAll [ Selector.classes [ "kpi-group", "volume" ] ]
                             |> Query.count (Expect.equal 18)
                 , test "All KPIs by color for Volume are equal to 0 on init" <|
                     \_ ->
                         setView
-                            [ ToJs <| SwitchViewMode KpiStudio 
+                            [ ToJs <| SwitchViewMode KpiStudio
                             , NoJs <| ToggleAccordion True "volume-kpi"
                             ]
                             |> Query.fromHtml
-                            |> Query.find [ Selector.classes ["kpi", "volume"] ]
+                            |> Query.find [ Selector.classes [ "kpi", "volume" ] ]
                             |> Query.children [ Selector.class "kpi-value" ]
                             |> Query.each
                                 (Expect.all [ Query.has [ Selector.text "0" ] ])
@@ -1239,19 +1316,228 @@ suite =
                             , NoJs <| ToggleAccordion True "mass-kpi"
                             ]
                             |> Query.fromHtml
-                            |> Query.findAll [ Selector.classes ["kpi-group","mass"] ]
+                            |> Query.findAll [ Selector.classes [ "kpi-group", "mass" ] ]
                             |> Query.count (Expect.equal 18)
                 , test "All KPIs by color for Mass are equal to 0 on init" <|
                     \_ ->
                         setView
-                            [ ToJs <| SwitchViewMode KpiStudio 
+                            [ ToJs <| SwitchViewMode KpiStudio
                             , NoJs <| ToggleAccordion True "mass-kpi"
                             ]
                             |> Query.fromHtml
-                            |> Query.find [ Selector.classes ["kpi", "mass"] ]
+                            |> Query.find [ Selector.classes [ "kpi", "mass" ] ]
                             |> Query.children [ Selector.class "kpi-value" ]
                             |> Query.each
                                 (Expect.all [ Query.has [ Selector.text "0" ] ])
                 ]
+            , describe "Modeller" <|
+                let
+                    modellerView =
+                        setView
+                            [ ToJs <| SelectHullReference "anthineas"
+                            , ToJs <| SwitchViewMode <| Modeller
+                            ]
+                in
+                    [ test "Length over all input is present" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "length-over-all" ]
+                                |> Query.first
+                                |> Query.has [ Selector.attribute <| Attributes.value "22.84600067138672" ]
+                    , test "Length over all input triggers SetLengthOverAll" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "length-over-all" ]
+                                |> Query.first
+                                |> Event.simulate (Event.input "123.4")
+                                |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "123.4")
+                    , test "SetLengthOverAll sets length over all" <|
+                        \_ ->
+                            Expect.equal (Just 123.4)
+                                (setModel [ ToJs <| SetLengthOverAll "anthineas" "123.4" ]
+                                    |> .slices
+                                    |> Dict.get "anthineas"
+                                    |> Maybe.map (.length >> .value)
+                                )
+                    , test "SetLengthOverAll is properly sent to JS" <|
+                        \_ ->
+                            let
+                                msg =
+                                    SetLengthOverAll "anthineas" "123.4"
+                            in
+                                Expect.equal
+                                    (toJS [ ToJs msg ] msg (Json.Decode.map Just HullSlices.decoder))
+                                <|
+                                    Just
+                                        { tag = "load-hull"
+                                        , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
+                                        }
+                    , test "Can press down arrow key to decrement length over all" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "length-over-all" ]
+                                |> Query.first
+                                |> Event.simulate (press |> downArrow)
+                                |> Event.expect (ToJs <| KeyDownOnLengthOverAllInput "anthineas" 22.84600067138672 { key = 40, shift = False, alt = False, ctrl = False })
+                    , test "Can press shift down arrow key to decrement length over all" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "length-over-all" ]
+                                |> Query.first
+                                |> Event.simulate (press |> shift |> downArrow)
+                                |> Event.expect (ToJs <| KeyDownOnLengthOverAllInput "anthineas" 22.84600067138672 { key = 40, shift = True, alt = False, ctrl = False })
+                    , test "Breadth input is present" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "breadth" ]
+                                |> Query.first
+                                |> Query.has [ Selector.attribute <| Attributes.value "6.8935699462890625" ]
+                    , test "Breadth input triggers SetBreadth" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "breadth" ]
+                                |> Query.first
+                                |> Event.simulate (Event.input "123.4")
+                                |> Event.expect (ToJs <| SetBreadth "anthineas" "123.4")
+                    , test "SetBreadth sets breadth" <|
+                        \_ ->
+                            Expect.equal (Just 123.4)
+                                (setModel [ ToJs <| SetBreadth "anthineas" "123.4" ]
+                                    |> .slices
+                                    |> Dict.get "anthineas"
+                                    |> Maybe.map (.breadth >> .value)
+                                )
+                    , test "SetBreadth is properly sent to JS" <|
+                        \_ ->
+                            let
+                                msg =
+                                    SetBreadth "anthineas" "123.4"
+                            in
+                                Expect.equal
+                                    (toJS [ ToJs msg ] msg (Json.Decode.map Just HullSlices.decoder))
+                                <|
+                                    Just
+                                        { tag = "load-hull"
+                                        , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
+                                        }
+                    , test "Can press down arrow key to decrement breadth" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "breadth" ]
+                                |> Query.first
+                                |> Event.simulate (press |> downArrow)
+                                |> Event.expect (ToJs <| KeyDownOnBreadthInput "anthineas" 6.8935699462890625 { key = 40, shift = False, alt = False, ctrl = False })
+                    , test "Can press up arrow key to increment breadth" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "breadth" ]
+                                |> Query.first
+                                |> Event.simulate (press |> upArrow)
+                                |> Event.expect (ToJs <| KeyDownOnBreadthInput "anthineas" 6.8935699462890625 { key = 38, shift = False, alt = False, ctrl = False })
+                    ]
+            ]
+        , describe "Parse JSON slices"
+            [ test "Can parse 'length'" <|
+                testHullSliceDecoding (.length >> .value) 22.84600067138672
+            , test "Can parse 'breadth'" <|
+                testHullSliceDecoding (.breadth >> .value) 6.8935699462890625
+            , test "Can parse 'mouldedDepth'" <|
+                testHullSliceDecoding (.mouldedDepth >> .value) 6.83698582649231
+            , test "Can parse 'xmin'" <|
+                testHullSliceDecoding .xmin -1
+            , test "Can parse 'ymin'" <|
+                testHullSliceDecoding .ymin -3.4467999935150146
+            , test "Can parse 'zmin'" <|
+                testHullSliceDecoding .zmin -6.146999835968018
+            , test "Can parse 'slices/x'" <|
+                testHullSliceDecoding (.slices >> List.map .x) [ 0.00437713372412022, 0.1111111111111111 ]
+            , test "Can parse 'slices/zmin'" <|
+                testHullSliceDecoding (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
+            , test "Can parse 'slices/zmax'" <|
+                testHullSliceDecoding (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
+            , test "Can parse 'slices/y'" <|
+                testHullSliceDecoding (.slices >> List.map .y >> List.head)
+                    (Just
+                        [ 0.964899527258786
+                        , 0.9648943694688346
+                        , 0.9629765202249831
+                        , 0.9592250480632435
+                        , 0.955473575901504
+                        , 0.9502377948034448
+                        , 0.9394176761317832
+                        , 0.9282437133662546
+                        , 0.9102579602794127
+                        , 0.742320749879794
+                        ]
+                    )
+            ]
+        , describe "Encode JSON slices"
+            [ test "Can encode 'length'" <|
+                testHullSliceEncoding (.length >> .value) 22.84600067138672
+            , test "Can encode 'breadth'" <|
+                testHullSliceEncoding (.breadth >> .value) 6.8935699462890625
+            , test "Can encode 'mouldedDepth'" <|
+                testHullSliceEncoding (.mouldedDepth >> .value) 6.83698582649231
+            , test "Can encode 'xmin'" <|
+                testHullSliceEncoding .xmin -1
+            , test "Can encode 'ymin'" <|
+                testHullSliceEncoding .ymin -3.4467999935150146
+            , test "Can encode 'zmin'" <|
+                testHullSliceEncoding .zmin -6.146999835968018
+            , test "Can encode 'slices/x'" <|
+                testHullSliceEncoding (.slices >> List.map .x) [ 0.00437713372412022, 0.1111111111111111 ]
+            , test "Can encode 'slices/zmin'" <|
+                testHullSliceEncoding (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
+            , test "Can encode 'slices/zmax'" <|
+                testHullSliceEncoding (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
+            , test "Can encode 'slices/y'" <|
+                testHullSliceEncoding (.slices >> List.map .y >> List.head)
+                    (Just
+                        [ 0.964899527258786
+                        , 0.9648943694688346
+                        , 0.9629765202249831
+                        , 0.9592250480632435
+                        , 0.955473575901504
+                        , 0.9502377948034448
+                        , 0.9394176761317832
+                        , 0.9282437133662546
+                        , 0.9102579602794127
+                        , 0.742320749879794
+                        ]
+                    )
             ]
         ]
+
+
+testHullSliceEncoding : (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSliceEncoding =
+    let
+        json : String
+        json =
+            case Result.map (encode 0 << HullSlices.encoder) (decodeString HullSlices.decoder TestData.hullSliceJson) of
+                Err e ->
+                    e
+
+                Ok s ->
+                    s
+    in
+        testField HullSlices.decoder json
+
+
+testHullSliceDecoding : (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSliceDecoding =
+    testField HullSlices.decoder TestData.hullSliceJson
+
+
+testField : Json.Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)
+testField decoder json extractor expectedValue =
+    \() ->
+        Expect.equal (Ok expectedValue) <| Result.map extractor <| (decodeString decoder json)

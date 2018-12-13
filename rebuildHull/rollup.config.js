@@ -1,13 +1,13 @@
 // rollup.config.js
 export default {
 
-		input: 'src/TEST.js'
+		input: 'src/hull.js'
 
 		, output: {
 				format: 'umd'
-				, name: 'TEST'
-				, file: 'js/test.js'
-				, indent: '\t'
+				, name: 'Hull'
+				, file: 'js/hull.js'
+				, indent: '    '
 		}
 		
 };

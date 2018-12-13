@@ -3,7 +3,7 @@ stages:
     - babel
     - deploy
 
-build:
+build-elm:
     stage: build
     script:
      - make
@@ -19,14 +19,35 @@ build-babel:
     script:
     - cd babel && make
 
+build-json:
+    stage: build
+    script:
+    - cd buildHull && make
+    artifacts:
+      paths:
+        - buildHull/anthineas.json
+        - buildHull/OPV.json
+        - buildHull/KCS.json
+        - buildHull/DTMB_5415.json
+
+build-js:
+    stage: build
+    script:
+    - cd rebuildHull && make
+    artifacts:
+      paths:
+        - rebuildHull/js/hull.js
+
 babel:
     stage: babel
     dependencies:
-    - build
+    - build-elm
+    - build-json
     script:
     - docker run -t --rm -v `pwd`:/work -w /work -u $(id -u):$(id -g) babel
     - mv shipBuilder/js/main.babel.js shipBuilder/js/main.js
     - mv shipBuilder/js/lib/TransformControls.babel.js shipBuilder/js/lib/TransformControls.js
+    - mv buildHull/*.json shipBuilder/assets
     artifacts:
       paths:
         - shipBuilder/index.html
