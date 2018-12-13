@@ -1390,6 +1390,58 @@ suite =
                                 |> Query.first
                                 |> Event.simulate (press |> shift |> downArrow)
                                 |> Event.expect (ToJs <| KeyDownOnLengthOverAllInput "anthineas" 22.84600067138672 { key = 40, shift = True, alt = False, ctrl = False })
+                    , test "Breadth input is present" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "breadth" ]
+                                |> Query.first
+                                |> Query.has [ Selector.attribute <| Attributes.value "6.8935699462890625" ]
+                    , test "Breadth input triggers SetBreadth" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "breadth" ]
+                                |> Query.first
+                                |> Event.simulate (Event.input "123.4")
+                                |> Event.expect (ToJs <| SetBreadth "anthineas" "123.4")
+                    , test "SetBreadth sets breadth" <|
+                        \_ ->
+                            Expect.equal (Just 123.4)
+                                (setModel [ ToJs <| SetBreadth "anthineas" "123.4" ]
+                                    |> .slices
+                                    |> Dict.get "anthineas"
+                                    |> Maybe.map (.breadth >> .value)
+                                )
+                    , test "SetBreadth is properly sent to JS" <|
+                        \_ ->
+                            let
+                                msg =
+                                    SetBreadth "anthineas" "123.4"
+                            in
+                                Expect.equal
+                                    (toJS [ ToJs msg ] msg (Json.Decode.map Just HullSlices.decoder))
+                                <|
+                                    Just
+                                        { tag = "load-hull"
+                                        , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
+                                        }
+                    , test "Can press down arrow key to decrement breadth" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "breadth" ]
+                                |> Query.first
+                                |> Event.simulate (press |> downArrow)
+                                |> Event.expect (ToJs <| KeyDownOnBreadthInput "anthineas" 6.8935699462890625 { key = 40, shift = False, alt = False, ctrl = False })
+                    , test "Can press up arrow key to increment breadth" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "breadth" ]
+                                |> Query.first
+                                |> Event.simulate (press |> upArrow)
+                                |> Event.expect (ToJs <| KeyDownOnBreadthInput "anthineas" 6.8935699462890625 { key = 38, shift = False, alt = False, ctrl = False })
                     ]
             ]
         , describe "Parse JSON slices"
