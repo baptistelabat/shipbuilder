@@ -269,8 +269,3 @@ plotAreaCurve slices =
                 }
                 [LineChart.line Colors.blue Dots.circle "Area curve" xys]
             ]
-
-
-
--- [ LineChart.line Colors.blue Dots.none "area-curve" xys
--- ]
