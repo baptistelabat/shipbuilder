@@ -6,6 +6,7 @@ import DictList
 import Expect exposing (Expectation)
 import Fuzz
 import Main exposing (..)
+import ExtraEvents exposing (KeyEvent)
 import Test exposing (..)
 import Html exposing (Html)
 import Html.Attributes as Attributes

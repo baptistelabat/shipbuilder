@@ -35,7 +35,6 @@ port module Main
         , SpaceReservationView(..)
         , hullReferences
         , JsData
-        , KeyEvent
         )
 
 import Color exposing (Color)
@@ -46,6 +45,7 @@ import SIRColorPicker
 import Dict exposing (Dict)
 import DictList exposing (DictList)
 import Dom
+import ExtraEvents exposing (onKeyDown)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
 import Http exposing (encodeUri)
@@ -2743,36 +2743,6 @@ msg2json model action =
                     String.toFloat input
 
 
-isKeyArrowUp : KeyEvent -> Bool
-isKeyArrowUp keyEvent =
-    keyEvent.key == 38
-
-
-isKeyArrowDown : KeyEvent -> Bool
-isKeyArrowDown keyEvent =
-    keyEvent.key == 40
-
-
-toIncrement : KeyEvent -> Maybe Float
-toIncrement keyEvent =
-    let
-        magnitude : Float
-        magnitude =
-            if keyEvent.shift && not keyEvent.alt then
-                10
-            else if keyEvent.alt && not keyEvent.shift then
-                0.1
-            else
-                1
-    in
-        if isKeyArrowUp keyEvent then
-            Just magnitude
-        else if isKeyArrowDown keyEvent then
-            Just <| -1 * magnitude
-        else
-            Nothing
-
-
 
 -- VIEW
 
@@ -2829,20 +2799,6 @@ sendSizeUpdate block =
 sendPositionUpdate : Block -> JsData
 sendPositionUpdate block =
     { tag = "update-position", data = encodeUpdatePositionCommand block }
-
-
-onKeyDown : String -> (String -> msg) -> Attribute msg
-onKeyDown currentValue onValueChange =
-    on "keydown" (Decode.map onValueChange (keyEventDecoder currentValue))
-
-
-type alias KeyEvent =
-    { key : Int
-    , shift : Bool
-    , alt : Bool
-    , ctrl : Bool
-    , targetValue : String
-    }
 
 
 updateBlockSizeForDimension : Dimension -> Block -> StringValueInput.FloatInput -> Block
@@ -4227,32 +4183,6 @@ updateBlockPositionOnAxis axis block floatInput =
     floatInput
         |> (asAxisInPosition axis) block.position
         |> asPositionInBlock block
-
-
-keyEventDecoder : String -> Decode.Decoder String
-keyEventDecoder currentValue =
-    let
-        convertToString : KeyEvent -> String
-        convertToString keyEvent =
-            case toIncrement keyEvent of
-                Nothing ->
-                    keyEvent.targetValue
-
-                Just inc ->
-                    case String.toFloat currentValue of
-                        Err _ ->
-                            keyEvent.targetValue
-
-                        Ok val ->
-                            toString (val + inc)
-    in
-        Pipeline.decode KeyEvent
-            |> Pipeline.required "keyCode" Decode.int
-            |> Pipeline.required "shiftKey" Decode.bool
-            |> Pipeline.required "altKey" Decode.bool
-            |> Pipeline.required "ctrlKey" Decode.bool
-            |> Pipeline.requiredAt [ "target", "value" ] Decode.string
-            |> Decode.map convertToString
 
 
 type Dimension
