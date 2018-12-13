@@ -654,7 +654,7 @@ type alias Frame =
 
 initFrame : Frame
 initFrame =
-    { x = StringValueInput.fromNumber 0.0
+    { x = StringValueInput.emptyFloat
     , points = Dict.fromList [ ( 0, initFramePoint ), ( 1, initFramePoint ), ( 2, initFramePoint ), ( 3, initFramePoint ), ( 4, initFramePoint ) ]
     }
 
@@ -667,8 +667,8 @@ type alias FramePoint =
 
 initFramePoint : FramePoint
 initFramePoint =
-    { y = StringValueInput.fromNumber 0.0
-    , z = StringValueInput.fromNumber 0.0
+    { y = StringValueInput.emptyFloat
+    , z = StringValueInput.emptyFloat
     }
 
 
@@ -733,8 +733,8 @@ initBlock uuid label color position size =
     , position = position
     , size = size
     , referenceForMass = None
-    , mass = StringValueInput.fromNumber 0.0
-    , density = StringValueInput.fromNumber 0.0
+    , mass = StringValueInput.emptyFloat
+    , density = StringValueInput.emptyFloat
     , visible = True
     , centerOfGravity = initPosition
     }
@@ -831,7 +831,7 @@ type alias Position =
 
 initPosition : Position
 initPosition =
-    { x = StringValueInput.fromNumber 0, y = StringValueInput.fromNumber 0, z = StringValueInput.fromNumber 0 }
+    { x = StringValueInput.emptyFloat, y = StringValueInput.emptyFloat, z = StringValueInput.emptyFloat }
 
 
 type alias Size =
@@ -1360,20 +1360,20 @@ initModel flag =
 initPartitions : PartitionsData
 initPartitions =
     { decks =
-        { number = StringValueInput.fromNumber 0
+        { number = StringValueInput.emptyInt
         , spacing = StringValueInput.fromNumber 3.0
         , zero =
             { index = 0
-            , position = StringValueInput.fromNumber 0.0
+            , position = StringValueInput.emptyFloat
             }
         , spacingExceptions = Dict.empty
         }
     , bulkheads =
-        { number = StringValueInput.fromNumber 0
+        { number = StringValueInput.emptyInt
         , spacing = StringValueInput.fromNumber 5.0
         , zero =
             { index = 0
-            , position = StringValueInput.fromNumber 0.0
+            , position = StringValueInput.emptyFloat
             }
         , spacingExceptions = Dict.empty
         }
