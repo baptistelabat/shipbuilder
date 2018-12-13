@@ -1705,6 +1705,7 @@ type ToJsMsg
     | SetSpacingException PartitionType Int String
     | SetLengthOverAll String String
     | SetBreadth String String
+    | SetDraught String String
     | SwitchViewMode ViewMode
     | ToggleBlocksVisibility (List Block) Bool
     | TogglePartitions
@@ -2281,6 +2282,14 @@ updateModelToJs msg model =
             in
                 { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
 
+        SetDraught hullReference newValue ->
+            let
+                updateSlice : HullSlices -> HullSlices
+                updateSlice =
+                    HullSlices.setDraught newValue
+            in
+                { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
+
         SetSpacingException partitionType index input ->
             let
                 ( partition, asPartitionInPartitions ) =
@@ -2554,6 +2563,14 @@ msg2json model action =
                     Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
 
         SetBreadth hullReference _ ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
+
+        SetDraught hullReference _ ->
             case Dict.get hullReference model.slices of
                 Nothing ->
                     Nothing
@@ -3164,6 +3181,7 @@ viewModeller model =
                         [ id "slices-inputs" ]
                         [ StringValueInput.view slices.length <| ToJs << SetLengthOverAll hullReference
                         , StringValueInput.view slices.breadth <| ToJs << SetBreadth hullReference
+                        , StringValueInput.view slices.draught <| ToJs << SetDraught hullReference
                         ]
             else
                 Nothing

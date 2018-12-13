@@ -1444,6 +1444,42 @@ suite =
                                 |> Query.first
                                 |> Event.simulate ("22" |> press |> upArrow)
                                 |> Event.expect (ToJs <| SetBreadth "anthineas" "7.9")
+                    , test "Draught input is present" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "draught" ]
+                                |> Query.first
+                                |> Query.has [ Selector.attribute <| Attributes.value "1.4" ]
+                    , test "Draught input triggers SetDraught" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "draught" ]
+                                |> Query.first
+                                |> Event.simulate (Event.input "123.4")
+                                |> Event.expect (ToJs <| SetDraught "anthineas" "123.4")
+                    , test "SetDraught sets draught" <|
+                        \_ ->
+                            Expect.equal (Just 123.4)
+                                (setModel [ ToJs <| SetDraught "anthineas" "123.4" ]
+                                    |> .slices
+                                    |> Dict.get "anthineas"
+                                    |> Maybe.map (.draught >> .value)
+                                )
+                    , test "SetDraught is properly sent to JS" <|
+                        \_ ->
+                            let
+                                msg =
+                                    SetDraught "anthineas" "123.4"
+                            in
+                                Expect.equal
+                                    (toJS [ ToJs msg ] msg (Json.Decode.map Just HullSlices.decoder))
+                                <|
+                                    Just
+                                        { tag = "load-hull"
+                                        , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
+                                        }
                     ]
             ]
         , describe "Parse JSON slices"
