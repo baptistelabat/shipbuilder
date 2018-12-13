@@ -11,6 +11,7 @@ module StringValueInput
         , floatInputDecoder
         , fromInt
         , fromNumber
+        , round_n
         , setString
         , syncNumberInput
         , view
