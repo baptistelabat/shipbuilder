@@ -1,7 +1,6 @@
 module HullSlicesTests exposing (suite)
 
 import Expect exposing (..)
-import Fuzz
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode
@@ -62,8 +61,8 @@ suite =
             , test "Can set breadth" <|
                 \_ ->
                     Expect.equal { hullSlices | breadth = { value = 13.4, string = "13.4", description = "Breadth", unit = "m" } } (HullSlices.setBreadth "13.4125" hullSlices)
-            , fuzz Fuzz.float "Can set draught" <|
-                \draught ->
-                    Expect.equal { hullSlices | draught = draught } (HullSlices.setDraught draught hullSlices)
+            , test "Can set draught" <|
+                \_ ->
+                    Expect.equal { hullSlices | draught = { value = 13.4, string = "13.4", description = "Draught", unit = "m" } } (HullSlices.setDraught "13.4125" hullSlices)
             ]
         ]
