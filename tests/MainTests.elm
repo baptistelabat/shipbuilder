@@ -1396,9 +1396,9 @@ suite =
             [ test "Can parse 'length'" <|
                 testHullSliceDecoding (.length >> .value) 22.84600067138672
             , test "Can parse 'breadth'" <|
-                testHullSliceDecoding .breadth 6.8935699462890625
+                testHullSliceDecoding (.breadth >> .value) 6.8935699462890625
             , test "Can parse 'mouldedDepth'" <|
-                testHullSliceDecoding .mouldedDepth 6.83698582649231
+                testHullSliceDecoding (.mouldedDepth >> .value) 6.83698582649231
             , test "Can parse 'xmin'" <|
                 testHullSliceDecoding .xmin -1
             , test "Can parse 'ymin'" <|
@@ -1431,9 +1431,9 @@ suite =
             [ test "Can encode 'length'" <|
                 testHullSliceEncoding (.length >> .value) 22.84600067138672
             , test "Can encode 'breadth'" <|
-                testHullSliceEncoding .breadth 6.8935699462890625
+                testHullSliceEncoding (.breadth >> .value) 6.8935699462890625
             , test "Can encode 'mouldedDepth'" <|
-                testHullSliceEncoding .mouldedDepth 6.83698582649231
+                testHullSliceEncoding (.mouldedDepth >> .value) 6.83698582649231
             , test "Can encode 'xmin'" <|
                 testHullSliceEncoding .xmin -1
             , test "Can encode 'ymin'" <|

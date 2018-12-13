@@ -21,8 +21,8 @@ import StringValueInput
 
 type alias HullSlices =
     { length : StringValueInput.FloatInput
-    , breadth : Float
-    , mouldedDepth : Float
+    , breadth : StringValueInput.FloatInput
+    , mouldedDepth : StringValueInput.FloatInput
     , xmin : Float
     , ymin : Float
     , zmin : Float
@@ -34,8 +34,8 @@ type alias HullSlices =
 empty : HullSlices
 empty =
     { length = StringValueInput.emptyFloat
-    , breadth = 0
-    , mouldedDepth = 0
+    , breadth = StringValueInput.emptyFloat
+    , mouldedDepth = StringValueInput.emptyFloat
     , xmin = 0
     , ymin = 0
     , zmin = 0
@@ -64,19 +64,19 @@ hullSliceDecoder =
 decoder : Decode.Decoder HullSlices
 decoder =
     let
-        helper : Float -> Decode.Decoder HullSlices
+        helper : StringValueInput.FloatInput -> Decode.Decoder HullSlices
         helper mouldedDepth =
             Pipeline.decode HullSlices
                 |> Pipeline.required "length" (Decode.map StringValueInput.fromNumber Decode.float)
-                |> Pipeline.required "breadth" Decode.float
+                |> Pipeline.required "breadth" (Decode.map StringValueInput.fromNumber Decode.float)
                 |> Pipeline.hardcoded mouldedDepth
                 |> Pipeline.required "xmin" Decode.float
                 |> Pipeline.required "ymin" Decode.float
                 |> Pipeline.required "zmin" Decode.float
                 |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
-                |> Pipeline.hardcoded (mouldedDepth / 5)
+                |> Pipeline.hardcoded (mouldedDepth.value / 5)
     in
-        Decode.field "mouldedDepth" Decode.float
+        Decode.field "mouldedDepth" (Decode.map StringValueInput.fromNumber Decode.float)
             |> Decode.andThen helper
 
 
@@ -104,8 +104,8 @@ encoder : HullSlices -> Encode.Value
 encoder hullSlices =
     Encode.object
         [ ( "length", Encode.float hullSlices.length.value )
-        , ( "breadth", Encode.float hullSlices.breadth )
-        , ( "mouldedDepth", Encode.float hullSlices.mouldedDepth )
+        , ( "breadth", Encode.float hullSlices.breadth.value )
+        , ( "mouldedDepth", Encode.float hullSlices.mouldedDepth.value )
         , ( "xmin", Encode.float hullSlices.xmin )
         , ( "ymin", Encode.float hullSlices.ymin )
         , ( "zmin", Encode.float hullSlices.zmin )
@@ -118,9 +118,9 @@ setLengthOverAll loa hullSlices =
     { hullSlices | length = hullSlices.length |> StringValueInput.setString loa }
 
 
-setBreadth : Float -> HullSlices -> HullSlices
+setBreadth : String -> HullSlices -> HullSlices
 setBreadth breadth hullSlices =
-    { hullSlices | breadth = breadth }
+    { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth }
 
 
 setDraught : Float -> HullSlices -> HullSlices

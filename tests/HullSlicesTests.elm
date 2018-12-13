@@ -61,7 +61,7 @@ suite =
                     Expect.equal { hullSlices | length = { value = loa, string = toString loa } } (HullSlices.setLengthOverAll (toString loa) hullSlices)
             , fuzz Fuzz.float "Can set breadth" <|
                 \breadth ->
-                    Expect.equal { hullSlices | breadth = breadth } (HullSlices.setBreadth breadth hullSlices)
+                    Expect.equal { hullSlices | breadth = { value = breadth, string = toString breadth } } (HullSlices.setBreadth (toString breadth) hullSlices)
             , fuzz Fuzz.float "Can set draught" <|
                 \draught ->
                     Expect.equal { hullSlices | draught = draught } (HullSlices.setDraught draught hullSlices)
