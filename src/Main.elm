@@ -3162,34 +3162,8 @@ viewModeller model =
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ div
-                            [ class "input-group" ]
-                            [ label
-                                [ for "length-over-all" ]
-                                [ text "Length over all (m)" ]
-                            , input
-                                [ type_ "text"
-                                , id "length-over-all"
-                                , value slices.length.string
-                                , onKeyDown slices.length.string <| ToJs << SetLengthOverAll hullReference
-                                , onInput <| ToJs << SetLengthOverAll hullReference
-                                ]
-                                []
-                            ]
-                        , div
-                            [ class "input-group" ]
-                            [ label
-                                [ for "breadth" ]
-                                [ text "Breadth (m)" ]
-                            , input
-                                [ type_ "text"
-                                , id "breadth"
-                                , value slices.breadth.string
-                                , onKeyDown slices.breadth.string <| ToJs << SetBreadth hullReference
-                                , onInput <| ToJs << SetBreadth hullReference
-                                ]
-                                []
-                            ]
+                        [ StringValueInput.view slices.length <| ToJs << SetLengthOverAll hullReference
+                        , StringValueInput.view slices.breadth <| ToJs << SetBreadth hullReference
                         ]
             else
                 Nothing

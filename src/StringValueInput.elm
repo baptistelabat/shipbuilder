@@ -13,11 +13,17 @@ module StringValueInput
         , fromNumber
         , setString
         , syncNumberInput
+        , view
         )
 
 import Dict exposing (Dict)
+import ExtraEvents
+import Html exposing (Html, div, input, label, text)
+import Html.Attributes exposing (class, for, id, type_, value)
+import Html.Events exposing (onInput)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
+import String
 
 
 type alias FloatInput =
@@ -130,3 +136,62 @@ asValueIn numberInput value =
 asStringIn : { a | value : b, string : String } -> String -> { a | value : b, string : String }
 asStringIn numberInput string =
     { numberInput | string = string }
+
+
+makeID : FloatInput -> String
+makeID var =
+    let
+        isAlphanumeric : Char -> Bool
+        isAlphanumeric char =
+            String.contains (String.fromChar char) alphanumeric
+
+        alphanumeric : String
+        alphanumeric =
+            "abcdefghijklmnopqrstuvxwyz0123456789-_"
+
+        dummy : String
+        dummy =
+            var.string ++ var.unit
+
+        default : String
+        default =
+            if dummy == "" then
+                "empty-float-input"
+            else
+                dummy
+
+        replaceByDefaultIfEmpty : String -> String
+        replaceByDefaultIfEmpty s =
+            if s == "" then
+                default
+            else
+                s
+    in
+        var.description
+            |> String.toLower
+            |> String.split " "
+            |> String.join "-"
+            |> String.filter isAlphanumeric
+
+
+view : FloatInput -> (String -> msg) -> Html msg
+view floatInput onChange =
+    let
+        generatedID : String
+        generatedID =
+            makeID floatInput
+    in
+        div
+            [ class "input-group" ]
+            [ label
+                [ for generatedID ]
+                [ text <| floatInput.description ++ " (" ++ floatInput.unit ++ ")" ]
+            , input
+                [ type_ "text"
+                , id generatedID
+                , value floatInput.string
+                , ExtraEvents.onKeyDown floatInput.string onChange
+                , onInput onChange
+                ]
+                []
+            ]
