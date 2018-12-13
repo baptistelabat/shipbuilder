@@ -3071,6 +3071,7 @@ type alias KeyEvent =
     , shift : Bool
     , alt : Bool
     , ctrl : Bool
+    , targetValue : String
     }
 
 
@@ -4460,6 +4461,7 @@ keyEventDecoder =
         |> Pipeline.required "shiftKey" Decode.bool
         |> Pipeline.required "altKey" Decode.bool
         |> Pipeline.required "ctrlKey" Decode.bool
+         |> Pipeline.requiredAt [ "target", "value" ] Decode.string
 
 
 type Dimension
