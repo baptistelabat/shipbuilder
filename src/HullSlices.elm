@@ -22,8 +22,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import LineChart
-
-
 import LineChart.Area as Area
 import LineChart.Axis as Axis
 import LineChart.Axis.Intersection as Intersection
@@ -37,7 +35,6 @@ import LineChart.Junk as Junk
 import LineChart.Junk as Junk
 import LineChart.Legends as Legends
 import LineChart.Line as Line
-
 import StringValueInput
 
 
