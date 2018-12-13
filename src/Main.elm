@@ -2032,14 +2032,10 @@ updateNoJs msg model =
 
         UpdateMass block input ->
             let
-                newMass : Float
-                newMass =
-                    abs <| Result.withDefault block.mass.value <| String.toFloat input
-
                 updatedBlock : Block
                 updatedBlock =
                     { block
-                        | mass = { value = newMass, string = input }
+                        | mass = StringValueInput.setString input block.mass
                         , referenceForMass = Mass
                     }
                         |> updateBlockMassAndDensity
@@ -2051,14 +2047,10 @@ updateNoJs msg model =
 
         UpdateDensity block input ->
             let
-                newDensity : Float
-                newDensity =
-                    abs <| Result.withDefault block.density.value <| String.toFloat input
-
                 updatedBlock : Block
                 updatedBlock =
                     { block
-                        | density = { value = newDensity, string = input }
+                        | density = StringValueInput.setString (String.filter ((/=) '-') input) block.density
                         , referenceForMass = Density
                     }
                         |> updateBlockMassAndDensity
