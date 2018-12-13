@@ -78,8 +78,12 @@ decodeFloatInput =
 
 
 fromNumber : String -> String -> Float -> FloatInput
-fromNumber unit description number =
-    { value = number, string = toString number, unit = unit, description = description }
+fromNumber unit description value =
+    let
+        roundedValue =
+            round_n 1 value
+    in
+        { value = roundedValue, string = toString roundedValue, unit = unit, description = description }
 
 
 fromInt : String -> Int -> IntInput
@@ -91,7 +95,14 @@ setString : String -> FloatInput -> FloatInput
 setString s floatInput =
     case String.toFloat s of
         Ok value ->
-            { floatInput | value = value, string = s }
+            let
+                roundedValue =
+                    round_n 1 value
+            in
+                if value == roundedValue then
+                    { floatInput | value = roundedValue, string = s }
+                else
+                    { floatInput | value = roundedValue, string = toString roundedValue }
 
         Err e ->
             { floatInput | string = s }
@@ -172,6 +183,24 @@ makeID var =
             |> String.split " "
             |> String.join "-"
             |> String.filter isAlphanumeric
+
+
+{-| Only keep a certain number of significant digits after coma
+-}
+round_n : Int -> Float -> Float
+round_n nb_of_digits x =
+    let
+        factor =
+            10 ^ toFloat nb_of_digits
+    in
+        factor
+            * x
+            + 0.5
+            |> floor
+            |> toFloat
+            |> \u ->
+                u
+                    / factor
 
 
 view : FloatInput -> (String -> msg) -> Html msg

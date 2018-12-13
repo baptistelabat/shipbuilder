@@ -1346,7 +1346,7 @@ suite =
                                 |> Query.fromHtml
                                 |> Query.findAll [ Selector.id "length-over-all" ]
                                 |> Query.first
-                                |> Query.has [ Selector.attribute <| Attributes.value "22.84600067138672" ]
+                                |> Query.has [ Selector.attribute <| Attributes.value "22.8" ]
                     , test "Length over all input triggers SetLengthOverAll" <|
                         \_ ->
                             modellerView
@@ -1383,7 +1383,7 @@ suite =
                                 |> Query.findAll [ Selector.id "length-over-all" ]
                                 |> Query.first
                                 |> Event.simulate ("22" |> press |> downArrow)
-                                |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "21.84600067138672")
+                                |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "21.8")
                     , test "Can press shift down arrow key to decrement length over all" <|
                         \_ ->
                             modellerView
@@ -1391,14 +1391,14 @@ suite =
                                 |> Query.findAll [ Selector.id "length-over-all" ]
                                 |> Query.first
                                 |> Event.simulate ("22" |> press |> shift |> downArrow)
-                                |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "12.846000671386719")
+                                |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "12.8")
                     , test "Breadth input is present" <|
                         \_ ->
                             modellerView
                                 |> Query.fromHtml
                                 |> Query.findAll [ Selector.id "breadth" ]
                                 |> Query.first
-                                |> Query.has [ Selector.attribute <| Attributes.value "6.8935699462890625" ]
+                                |> Query.has [ Selector.attribute <| Attributes.value "6.9" ]
                     , test "Breadth input triggers SetBreadth" <|
                         \_ ->
                             modellerView
@@ -1435,7 +1435,7 @@ suite =
                                 |> Query.findAll [ Selector.id "breadth" ]
                                 |> Query.first
                                 |> Event.simulate ("22" |> press |> downArrow)
-                                |> Event.expect (ToJs <| SetBreadth "anthineas" "5.8935699462890625")
+                                |> Event.expect (ToJs <| SetBreadth "anthineas" "5.9")
                     , test "Can press up arrow key to increment breadth" <|
                         \_ ->
                             modellerView
@@ -1443,16 +1443,16 @@ suite =
                                 |> Query.findAll [ Selector.id "breadth" ]
                                 |> Query.first
                                 |> Event.simulate ("22" |> press |> upArrow)
-                                |> Event.expect (ToJs <| SetBreadth "anthineas" "7.8935699462890625")
+                                |> Event.expect (ToJs <| SetBreadth "anthineas" "7.9")
                     ]
             ]
         , describe "Parse JSON slices"
             [ test "Can parse 'length'" <|
-                testHullSliceDecoding (.length >> .value) 22.84600067138672
+                testHullSliceDecoding (.length >> .value) 22.8
             , test "Can parse 'breadth'" <|
-                testHullSliceDecoding (.breadth >> .value) 6.8935699462890625
+                testHullSliceDecoding (.breadth >> .value) 6.9
             , test "Can parse 'mouldedDepth'" <|
-                testHullSliceDecoding (.mouldedDepth >> .value) 6.83698582649231
+                testHullSliceDecoding (.mouldedDepth >> .value) 6.8
             , test "Can parse 'xmin'" <|
                 testHullSliceDecoding .xmin -1
             , test "Can parse 'ymin'" <|
@@ -1483,11 +1483,11 @@ suite =
             ]
         , describe "Encode JSON slices"
             [ test "Can encode 'length'" <|
-                testHullSliceEncoding (.length >> .value) 22.84600067138672
+                testHullSliceEncoding (.length >> .value) 22.8
             , test "Can encode 'breadth'" <|
-                testHullSliceEncoding (.breadth >> .value) 6.8935699462890625
+                testHullSliceEncoding (.breadth >> .value) 6.9
             , test "Can encode 'mouldedDepth'" <|
-                testHullSliceEncoding (.mouldedDepth >> .value) 6.83698582649231
+                testHullSliceEncoding (.mouldedDepth >> .value) 6.8
             , test "Can encode 'xmin'" <|
                 testHullSliceEncoding .xmin -1
             , test "Can encode 'ymin'" <|
