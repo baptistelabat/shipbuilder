@@ -65,4 +65,9 @@ suite =
                 \_ ->
                     Expect.equal { hullSlices | draught = { value = 13.4, string = "13.4", description = "Draught", unit = "m" } } (HullSlices.setDraught "13.4125" hullSlices)
             ]
+        , describe "Area"
+            [ test "Can calculate slice areas" <|
+                \_ ->
+                    Expect.equal [ 0, 5.246918004139403 ] (hullSlices |> HullSlices.setBreadth "10" |> .sliceAreas)
+            ]
         ]

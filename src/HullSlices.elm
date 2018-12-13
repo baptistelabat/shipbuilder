@@ -17,6 +17,7 @@ import Dict exposing (Dict)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Interpolate.Cubic as Spline exposing (Spline)
 import StringValueInput
 
 
@@ -41,20 +42,23 @@ type alias HullSlices =
     , zmin : Float
     , slices : List HullSlice
     , draught : StringValueInput.FloatInput
+    , sliceSplines : List Spline
+    , sliceAreas : List Float
     }
 
 
 empty : HullSlices
 empty =
-    { length = StringValueInput.emptyFloat
-    , breadth = StringValueInput.emptyFloat
-    , mouldedDepth = StringValueInput.emptyFloat
-    , xmin = 0
-    , ymin = 0
-    , zmin = 0
-    , slices = []
-    , draught = StringValueInput.emptyFloat
-    }
+    interpolate
+        { length = StringValueInput.emptyFloat
+        , breadth = StringValueInput.emptyFloat
+        , mouldedDepth = StringValueInput.emptyFloat
+        , xmin = 0
+        , ymin = 0
+        , zmin = 0
+        , slices = []
+        , draught = StringValueInput.emptyFloat
+        }
 
 
 type alias HullSlice =
@@ -72,6 +76,39 @@ hullSliceDecoder =
         |> Pipeline.required "zmin" Decode.float
         |> Pipeline.required "zmax" Decode.float
         |> Pipeline.required "y" (Decode.list Decode.float)
+
+
+makeSliceSpline : (Float -> Float) -> (Float -> Float) -> HullSlice -> Spline
+makeSliceSpline scaleY scaleZ slice =
+    Spline.withRange (scaleZ slice.zmin) (scaleZ slice.zmax) <| List.map scaleY slice.y
+
+
+interpolate : JsonHullSlices -> HullSlices
+interpolate json =
+    let
+        scaleY : Float -> Float
+        scaleY y =
+            y * json.breadth.value + json.ymin
+
+        scaleZ : Float -> Float
+        scaleZ y =
+            y * json.mouldedDepth.value + json.zmin
+
+        sliceSplines : List Spline
+        sliceSplines =
+            List.map (makeSliceSpline scaleY scaleZ) json.slices
+    in
+        { length = json.length
+        , breadth = json.breadth
+        , mouldedDepth = json.mouldedDepth
+        , xmin = json.xmin
+        , ymin = json.ymin
+        , zmin = json.zmin
+        , slices = json.slices
+        , draught = json.draught
+        , sliceAreas = List.map (Spline.integrate json.zmin (json.zmin + json.draught.value)) sliceSplines
+        , sliceSplines = sliceSplines
+        }
 
 
 decoder : Decode.Decoder HullSlices
@@ -100,6 +137,7 @@ decoder =
             |> Pipeline.required "mouldedDepth" (Decode.map (StringValueInput.fromNumber "m" "Moulded depth") Decode.float)
             |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught") (Decode.float)) Nothing
             |> Decode.andThen helper
+            |> Decode.map interpolate
 
 
 dictDecoder : Decode.Decoder (Dict String HullSlices)
