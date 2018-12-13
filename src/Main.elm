@@ -35,6 +35,7 @@ port module Main
         , SpaceReservationView(..)
         , hullReferences
         , JsData
+        , KeyEvent
         )
 
 import Color exposing (Color)
@@ -1696,12 +1697,6 @@ update msg model =
 type ToJsMsg
     = AddBlock String
     | ChangeBlockColor Block Color
-    | KeyDownOnPositionInput Axis Block KeyEvent
-    | KeyDownOnSizeInput Dimension Block KeyEvent
-    | KeyDownOnPartitionPositionInput PartitionType KeyEvent
-    | KeyDownOnPartitionSpacingInput PartitionType KeyEvent
-    | KeyDownOnLengthOverAllInput String Float KeyEvent
-    | KeyDownOnBreadthInput String Float KeyEvent
     | OpenSaveFile
     | RemoveBlock Block
     | RemoveBlocks (List Block)
@@ -2235,122 +2230,6 @@ updateModelToJs msg model =
         AddBlock label ->
             model
 
-        KeyDownOnPartitionPositionInput partitionType keyEvent ->
-            case toIncrement keyEvent of
-                Just increment ->
-                    let
-                        ( partition, asPartition ) =
-                            case partitionType of
-                                Deck ->
-                                    ( model.partitions.decks, asDecksInPartitions )
-
-                                Bulkhead ->
-                                    ( model.partitions.bulkheads, asBulkheadsInPartitions )
-
-                        newFloatInput : StringValueInput.FloatInput
-                        newFloatInput =
-                            StringValueInput.addToFloatInput increment (partition.zero.position)
-
-                        updatedPartitions : PartitionsData
-                        updatedPartitions =
-                            newFloatInput
-                                |> asPositionInPartitionZero partition.zero
-                                |> asZeroInPartition partition
-                                |> asPartition model.partitions
-                    in
-                        { model | partitions = updatedPartitions }
-
-                Nothing ->
-                    model
-
-        KeyDownOnLengthOverAllInput hullReference originalValue keyEvent ->
-            case toIncrement keyEvent of
-                Nothing ->
-                    model
-
-                Just increment ->
-                    let
-                        updateSlice : HullSlices -> HullSlices
-                        updateSlice =
-                            HullSlices.setLengthOverAll <| toString <| originalValue + increment
-                    in
-                        { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
-
-        KeyDownOnBreadthInput hullReference originalValue keyEvent ->
-            case toIncrement keyEvent of
-                Nothing ->
-                    model
-
-                Just increment ->
-                    let
-                        updateSlice : HullSlices -> HullSlices
-                        updateSlice =
-                            HullSlices.setBreadth <| toString <| originalValue + increment
-                    in
-                        { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
-
-        KeyDownOnPartitionSpacingInput partitionType keyEvent ->
-            case toIncrement keyEvent of
-                Just increment ->
-                    let
-                        ( partition, asPartition ) =
-                            case partitionType of
-                                Deck ->
-                                    ( model.partitions.decks, asDecksInPartitions )
-
-                                Bulkhead ->
-                                    ( model.partitions.bulkheads, asBulkheadsInPartitions )
-
-                        newFloatInput : StringValueInput.FloatInput
-                        newFloatInput =
-                            StringValueInput.addToFloatInput increment (partition.spacing)
-
-                        updatedPartitions : PartitionsData
-                        updatedPartitions =
-                            newFloatInput
-                                |> updateSpacingOfPartition partition
-                                |> asPartition model.partitions
-                    in
-                        { model | partitions = updatedPartitions }
-
-                Nothing ->
-                    model
-
-        KeyDownOnPositionInput axis block keyEvent ->
-            case toIncrement keyEvent of
-                Just increment ->
-                    let
-                        newFloatInput : StringValueInput.FloatInput
-                        newFloatInput =
-                            StringValueInput.addToFloatInput increment (block.position |> axisAccessor axis)
-
-                        updatedBlock : Block
-                        updatedBlock =
-                            updateBlockPositionOnAxis axis block newFloatInput
-                    in
-                        updateBlockInModel updatedBlock model
-
-                Nothing ->
-                    model
-
-        KeyDownOnSizeInput dimension block keyEvent ->
-            case toIncrement keyEvent of
-                Just increment ->
-                    let
-                        newFloatInput : StringValueInput.FloatInput
-                        newFloatInput =
-                            StringValueInput.addToFloatInput increment (block.size |> dimensionAccessor dimension)
-
-                        updatedBlock : Block
-                        updatedBlock =
-                            updateBlockSizeForDimension dimension block newFloatInput
-                                |> updateBlockMassAndDensity
-                    in
-                        updateBlockInModel updatedBlock model
-
-                Nothing ->
-                    model
-
         RemoveBlock block ->
             let
                 blocks : Blocks
@@ -2636,99 +2515,6 @@ msg2json model action =
         AddBlock label ->
             Just { tag = "add-block", data = (encodeAddBlockCommand label) }
 
-        KeyDownOnPartitionPositionInput partitionType keyEvent ->
-            Maybe.map
-                (\increment ->
-                    let
-                        ( partition, asPartition, tag, computePartition ) =
-                            case partitionType of
-                                Deck ->
-                                    ( .partitions >> .decks, asDecksInPartitions, "make-decks", computeDecks )
-
-                                Bulkhead ->
-                                    ( .partitions >> .bulkheads, asBulkheadsInPartitions, "make-bulkheads", computeBulkheads )
-
-                        newFloatInput : StringValueInput.FloatInput
-                        newFloatInput =
-                            StringValueInput.addToFloatInput increment (partition model |> .zero >> .position)
-
-                        updatedPartition =
-                            newFloatInput
-                                |> asPositionInPartitionZero (partition model |> .zero)
-                                |> asZeroInPartition (partition model)
-                    in
-                        { tag = tag
-                        , data =
-                            encodeComputedPartitions <|
-                                computePartition updatedPartition
-                        }
-                )
-            <|
-                toIncrement keyEvent
-
-        KeyDownOnPartitionSpacingInput partitionType keyEvent ->
-            Maybe.map
-                (\increment ->
-                    let
-                        ( partition, asPartition, tag, computePartition ) =
-                            case partitionType of
-                                Deck ->
-                                    ( model.partitions.decks, asDecksInPartitions, "make-decks", computeDecks )
-
-                                Bulkhead ->
-                                    ( model.partitions.bulkheads, asBulkheadsInPartitions, "make-bulkheads", computeBulkheads )
-
-                        newFloatInput : StringValueInput.FloatInput
-                        newFloatInput =
-                            StringValueInput.addToFloatInput increment (partition.spacing)
-
-                        updatedPartition =
-                            newFloatInput
-                                |> updateSpacingOfPartition partition
-                    in
-                        { tag = tag
-                        , data =
-                            encodeComputedPartitions <|
-                                computePartition updatedPartition
-                        }
-                )
-            <|
-                toIncrement keyEvent
-
-        KeyDownOnPositionInput axis block keyEvent ->
-            Maybe.map
-                (\increment ->
-                    let
-                        newFloatInput : StringValueInput.FloatInput
-                        newFloatInput =
-                            StringValueInput.addToFloatInput increment (block.position |> axisAccessor axis)
-
-                        updatedBlock : Block
-                        updatedBlock =
-                            updateBlockPositionOnAxis axis block newFloatInput
-                    in
-                        sendPositionUpdate updatedBlock
-                )
-            <|
-                toIncrement keyEvent
-
-        KeyDownOnSizeInput dimension block keyEvent ->
-            Maybe.map
-                (\increment ->
-                    let
-                        newFloatInput : StringValueInput.FloatInput
-                        newFloatInput =
-                            StringValueInput.addToFloatInput increment (block.size |> dimensionAccessor dimension)
-
-                        updatedBlock : Block
-                        updatedBlock =
-                            updateBlockSizeForDimension dimension block newFloatInput
-                    in
-                        sendSizeUpdate updatedBlock
-                )
-            <|
-                toIncrement keyEvent
-
         OpenSaveFile ->
             Just { tag = "read-json-file", data = Encode.string "open-save-file" }
 
@@ -2768,22 +2554,6 @@ msg2json model action =
                     Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
 
         SetBreadth hullReference _ ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
-
-        KeyDownOnLengthOverAllInput hullReference _ _ ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
-
-        KeyDownOnBreadthInput hullReference _ _ ->
             case Dict.get hullReference model.slices of
                 Nothing ->
                     Nothing
@@ -3061,9 +2831,9 @@ sendPositionUpdate block =
     { tag = "update-position", data = encodeUpdatePositionCommand block }
 
 
-onKeyDown : (KeyEvent -> msg) -> Attribute msg
-onKeyDown tagger =
-    on "keydown" (Decode.map tagger keyEventDecoder)
+onKeyDown : String -> (String -> msg) -> Attribute msg
+onKeyDown currentValue onValueChange =
+    on "keydown" (Decode.map onValueChange (keyEventDecoder currentValue))
 
 
 type alias KeyEvent =
@@ -3445,7 +3215,7 @@ viewModeller model =
                                 [ type_ "text"
                                 , id "length-over-all"
                                 , value slices.length.string
-                                , onKeyDown <| ToJs << KeyDownOnLengthOverAllInput hullReference slices.length.value
+                                , onKeyDown slices.length.string <| ToJs << SetLengthOverAll hullReference
                                 , onInput <| ToJs << SetLengthOverAll hullReference
                                 ]
                                 []
@@ -3459,7 +3229,7 @@ viewModeller model =
                                 [ type_ "text"
                                 , id "breadth"
                                 , value slices.breadth.string
-                                , onKeyDown <| ToJs << KeyDownOnBreadthInput hullReference slices.breadth.value
+                                , onKeyDown slices.breadth.string <| ToJs << SetBreadth hullReference
                                 , onInput <| ToJs << SetBreadth hullReference
                                 ]
                                 []
@@ -3831,7 +3601,7 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
                     , value decks.spacing.string
                     , onInput <| ToJs << UpdatePartitionSpacing Deck
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown <| ToJs << KeyDownOnPartitionSpacingInput Deck
+                    , onKeyDown decks.spacing.string <| ToJs << UpdatePartitionSpacing Deck
                     ]
                     []
                 ]
@@ -3857,7 +3627,7 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
                     , value decks.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Deck
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown <| ToJs << KeyDownOnPartitionPositionInput Deck
+                    , onKeyDown decks.zero.position.string <| ToJs << UpdatePartitionZeroPosition Deck
                     ]
                     []
                 ]
@@ -3979,7 +3749,7 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
                     , value bulkheads.spacing.string
                     , onInput <| ToJs << UpdatePartitionSpacing Bulkhead
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown <| ToJs << KeyDownOnPartitionSpacingInput Bulkhead
+                    , onKeyDown bulkheads.spacing.string <| ToJs << UpdatePartitionSpacing Bulkhead
                     ]
                     []
                 ]
@@ -4005,7 +3775,7 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
                     , value bulkheads.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Bulkhead
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown <| ToJs << KeyDownOnPartitionPositionInput Bulkhead
+                    , onKeyDown bulkheads.zero.position.string <| ToJs << UpdatePartitionZeroPosition Bulkhead
                     ]
                     []
                 ]
@@ -4435,16 +4205,21 @@ viewPositionInputLabel axisLabel =
 
 viewPositionInputInput : Axis -> Block -> String -> Html Msg
 viewPositionInputInput axis block axisLabel =
-    input
-        [ class "block-position-input"
-        , id <| "position-" ++ axisLabel
-        , type_ "text"
-        , value <| .string <| axisAccessor axis <| .position block
-        , onInput <| ToJs << UpdatePosition axis block
-        , onBlur <| NoJs <| SyncBlockInputs block
-        , onKeyDown <| ToJs << KeyDownOnPositionInput axis block
-        ]
-        []
+    let
+        val : String
+        val =
+            .string <| axisAccessor axis <| .position block
+    in
+        input
+            [ class "block-position-input"
+            , id <| "position-" ++ axisLabel
+            , type_ "text"
+            , value val
+            , onInput <| ToJs << UpdatePosition axis block
+            , onBlur <| NoJs <| SyncBlockInputs block
+            , onKeyDown val <| ToJs << UpdatePosition axis block
+            ]
+            []
 
 
 updateBlockPositionOnAxis : Axis -> Block -> StringValueInput.FloatInput -> Block
@@ -4454,14 +4229,30 @@ updateBlockPositionOnAxis axis block floatInput =
         |> asPositionInBlock block
 
 
-keyEventDecoder : Decode.Decoder KeyEvent
-keyEventDecoder =
-    Pipeline.decode KeyEvent
-        |> Pipeline.required "keyCode" Decode.int
-        |> Pipeline.required "shiftKey" Decode.bool
-        |> Pipeline.required "altKey" Decode.bool
-        |> Pipeline.required "ctrlKey" Decode.bool
-         |> Pipeline.requiredAt [ "target", "value" ] Decode.string
+keyEventDecoder : String -> Decode.Decoder String
+keyEventDecoder currentValue =
+    let
+        convertToString : KeyEvent -> String
+        convertToString keyEvent =
+            case toIncrement keyEvent of
+                Nothing ->
+                    keyEvent.targetValue
+
+                Just inc ->
+                    case String.toFloat currentValue of
+                        Err _ ->
+                            keyEvent.targetValue
+
+                        Ok val ->
+                            toString (val + inc)
+    in
+        Pipeline.decode KeyEvent
+            |> Pipeline.required "keyCode" Decode.int
+            |> Pipeline.required "shiftKey" Decode.bool
+            |> Pipeline.required "altKey" Decode.bool
+            |> Pipeline.required "ctrlKey" Decode.bool
+            |> Pipeline.requiredAt [ "target", "value" ] Decode.string
+            |> Decode.map convertToString
 
 
 type Dimension
@@ -4503,16 +4294,21 @@ viewSizeInputLabel dimensionLabel =
 
 viewSizeInputInput : Dimension -> Block -> String -> Html Msg
 viewSizeInputInput dimension block dimensionLabel =
-    input
-        [ class "block-size-input"
-        , id ("size-" ++ dimensionLabel)
-        , type_ "text"
-        , value <| .string <| (dimensionAccessor dimension) <| .size block
-        , onInput <| ToJs << UpdateDimension dimension block
-        , onBlur <| NoJs <| SyncBlockInputs block
-        , onKeyDown <| ToJs << KeyDownOnSizeInput dimension block
-        ]
-        []
+    let
+        val : String
+        val =
+            .string <| (dimensionAccessor dimension) <| .size block
+    in
+        input
+            [ class "block-size-input"
+            , id ("size-" ++ dimensionLabel)
+            , type_ "text"
+            , value val
+            , onInput <| ToJs << UpdateDimension dimension block
+            , onBlur <| NoJs <| SyncBlockInputs block
+            , onKeyDown val <| ToJs << UpdateDimension dimension block
+            ]
+            []
 
 
 viewEditableBlockName : Block -> Html Msg

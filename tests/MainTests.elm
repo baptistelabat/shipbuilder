@@ -36,46 +36,47 @@ type alias ParsedJSData a =
     }
 
 
-keyDown : Int -> ( Bool, Bool, Bool ) -> ( String, Encode.Value )
-keyDown key ( shift, alt, ctrl ) =
+keyDown : Int -> KeyEvent -> ( String, Encode.Value )
+keyDown key keyEvent =
     ( "keydown"
     , Encode.object
         [ ( "keyCode", Encode.int key )
-        , ( "shiftKey", Encode.bool shift )
-        , ( "altKey", Encode.bool alt )
-        , ( "ctrlKey", Encode.bool ctrl )
+        , ( "shiftKey", Encode.bool keyEvent.shift )
+        , ( "altKey", Encode.bool keyEvent.alt )
+        , ( "ctrlKey", Encode.bool keyEvent.ctrl )
+        , ( "target", Encode.object [ ( "value", Encode.string keyEvent.targetValue ) ] )
         ]
     )
 
 
-downArrow : ( Bool, Bool, Bool ) -> ( String, Encode.Value )
+downArrow : KeyEvent -> ( String, Encode.Value )
 downArrow =
     keyDown 40
 
 
-upArrow : ( Bool, Bool, Bool ) -> ( String, Encode.Value )
+upArrow : KeyEvent -> ( String, Encode.Value )
 upArrow =
     keyDown 38
 
 
-press : ( Bool, Bool, Bool )
-press =
-    ( False, False, False )
+press : String -> KeyEvent
+press targetValue =
+    { key = 0, shift = False, alt = False, ctrl = False, targetValue = targetValue }
 
 
-shift : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
-shift ( _, alt, ctrl ) =
-    ( True, alt, ctrl )
+shift : KeyEvent -> KeyEvent
+shift keyEvent =
+    { keyEvent | shift = True }
 
 
-alt : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
-alt ( shift, _, ctrl ) =
-    ( shift, True, ctrl )
+alt : KeyEvent -> KeyEvent
+alt keyEvent =
+    { keyEvent | alt = True }
 
 
-ctrl : ( Bool, Bool, Bool ) -> ( Bool, Bool, Bool )
-ctrl ( shift, alt, _ ) =
-    ( shift, alt, True )
+ctrl : KeyEvent -> KeyEvent
+ctrl keyEvent =
+    { keyEvent | ctrl = True }
 
 
 toJS : List Msg -> ToJsMsg -> Decoder a -> Maybe (ParsedJSData a)
@@ -1380,16 +1381,16 @@ suite =
                                 |> Query.fromHtml
                                 |> Query.findAll [ Selector.id "length-over-all" ]
                                 |> Query.first
-                                |> Event.simulate (press |> downArrow)
-                                |> Event.expect (ToJs <| KeyDownOnLengthOverAllInput "anthineas" 22.84600067138672 { key = 40, shift = False, alt = False, ctrl = False })
+                                |> Event.simulate ("22" |> press |> downArrow)
+                                |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "21.84600067138672")
                     , test "Can press shift down arrow key to decrement length over all" <|
                         \_ ->
                             modellerView
                                 |> Query.fromHtml
                                 |> Query.findAll [ Selector.id "length-over-all" ]
                                 |> Query.first
-                                |> Event.simulate (press |> shift |> downArrow)
-                                |> Event.expect (ToJs <| KeyDownOnLengthOverAllInput "anthineas" 22.84600067138672 { key = 40, shift = True, alt = False, ctrl = False })
+                                |> Event.simulate ("22" |> press |> shift |> downArrow)
+                                |> Event.expect (ToJs <| SetLengthOverAll "anthineas" "12.846000671386719")
                     , test "Breadth input is present" <|
                         \_ ->
                             modellerView
@@ -1432,16 +1433,16 @@ suite =
                                 |> Query.fromHtml
                                 |> Query.findAll [ Selector.id "breadth" ]
                                 |> Query.first
-                                |> Event.simulate (press |> downArrow)
-                                |> Event.expect (ToJs <| KeyDownOnBreadthInput "anthineas" 6.8935699462890625 { key = 40, shift = False, alt = False, ctrl = False })
+                                |> Event.simulate ("22" |> press |> downArrow)
+                                |> Event.expect (ToJs <| SetBreadth "anthineas" "5.8935699462890625")
                     , test "Can press up arrow key to increment breadth" <|
                         \_ ->
                             modellerView
                                 |> Query.fromHtml
                                 |> Query.findAll [ Selector.id "breadth" ]
                                 |> Query.first
-                                |> Event.simulate (press |> upArrow)
-                                |> Event.expect (ToJs <| KeyDownOnBreadthInput "anthineas" 6.8935699462890625 { key = 38, shift = False, alt = False, ctrl = False })
+                                |> Event.simulate ("22" |> press |> upArrow)
+                                |> Event.expect (ToJs <| SetBreadth "anthineas" "7.8935699462890625")
                     ]
             ]
         , describe "Parse JSON slices"
