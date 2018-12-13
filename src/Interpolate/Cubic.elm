@@ -77,8 +77,8 @@ curveAt =
 
 {-| Integrates a spline between two bounds
 -}
-integrate : Spline -> Float -> Float -> Float
-integrate (Spline spline) x0 x1 =
+integrate : Float -> Float -> Spline -> Float
+integrate x0 x1 (Spline spline) =
     let
         n : Int
         n =

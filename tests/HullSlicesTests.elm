@@ -46,13 +46,13 @@ suite =
         , describe "Integrate"
             [ test "Integrating outside the spline bounds should give 0" <|
                 \_ ->
-                    Expect.equal 0 <| Interpolate.Cubic.integrate s 8 9
+                    Expect.equal 0 <| Interpolate.Cubic.integrate 8 9 s
             , test "Integrating within the bounds" <|
                 \_ ->
-                    Expect.equal 127.5 <| Interpolate.Cubic.integrate s 8 11
+                    Expect.equal 127.5 <| Interpolate.Cubic.integrate 8 11 s
             , test "Integrating a bit outside, a bit within the bounds" <|
                 \_ ->
-                    Expect.equal 127.5 <| Interpolate.Cubic.integrate s 10 11
+                    Expect.equal 127.5 <| Interpolate.Cubic.integrate 10 11 s
             ]
         , describe "Setters"
             [ test "Can set length over all" <|
