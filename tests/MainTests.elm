@@ -1488,7 +1488,7 @@ suite =
                 \() ->
                     modellerView
                         |> Query.fromHtml
-                        |> Query.findAll [ Selector.id "area-curve-plot" ]
+                        |> Query.findAll [ Selector.id "area-curve-plot-container" ]
                         |> Query.first
                         |> Query.findAll [ Selector.tag "svg" ]
                         |> Query.count (Expect.equal 1)

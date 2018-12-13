@@ -24,21 +24,19 @@ import Json.Encode as Encode
 import LineChart
 
 
--- import LineChart.Colors as Colors
--- import LineChart.Junk as Junk
--- import LineChart.Area as Area
--- import LineChart.Axis as Axis
--- import LineChart.Junk as Junk
--- import LineChart.Dots as Dots
--- import LineChart.Grid as Grid
--- import LineChart.Dots as Dots
--- import LineChart.Line as Line
--- import LineChart.Colors as Colors
--- import LineChart.Events as Events
--- import LineChart.Legends as Legends
--- import LineChart.Container as Container
--- import LineChart.Interpolation as Interpolation
--- import LineChart.Axis.Intersection as Intersection
+import LineChart.Area as Area
+import LineChart.Axis as Axis
+import LineChart.Axis.Intersection as Intersection
+import LineChart.Colors as Colors
+import LineChart.Container as Container
+import LineChart.Dots as Dots
+import LineChart.Events as Events
+import LineChart.Grid as Grid
+import LineChart.Interpolation as Interpolation
+import LineChart.Junk as Junk
+import LineChart.Junk as Junk
+import LineChart.Legends as Legends
+import LineChart.Line as Line
 
 import StringValueInput
 
@@ -232,22 +230,27 @@ plotAreaCurve slices =
             Debug.log "xys" <| List.map2 (,) xs slices.sliceAreas
     in
         div [ id "area-curve-plot" ]
-            [ LineChart.view1 Tuple.first
-                Tuple.second
-                -- { x = Axis.none 231 Tuple.first
-                -- , y = Axis.none 231 Tuple.second
-                -- , container = Container.spaced "area-curve-plot" 0 0 0 0
-                -- , interpolation = Interpolation.default
-                -- , intersection = Intersection.default
-                -- , legends = Legends.none
-                -- , events = Events.default
-                -- , junk = Junk.default
-                -- , grid = Grid.default
-                -- , area = Area.default
-                -- , line = Line.default
-                -- , dots = Dots.default
-                -- }
-                xys
+            [ LineChart.viewCustom
+                { x = Axis.default 231 "x" Tuple.first
+                , y = Axis.default 231 "z" Tuple.second
+                , container = Container.custom
+                    { attributesHtml = [Html.Attributes.style[ ( "font-family", "monospace" ) ]]
+                    , attributesSvg = [  ]
+                    , size = Container.static
+                    , margin = Container.Margin 0 10 20 30
+                    , id = "area-curve-plot"
+                    }
+                , interpolation = Interpolation.monotone
+                , intersection = Intersection.default
+                , legends = Legends.none
+                , events = Events.default
+                , junk = Junk.default
+                , grid = Grid.lines 1 Colors.gray
+                , area = Area.stacked 0.2
+                , line = Line.wider 3
+                , dots = Dots.custom (Dots.full 10)
+                }
+                [LineChart.line Colors.blue Dots.circle "Area curve" xys]
             ]
 
 
