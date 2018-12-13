@@ -67,8 +67,8 @@ decoder =
         helper : StringValueInput.FloatInput -> Decode.Decoder HullSlices
         helper mouldedDepth =
             Pipeline.decode HullSlices
-                |> Pipeline.required "length" (Decode.map StringValueInput.fromNumber Decode.float)
-                |> Pipeline.required "breadth" (Decode.map StringValueInput.fromNumber Decode.float)
+                |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)
+                |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth") Decode.float)
                 |> Pipeline.hardcoded mouldedDepth
                 |> Pipeline.required "xmin" Decode.float
                 |> Pipeline.required "ymin" Decode.float
@@ -76,7 +76,7 @@ decoder =
                 |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
                 |> Pipeline.hardcoded (mouldedDepth.value / 5)
     in
-        Decode.field "mouldedDepth" (Decode.map StringValueInput.fromNumber Decode.float)
+        Decode.field "mouldedDepth" (Decode.map (StringValueInput.fromNumber "m" "Moulded depth (m)") Decode.float)
             |> Decode.andThen helper
 
 

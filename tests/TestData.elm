@@ -6,6 +6,7 @@ import Math.Vector3 exposing (..)
 import Html exposing (Html)
 import Color
 import Json.Encode as Encode
+import StringValueInput
 
 
 valueToIndentedString : Encode.Value -> String
@@ -19,13 +20,13 @@ blockA =
         "abcd"
         "Helicopter"
         Color.blue
-        { x = { value = 0, string = "0" }
-        , y = { value = 0, string = "0" }
-        , z = { value = 0, string = "0" }
+        { x = StringValueInput.emptyFloat
+        , y = StringValueInput.emptyFloat
+        , z = StringValueInput.emptyFloat
         }
-        { length = { value = 10, string = "10" }
-        , width = { value = 10, string = "10" }
-        , height = { value = 10, string = "10" }
+        { length = StringValueInput.fromNumber "" "" 10
+        , width = StringValueInput.fromNumber "" "" 10
+        , height = StringValueInput.fromNumber "" "" 10
         }
 
 
@@ -35,13 +36,13 @@ blockB =
         "efgh"
         "Tank"
         Color.red
-        { x = { value = 0, string = "0" }
-        , y = { value = 0, string = "0" }
-        , z = { value = 0, string = "0" }
+        { x = StringValueInput.emptyFloat
+        , y = StringValueInput.emptyFloat
+        , z = StringValueInput.emptyFloat
         }
-        { length = { value = 10, string = "10" }
-        , width = { value = 10, string = "10" }
-        , height = { value = 10, string = "10" }
+        { length = StringValueInput.fromNumber "" "" 10
+        , width = StringValueInput.fromNumber "" "" 10
+        , height = StringValueInput.fromNumber "" "" 10
         }
 
 
@@ -51,13 +52,13 @@ blockC =
         "ijkl"
         "Hangar"
         Color.green
-        { x = { value = 0, string = "0" }
-        , y = { value = 0, string = "0" }
-        , z = { value = 0, string = "0" }
+        { x = StringValueInput.emptyFloat
+        , y = StringValueInput.emptyFloat
+        , z = StringValueInput.emptyFloat
         }
-        { length = { value = 10, string = "10" }
-        , width = { value = 10, string = "10" }
-        , height = { value = 10, string = "10" }
+        { length = StringValueInput.fromNumber "" "" 10
+        , width = StringValueInput.fromNumber "" "" 10
+        , height = StringValueInput.fromNumber "" "" 10
         }
 
 

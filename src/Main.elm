@@ -242,8 +242,8 @@ decodeBlock =
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
         |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
-        |> Pipeline.optional "mass" StringValueInput.floatInputDecoder StringValueInput.emptyFloat
-        |> Pipeline.optional "density" StringValueInput.floatInputDecoder StringValueInput.emptyFloat
+        |> Pipeline.optional "mass" (StringValueInput.floatInputDecoder "m" "Mass") StringValueInput.emptyFloat
+        |> Pipeline.optional "density" (StringValueInput.floatInputDecoder "kg/m^3" "Density") StringValueInput.emptyFloat
         |> Pipeline.optional "visible" Decode.bool True
         |> Pipeline.optional "centerOfGravity" decodePosition initPosition
 
@@ -287,17 +287,17 @@ syncSizeDecoder =
 decodePosition : Decode.Decoder Position
 decodePosition =
     Pipeline.decode Position
-        |> Pipeline.required "x" StringValueInput.floatInputDecoder
-        |> Pipeline.required "y" StringValueInput.floatInputDecoder
-        |> Pipeline.required "z" StringValueInput.floatInputDecoder
+        |> Pipeline.required "x" (StringValueInput.floatInputDecoder "m" "x")
+        |> Pipeline.required "y" (StringValueInput.floatInputDecoder "m" "y")
+        |> Pipeline.required "z" (StringValueInput.floatInputDecoder "m" "z")
 
 
 decodeSize : Decode.Decoder Size
 decodeSize =
     Pipeline.decode Size
-        |> Pipeline.required "x" StringValueInput.floatInputDecoder
-        |> Pipeline.required "y" StringValueInput.floatInputDecoder
-        |> Pipeline.required "z" StringValueInput.floatInputDecoder
+        |> Pipeline.required "x" (StringValueInput.floatInputDecoder "m" "x")
+        |> Pipeline.required "y" (StringValueInput.floatInputDecoder "m" "y")
+        |> Pipeline.required "z" (StringValueInput.floatInputDecoder "m" "z")
 
 
 decodeRgbRecord : Decode.Decoder Color
@@ -319,8 +319,8 @@ decodePartitions =
 decodeDecks : Decode.Decoder Decks
 decodeDecks =
     Pipeline.decode Decks
-        |> Pipeline.required "number" (Decode.map StringValueInput.fromNumber Decode.int)
-        |> Pipeline.required "spacing" StringValueInput.floatInputDecoder
+        |> Pipeline.required "number" (Decode.map (StringValueInput.fromInt "Number of decks") Decode.int)
+        |> Pipeline.required "spacing" (StringValueInput.floatInputDecoder "m" "Spacing")
         |> Pipeline.required "zero" decodePartitionZero
         |> Pipeline.optional "spacingExceptions" StringValueInput.decodeSpacingExceptions Dict.empty
 
@@ -328,8 +328,8 @@ decodeDecks =
 decodeBulkheads : Decode.Decoder Bulkheads
 decodeBulkheads =
     Pipeline.decode Bulkheads
-        |> Pipeline.required "number" (Decode.map StringValueInput.fromNumber Decode.int)
-        |> Pipeline.required "spacing" StringValueInput.floatInputDecoder
+        |> Pipeline.required "number" (Decode.map (StringValueInput.fromInt "Number of decks") Decode.int)
+        |> Pipeline.required "spacing" (StringValueInput.floatInputDecoder "m" "Spacing")
         |> Pipeline.required "zero" decodePartitionZero
         |> Pipeline.optional "spacingExceptions" StringValueInput.decodeSpacingExceptions Dict.empty
 
@@ -338,7 +338,7 @@ decodePartitionZero : Decode.Decoder PartitionZero
 decodePartitionZero =
     Pipeline.decode PartitionZero
         |> Pipeline.required "index" Decode.int
-        |> Pipeline.required "position" StringValueInput.floatInputDecoder
+        |> Pipeline.required "position" (StringValueInput.floatInputDecoder "m" "Position")
 
 
 type alias Toasts =
@@ -654,7 +654,7 @@ type alias Frame =
 
 initFrame : Frame
 initFrame =
-    { x = StringValueInput.emptyFloat
+    { x = (StringValueInput.fromNumber "m" "x") 0
     , points = Dict.fromList [ ( 0, initFramePoint ), ( 1, initFramePoint ), ( 2, initFramePoint ), ( 3, initFramePoint ), ( 4, initFramePoint ) ]
     }
 
@@ -667,8 +667,8 @@ type alias FramePoint =
 
 initFramePoint : FramePoint
 initFramePoint =
-    { y = StringValueInput.emptyFloat
-    , z = StringValueInput.emptyFloat
+    { y = (StringValueInput.fromNumber "m" "y") 0.0
+    , z = (StringValueInput.fromNumber "m" "z") 0.0
     }
 
 
@@ -1361,7 +1361,7 @@ initPartitions : PartitionsData
 initPartitions =
     { decks =
         { number = StringValueInput.emptyInt
-        , spacing = StringValueInput.fromNumber 3.0
+        , spacing = (StringValueInput.fromNumber "m" "Spacing") 3.0
         , zero =
             { index = 0
             , position = StringValueInput.emptyFloat
@@ -1370,10 +1370,10 @@ initPartitions =
         }
     , bulkheads =
         { number = StringValueInput.emptyInt
-        , spacing = StringValueInput.fromNumber 5.0
+        , spacing = (StringValueInput.fromNumber "m" "Spacing") 5
         , zero =
             { index = 0
-            , position = StringValueInput.emptyFloat
+            , position = (StringValueInput.fromNumber "m" "Position of bulckhead zero") 0
             }
         , spacingExceptions = Dict.empty
         }
@@ -1577,10 +1577,10 @@ updateBlockMassAndDensity block =
             block
 
         Mass ->
-            { block | density = StringValueInput.fromNumber <| block.mass.value / (computeVolume block) }
+            { block | density = StringValueInput.fromNumber "kg" "Mass" <| block.mass.value / (computeVolume block) }
 
         Density ->
-            { block | mass = StringValueInput.fromNumber <| block.density.value * (computeVolume block) }
+            { block | mass = StringValueInput.fromNumber "kg/m^3" "Density" <| block.density.value * (computeVolume block) }
 
 
 type alias BoundingBox =
@@ -1785,9 +1785,9 @@ updateNoJs msg model =
                 updatedBlock =
                     { block
                         | centerOfGravity =
-                            { x = StringValueInput.fromNumber centerOfVolume.x
-                            , y = StringValueInput.fromNumber centerOfVolume.y
-                            , z = StringValueInput.fromNumber centerOfVolume.z
+                            { x = (StringValueInput.fromNumber "m" "x") centerOfVolume.x
+                            , y = (StringValueInput.fromNumber "m" "y") centerOfVolume.y
+                            , z = (StringValueInput.fromNumber "m" "z") centerOfVolume.z
                             }
                     }
             in
@@ -2139,7 +2139,7 @@ updateFromJs jsmsg model =
                                 | partitions =
                                     updatePartition <|
                                         asZeroInPartition (partition model) <|
-                                            flip asPositionInPartitionZero (StringValueInput.fromNumber position) <|
+                                            flip asPositionInPartitionZero ((StringValueInput.fromNumber "m" "Position") position) <|
                                                 asIndexInPartitionZero (.zero <| partition model) index
                                 , viewMode = Partitioning PropertiesEdition
                             }
@@ -2859,7 +2859,7 @@ msg2json model action =
                             , data =
                                 encodeComputedPartitions <|
                                     computePartition
-                                        { partition | number = StringValueInput.fromNumber <| abs value }
+                                        { partition | number = (StringValueInput.fromInt "Number of partitions") <| abs value }
                             }
 
                     Err error ->
@@ -2882,7 +2882,7 @@ msg2json model action =
                             , data =
                                 encodeComputedPartitions <|
                                     computePartition
-                                        { partition | spacing = StringValueInput.fromNumber <| abs value }
+                                        { partition | spacing = (StringValueInput.fromNumber "m" "Spacing") <| abs value }
                             }
 
                     Err error ->
@@ -2907,7 +2907,7 @@ msg2json model action =
                                     computePartition <|
                                         asZeroInPartition partition <|
                                             asPositionInPartitionZero partition.zero <|
-                                                StringValueInput.fromNumber value
+                                                (StringValueInput.fromNumber "m" "Position of partition zero") value
                             }
 
                     Err error ->
@@ -3079,7 +3079,7 @@ updateBlockSizeForDimension dimension block floatInput =
     let
         validFloatInput =
             Basics.max 0.1 floatInput.value
-                |> StringValueInput.fromNumber
+                |> (StringValueInput.fromNumber "m" "Dimension")
     in
         validFloatInput
             |> (asDimensionInSize dimension) block.size
@@ -3091,7 +3091,7 @@ updateSpacingOfPartition partition floatInput =
     let
         validFloatInput =
             Basics.max 0 floatInput.value
-                |> StringValueInput.fromNumber
+                |> (StringValueInput.fromNumber "m" "Spacing")
     in
         validFloatInput
             |> asSpacingInPartition partition
@@ -3102,7 +3102,7 @@ updateBlockLength block floatInput =
     let
         validFloatInput =
             Basics.max 0.1 floatInput.value
-                |> StringValueInput.fromNumber
+                |> (StringValueInput.fromNumber "m" "Block length")
     in
         validFloatInput
             |> asLengthInSize block.size

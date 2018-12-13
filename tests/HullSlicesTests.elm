@@ -58,10 +58,10 @@ suite =
         , describe "Setters"
             [ fuzz Fuzz.float "Can set length over all" <|
                 \loa ->
-                    Expect.equal { hullSlices | length = { value = loa, string = toString loa } } (HullSlices.setLengthOverAll (toString loa) hullSlices)
+                    Expect.equal { hullSlices | length = { value = loa, string = toString loa, description = "Length over all", unit = "m" } } (HullSlices.setLengthOverAll (toString loa) hullSlices)
             , fuzz Fuzz.float "Can set breadth" <|
                 \breadth ->
-                    Expect.equal { hullSlices | breadth = { value = breadth, string = toString breadth } } (HullSlices.setBreadth (toString breadth) hullSlices)
+                    Expect.equal { hullSlices | breadth = { value = breadth, string = toString breadth, description = "Breadth", unit = "m" } } (HullSlices.setBreadth (toString breadth) hullSlices)
             , fuzz Fuzz.float "Can set draught" <|
                 \draught ->
                     Expect.equal { hullSlices | draught = draught } (HullSlices.setDraught draught hullSlices)
