@@ -246,10 +246,10 @@ plotAreaCurve slices =
         xys =
             Debug.log "xys" <| List.map2 (,) xs slices.sliceAreas
     in
-        div [ id "area-curve-plot" ]
+        div [ id "area-curve-plot-container" ]
             [ LineChart.viewCustom
                 { x = Axis.default 231 "x" Tuple.first
-                , y = Axis.default 231 "z" Tuple.second
+                , y = Axis.default 231 "Area" Tuple.second
                 , container = Container.custom
                     { attributesHtml = [Html.Attributes.style[ ( "font-family", "monospace" ) ]]
                     , attributesSvg = [  ]
