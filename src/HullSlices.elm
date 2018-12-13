@@ -41,8 +41,9 @@ import LineChart.Line as Line
 import StringValueInput
 
 
-type alias JsonHullSlices =
-    { length : StringValueInput.FloatInput
+type alias JsonHullSlices a =
+    { a
+    | length : StringValueInput.FloatInput
     , breadth : StringValueInput.FloatInput
     , mouldedDepth : StringValueInput.FloatInput
     , xmin : Float
@@ -104,7 +105,7 @@ makeSliceSpline scaleY scaleZ slice =
     Spline.withRange (scaleZ slice.zmin) (scaleZ slice.zmax) <| List.map scaleY slice.y
 
 
-interpolate : JsonHullSlices -> HullSlices
+interpolate : JsonHullSlices a -> HullSlices
 interpolate json =
     let
         scaleY : Float -> Float
@@ -135,13 +136,24 @@ interpolate json =
         , blockCoefficient = (Maybe.withDefault 0 <| List.maximum sliceAreas) /(json.breadth.value*json.draught.value)
         }
 
+f :  StringValueInput.FloatInput->  StringValueInput.FloatInput->  StringValueInput.FloatInput->  Float->  Float->  Float->  List HullSlice-> StringValueInput.FloatInput -> JsonHullSlices {}
+f length breadth mouldedDepth xmin ymin zmin slices draught =
+  { length = length
+  , breadth = breadth
+  , mouldedDepth = mouldedDepth
+  , xmin = xmin
+  , ymin = ymin
+  , zmin = zmin
+  , slices = slices
+  , draught = draught
+  }
 
 decoder : Decode.Decoder HullSlices
 decoder =
     let
-        helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder JsonHullSlices
+        helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder (JsonHullSlices {})
         helper ( mouldedDepth, maybeDraught ) =
-            Pipeline.decode JsonHullSlices
+            Pipeline.decode f
                 |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)
                 |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth") Decode.float)
                 |> Pipeline.hardcoded mouldedDepth
