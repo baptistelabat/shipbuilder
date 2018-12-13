@@ -64,6 +64,7 @@ type alias HullSlices =
     , draught : StringValueInput.FloatInput
     , sliceSplines : List Spline
     , sliceAreas : List Float
+    , blockCoefficient : Float
     }
 
 
@@ -117,6 +118,9 @@ interpolate json =
         sliceSplines : List Spline
         sliceSplines =
             List.map (makeSliceSpline scaleY scaleZ) json.slices
+        sliceAreas : List Float
+        sliceAreas =
+          List.map (Spline.integrate json.zmin (json.zmin + json.draught.value)) sliceSplines
     in
         { length = json.length
         , breadth = json.breadth
@@ -126,8 +130,9 @@ interpolate json =
         , zmin = json.zmin
         , slices = json.slices
         , draught = json.draught
-        , sliceAreas = List.map (Spline.integrate json.zmin (json.zmin + json.draught.value)) sliceSplines
+        , sliceAreas = sliceAreas
         , sliceSplines = sliceSplines
+        , blockCoefficient = (Maybe.withDefault 0 <| List.maximum sliceAreas) /(json.breadth.value*json.draught.value)
         }
 
 
