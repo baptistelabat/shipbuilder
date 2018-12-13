@@ -1703,9 +1703,7 @@ type ToJsMsg
     | SelectBlock Block
     | SelectHullReference String
     | SetSpacingException PartitionType Int String
-    | SetLengthOverAll String String
-    | SetBreadth String String
-    | SetDraught String String
+    | ModifySlice (String -> HullSlices -> HullSlices) String String
     | SwitchViewMode ViewMode
     | ToggleBlocksVisibility (List Block) Bool
     | TogglePartitions
@@ -2266,29 +2264,8 @@ updateModelToJs msg model =
         UnselectHullReference ->
             { model | selectedHullReference = Nothing }
 
-        SetLengthOverAll hullReference newValue ->
-            let
-                updateSlice : HullSlices -> HullSlices
-                updateSlice =
-                    HullSlices.setLengthOverAll newValue
-            in
-                { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
-
-        SetBreadth hullReference newValue ->
-            let
-                updateSlice : HullSlices -> HullSlices
-                updateSlice =
-                    HullSlices.setBreadth newValue
-            in
-                { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
-
-        SetDraught hullReference newValue ->
-            let
-                updateSlice : HullSlices -> HullSlices
-                updateSlice =
-                    HullSlices.setDraught newValue
-            in
-                { model | slices = Dict.update hullReference (Maybe.map updateSlice) model.slices }
+        ModifySlice modifier hullReference newValue ->
+            { model | slices = Dict.update hullReference (Maybe.map <| modifier newValue) model.slices }
 
         SetSpacingException partitionType index input ->
             let
@@ -2554,23 +2531,7 @@ msg2json model action =
                 Just hullSlices ->
                     Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
 
-        SetLengthOverAll hullReference _ ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
-
-        SetBreadth hullReference _ ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
-
-        SetDraught hullReference _ ->
+        ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
                 Nothing ->
                     Nothing
@@ -3179,9 +3140,9 @@ viewModeller model =
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ StringValueInput.view slices.length <| ToJs << SetLengthOverAll hullReference
-                        , StringValueInput.view slices.breadth <| ToJs << SetBreadth hullReference
-                        , StringValueInput.view slices.draught <| ToJs << SetDraught hullReference
+                        [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSlices.setLengthOverAll hullReference
+                        , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSlices.setBreadth hullReference
+                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
                         ]
             else
                 Nothing
