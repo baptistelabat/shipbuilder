@@ -8,6 +8,7 @@ module HullSlices
         , setBreadth
         , setDraught
         , setLengthOverAll
+        , setMouldedDepth
         , HullSlices
         , HullSlice
         )
@@ -136,3 +137,8 @@ setBreadth breadth hullSlices =
 setDraught : String -> HullSlices -> HullSlices
 setDraught draught hullSlices =
     { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught }
+
+
+setMouldedDepth : String -> HullSlices -> HullSlices
+setMouldedDepth mouldedDepth hullSlices =
+    { hullSlices | mouldedDepth = hullSlices.mouldedDepth |> StringValueInput.setString mouldedDepth }
