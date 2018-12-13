@@ -7,6 +7,7 @@ module StringValueInput
         , asValueIn
         , decodeSpacingExceptions
         , emptyFloat
+        , emptyInt
         , floatInputDecoder
         , fromNumber
         , setString
@@ -26,6 +27,13 @@ type alias FloatInput =
 
 emptyFloat : FloatInput
 emptyFloat =
+    { value = 0
+    , string = ""
+    }
+
+
+emptyInt : IntInput
+emptyInt =
     { value = 0
     , string = ""
     }
