@@ -3144,6 +3144,7 @@ viewModeller model =
                         , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSlices.setBreadth hullReference
                         , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
                         , StringValueInput.view slices.mouldedDepth <| ToJs << ModifySlice HullSlices.setMouldedDepth hullReference
+                        , HullSlices.plotAreaCurve slices
                         ]
             else
                 Nothing

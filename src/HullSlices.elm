@@ -5,6 +5,7 @@ module HullSlices
         , encoder
         , dictDecoder
         , dictEncoder
+        , plotAreaCurve
         , setBreadth
         , setDraught
         , setLengthOverAll
@@ -14,10 +15,31 @@ module HullSlices
         )
 
 import Dict exposing (Dict)
+import Html exposing (Html, div)
+import Html.Attributes exposing (id)
+import Interpolate.Cubic as Spline exposing (Spline)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import Interpolate.Cubic as Spline exposing (Spline)
+import LineChart
+
+
+-- import LineChart.Colors as Colors
+-- import LineChart.Junk as Junk
+-- import LineChart.Area as Area
+-- import LineChart.Axis as Axis
+-- import LineChart.Junk as Junk
+-- import LineChart.Dots as Dots
+-- import LineChart.Grid as Grid
+-- import LineChart.Dots as Dots
+-- import LineChart.Line as Line
+-- import LineChart.Colors as Colors
+-- import LineChart.Events as Events
+-- import LineChart.Legends as Legends
+-- import LineChart.Container as Container
+-- import LineChart.Interpolation as Interpolation
+-- import LineChart.Axis.Intersection as Intersection
+
 import StringValueInput
 
 
@@ -192,3 +214,43 @@ setDraught draught hullSlices =
 setMouldedDepth : String -> HullSlices -> HullSlices
 setMouldedDepth mouldedDepth hullSlices =
     { hullSlices | mouldedDepth = hullSlices.mouldedDepth |> StringValueInput.setString mouldedDepth }
+
+
+plotAreaCurve : HullSlices -> Html msg
+plotAreaCurve slices =
+    let
+        n : Int
+        n =
+            List.length slices.sliceAreas
+
+        xs : List Float
+        xs =
+            Debug.log "xs" <| List.map (\idx -> slices.xmin + slices.length.value * (toFloat idx) / ((toFloat n) - 1.0)) <| List.range 0 (n - 1)
+
+        xys : List ( Float, Float )
+        xys =
+            Debug.log "xys" <| List.map2 (,) xs slices.sliceAreas
+    in
+        div [ id "area-curve-plot" ]
+            [ LineChart.view1 Tuple.first
+                Tuple.second
+                -- { x = Axis.none 231 Tuple.first
+                -- , y = Axis.none 231 Tuple.second
+                -- , container = Container.spaced "area-curve-plot" 0 0 0 0
+                -- , interpolation = Interpolation.default
+                -- , intersection = Intersection.default
+                -- , legends = Legends.none
+                -- , events = Events.default
+                -- , junk = Junk.default
+                -- , grid = Grid.default
+                -- , area = Area.default
+                -- , line = Line.default
+                -- , dots = Dots.default
+                -- }
+                xys
+            ]
+
+
+
+-- [ LineChart.line Colors.blue Dots.none "area-curve" xys
+-- ]
