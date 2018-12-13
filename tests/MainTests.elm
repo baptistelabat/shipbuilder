@@ -1454,6 +1454,29 @@ suite =
                                     |> Dict.get "anthineas"
                                     |> Maybe.map (.draught >> .value)
                                 )
+                    , test "Moulded depth input is present" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "moulded-depth" ]
+                                |> Query.first
+                                |> Query.has [ Selector.attribute <| Attributes.value "6.8" ]
+                    , test "Moulded depth input triggers ModifySlice" <|
+                        \_ ->
+                            modellerView
+                                |> Query.fromHtml
+                                |> Query.findAll [ Selector.id "moulded-depth" ]
+                                |> Query.first
+                                |> Event.simulate (Event.input "123.4")
+                                |> Event.expect (ToJs <| ModifySlice HullSlices.setMouldedDepth "anthineas" "123.4")
+                    , test "ModifySlice sets mouldedDepth" <|
+                        \_ ->
+                            Expect.equal (Just 123.4)
+                                (setModel [ ToJs <| ModifySlice HullSlices.setMouldedDepth "anthineas" "123.4" ]
+                                    |> .slices
+                                    |> Dict.get "anthineas"
+                                    |> Maybe.map (.mouldedDepth >> .value)
+                                )
                     ]
             ]
         , describe "Parse JSON slices"
