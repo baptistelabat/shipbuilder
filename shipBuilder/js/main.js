@@ -430,7 +430,7 @@ let loadHull = function (json) {
         // there can only be one hull in the scene so remove the current one, if any
         unloadHull();
 
-        const hullColor = new THREE.Color(0.56, 0.69, 1); // light blue
+        const hullColor = new THREE.Color(3/255, 146/255, 255/255); // light blue
         // the STL loader returns a bufferGeometry. We can't read its vertices and faces
         // we need to convert it to an "actual" geometry to access these
         const geometry = buildHullGeometry(json);
