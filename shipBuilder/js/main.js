@@ -404,8 +404,8 @@ let buildHullGeometry = function ( json ) {
             var k3 = k1+2*ny;
             var k4 = k3 + 1;
 
-            geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
-            geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
+            geometry.faces.push( new THREE.Face3( k1, k4, k3 ) );
+            geometry.faces.push( new THREE.Face3( k1, k2, k4 ) );
         }
     }
     for (let i = 0; i < nx -1 ; i++){
@@ -416,8 +416,8 @@ let buildHullGeometry = function ( json ) {
             var k3 = k1+2*ny;
             var k4 = k3 + 1;
 
-            geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
-            geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
+            geometry.faces.push( new THREE.Face3( k1, k3, k2 ) );
+            geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
         }
     }
     //compute Normals
