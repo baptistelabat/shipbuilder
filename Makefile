@@ -2,7 +2,7 @@
 
 VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points-at HEAD),$(shell git rev-parse --short=8 HEAD))
 
-all: build test
+all: json build test
 
 build: shipBuilder/js/elm.js shipBuilder/index.html
 
@@ -14,9 +14,9 @@ rebuildHull/js/hull.js: rebuildHull/src/hull.js
 
 json:
 	cd buildHull && make
-	cp buildHull/*.json shipBuilder/assets
+	cp buildHull/*.json shipBuilder
 
-shipBuilder/js/elm.js: src/* tests/*
+shipBuilder/js/elm.js: src/* tests/* src/Interpolate/*
 	rm -rf elm-stuff/generated-code || true
 	docker build -t elm .
 	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm make --yes --warn src/Main.elm --output shipBuilder/js/elm.js
@@ -25,9 +25,12 @@ test:
 	docker build -t elm .
 	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm test --skip-install --verbose
 
-shipBuilder/index.html: shipBuilder/index.template.html
-	@sed 's/GIT_SHA/$(VERSION)/g' shipBuilder/index.template.html > shipBuilder/index.html
+shipBuilder/index.html: shipBuilder/index.template.json.html
+	@sed 's/GIT_SHA/$(VERSION)/g' shipBuilder/index.template.json.html > shipBuilder/index.html
 	@echo "Added GIT SHA to index.html"
+
+shipBuilder/index.template.json.html: shipBuilder/index.template.html
+	cd shipBuilder && docker run -t --rm -u $(shell id -u):$(shell id -g) -v $(shell pwd)/shipBuilder:/work -w /work python:3.6 python add_json_to_html.py
 
 artifacts: shipBuilder.zip
 
