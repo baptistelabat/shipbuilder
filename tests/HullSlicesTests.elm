@@ -1,7 +1,6 @@
 module HullSlicesTests exposing (suite)
 
 import Expect exposing (..)
-import Fuzz
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode
@@ -56,14 +55,14 @@ suite =
                     Expect.equal 127.5 <| Interpolate.Cubic.integrate s 10 11
             ]
         , describe "Setters"
-            [ fuzz Fuzz.float "Can set length over all" <|
-                \loa ->
-                    Expect.equal { hullSlices | length = { value = loa, string = toString loa } } (HullSlices.setLengthOverAll (toString loa) hullSlices)
-            , fuzz Fuzz.float "Can set breadth" <|
-                \breadth ->
-                    Expect.equal { hullSlices | breadth = { value = breadth, string = toString breadth } } (HullSlices.setBreadth (toString breadth) hullSlices)
-            , fuzz Fuzz.float "Can set draught" <|
-                \draught ->
-                    Expect.equal { hullSlices | draught = draught } (HullSlices.setDraught draught hullSlices)
+            [ test "Can set length over all" <|
+                \_ ->
+                    Expect.equal { hullSlices | length = { value = 1.2, string = "1.2", description = "Length over all", unit = "m" } } (HullSlices.setLengthOverAll "1.234" hullSlices)
+            , test "Can set breadth" <|
+                \_ ->
+                    Expect.equal { hullSlices | breadth = { value = 13.4, string = "13.4", description = "Breadth", unit = "m" } } (HullSlices.setBreadth "13.4125" hullSlices)
+            , test "Can set draught" <|
+                \_ ->
+                    Expect.equal { hullSlices | draught = { value = 13.4, string = "13.4", description = "Draught", unit = "m" } } (HullSlices.setDraught "13.4125" hullSlices)
             ]
         ]
