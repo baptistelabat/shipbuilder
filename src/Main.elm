@@ -2239,9 +2239,6 @@ updateModelToJs msg model =
 
         RemoveBlocks blocks ->
             let
-                _ =
-                    Debug.log "remove blocks " (List.length blocks)
-
                 nblocks =
                     removeListBlocksFrom model.blocks blocks
             in
@@ -2323,9 +2320,6 @@ updateModelToJs msg model =
                 partitions : PartitionsData
                 partitions =
                     model.partitions
-
-                _ =
-                    Debug.log "toggle!" <| not partitions.showing
 
                 updatedPartitions =
                     { partitions | showing = not partitions.showing }
