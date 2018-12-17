@@ -1,6 +1,7 @@
 module HullSlicesTests exposing (suite)
 
 import Expect exposing (..)
+import Fuzz
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode
@@ -108,5 +109,8 @@ suite =
             , test "Can clip properly a=x1 and b=x2" <|
                 \_ ->
                     Expect.equal [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ] <| HullSlices.clip 0 2 [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ]
+            , fuzz (Fuzz.map2 (,) (Fuzz.constant 2) (Fuzz.constant 3)) "Square" <|
+                \( width, height ) ->
+                    Expect.equal (abs (width * height)) (HullSlices.area { xmin = 0, dx = (abs width) / 2, a = 0, b = (abs width), ys = [ abs height, abs height, abs height ] })
             ]
         ]

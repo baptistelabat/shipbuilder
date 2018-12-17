@@ -1,6 +1,7 @@
 module HullSlices
     exposing
-        ( clip
+        ( area
+        , clip
         , decoder
         , empty
         , encoder
@@ -15,6 +16,7 @@ module HullSlices
         , HullSlice
         )
 
+import Array
 import Dict exposing (Dict)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id)
@@ -117,9 +119,10 @@ interpolate json =
         sliceSplines : List Spline
         sliceSplines =
             List.map (makeSliceSpline scaleY scaleZ) json.slices
+
         sliceAreas : List Float
         sliceAreas =
-          List.map (Spline.integrate json.zmin (json.zmin + json.draught.value)) sliceSplines
+            List.map (Spline.integrate json.zmin (json.zmin + json.draught.value)) sliceSplines
     in
         { length = json.length
         , breadth = json.breadth
@@ -342,3 +345,23 @@ clip_ a b xys =
                         else
                             [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ (clip a b (( x2, y2 ) :: rest))
 
+
+area : { c | xmin : Float, dx : Float, a : Float, b : Float, ys : List Float } -> Float
+area curve =
+    let
+        integrate : List ( Float, Float ) -> Float
+        integrate l =
+            case l of
+                [] ->
+                    0
+
+                [ xy ] ->
+                    0
+
+                ( x1, y1 ) :: ( x2, y2 ) :: rest ->
+                    ((x2 - x1) * (y1 + y2) / 2) + (integrate (( x2, y2 ) :: rest))
+    in
+        curve
+            |> toXY
+            |> clip curve.a curve.b
+            |> integrate
