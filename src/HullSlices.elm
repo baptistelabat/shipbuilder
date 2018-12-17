@@ -1,6 +1,7 @@
 module HullSlices
     exposing
-        ( decoder
+        ( clip
+        , decoder
         , empty
         , encoder
         , dictDecoder
@@ -269,3 +270,75 @@ plotAreaCurve slices =
                 }
                 [ LineChart.line Colors.blue Dots.circle "Area curve" xys ]
             ]
+
+
+toXY : { a | xmin : Float, dx : Float, ys : List Float } -> List ( Float, Float )
+toXY { xmin, dx, ys } =
+    let
+        acc : Float -> Float -> ( Int, Float ) -> ( Float, Float )
+        acc xmin dx ( idx, y ) =
+            ( xmin + (toFloat idx) * dx, y )
+    in
+        ys
+            |> Array.fromList
+            |> Array.toIndexedList
+            |> List.map (acc xmin dx)
+
+
+removeDuplicates : List ( Float, Float ) -> List ( Float, Float )
+removeDuplicates l =
+    case l of
+        [] ->
+            []
+
+        [ xy ] ->
+            [ xy ]
+
+        ( x1, y1 ) :: ( x2, y2 ) :: rest ->
+            if x1 == x2 then
+                removeDuplicates (( x2, y2 ) :: rest)
+            else
+                [ ( x1, y1 ) ] ++ (removeDuplicates (( x2, y2 ) :: rest))
+
+
+clip : Float -> Float -> List ( Float, Float ) -> List ( Float, Float )
+clip a b xys =
+    clip_ a b xys
+        |> removeDuplicates
+
+
+clip_ : Float -> Float -> List ( Float, Float ) -> List ( Float, Float )
+clip_ a b xys =
+    case xys of
+        [] ->
+            []
+
+        [ ( x, y ) ] ->
+            []
+
+        ( x1, y1 ) :: ( x2, y2 ) :: rest ->
+            let
+                _ =
+                    ( x1, x2 )
+            in
+                if x1 >= b then
+                    -- a--b--x1----x2
+                    []
+                else if x2 <= a then
+                    -- x1----x2--a--b
+                    clip a b (( x2, y2 ) :: rest)
+                else
+                    let
+                        left : Float
+                        left =
+                            min b <| max a x1
+
+                        right : Float
+                        right =
+                            max a <| min b x2
+                    in
+                        if left == right then
+                            [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ (clip a b rest)
+                        else
+                            [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ (clip a b (( x2, y2 ) :: rest))
+

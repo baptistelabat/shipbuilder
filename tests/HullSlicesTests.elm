@@ -69,5 +69,44 @@ suite =
             [ test "Can calculate slice areas" <|
                 \_ ->
                     Expect.equal [ 0, 5.246918004139403 ] (hullSlices |> HullSlices.setBreadth "10" |> .sliceAreas)
+            , test "Clip one interval a--x1=====x2--b" <|
+                \_ ->
+                    Expect.equal [ ( 3, 3 ), ( 6, 3 ) ] <| HullSlices.clip 1 7 [ ( 3, 3 ), ( 6, 3 ) ]
+            , test "Clip one interval x1--a=====b--x2" <|
+                \_ ->
+                    Expect.equal [ ( 4, 3 ), ( 5, 3 ) ] <| HullSlices.clip 4 5 [ ( 3, 3 ), ( 6, 3 ) ]
+            , test "Clip one interval a--x1=====b--x2" <|
+                \_ ->
+                    Expect.equal [ ( 3, 3 ), ( 4, 3 ) ] <| HullSlices.clip 2 4 [ ( 3, 3 ), ( 6, 3 ) ]
+            , test "Clip one interval x1--a=====x2--b" <|
+                \_ ->
+                    Expect.equal [ ( 5, 3 ), ( 6, 3 ) ] <| HullSlices.clip 5 7 [ ( 3, 3 ), ( 6, 3 ) ]
+            , test "Clip one interval a--b--x1----x2" <|
+                \_ ->
+                    Expect.equal [] <| HullSlices.clip 1 2 [ ( 3, 3 ), ( 6, 3 ) ]
+            , test "Clip one interval x1----x2--a--b" <|
+                \_ ->
+                    Expect.equal [] <| HullSlices.clip 7 8 [ ( 3, 3 ), ( 6, 3 ) ]
+            , test "Clip several intervals a--x1=====x2--b" <|
+                \_ ->
+                    Expect.equal [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ] <| HullSlices.clip 1 7 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
+            , test "Clip several intervals x1--a=====b--x2" <|
+                \_ ->
+                    Expect.equal [ ( 4, 3 ), ( 5, 3 ) ] <| HullSlices.clip 4 5 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
+            , test "Clip several intervals a--x1=====b--x2" <|
+                \_ ->
+                    Expect.equal [ ( 3, 3 ), ( 4, 3 ) ] <| HullSlices.clip 2 4 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
+            , test "Clip several intervals x1--a=====x2--b" <|
+                \_ ->
+                    Expect.equal [ ( 5, 3 ), ( 6, 3 ) ] <| HullSlices.clip 5 7 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
+            , test "Clip several intervals a--b--x1----x2" <|
+                \_ ->
+                    Expect.equal [] <| HullSlices.clip 1 2 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
+            , test "Clip several intervals x1----x2--a--b" <|
+                \_ ->
+                    Expect.equal [] <| HullSlices.clip 7 8 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
+            , test "Can clip properly a=x1 and b=x2" <|
+                \_ ->
+                    Expect.equal [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ] <| HullSlices.clip 0 2 [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ]
             ]
         ]
