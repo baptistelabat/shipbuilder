@@ -40,14 +40,14 @@ import StringValueInput
 
 type alias JsonHullSlices a =
     { a
-    | length : StringValueInput.FloatInput
-    , breadth : StringValueInput.FloatInput
-    , mouldedDepth : StringValueInput.FloatInput
-    , xmin : Float
-    , ymin : Float
-    , zmin : Float
-    , slices : List HullSlice
-    , draught : StringValueInput.FloatInput
+        | length : StringValueInput.FloatInput
+        , breadth : StringValueInput.FloatInput
+        , mouldedDepth : StringValueInput.FloatInput
+        , xmin : Float
+        , ymin : Float
+        , zmin : Float
+        , slices : List HullSlice
+        , draught : StringValueInput.FloatInput
     }
 
 
@@ -130,20 +130,22 @@ interpolate json =
         , draught = json.draught
         , sliceAreas = sliceAreas
         , sliceSplines = sliceSplines
-        , blockCoefficient = (Maybe.withDefault 0 <| List.maximum sliceAreas) /(json.breadth.value*json.draught.value)
+        , blockCoefficient = (Maybe.withDefault 0 <| List.maximum sliceAreas) / (json.breadth.value * json.draught.value)
         }
 
-f :  StringValueInput.FloatInput->  StringValueInput.FloatInput->  StringValueInput.FloatInput->  Float->  Float->  Float->  List HullSlice-> StringValueInput.FloatInput -> JsonHullSlices {}
+
+f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> JsonHullSlices {}
 f length breadth mouldedDepth xmin ymin zmin slices draught =
-  { length = length
-  , breadth = breadth
-  , mouldedDepth = mouldedDepth
-  , xmin = xmin
-  , ymin = ymin
-  , zmin = zmin
-  , slices = slices
-  , draught = draught
-  }
+    { length = length
+    , breadth = breadth
+    , mouldedDepth = mouldedDepth
+    , xmin = xmin
+    , ymin = ymin
+    , zmin = zmin
+    , slices = slices
+    , draught = draught
+    }
+
 
 decoder : Decode.Decoder HullSlices
 decoder =
@@ -247,13 +249,14 @@ plotAreaCurve slices =
             [ LineChart.viewCustom
                 { x = Axis.default 231 "x" Tuple.first
                 , y = Axis.default 231 "Area" Tuple.second
-                , container = Container.custom
-                    { attributesHtml = [Html.Attributes.style[ ( "font-family", "monospace" ) ]]
-                    , attributesSvg = [  ]
-                    , size = Container.static
-                    , margin = Container.Margin 0 10 20 30
-                    , id = "area-curve-plot"
-                    }
+                , container =
+                    Container.custom
+                        { attributesHtml = [ Html.Attributes.style [ ( "font-family", "monospace" ) ] ]
+                        , attributesSvg = []
+                        , size = Container.static
+                        , margin = Container.Margin 0 10 20 30
+                        , id = "area-curve-plot"
+                        }
                 , interpolation = Interpolation.monotone
                 , intersection = Intersection.default
                 , legends = Legends.none
@@ -264,5 +267,5 @@ plotAreaCurve slices =
                 , line = Line.wider 3
                 , dots = Dots.custom (Dots.full 10)
                 }
-                [LineChart.line Colors.blue Dots.circle "Area curve" xys]
+                [ LineChart.line Colors.blue Dots.circle "Area curve" xys ]
             ]
