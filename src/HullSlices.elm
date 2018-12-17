@@ -237,11 +237,11 @@ plotAreaCurve slices =
 
         xs : List Float
         xs =
-            Debug.log "xs" <| List.map (\idx -> slices.xmin + slices.length.value * (toFloat idx) / ((toFloat n) - 1.0)) <| List.range 0 (n - 1)
+            List.map (\idx -> slices.xmin + slices.length.value * (toFloat idx) / ((toFloat n) - 1.0)) <| List.range 0 (n - 1)
 
         xys : List ( Float, Float )
         xys =
-            Debug.log "xys" <| List.map2 (,) xs slices.sliceAreas
+            List.map2 (,) xs slices.sliceAreas
     in
         div [ id "area-curve-plot-container" ]
             [ LineChart.viewCustom
