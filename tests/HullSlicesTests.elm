@@ -152,102 +152,102 @@ suite =
                         Expect.equal [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ] <| HullSlices.clip 0 2 [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ]
                 , fuzz (Fuzz.map2 (,) (Fuzz.constant 2) (Fuzz.constant 3)) "Square" <|
                     \( width, height ) ->
-                        Expect.equal (abs (width * height)) (HullSlices.area { zmin = 0, zmax = width, a = 0, b = (abs width), y = [ abs height, abs height, abs height ] })
+                        Expect.equal (abs (width * height)) (HullSlices.area 0 (abs width) { zmin = 0, zmax = width, y = [ abs height, abs height, abs height ] })
                 ]
             , describe "Area tests"
                 [ describe "Area under straight line"
                     [ fuzz fourIncreasingFloats "Vertical line (case 1)" <|
                         \( a, b, zmin, zmax ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz threeIncreasingFloats "Vertical line (case 2)" <|
                         \( a, bzmin, zmax ) ->
-                            HullSlices.area { zmin = bzmin, zmax = zmax, a = a, b = bzmin, y = [ 3, 3, 3 ] }
+                            HullSlices.area a bzmin { zmin = bzmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Vertical line (case 3)" <|
                         \( a, zmin, b, zmax ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (b - zmin))
                     , fuzz fourIncreasingFloats "Vertical line (case 4)" <|
                         \( zmin, a, b, zmax ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (b - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 5)" <|
                         \( zmina, b, zmax ) ->
-                            HullSlices.area { zmin = zmina, zmax = zmax, a = zmina, b = b, y = [ 3, 3, 3 ] }
+                            HullSlices.area zmina b { zmin = zmina, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (b - zmina))
                     , fuzz threeIncreasingFloats "Vertical line (case 6)" <|
                         \( zmin, a, zmaxb ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmaxb, a = a, b = zmaxb, y = [ 3, 3, 3 ] }
+                            HullSlices.area a zmaxb { zmin = zmin, zmax = zmaxb, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (zmaxb - a))
                     , fuzz twoIncreasingFloats "Vertical line (case 7)" <|
                         \( zmina, zmaxb ) ->
-                            HullSlices.area { zmin = zmina, zmax = zmaxb, a = zmina, b = zmaxb, y = [ 3, 3, 3 ] }
+                            HullSlices.area zmina zmaxb { zmin = zmina, zmax = zmaxb, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (zmaxb - zmina))
                     , fuzz fourIncreasingFloats "Vertical line (case 8)" <|
                         \( zmin, a, zmax, b ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (zmax - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 9)" <|
                         \( zmin, zmaxa, b ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmaxa, a = zmaxa, b = b, y = [ 3, 3, 3 ] }
+                            HullSlices.area zmaxa b { zmin = zmin, zmax = zmaxa, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Vertical line (case 10)" <|
                         \( zmin, zmax, a, b ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     ]
                 , describe "Area under oblique line"
                     [ fuzz fourIncreasingFloats "Oblique line (case 1)" <|
                         \( a, b, zmin, zmax ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps 0
                     , fuzz threeIncreasingFloats "Oblique line (case 2)" <|
                         \( a, bzmin, zmax ) ->
-                            HullSlices.area { zmin = bzmin, zmax = zmax, a = a, b = bzmin, y = [ 3, 2, 1 ] }
+                            HullSlices.area a bzmin { zmin = bzmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Oblique line (case 3)" <|
                         \( a, zmin, b, zmax ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (((b - zmin) * (b + 2 * zmin - 3 * zmax)) / (zmin - zmax))
 
                     -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-zmin)%2F(zmax-zmin)+from+x+%3D+zmin+to+b
                     , fuzz fourIncreasingFloats "Oblique line (case 4)" <|
                         \( zmin, a, b, zmax ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (-((a - b) * (a + b + zmin - 3 * zmax)) / (zmin - zmax))
 
                     -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-zmin)%2F(zmax-zmin)+from+x+%3D+a+to+b
                     , fuzz threeIncreasingFloats "Oblique line (case 5)" <|
                         \( zmina, b, zmax ) ->
-                            HullSlices.area { zmin = zmina, zmax = zmax, a = zmina, b = b, y = [ 3, 2, 1 ] }
+                            HullSlices.area zmina b { zmin = zmina, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (-((zmina - b) * (zmina + b + zmina - 3 * zmax)) / (zmina - zmax))
                     , fuzz threeIncreasingFloats "Oblique line (case 6)" <|
                         \( zmin, a, zmaxb ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmaxb, a = a, b = zmaxb, y = [ 3, 2, 1 ] }
+                            HullSlices.area a zmaxb { zmin = zmin, zmax = zmaxb, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (-((a - zmaxb) * (a + zmaxb + zmin - 3 * zmaxb)) / (zmin - zmaxb))
                     , fuzz twoIncreasingFloats "Oblique line (case 7)" <|
                         \( zmina, zmaxb ) ->
-                            HullSlices.area { zmin = zmina, zmax = zmaxb, a = zmina, b = zmaxb, y = [ 3, 2, 1 ] }
+                            HullSlices.area zmina zmaxb { zmin = zmina, zmax = zmaxb, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (2 * (zmaxb - zmina))
                     , fuzz fourIncreasingFloats "Oblique line (case 8)" <|
                         \( zmin, a, zmax, b ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (-((a + zmin - 2 * zmax) * (a - zmax)) / (zmin - zmax))
                     , fuzz threeIncreasingFloats "Oblique line (case 9)" <|
                         \( zmin, zmaxa, b ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmaxa, a = zmaxa, b = b, y = [ 3, 2, 1 ] }
+                            HullSlices.area zmaxa b { zmin = zmin, zmax = zmaxa, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     0
                     , fuzz fourIncreasingFloats "Oblique line (case 10)" <|
                         \( zmin, zmax, a, b ) ->
-                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
+                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     0
                     ]

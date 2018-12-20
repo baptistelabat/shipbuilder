@@ -350,8 +350,8 @@ clip_ a b xys =
                             [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ (clip a b (( x2, y2 ) :: rest))
 
 
-area : { c | zmin : Float, zmax : Float, a : Float, b : Float, y : List Float } -> Float
-area curve =
+area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
+area a b curve =
     let
         integrate : List ( Float, Float ) -> Float
         integrate l =
@@ -367,5 +367,5 @@ area curve =
     in
         curve
             |> toXY
-            |> clip curve.a curve.b
+            |> clip a b
             |> integrate
