@@ -5,6 +5,7 @@ import Fuzz
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode
+import StringValueInput
 import Test exposing (..)
 import TestData
 
@@ -259,5 +260,51 @@ suite =
                                     0.20027049633242555
                     ]
                 ]
+
             ]
+        , describe "Scale the slices"
+        [ test "zmin should be scaled properly" <|
+          \_ ->
+            HullSlices.scale
+            {breadth = 10 |> StringValueInput.fromNumber "" ""
+            , depth=5 |> StringValueInput.fromNumber "" ""
+            , draught=4 |> StringValueInput.fromNumber "" ""
+            , xmin=-5
+            , ymin=-89
+            , zmin=88
+            , length=456 |> StringValueInput.fromNumber "" ""
+            , slices=[]}
+            {x=1,zmin=0.5,zmax=0.9,y=[0.1,0.2,0.5]} |> .zmin
+            |> Expect.within eps
+                (88+0.5*5)
+        , test "zmax should be scaled properly" <|
+          \_ ->
+            HullSlices.scale
+            {breadth = 10 |> StringValueInput.fromNumber "" ""
+            , depth=5 |> StringValueInput.fromNumber "" ""
+            , draught=4 |> StringValueInput.fromNumber "" ""
+            , xmin=-5
+            , ymin=-89
+            , zmin=88
+            , length=456 |> StringValueInput.fromNumber "" ""
+            , slices=[]}
+            {x=1,zmin=0.5,zmax=0.9,y=[0.1,0.2,0.5]} |> .zmax
+            |> Expect.within eps
+                (88+0.9*5)
+        , test "y should be scaled properly" <|
+          \_ ->
+            HullSlices.scale
+            {breadth = 10 |> StringValueInput.fromNumber "" ""
+            , depth=5 |> StringValueInput.fromNumber "" ""
+            , draught=4 |> StringValueInput.fromNumber "" ""
+            , xmin=-5
+            , ymin=-89
+            , zmin=88
+            , length=456 |> StringValueInput.fromNumber "" ""
+            , slices=[]}
+            {x=1,zmin=0.5,zmax=0.9,y=[0.1,0.2,0.5]} |> .y
+            |> Expect.equal
+                ([-89+10*0.1,-89+10*0.2,-89+10*0.5])
+
+        ]
         ]

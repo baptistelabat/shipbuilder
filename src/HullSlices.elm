@@ -8,6 +8,7 @@ module HullSlices
         , dictDecoder
         , dictEncoder
         , plotAreaCurve
+        , scale
         , setBreadth
         , setDraught
         , setLengthOverAll
@@ -103,6 +104,24 @@ hullSliceDecoder =
 makeSliceSpline : (Float -> Float) -> (Float -> Float) -> HullSlice -> Spline
 makeSliceSpline scaleY scaleZ slice =
     Spline.withRange (scaleZ slice.zmin) (scaleZ slice.zmax) <| List.map scaleY slice.y
+
+
+scale : JsonHullSlices a -> HullSlice -> HullSlice
+scale json hullSlice =
+    let
+        scaleY : Float -> Float
+        scaleY y =
+            y * json.breadth.value + json.ymin
+
+        scaleZ : Float -> Float
+        scaleZ z =
+            z * json.depth.value + json.zmin
+    in
+        { x = hullSlice.x
+        , zmin = scaleZ hullSlice.zmin
+        , zmax = scaleZ hullSlice.zmax
+        , y = List.map scaleY hullSlice.y
+        }
 
 
 interpolate : JsonHullSlices a -> HullSlices
