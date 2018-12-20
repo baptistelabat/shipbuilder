@@ -11,7 +11,7 @@ import TestData
 
 positiveFloat : Fuzz.Fuzzer Float
 positiveFloat =
-    Fuzz.map abs Fuzz.float
+    Fuzz.floatRange 0.01 1.0e10
 
 
 twoIncreasingFloats : Fuzz.Fuzzer ( Float, Float )
