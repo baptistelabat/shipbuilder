@@ -29,7 +29,7 @@ shipBuilder/index.html: shipBuilder/index.template.json.html
 	@sed 's/GIT_SHA/$(VERSION)/g' shipBuilder/index.template.json.html > shipBuilder/index.html
 	@echo "Added GIT SHA to index.html"
 
-shipBuilder/index.template.json.html: shipBuilder/index.template.html
+shipBuilder/index.template.json.html: json shipBuilder/index.template.html
 	cd shipBuilder && docker run -t --rm -u $(shell id -u):$(shell id -g) -v $(shell pwd)/shipBuilder:/work -w /work python:3.6 python add_json_to_html.py
 
 artifacts: shipBuilder.zip
