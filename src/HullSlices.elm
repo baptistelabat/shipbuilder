@@ -132,8 +132,8 @@ interpolate json =
             y * json.breadth.value + json.ymin
 
         scaleZ : Float -> Float
-        scaleZ y =
-            y * json.depth.value + json.zmin
+        scaleZ z =
+            z * json.depth.value + json.zmin
 
         sliceSplines : List Spline
         sliceSplines =
