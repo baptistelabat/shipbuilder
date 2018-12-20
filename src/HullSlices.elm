@@ -15,6 +15,7 @@ module HullSlices
         , setDepth
         , HullSlices
         , HullSlice
+        , JsonHullSlices
         )
 
 import Array
