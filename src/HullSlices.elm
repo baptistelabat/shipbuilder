@@ -141,7 +141,7 @@ interpolate json =
 
         sliceAreas : List Float
         sliceAreas =
-            List.map (Spline.integrate json.zmin (json.zmin + json.draught.value)) sliceSplines
+            List.map ((scale json) >> area (json.zmin + json.depth.value - json.draught.value) (json.zmin + json.depth.value)) json.slices
     in
         { length = json.length
         , breadth = json.breadth
@@ -153,7 +153,7 @@ interpolate json =
         , draught = json.draught
         , sliceAreas = sliceAreas
         , sliceSplines = sliceSplines
-        , blockCoefficient = (Maybe.withDefault 0 <| List.maximum sliceAreas) / (json.breadth.value * json.draught.value)
+        , blockCoefficient = StringValueInput.round_n 2 <| (Maybe.withDefault 0 <| List.maximum sliceAreas) / (json.breadth.value * json.draught.value)
         }
 
 
@@ -235,22 +235,22 @@ encoder hullSlices =
 
 setLengthOverAll : String -> HullSlices -> HullSlices
 setLengthOverAll loa hullSlices =
-    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa }
+    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa } |> interpolate
 
 
 setBreadth : String -> HullSlices -> HullSlices
 setBreadth breadth hullSlices =
-    { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth }
+    { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth } |> interpolate
 
 
 setDraught : String -> HullSlices -> HullSlices
 setDraught draught hullSlices =
-    { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught }
+    { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught } |> interpolate
 
 
 setDepth : String -> HullSlices -> HullSlices
 setDepth depth hullSlices =
-    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth }
+    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth } |> interpolate
 
 
 plotAreaCurve : HullSlices -> Html msg
