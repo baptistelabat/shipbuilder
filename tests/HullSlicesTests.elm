@@ -197,6 +197,60 @@ suite =
                             HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     ]
+                , describe "Area under oblique line"
+                    [ fuzz fourIncreasingFloats "Oblique line (case 1)" <|
+                        \( a, b, x1, x2 ) ->
+                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps 0
+                    , fuzz threeIncreasingFloats "Oblique line (case 2)" <|
+                        \( a, bx1, x2 ) ->
+                            HullSlices.area { xmin = bx1, dx = (x2 - bx1) / 2, a = a, b = bx1, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps 0
+                    , fuzz fourIncreasingFloats "Oblique line (case 3)" <|
+                        \( a, x1, b, x2 ) ->
+                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps
+                                    (((b - x1) * (b + 2 * x1 - 3 * x2)) / (x1 - x2))
+
+                    -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-x1)%2F(x2-x1)+from+x+%3D+x1+to+b
+                    , fuzz fourIncreasingFloats "Oblique line (case 4)" <|
+                        \( x1, a, b, x2 ) ->
+                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps
+                                    (-((a - b) * (a + b + x1 - 3 * x2)) / (x1 - x2))
+
+                    -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-x1)%2F(x2-x1)+from+x+%3D+a+to+b
+                    , fuzz threeIncreasingFloats "Oblique line (case 5)" <|
+                        \( x1a, b, x2 ) ->
+                            HullSlices.area { xmin = x1a, dx = (x2 - x1a) / 2, a = x1a, b = b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps
+                                    (-((x1a - b) * (x1a + b + x1a - 3 * x2)) / (x1a - x2))
+                    , fuzz threeIncreasingFloats "Oblique line (case 6)" <|
+                        \( x1, a, x2b ) ->
+                            HullSlices.area { xmin = x1, dx = (x2b - x1) / 2, a = a, b = x2b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps
+                                    (-((a - x2b) * (a + x2b + x1 - 3 * x2b)) / (x1 - x2b))
+                    , fuzz twoIncreasingFloats "Oblique line (case 7)" <|
+                        \( x1a, x2b ) ->
+                            HullSlices.area { xmin = x1a, dx = (x2b - x1a) / 2, a = x1a, b = x2b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps
+                                    (2 * (x2b - x1a))
+                    , fuzz fourIncreasingFloats "Oblique line (case 8)" <|
+                        \( x1, a, x2, b ) ->
+                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps
+                                    (-((a + x1 - 2 * x2) * (a - x2)) / (x1 - x2))
+                    , fuzz threeIncreasingFloats "Oblique line (case 9)" <|
+                        \( x1, x2a, b ) ->
+                            HullSlices.area { xmin = x1, dx = (x2a - x1) / 2, a = x2a, b = b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps
+                                    0
+                    , fuzz fourIncreasingFloats "Oblique line (case 10)" <|
+                        \( x1, x2, a, b ) ->
+                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                                |> Expect.within eps
+                                    0
+                    ]
                 ]
             ]
         ]
