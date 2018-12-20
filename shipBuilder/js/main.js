@@ -360,7 +360,7 @@ let unloadHull = function () {
 }
 
 let buildHullGeometry = function ( json ) {
-    var H = json['mouldedDepth'];
+    var H = json['depth'];
     var B = json['breadth'];
     var L = json['length'];
     var xmin = json['xmin'];

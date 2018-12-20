@@ -178,17 +178,17 @@ def slice2json(points_on_slice, x_coordinate_of_slice):
 
 def intersect(slice_bounds, offset, intersection_direction, ny, bounds):
     B = bounds[3] - bounds[2]
-    moulded_depth = bounds[5] - bounds[4]
+    depth = bounds[5] - bounds[4]
     if intersection_direction == 'z+':
         y_min = slice_bounds[2] + offset
         y_max = slice_bounds[3] - offset
         vy = np.linspace(y_min, y_max, ny)
-        vz = [bounds[4] - moulded_depth]
+        vz = [bounds[4] - depth]
     elif intersection_direction == 'z-':
         y_min = slice_bounds[2] + offset
         y_max = slice_bounds[3] - offset
         vy = np.linspace(y_min, y_max, ny)
-        vz = [bounds[5] + moulded_depth]
+        vz = [bounds[5] + depth]
     elif intersection_direction == 'y+':
         z_min = slice_bounds[4] + offset
         z_max = slice_bounds[5] - offset
@@ -198,7 +198,7 @@ def intersect(slice_bounds, offset, intersection_direction, ny, bounds):
         z_min = slice_bounds[4] + offset
         z_max = slice_bounds[5] - offset
         vz = np.linspace(z_min, z_max, ny)
-        vy = [bounds[3] + moulded_depth]
+        vy = [bounds[3] + depth]
     else:
         raise Exception('Unknown direction')
     return vy, vz
@@ -232,7 +232,7 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
 
     L = bounds[1] - bounds[0]
     B = bounds[3] - bounds[2]
-    moulded_depth = bounds[5] - bounds[4]
+    depth = bounds[5] - bounds[4]
 
     slices = []
 
@@ -245,9 +245,9 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
         start_points = np.copy(grid)
         end_points = np.copy(grid)
         if intersection_direction == 'z+':
-            end_points[:, 2] += 3 * moulded_depth
+            end_points[:, 2] += 3 * depth
         elif intersection_direction == 'z-':
-            end_points[:, 2] -= 3 * moulded_depth
+            end_points[:, 2] -= 3 * depth
         elif intersection_direction == 'y+':
             end_points[:, 1] += 3 * B
         elif intersection_direction == 'y-':
@@ -265,7 +265,7 @@ def extract_n_points_on_slices_of_a_mesh(filename, nx, ny, lx,
     max_points = max(list(map(lambda x: len(x['y']), slices)))
     filtered_slices = filter(lambda x: len(x['y']) == max_points, slices)
 
-    global_json = {"length": L, "breadth": B, "mouldedDepth": moulded_depth,
+    global_json = {"length": L, "breadth": B, "depth": depth,
                    "slices":
                    [normalize(slice, bounds) for slice in filtered_slices],
                    "xmin": bounds[0],

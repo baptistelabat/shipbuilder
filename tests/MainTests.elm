@@ -1458,28 +1458,28 @@ suite =
                                 |> Dict.get "anthineas"
                                 |> Maybe.map (.draught >> .value)
                             )
-                , test "Moulded depth input is present" <|
+                , test "Depth input is present" <|
                     \_ ->
                         modellerView
                             |> Query.fromHtml
-                            |> Query.findAll [ Selector.id "moulded-depth" ]
+                            |> Query.findAll [ Selector.id "depth" ]
                             |> Query.first
                             |> Query.has [ Selector.attribute <| Attributes.value "6.8" ]
-                , test "Moulded depth input triggers ModifySlice" <|
+                , test "Depth input triggers ModifySlice" <|
                     \_ ->
                         modellerView
                             |> Query.fromHtml
-                            |> Query.findAll [ Selector.id "moulded-depth" ]
+                            |> Query.findAll [ Selector.id "depth" ]
                             |> Query.first
                             |> Event.simulate (Event.input "123.4")
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setMouldedDepth "anthineas" "123.4")
-                , test "ModifySlice sets mouldedDepth" <|
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setDepth "anthineas" "123.4")
+                , test "ModifySlice sets depth" <|
                     \_ ->
                         Expect.equal (Just 123.4)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setMouldedDepth "anthineas" "123.4" ]
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDepth "anthineas" "123.4" ]
                                 |> .slices
                                 |> Dict.get "anthineas"
-                                |> Maybe.map (.mouldedDepth >> .value)
+                                |> Maybe.map (.depth >> .value)
                             )
                 ]
             ]
@@ -1508,8 +1508,8 @@ suite =
                 testHullSliceDecoding (.length >> .value) 22.8
             , test "Can parse 'breadth'" <|
                 testHullSliceDecoding (.breadth >> .value) 6.9
-            , test "Can parse 'mouldedDepth'" <|
-                testHullSliceDecoding (.mouldedDepth >> .value) 6.8
+            , test "Can parse 'depth'" <|
+                testHullSliceDecoding (.depth >> .value) 6.8
             , test "Can parse 'xmin'" <|
                 testHullSliceDecoding .xmin -1
             , test "Can parse 'ymin'" <|
@@ -1543,8 +1543,8 @@ suite =
                 testHullSliceEncoding (.length >> .value) 22.8
             , test "Can encode 'breadth'" <|
                 testHullSliceEncoding (.breadth >> .value) 6.9
-            , test "Can encode 'mouldedDepth'" <|
-                testHullSliceEncoding (.mouldedDepth >> .value) 6.8
+            , test "Can encode 'depth'" <|
+                testHullSliceEncoding (.depth >> .value) 6.8
             , test "Can encode 'xmin'" <|
                 testHullSliceEncoding .xmin -1
             , test "Can encode 'ymin'" <|

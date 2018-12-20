@@ -3137,7 +3137,7 @@ viewModeller model =
                         [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSlices.setLengthOverAll hullReference
                         , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSlices.setBreadth hullReference
                         , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
-                        , StringValueInput.view slices.mouldedDepth <| ToJs << ModifySlice HullSlices.setMouldedDepth hullReference
+                        , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSlices.setDepth hullReference
                         , HullSlices.plotAreaCurve slices
                         , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
                         ]

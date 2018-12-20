@@ -11,7 +11,7 @@ module HullSlices
         , setBreadth
         , setDraught
         , setLengthOverAll
-        , setMouldedDepth
+        , setDepth
         , HullSlices
         , HullSlice
         )
@@ -45,7 +45,7 @@ type alias JsonHullSlices a =
     { a
         | length : StringValueInput.FloatInput
         , breadth : StringValueInput.FloatInput
-        , mouldedDepth : StringValueInput.FloatInput
+        , depth : StringValueInput.FloatInput
         , xmin : Float
         , ymin : Float
         , zmin : Float
@@ -57,7 +57,7 @@ type alias JsonHullSlices a =
 type alias HullSlices =
     { length : StringValueInput.FloatInput
     , breadth : StringValueInput.FloatInput
-    , mouldedDepth : StringValueInput.FloatInput
+    , depth : StringValueInput.FloatInput
     , xmin : Float
     , ymin : Float
     , zmin : Float
@@ -74,7 +74,7 @@ empty =
     interpolate
         { length = StringValueInput.emptyFloat
         , breadth = StringValueInput.emptyFloat
-        , mouldedDepth = StringValueInput.emptyFloat
+        , depth = StringValueInput.emptyFloat
         , xmin = 0
         , ymin = 0
         , zmin = 0
@@ -114,7 +114,7 @@ interpolate json =
 
         scaleZ : Float -> Float
         scaleZ y =
-            y * json.mouldedDepth.value + json.zmin
+            y * json.depth.value + json.zmin
 
         sliceSplines : List Spline
         sliceSplines =
@@ -126,7 +126,7 @@ interpolate json =
     in
         { length = json.length
         , breadth = json.breadth
-        , mouldedDepth = json.mouldedDepth
+        , depth = json.depth
         , xmin = json.xmin
         , ymin = json.ymin
         , zmin = json.zmin
@@ -139,10 +139,10 @@ interpolate json =
 
 
 f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> JsonHullSlices {}
-f length breadth mouldedDepth xmin ymin zmin slices draught =
+f length breadth depth xmin ymin zmin slices draught =
     { length = length
     , breadth = breadth
-    , mouldedDepth = mouldedDepth
+    , depth = depth
     , xmin = xmin
     , ymin = ymin
     , zmin = zmin
@@ -155,11 +155,11 @@ decoder : Decode.Decoder HullSlices
 decoder =
     let
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder (JsonHullSlices {})
-        helper ( mouldedDepth, maybeDraught ) =
+        helper ( depth, maybeDraught ) =
             Pipeline.decode f
                 |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)
                 |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth") Decode.float)
-                |> Pipeline.hardcoded mouldedDepth
+                |> Pipeline.hardcoded depth
                 |> Pipeline.required "xmin" Decode.float
                 |> Pipeline.required "ymin" Decode.float
                 |> Pipeline.required "zmin" Decode.float
@@ -170,11 +170,11 @@ decoder =
                             draught
 
                         Nothing ->
-                            StringValueInput.fromNumber "m" "Draught" (mouldedDepth.value / 5)
+                            StringValueInput.fromNumber "m" "Draught" (depth.value / 5)
                     )
     in
         Pipeline.decode (,)
-            |> Pipeline.required "mouldedDepth" (Decode.map (StringValueInput.fromNumber "m" "Moulded depth") Decode.float)
+            |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth") Decode.float)
             |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught") (Decode.float)) Nothing
             |> Decode.andThen helper
             |> Decode.map interpolate
@@ -205,7 +205,7 @@ encoder hullSlices =
     Encode.object
         [ ( "length", Encode.float hullSlices.length.value )
         , ( "breadth", Encode.float hullSlices.breadth.value )
-        , ( "mouldedDepth", Encode.float hullSlices.mouldedDepth.value )
+        , ( "depth", Encode.float hullSlices.depth.value )
         , ( "draught", Encode.float hullSlices.draught.value )
         , ( "xmin", Encode.float hullSlices.xmin )
         , ( "ymin", Encode.float hullSlices.ymin )
@@ -229,9 +229,9 @@ setDraught draught hullSlices =
     { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught }
 
 
-setMouldedDepth : String -> HullSlices -> HullSlices
-setMouldedDepth mouldedDepth hullSlices =
-    { hullSlices | mouldedDepth = hullSlices.mouldedDepth |> StringValueInput.setString mouldedDepth }
+setDepth : String -> HullSlices -> HullSlices
+setDepth depth hullSlices =
+    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth }
 
 
 plotAreaCurve : HullSlices -> Html msg
