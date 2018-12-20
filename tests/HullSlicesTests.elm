@@ -44,9 +44,9 @@ fourIncreasingFloats =
         Fuzz.map4 f Fuzz.float positiveFloat positiveFloat positiveFloat
 
 
-eps : Float
+eps : FloatingPointTolerance
 eps =
-    1.0e-5
+    Absolute 1.0e-5
 
 
 s : Interpolate.Cubic.Spline
@@ -159,43 +159,43 @@ suite =
                     [ fuzz fourIncreasingFloats "Vertical line (case 1)" <|
                         \( a, b, x1, x2 ) ->
                             HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) 0
+                                |> Expect.within eps 0
                     , fuzz threeIncreasingFloats "Vertical line (case 2)" <|
                         \( a, bx1, x2 ) ->
                             HullSlices.area { xmin = bx1, dx = (x2 - bx1) / 2, a = a, b = bx1, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) 0
+                                |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Vertical line (case 3)" <|
                         \( a, x1, b, x2 ) ->
                             HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) (3 * (b - x1))
+                                |> Expect.within eps (3 * (b - x1))
                     , fuzz fourIncreasingFloats "Vertical line (case 4)" <|
                         \( x1, a, b, x2 ) ->
                             HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) (3 * (b - a))
+                                |> Expect.within eps (3 * (b - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 5)" <|
                         \( x1a, b, x2 ) ->
                             HullSlices.area { xmin = x1a, dx = (x2 - x1a) / 2, a = x1a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) (3 * (b - x1a))
+                                |> Expect.within eps (3 * (b - x1a))
                     , fuzz threeIncreasingFloats "Vertical line (case 6)" <|
                         \( x1, a, x2b ) ->
                             HullSlices.area { xmin = x1, dx = (x2b - x1) / 2, a = a, b = x2b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) (3 * (x2b - a))
+                                |> Expect.within eps (3 * (x2b - a))
                     , fuzz twoIncreasingFloats "Vertical line (case 7)" <|
                         \( x1a, x2b ) ->
                             HullSlices.area { xmin = x1a, dx = (x2b - x1a) / 2, a = x1a, b = x2b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) (3 * (x2b - x1a))
+                                |> Expect.within eps (3 * (x2b - x1a))
                     , fuzz fourIncreasingFloats "Vertical line (case 8)" <|
                         \( x1, a, x2, b ) ->
                             HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) (3 * (x2 - a))
+                                |> Expect.within eps (3 * (x2 - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 9)" <|
                         \( x1, x2a, b ) ->
                             HullSlices.area { xmin = x1, dx = (x2a - x1) / 2, a = x2a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) 0
+                                |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Vertical line (case 10)" <|
                         \( x1, x2, a, b ) ->
                             HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within (Relative eps) 0
+                                |> Expect.within eps 0
                     ]
                 ]
             ]
