@@ -275,17 +275,21 @@ plotAreaCurve slices =
             ]
 
 
-toXY : { a | xmin : Float, dx : Float, ys : List Float } -> List ( Float, Float )
-toXY { xmin, dx, ys } =
+toXY : { a | zmin : Float, zmax : Float, y : List Float } -> List ( Float, Float )
+toXY { zmin, zmax, y } =
     let
-        acc : Float -> Float -> ( Int, Float ) -> ( Float, Float )
-        acc xmin dx ( idx, y ) =
-            ( xmin + (toFloat idx) * dx, y )
+        dz : Float
+        dz =
+            (zmax - zmin) / (toFloat <| max 1 <| List.length y - 1)
+
+        acc : ( Int, Float ) -> ( Float, Float )
+        acc ( idx, y_ ) =
+            ( zmin + (toFloat idx) * dz, y_ )
     in
-        ys
+        y
             |> Array.fromList
             |> Array.toIndexedList
-            |> List.map (acc xmin dx)
+            |> List.map acc
 
 
 removeDuplicates : List ( Float, Float ) -> List ( Float, Float )
@@ -346,7 +350,7 @@ clip_ a b xys =
                             [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ (clip a b (( x2, y2 ) :: rest))
 
 
-area : { c | xmin : Float, dx : Float, a : Float, b : Float, ys : List Float } -> Float
+area : { c | zmin : Float, zmax : Float, a : Float, b : Float, y : List Float } -> Float
 area curve =
     let
         integrate : List ( Float, Float ) -> Float

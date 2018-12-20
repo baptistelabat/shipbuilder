@@ -38,8 +38,8 @@ fourIncreasingFloats : Fuzz.Fuzzer ( Float, Float, Float, Float )
 fourIncreasingFloats =
     let
         f : Float -> Float -> Float -> Float -> ( Float, Float, Float, Float )
-        f a ab bx1 x1x2 =
-            ( a, a + ab, a + ab + bx1, a + ab + bx1 + x1x2 )
+        f a ab bzmin zminzmax =
+            ( a, a + ab, a + ab + bzmin, a + ab + bzmin + zminzmax )
     in
         Fuzz.map4 f Fuzz.float positiveFloat positiveFloat positiveFloat
 
@@ -111,143 +111,143 @@ suite =
                 \_ ->
                     Expect.equal [ 0, 5.246918004139403 ] (hullSlices |> HullSlices.setBreadth "10" |> .sliceAreas)
             , describe "Clipper" <|
-                [ test "Clip one interval a--x1=====x2--b" <|
+                [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->
                         Expect.equal [ ( 3, 3 ), ( 6, 3 ) ] <| HullSlices.clip 1 7 [ ( 3, 3 ), ( 6, 3 ) ]
-                , test "Clip one interval x1--a=====b--x2" <|
+                , test "Clip one interval zmin--a=====b--zmax" <|
                     \_ ->
                         Expect.equal [ ( 4, 3 ), ( 5, 3 ) ] <| HullSlices.clip 4 5 [ ( 3, 3 ), ( 6, 3 ) ]
-                , test "Clip one interval a--x1=====b--x2" <|
+                , test "Clip one interval a--zmin=====b--zmax" <|
                     \_ ->
                         Expect.equal [ ( 3, 3 ), ( 4, 3 ) ] <| HullSlices.clip 2 4 [ ( 3, 3 ), ( 6, 3 ) ]
-                , test "Clip one interval x1--a=====x2--b" <|
+                , test "Clip one interval zmin--a=====zmax--b" <|
                     \_ ->
                         Expect.equal [ ( 5, 3 ), ( 6, 3 ) ] <| HullSlices.clip 5 7 [ ( 3, 3 ), ( 6, 3 ) ]
-                , test "Clip one interval a--b--x1----x2" <|
+                , test "Clip one interval a--b--zmin----zmax" <|
                     \_ ->
                         Expect.equal [] <| HullSlices.clip 1 2 [ ( 3, 3 ), ( 6, 3 ) ]
-                , test "Clip one interval x1----x2--a--b" <|
+                , test "Clip one interval zmin----zmax--a--b" <|
                     \_ ->
                         Expect.equal [] <| HullSlices.clip 7 8 [ ( 3, 3 ), ( 6, 3 ) ]
-                , test "Clip several intervals a--x1=====x2--b" <|
+                , test "Clip several intervals a--zmin=====zmax--b" <|
                     \_ ->
                         Expect.equal [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ] <| HullSlices.clip 1 7 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
-                , test "Clip several intervals x1--a=====b--x2" <|
+                , test "Clip several intervals zmin--a=====b--zmax" <|
                     \_ ->
                         Expect.equal [ ( 4, 3 ), ( 5, 3 ) ] <| HullSlices.clip 4 5 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
-                , test "Clip several intervals a--x1=====b--x2" <|
+                , test "Clip several intervals a--zmin=====b--zmax" <|
                     \_ ->
                         Expect.equal [ ( 3, 3 ), ( 4, 3 ) ] <| HullSlices.clip 2 4 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
-                , test "Clip several intervals x1--a=====x2--b" <|
+                , test "Clip several intervals zmin--a=====zmax--b" <|
                     \_ ->
                         Expect.equal [ ( 5, 3 ), ( 6, 3 ) ] <| HullSlices.clip 5 7 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
-                , test "Clip several intervals a--b--x1----x2" <|
+                , test "Clip several intervals a--b--zmin----zmax" <|
                     \_ ->
                         Expect.equal [] <| HullSlices.clip 1 2 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
-                , test "Clip several intervals x1----x2--a--b" <|
+                , test "Clip several intervals zmin----zmax--a--b" <|
                     \_ ->
                         Expect.equal [] <| HullSlices.clip 7 8 [ ( 3, 3 ), ( 4, 3 ), ( 5, 3 ), ( 6, 3 ) ]
-                , test "Can clip properly a=x1 and b=x2" <|
+                , test "Can clip properly a=zmin and b=zmax" <|
                     \_ ->
                         Expect.equal [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ] <| HullSlices.clip 0 2 [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ]
                 , fuzz (Fuzz.map2 (,) (Fuzz.constant 2) (Fuzz.constant 3)) "Square" <|
                     \( width, height ) ->
-                        Expect.equal (abs (width * height)) (HullSlices.area { xmin = 0, dx = (abs width) / 2, a = 0, b = (abs width), ys = [ abs height, abs height, abs height ] })
+                        Expect.equal (abs (width * height)) (HullSlices.area { zmin = 0, zmax = width, a = 0, b = (abs width), y = [ abs height, abs height, abs height ] })
                 ]
             , describe "Area tests"
                 [ describe "Area under straight line"
                     [ fuzz fourIncreasingFloats "Vertical line (case 1)" <|
-                        \( a, b, x1, x2 ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
+                        \( a, b, zmin, zmax ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz threeIncreasingFloats "Vertical line (case 2)" <|
-                        \( a, bx1, x2 ) ->
-                            HullSlices.area { xmin = bx1, dx = (x2 - bx1) / 2, a = a, b = bx1, ys = [ 3, 3, 3 ] }
+                        \( a, bzmin, zmax ) ->
+                            HullSlices.area { zmin = bzmin, zmax = zmax, a = a, b = bzmin, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Vertical line (case 3)" <|
-                        \( a, x1, b, x2 ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within eps (3 * (b - x1))
+                        \( a, zmin, b, zmax ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
+                                |> Expect.within eps (3 * (b - zmin))
                     , fuzz fourIncreasingFloats "Vertical line (case 4)" <|
-                        \( x1, a, b, x2 ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
+                        \( zmin, a, b, zmax ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (b - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 5)" <|
-                        \( x1a, b, x2 ) ->
-                            HullSlices.area { xmin = x1a, dx = (x2 - x1a) / 2, a = x1a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within eps (3 * (b - x1a))
+                        \( zmina, b, zmax ) ->
+                            HullSlices.area { zmin = zmina, zmax = zmax, a = zmina, b = b, y = [ 3, 3, 3 ] }
+                                |> Expect.within eps (3 * (b - zmina))
                     , fuzz threeIncreasingFloats "Vertical line (case 6)" <|
-                        \( x1, a, x2b ) ->
-                            HullSlices.area { xmin = x1, dx = (x2b - x1) / 2, a = a, b = x2b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within eps (3 * (x2b - a))
+                        \( zmin, a, zmaxb ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmaxb, a = a, b = zmaxb, y = [ 3, 3, 3 ] }
+                                |> Expect.within eps (3 * (zmaxb - a))
                     , fuzz twoIncreasingFloats "Vertical line (case 7)" <|
-                        \( x1a, x2b ) ->
-                            HullSlices.area { xmin = x1a, dx = (x2b - x1a) / 2, a = x1a, b = x2b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within eps (3 * (x2b - x1a))
+                        \( zmina, zmaxb ) ->
+                            HullSlices.area { zmin = zmina, zmax = zmaxb, a = zmina, b = zmaxb, y = [ 3, 3, 3 ] }
+                                |> Expect.within eps (3 * (zmaxb - zmina))
                     , fuzz fourIncreasingFloats "Vertical line (case 8)" <|
-                        \( x1, a, x2, b ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
-                                |> Expect.within eps (3 * (x2 - a))
+                        \( zmin, a, zmax, b ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
+                                |> Expect.within eps (3 * (zmax - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 9)" <|
-                        \( x1, x2a, b ) ->
-                            HullSlices.area { xmin = x1, dx = (x2a - x1) / 2, a = x2a, b = b, ys = [ 3, 3, 3 ] }
+                        \( zmin, zmaxa, b ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmaxa, a = zmaxa, b = b, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Vertical line (case 10)" <|
-                        \( x1, x2, a, b ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 3, 3 ] }
+                        \( zmin, zmax, a, b ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     ]
                 , describe "Area under oblique line"
                     [ fuzz fourIncreasingFloats "Oblique line (case 1)" <|
-                        \( a, b, x1, x2 ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                        \( a, b, zmin, zmax ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps 0
                     , fuzz threeIncreasingFloats "Oblique line (case 2)" <|
-                        \( a, bx1, x2 ) ->
-                            HullSlices.area { xmin = bx1, dx = (x2 - bx1) / 2, a = a, b = bx1, ys = [ 3, 2, 1 ] }
+                        \( a, bzmin, zmax ) ->
+                            HullSlices.area { zmin = bzmin, zmax = zmax, a = a, b = bzmin, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Oblique line (case 3)" <|
-                        \( a, x1, b, x2 ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                        \( a, zmin, b, zmax ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
-                                    (((b - x1) * (b + 2 * x1 - 3 * x2)) / (x1 - x2))
+                                    (((b - zmin) * (b + 2 * zmin - 3 * zmax)) / (zmin - zmax))
 
-                    -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-x1)%2F(x2-x1)+from+x+%3D+x1+to+b
+                    -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-zmin)%2F(zmax-zmin)+from+x+%3D+zmin+to+b
                     , fuzz fourIncreasingFloats "Oblique line (case 4)" <|
-                        \( x1, a, b, x2 ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                        \( zmin, a, b, zmax ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
-                                    (-((a - b) * (a + b + x1 - 3 * x2)) / (x1 - x2))
+                                    (-((a - b) * (a + b + zmin - 3 * zmax)) / (zmin - zmax))
 
-                    -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-x1)%2F(x2-x1)+from+x+%3D+a+to+b
+                    -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-zmin)%2F(zmax-zmin)+from+x+%3D+a+to+b
                     , fuzz threeIncreasingFloats "Oblique line (case 5)" <|
-                        \( x1a, b, x2 ) ->
-                            HullSlices.area { xmin = x1a, dx = (x2 - x1a) / 2, a = x1a, b = b, ys = [ 3, 2, 1 ] }
+                        \( zmina, b, zmax ) ->
+                            HullSlices.area { zmin = zmina, zmax = zmax, a = zmina, b = b, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
-                                    (-((x1a - b) * (x1a + b + x1a - 3 * x2)) / (x1a - x2))
+                                    (-((zmina - b) * (zmina + b + zmina - 3 * zmax)) / (zmina - zmax))
                     , fuzz threeIncreasingFloats "Oblique line (case 6)" <|
-                        \( x1, a, x2b ) ->
-                            HullSlices.area { xmin = x1, dx = (x2b - x1) / 2, a = a, b = x2b, ys = [ 3, 2, 1 ] }
+                        \( zmin, a, zmaxb ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmaxb, a = a, b = zmaxb, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
-                                    (-((a - x2b) * (a + x2b + x1 - 3 * x2b)) / (x1 - x2b))
+                                    (-((a - zmaxb) * (a + zmaxb + zmin - 3 * zmaxb)) / (zmin - zmaxb))
                     , fuzz twoIncreasingFloats "Oblique line (case 7)" <|
-                        \( x1a, x2b ) ->
-                            HullSlices.area { xmin = x1a, dx = (x2b - x1a) / 2, a = x1a, b = x2b, ys = [ 3, 2, 1 ] }
+                        \( zmina, zmaxb ) ->
+                            HullSlices.area { zmin = zmina, zmax = zmaxb, a = zmina, b = zmaxb, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
-                                    (2 * (x2b - x1a))
+                                    (2 * (zmaxb - zmina))
                     , fuzz fourIncreasingFloats "Oblique line (case 8)" <|
-                        \( x1, a, x2, b ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                        \( zmin, a, zmax, b ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
-                                    (-((a + x1 - 2 * x2) * (a - x2)) / (x1 - x2))
+                                    (-((a + zmin - 2 * zmax) * (a - zmax)) / (zmin - zmax))
                     , fuzz threeIncreasingFloats "Oblique line (case 9)" <|
-                        \( x1, x2a, b ) ->
-                            HullSlices.area { xmin = x1, dx = (x2a - x1) / 2, a = x2a, b = b, ys = [ 3, 2, 1 ] }
+                        \( zmin, zmaxa, b ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmaxa, a = zmaxa, b = b, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     0
                     , fuzz fourIncreasingFloats "Oblique line (case 10)" <|
-                        \( x1, x2, a, b ) ->
-                            HullSlices.area { xmin = x1, dx = (x2 - x1) / 2, a = a, b = b, ys = [ 3, 2, 1 ] }
+                        \( zmin, zmax, a, b ) ->
+                            HullSlices.area { zmin = zmin, zmax = zmax, a = a, b = b, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     0
                     ]
