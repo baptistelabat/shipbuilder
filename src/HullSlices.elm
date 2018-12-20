@@ -1,6 +1,7 @@
 module HullSlices
     exposing
         ( area
+        , calculateSliceArea
         , clip
         , decoder
         , empty
@@ -124,12 +125,18 @@ scale json hullSlice =
         }
 
 
+calculateSliceArea : JsonHullSlices a -> HullSlice -> Float
+calculateSliceArea json hullSlice =
+    scale json hullSlice
+        |> area (json.zmin + json.depth.value - json.draught.value) (json.zmin + json.depth.value)
+
+
 interpolate : JsonHullSlices a -> HullSlices
 interpolate json =
     let
         sliceAreas : List Float
         sliceAreas =
-            List.map ((scale json) >> area (json.zmin + json.depth.value - json.draught.value) (json.zmin + json.depth.value)) json.slices
+            List.map (calculateSliceArea json) json.slices
     in
         { length = json.length
         , breadth = json.breadth
