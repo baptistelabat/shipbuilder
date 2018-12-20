@@ -8,6 +8,7 @@ module StringValueInput
         , decodeSpacingExceptions
         , emptyFloat
         , emptyInt
+        , floatInput
         , floatInputDecoder
         , fromInt
         , fromNumber
@@ -85,6 +86,11 @@ fromNumber unit description value =
             round_n 1 value
     in
         { value = roundedValue, string = toString roundedValue, unit = unit, description = description }
+
+
+floatInput : Float -> FloatInput
+floatInput value =
+    { value = value, string = "", unit = "", description = "" }
 
 
 fromInt : String -> Int -> IntInput

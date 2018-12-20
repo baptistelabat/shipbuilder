@@ -67,9 +67,9 @@ hullSlices =
 
 cube : HullSlices.JsonHullSlices {}
 cube =
-    { length = StringValueInput.fromNumber "" "" 200
-    , breadth = StringValueInput.fromNumber "" "" 20
-    , depth = StringValueInput.fromNumber "" "" 10
+    { length = StringValueInput.floatInput 200
+    , breadth = StringValueInput.floatInput 20
+    , depth = StringValueInput.floatInput 10
     , xmin = -1
     , ymin = -10
     , zmin = 3
@@ -90,7 +90,7 @@ cube =
           , y = [ 1, 1, 1, 1 ]
           }
         ]
-    , draught = StringValueInput.fromNumber "" "" 2
+    , draught = StringValueInput.floatInput 2
     }
 
 
@@ -294,13 +294,13 @@ suite =
             [ test "zmin should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.fromNumber "" ""
-                        , depth = 5 |> StringValueInput.fromNumber "" ""
-                        , draught = 4 |> StringValueInput.fromNumber "" ""
+                        { breadth = 10 |> StringValueInput.floatInput
+                        , depth = 5 |> StringValueInput.floatInput
+                        , draught = 4 |> StringValueInput.floatInput
                         , xmin = -5
                         , ymin = -89
                         , zmin = 88
-                        , length = 456 |> StringValueInput.fromNumber "" ""
+                        , length = 456 |> StringValueInput.floatInput
                         , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
@@ -310,13 +310,13 @@ suite =
             , test "zmax should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.fromNumber "" ""
-                        , depth = 5 |> StringValueInput.fromNumber "" ""
-                        , draught = 4 |> StringValueInput.fromNumber "" ""
+                        { breadth = 10 |> StringValueInput.floatInput
+                        , depth = 5 |> StringValueInput.floatInput
+                        , draught = 4 |> StringValueInput.floatInput
                         , xmin = -5
                         , ymin = -89
                         , zmin = 88
-                        , length = 456 |> StringValueInput.fromNumber "" ""
+                        , length = 456 |> StringValueInput.floatInput
                         , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
@@ -326,13 +326,13 @@ suite =
             , test "y should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.fromNumber "" ""
-                        , depth = 5 |> StringValueInput.fromNumber "" ""
-                        , draught = 4 |> StringValueInput.fromNumber "" ""
+                        { breadth = 10 |> StringValueInput.floatInput
+                        , depth = 5 |> StringValueInput.floatInput
+                        , draught = 4 |> StringValueInput.floatInput
                         , xmin = -5
                         , ymin = -89
                         , zmin = 88
-                        , length = 456 |> StringValueInput.fromNumber "" ""
+                        , length = 456 |> StringValueInput.floatInput
                         , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
