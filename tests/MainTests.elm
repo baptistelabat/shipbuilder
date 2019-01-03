@@ -21,6 +21,9 @@ import Json.Encode as Encode exposing (encode)
 import StringValueInput
 
 
+-- import Svg.Attributes
+
+
 setView : List Msg -> Html Msg
 setView =
     view << setModel
@@ -48,6 +51,14 @@ keyDown key keyEvent =
         , ( "target", Encode.object [ ( "value", Encode.string keyEvent.targetValue ) ] )
         ]
     )
+
+
+modellerView : Html Msg
+modellerView =
+    setView
+        [ ToJs <| SelectHullReference "anthineas"
+        , ToJs <| SwitchViewMode <| Modeller
+        ]
 
 
 downArrow : KeyEvent -> ( String, Encode.Value )
@@ -1333,159 +1344,186 @@ suite =
                                 (Expect.all [ Query.has [ Selector.text "0" ] ])
                 ]
             , describe "Modeller" <|
-                let
-                    modellerView =
-                        setView
-                            [ ToJs <| SelectHullReference "anthineas"
-                            , ToJs <| SwitchViewMode <| Modeller
-                            ]
-                in
-                    [ test "Length over all input is present" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "length-over-all" ]
-                                |> Query.first
-                                |> Query.has [ Selector.attribute <| Attributes.value "22.8" ]
-                    , test "Length over all input triggers ModifySlice" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "length-over-all" ]
-                                |> Query.first
-                                |> Event.simulate (Event.input "123.4")
-                                |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4")
-                    , test "ModifySlice sets length over all" <|
-                        \_ ->
-                            Expect.equal (Just 123.4)
-                                (setModel [ ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4" ]
-                                    |> .slices
-                                    |> Dict.get "anthineas"
-                                    |> Maybe.map (.length >> .value)
-                                )
-                    , test "ModifySlice is properly sent to JS" <|
-                        \_ ->
-                            let
-                                msg =
-                                    ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4"
-                            in
-                                Expect.equal
-                                    (toJS [ ToJs msg ] msg (Json.Decode.map Just HullSlices.decoder))
-                                <|
-                                    Just
-                                        { tag = "load-hull"
-                                        , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
-                                        }
-                    , test "Can press down arrow key to decrement length over all" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "length-over-all" ]
-                                |> Query.first
-                                |> Event.simulate ("22" |> press |> downArrow)
-                                |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "21.8")
-                    , test "Can press shift down arrow key to decrement length over all" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "length-over-all" ]
-                                |> Query.first
-                                |> Event.simulate ("22" |> press |> shift |> downArrow)
-                                |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "12.8")
-                    , test "Breadth input is present" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "breadth" ]
-                                |> Query.first
-                                |> Query.has [ Selector.attribute <| Attributes.value "6.9" ]
-                    , test "Breadth input triggers ModifySlice" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "breadth" ]
-                                |> Query.first
-                                |> Event.simulate (Event.input "123.4")
-                                |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "123.4")
-                    , test "ModifySlice sets breadth" <|
-                        \_ ->
-                            Expect.equal (Just 123.4)
-                                (setModel [ ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "123.4" ]
-                                    |> .slices
-                                    |> Dict.get "anthineas"
-                                    |> Maybe.map (.breadth >> .value)
-                                )
-                    , test "Can press down arrow key to decrement breadth" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "breadth" ]
-                                |> Query.first
-                                |> Event.simulate ("22" |> press |> downArrow)
-                                |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "5.9")
-                    , test "Can press up arrow key to increment breadth" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "breadth" ]
-                                |> Query.first
-                                |> Event.simulate ("22" |> press |> upArrow)
-                                |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "7.9")
-                    , test "Draught input is present" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "draught" ]
-                                |> Query.first
-                                |> Query.has [ Selector.attribute <| Attributes.value "1.4" ]
-                    , test "Draught input triggers ModifySlice" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "draught" ]
-                                |> Query.first
-                                |> Event.simulate (Event.input "123.4")
-                                |> Event.expect (ToJs <| ModifySlice HullSlices.setDraught "anthineas" "123.4")
-                    , test "SetDraught sets draught" <|
-                        \_ ->
-                            Expect.equal (Just 123.4)
-                                (setModel [ ToJs <| ModifySlice HullSlices.setDraught "anthineas" "123.4" ]
-                                    |> .slices
-                                    |> Dict.get "anthineas"
-                                    |> Maybe.map (.draught >> .value)
-                                )
-                    , test "Moulded depth input is present" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "moulded-depth" ]
-                                |> Query.first
-                                |> Query.has [ Selector.attribute <| Attributes.value "6.8" ]
-                    , test "Moulded depth input triggers ModifySlice" <|
-                        \_ ->
-                            modellerView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.id "moulded-depth" ]
-                                |> Query.first
-                                |> Event.simulate (Event.input "123.4")
-                                |> Event.expect (ToJs <| ModifySlice HullSlices.setMouldedDepth "anthineas" "123.4")
-                    , test "ModifySlice sets mouldedDepth" <|
-                        \_ ->
-                            Expect.equal (Just 123.4)
-                                (setModel [ ToJs <| ModifySlice HullSlices.setMouldedDepth "anthineas" "123.4" ]
-                                    |> .slices
-                                    |> Dict.get "anthineas"
-                                    |> Maybe.map (.mouldedDepth >> .value)
-                                )
-                    ]
+                [ test "Length over all input is present" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "length-over-all" ]
+                            |> Query.first
+                            |> Query.has [ Selector.attribute <| Attributes.value "22.8" ]
+                , test "Block cefficient is present" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "block-coefficient" ]
+                            |> Query.find [ Selector.class "kpi-value" ]
+                            |> Query.has [ Selector.text "0.22" ]
+                , test "Volume is present" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "displacement" ]
+                            |> Query.find [ Selector.class "kpi-value" ]
+                            |> Query.has [ Selector.text "19.85" ]
+                , test "Length over all input triggers ModifySlice" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "length-over-all" ]
+                            |> Query.first
+                            |> Event.simulate (Event.input "123.4")
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4")
+                , test "ModifySlice sets length over all" <|
+                    \_ ->
+                        Expect.equal (Just 123.4)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4" ]
+                                |> .slices
+                                |> Dict.get "anthineas"
+                                |> Maybe.map (.length >> .value)
+                            )
+                , test "ModifySlice is properly sent to JS" <|
+                    \_ ->
+                        let
+                            msg =
+                                ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4"
+                        in
+                            Expect.equal
+                                (toJS [ ToJs msg ] msg (Json.Decode.map Just HullSlices.decoder))
+                            <|
+                                Just
+                                    { tag = "load-hull"
+                                    , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
+                                    }
+                , test "Can press down arrow key to decrement length over all" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "length-over-all" ]
+                            |> Query.first
+                            |> Event.simulate ("22" |> press |> downArrow)
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "21.8")
+                , test "Can press shift down arrow key to decrement length over all" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "length-over-all" ]
+                            |> Query.first
+                            |> Event.simulate ("22" |> press |> shift |> downArrow)
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "12.8")
+                , test "Breadth input is present" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "breadth" ]
+                            |> Query.first
+                            |> Query.has [ Selector.attribute <| Attributes.value "6.9" ]
+                , test "Breadth input triggers ModifySlice" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "breadth" ]
+                            |> Query.first
+                            |> Event.simulate (Event.input "123.4")
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "123.4")
+                , test "ModifySlice sets breadth" <|
+                    \_ ->
+                        Expect.equal (Just 123.4)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "123.4" ]
+                                |> .slices
+                                |> Dict.get "anthineas"
+                                |> Maybe.map (.breadth >> .value)
+                            )
+                , test "Can press down arrow key to decrement breadth" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "breadth" ]
+                            |> Query.first
+                            |> Event.simulate ("22" |> press |> downArrow)
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "5.9")
+                , test "Can press up arrow key to increment breadth" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "breadth" ]
+                            |> Query.first
+                            |> Event.simulate ("22" |> press |> upArrow)
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "7.9")
+                , test "Draught input is present" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "draught" ]
+                            |> Query.first
+                            |> Query.has [ Selector.attribute <| Attributes.value "1.4" ]
+                , test "Draught input triggers ModifySlice" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "draught" ]
+                            |> Query.first
+                            |> Event.simulate (Event.input "123.4")
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setDraught "anthineas" "123.4")
+                , test "SetDraught sets draught" <|
+                    \_ ->
+                        Expect.equal (Just 123.4)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "anthineas" "123.4" ]
+                                |> .slices
+                                |> Dict.get "anthineas"
+                                |> Maybe.map (.draught >> .value)
+                            )
+                , test "Depth input is present" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "depth" ]
+                            |> Query.first
+                            |> Query.has [ Selector.attribute <| Attributes.value "6.8" ]
+                , test "Depth input triggers ModifySlice" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.id "depth" ]
+                            |> Query.first
+                            |> Event.simulate (Event.input "123.4")
+                            |> Event.expect (ToJs <| ModifySlice HullSlices.setDepth "anthineas" "123.4")
+                , test "ModifySlice sets depth" <|
+                    \_ ->
+                        Expect.equal (Just 123.4)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDepth "anthineas" "123.4" ]
+                                |> .slices
+                                |> Dict.get "anthineas"
+                                |> Maybe.map (.depth >> .value)
+                            )
+                ]
+            ]
+        , describe "Slice area curve"
+            [ test "Should have a plot for area curve" <|
+                \() ->
+                    modellerView
+                        |> Query.fromHtml
+                        |> Query.findAll [ Selector.id "area-curve-plot-container" ]
+                        |> Query.first
+                        |> Query.findAll [ Selector.tag "svg" ]
+                        |> Query.count (Expect.equal 1)
+
+            -- , test "Should have a line on plot for curve" <|
+            --     \() ->
+            --         modellerView
+            --             |> Query.fromHtml
+            --             |> Query.findAll [ Selector.id "area-curve-plot" ]
+            --             |> Query.index 0
+            --             |> Query.findAll [ Selector.tag "path" ]
+            --             |> Query.index 0
+            --             |> Query.has [ Selector.attribute <| Svg.Attributes.d "M20.000000000000004 130 L20.000000000000004 130 L32.22222222222223 124.49137453276262 L44.44444444444445 117.30434987677904 L56.666666666666664 108.43892603204925 L68.8888888888889 97.89510299857324 L81.11111111111113 85.67288077635101 L93.33333333333334 71.77225936538258 L105.55555555555559 56.19323876566792 L117.7777777777778 38.93581897720708 L130 19.999999999999996" ]
             ]
         , describe "Parse JSON slices"
             [ test "Can parse 'length'" <|
                 testHullSliceDecoding (.length >> .value) 22.8
             , test "Can parse 'breadth'" <|
                 testHullSliceDecoding (.breadth >> .value) 6.9
-            , test "Can parse 'mouldedDepth'" <|
-                testHullSliceDecoding (.mouldedDepth >> .value) 6.8
+            , test "Can parse 'depth'" <|
+                testHullSliceDecoding (.depth >> .value) 6.8
             , test "Can parse 'xmin'" <|
                 testHullSliceDecoding .xmin -1
             , test "Can parse 'ymin'" <|
@@ -1519,8 +1557,8 @@ suite =
                 testHullSliceEncoding (.length >> .value) 22.8
             , test "Can encode 'breadth'" <|
                 testHullSliceEncoding (.breadth >> .value) 6.9
-            , test "Can encode 'mouldedDepth'" <|
-                testHullSliceEncoding (.mouldedDepth >> .value) 6.8
+            , test "Can encode 'depth'" <|
+                testHullSliceEncoding (.depth >> .value) 6.8
             , test "Can encode 'xmin'" <|
                 testHullSliceEncoding .xmin -1
             , test "Can encode 'ymin'" <|

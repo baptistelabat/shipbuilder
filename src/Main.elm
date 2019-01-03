@@ -2239,9 +2239,6 @@ updateModelToJs msg model =
 
         RemoveBlocks blocks ->
             let
-                _ =
-                    Debug.log "remove blocks " (List.length blocks)
-
                 nblocks =
                     removeListBlocksFrom model.blocks blocks
             in
@@ -2323,9 +2320,6 @@ updateModelToJs msg model =
                 partitions : PartitionsData
                 partitions =
                     model.partitions
-
-                _ =
-                    Debug.log "toggle!" <| not partitions.showing
 
                 updatedPartitions =
                     { partitions | showing = not partitions.showing }
@@ -3143,7 +3137,10 @@ viewModeller model =
                         [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSlices.setLengthOverAll hullReference
                         , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSlices.setBreadth hullReference
                         , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
-                        , StringValueInput.view slices.mouldedDepth <| ToJs << ModifySlice HullSlices.setMouldedDepth hullReference
+                        , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSlices.setDepth hullReference
+                        , HullSlices.plotAreaCurve slices
+                        , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
+                        , viewSimpleKpi "Displacement (t)" "displacement" slices.volume
                         ]
             else
                 Nothing

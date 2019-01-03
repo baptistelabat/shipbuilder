@@ -1,16 +1,23 @@
 {
     "elm-lang/virtual-dom": "2.0.4",
     "elm-community/linear-algebra": "3.1.2",
+    "mgold/elm-date-format": "1.8.0",
     "jystic/elm-font-awesome": "3.0.0",
     "elm-lang/dom": "1.1.1",
     "elm-lang/html": "2.0.0",
     "elm-lang/keyboard": "1.0.1",
+    "fredcy/elm-parseint": "2.0.0",
+    "justinmimbs/elm-date-extra": "2.1.1",
     "elm-lang/http": "1.0.0",
+    "myrho/elm-round": "1.0.3",
+    "terezka/line-charts": "1.0.0",
     "elm-community/list-extra": "7.1.0",
+    "eskimoblood/elm-color-extra": "5.1.0",
     "elm-lang/svg": "2.0.0",
     "rluiten/elm-date-extra": "9.4.0",
     "NoRedInk/elm-decode-pipeline": "3.0.1",
     "eeue56/elm-all-dict": "2.0.1",
+    "debois/elm-dom": "1.2.3",
     "Gizra/elm-dictlist": "2.1.2",
     "elm-lang/core": "5.1.1"
 }

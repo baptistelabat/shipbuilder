@@ -360,7 +360,7 @@ let unloadHull = function () {
 }
 
 let buildHullGeometry = function ( json ) {
-    var H = json['mouldedDepth'];
+    var H = json['depth'];
     var B = json['breadth'];
     var L = json['length'];
     var xmin = json['xmin'];
@@ -404,8 +404,8 @@ let buildHullGeometry = function ( json ) {
             var k3 = k1+2*ny;
             var k4 = k3 + 1;
 
-            geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
-            geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
+            geometry.faces.push( new THREE.Face3( k1, k4, k3 ) );
+            geometry.faces.push( new THREE.Face3( k1, k2, k4 ) );
         }
     }
     for (let i = 0; i < nx -1 ; i++){
@@ -416,8 +416,8 @@ let buildHullGeometry = function ( json ) {
             var k3 = k1+2*ny;
             var k4 = k3 + 1;
 
-            geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
-            geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
+            geometry.faces.push( new THREE.Face3( k1, k3, k2 ) );
+            geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
         }
     }
     //compute Normals
@@ -430,7 +430,7 @@ let loadHull = function (json) {
         // there can only be one hull in the scene so remove the current one, if any
         unloadHull();
 
-        const hullColor = new THREE.Color(0.56, 0.69, 1); // light blue
+        const hullColor = new THREE.Color(3/255, 146/255, 255/255); // light blue
         // the STL loader returns a bufferGeometry. We can't read its vertices and faces
         // we need to convert it to an "actual" geometry to access these
         const geometry = buildHullGeometry(json);
