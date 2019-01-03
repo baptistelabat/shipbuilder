@@ -245,7 +245,9 @@ setLengthOverAll loa hullSlices =
 
 setBreadth : String -> HullSlices -> HullSlices
 setBreadth breadth hullSlices =
-    { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth } |> interpolate
+    { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth }
+        |> (\slices -> { slices | ymin = -slices.breadth.value / 2 })
+        |> interpolate
 
 
 setDraught : String -> HullSlices -> HullSlices
