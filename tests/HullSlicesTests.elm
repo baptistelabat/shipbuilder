@@ -432,4 +432,20 @@ suite =
                         |> Expect.equal
                             ([ -89 + 10 * 0.1, -89 + 10 * 0.2, -89 + 10 * 0.5 ])
             ]
+        , describe "Volume"
+            [ fuzz
+                (Fuzz.map2 (,) Fuzz.float Fuzz.float)
+                "Triangular area curve"
+              <|
+                \( xmin, length ) ->
+                    let
+                        ( xmin, length ) =
+                            ( 0.000001, 0.00005116475268283904 )
+                    in
+                        HullSlices.volume
+                            { xmin = xmin, length = StringValueInput.floatInput length }
+                            [ 0, 1, 2, 3, 2, 1, 0 ]
+                            |> Expect.within eps
+                                (3 * length / 2)
+            ]
         ]

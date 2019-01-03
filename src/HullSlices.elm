@@ -8,12 +8,14 @@ module HullSlices
         , encoder
         , dictDecoder
         , dictEncoder
+        , interpolate
         , plotAreaCurve
         , scale
         , setBreadth
         , setDraught
         , setLengthOverAll
         , setDepth
+        , volume
         , HullSlices
         , HullSlice
         , JsonHullSlices
@@ -68,6 +70,7 @@ type alias HullSlices =
     , draught : StringValueInput.FloatInput
     , sliceAreas : List Float
     , blockCoefficient : Float
+    , volume : Float
     }
 
 
@@ -125,6 +128,11 @@ scale json hullSlice =
         }
 
 
+volume : { a | xmin : Float, length : StringValueInput.FloatInput } -> List Float -> Float
+volume json sliceAreas =
+    area json.xmin (json.xmin + json.length.value) { zmin = json.xmin, zmax = (json.xmin + json.length.value), y = sliceAreas }
+
+
 calculateSliceArea : JsonHullSlices a -> HullSlice -> Float
 calculateSliceArea json hullSlice =
     -- Multiply by 2 to account for both sides of the hull: otherwise the area is just for the y>0 half-plane
@@ -150,6 +158,7 @@ interpolate json =
         , draught = json.draught
         , sliceAreas = sliceAreas
         , blockCoefficient = StringValueInput.round_n 2 <| (Maybe.withDefault 0 <| List.maximum sliceAreas) / (json.breadth.value * json.draught.value)
+        , volume = StringValueInput.round_n 2 <| volume json sliceAreas
         }
 
 
