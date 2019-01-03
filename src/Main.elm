@@ -3140,6 +3140,7 @@ viewModeller model =
                         , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSlices.setDepth hullReference
                         , HullSlices.plotAreaCurve slices
                         , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
+                        , viewSimpleKpi "Displacement (t)" "displacement" slices.volume
                         ]
             else
                 Nothing

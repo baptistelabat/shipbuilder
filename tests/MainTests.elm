@@ -1358,6 +1358,13 @@ suite =
                             |> Query.find [ Selector.class "block-coefficient" ]
                             |> Query.find [ Selector.class "kpi-value" ]
                             |> Query.has [ Selector.text "0.22" ]
+                , test "Volume is present" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "displacement" ]
+                            |> Query.find [ Selector.class "kpi-value" ]
+                            |> Query.has [ Selector.text "19.85" ]
                 , test "Length over all input triggers ModifySlice" <|
                     \_ ->
                         modellerView
