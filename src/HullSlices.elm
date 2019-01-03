@@ -127,8 +127,10 @@ scale json hullSlice =
 
 calculateSliceArea : JsonHullSlices a -> HullSlice -> Float
 calculateSliceArea json hullSlice =
+    -- Multiply by 2 to account for both sides of the hull: otherwise the area is just for the y>0 half-plane
     scale json hullSlice
         |> area (json.zmin + json.depth.value - json.draught.value) (json.zmin + json.depth.value)
+        |> (*) 2
 
 
 interpolate : JsonHullSlices a -> HullSlices

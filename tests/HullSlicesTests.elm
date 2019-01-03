@@ -94,6 +94,35 @@ cube =
     }
 
 
+toblerone : Float -> Float -> HullSlices.JsonHullSlices {}
+toblerone breadth depth =
+    { length = StringValueInput.floatInput 200
+    , breadth = StringValueInput.floatInput breadth
+    , depth = StringValueInput.floatInput depth
+    , xmin = -1
+    , ymin = -breadth / 2
+    , zmin = 3
+    , slices =
+        [ { x = 0
+          , zmin = 0
+          , zmax = 1
+          , y = [ 1, 0.75, 0.5 ]
+          }
+        , { x = 0.5
+          , zmin = 0
+          , zmax = 1
+          , y = [ 1, 0.75, 0.5 ]
+          }
+        , { x = 1
+          , zmin = 0
+          , zmax = 1
+          , y = [ 1, 0.75, 0.5 ]
+          }
+        ]
+    , draught = StringValueInput.floatInput 2
+    }
+
+
 suite : Test
 suite =
     describe "Hull slices"
@@ -139,7 +168,7 @@ suite =
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
-                    Expect.equal [ 0, 2.0484246608657704 ] (hullSlices |> HullSlices.setBreadth "10" |> .sliceAreas)
+                    Expect.equal [ 0, 4.096849321731541 ] (hullSlices |> HullSlices.setBreadth "10" |> .sliceAreas)
             , describe "Clipper" <|
                 [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->
@@ -280,6 +309,11 @@ suite =
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     0
+                    , test "Bug detected when calculating toblerone area" <|
+                        \_ ->
+                            HullSlices.area 3.0100000959552076 3.010000694363696 { x = 0, zmin = 3, zmax = 3.010000694363696, y = [ -9.99, -9.9925, -9.995 ] }
+                                |> Expect.within (Absolute 1.0e-14)
+                                    (-0.00000598109275204103)
                     ]
                 , describe "Real slice"
                     [ test "Anthineas" <|
@@ -291,7 +325,60 @@ suite =
                         \_ ->
                             (List.map (HullSlices.calculateSliceArea cube) cube.slices)
                                 |> Expect.equal
-                                    [ 20, 20, 20 ]
+                                    [ cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value ]
+                    , fuzz (Fuzz.map3 (,,) positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|
+                        \( breadth, depth, draughtDividedByDepth ) ->
+                            let
+                                t =
+                                    toblerone breadth depth
+                                        |> setDraught (draughtDividedByDepth * depth)
+
+                                expectedArea =
+                                    draughtDividedByDepth * draughtDividedByDepth * depth * breadth / 2
+
+                                setDraught : Float -> { a | draught : StringValueInput.FloatInput } -> { a | draught : StringValueInput.FloatInput }
+                                setDraught val slice =
+                                    { slice | draught = val |> StringValueInput.asValueIn slice.draught }
+                            in
+                                Expect.all
+                                    ((List.map
+                                        (HullSlices.calculateSliceArea t)
+                                        t.slices
+                                     )
+                                        |> List.map (\area -> (\e -> Expect.within e expectedArea area))
+                                    )
+                                    (Relative 1.0e-8)
+                    , test "Toblerone bug" <|
+                        \_ ->
+                            let
+                                breadth =
+                                    0.01
+
+                                depth =
+                                    0.010000694363696206
+
+                                draughtDividedByDepth =
+                                    0.00005983669402257387
+
+                                t =
+                                    toblerone breadth depth
+                                        |> setDraught (draughtDividedByDepth * depth)
+
+                                expectedArea =
+                                    draughtDividedByDepth * draughtDividedByDepth * depth * breadth / 2
+
+                                setDraught : Float -> { a | draught : StringValueInput.FloatInput } -> { a | draught : StringValueInput.FloatInput }
+                                setDraught val slice =
+                                    { slice | draught = val |> StringValueInput.asValueIn slice.draught }
+                            in
+                                Expect.all
+                                    ((List.map
+                                        (HullSlices.calculateSliceArea t)
+                                        t.slices
+                                     )
+                                        |> List.map (\area -> (\e -> Expect.within e expectedArea area))
+                                    )
+                                    eps
                     ]
                 ]
             ]
