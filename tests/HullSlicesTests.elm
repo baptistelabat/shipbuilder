@@ -164,11 +164,14 @@ suite =
             , test "Can set draught" <|
                 \_ ->
                     Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m" } (HullSlices.setDraught "13.4125" hullSlices |> .draught)
+            , test "Resizing should not change centering: changing breadth should also change ymin" <|
+                \_ ->
+                    Expect.equal -3.5 (HullSlices.setBreadth "7" hullSlices |> .ymin)
             ]
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
-                    Expect.equal [ 0, 4.096849321731541 ] (hullSlices |> HullSlices.setBreadth "10" |> .sliceAreas)
+                    Expect.equal [ 0, 0.06183408481917592 ] (hullSlices |> HullSlices.setBreadth "10" |> .sliceAreas)
             , describe "Clipper" <|
                 [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->
@@ -326,6 +329,11 @@ suite =
                             (List.map (HullSlices.calculateSliceArea cube) cube.slices)
                                 |> Expect.equal
                                     [ cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value ]
+                    , test "Cube after changing breadth" <|
+                        \_ ->
+                            (List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.interpolate cube) cube.slices)
+                                |> Expect.equal
+                                    [ 10 * cube.draught.value, 10 * cube.draught.value, 10 * cube.draught.value ]
                     , fuzz (Fuzz.map3 (,,) positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|
                         \( breadth, depth, draughtDividedByDepth ) ->
                             let
