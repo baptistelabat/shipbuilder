@@ -1351,6 +1351,13 @@ suite =
                             |> Query.findAll [ Selector.id "length-over-all" ]
                             |> Query.first
                             |> Query.has [ Selector.attribute <| Attributes.value "22.8" ]
+                , test "Block cefficient is present" <|
+                    \_ ->
+                        modellerView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "block-coefficient" ]
+                            |> Query.find [ Selector.class "kpi-value" ]
+                            |> Query.has [ Selector.text "0.22" ]
                 , test "Length over all input triggers ModifySlice" <|
                     \_ ->
                         modellerView
