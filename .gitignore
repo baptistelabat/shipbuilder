@@ -2,6 +2,7 @@
 generated-code
 shipBuilder/js/elm.js
 shipBuilder/*.json
+shipBuilder/index.template.json.html
 *.babel.js
 shipBuilder/index.html
 build-artifacts
