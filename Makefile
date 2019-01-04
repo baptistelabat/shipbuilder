@@ -19,7 +19,7 @@ json:
 shipBuilder/js/elm.js: src/* tests/* src/Interpolate/*
 	rm -rf elm-stuff/generated-code || true
 	docker build -t elm .
-	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm make --yes --warn src/Main.elm --output shipBuilder/js/elm.js
+	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm make src/Main.elm --output shipBuilder/js/elm.js
 
 test:
 	docker build -t elm .

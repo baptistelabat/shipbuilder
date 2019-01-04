@@ -1,16 +1,15 @@
-module Viewports
-    exposing
-        ( init
-        , Viewport
-        , Viewports
-        , encodeViewport
-        , encodeViewports
-        , CameraType(..)
-        )
+module Viewports exposing
+    ( CameraType(..)
+    , Viewport
+    , Viewports
+    , encodeViewport
+    , encodeViewports
+    , init
+    )
 
-import Color exposing (Color, hsl, toRgb)
-import Math.Vector3 exposing (toRecord, Vec3, vec3)
+import Color exposing (Color, hsl)
 import Json.Encode as Encode
+import Math.Vector3 exposing (Vec3, toRecord, vec3)
 
 
 type alias Viewports =
@@ -54,7 +53,7 @@ init =
 
 encodeViewports : Viewports -> Encode.Value
 encodeViewports viewports =
-    Encode.list <| List.map encodeViewport viewports
+    Encode.list encodeViewport viewports
 
 
 encodeViewport : Viewport -> Encode.Value
@@ -68,7 +67,7 @@ encodeViewport viewport =
         , ( "background", encodeColor viewport.background )
         , ( "eye", encodeVector3 viewport.eye )
         , ( "canControl", encodeCanControl viewport.canControl )
-        , ( "cameraType", Encode.string <| toString viewport.cameraType )
+        , ( "cameraType", Encode.string <| Debug.toString viewport.cameraType )
         ]
 
 
@@ -78,11 +77,11 @@ encodeVector3 vector =
         record =
             toRecord vector
     in
-        Encode.object
-            [ ( "x", Encode.float record.x )
-            , ( "y", Encode.float record.y )
-            , ( "z", Encode.float record.z )
-            ]
+    Encode.object
+        [ ( "x", Encode.float record.x )
+        , ( "y", Encode.float record.y )
+        , ( "z", Encode.float record.z )
+        ]
 
 
 encodeCanControl : { x : Bool, y : Bool, z : Bool } -> Encode.Value
@@ -102,7 +101,7 @@ viewportSide left top width height background =
     , width = width
     , height = height
     , background = background
-    , eye = (vec3 0 1000 0)
+    , eye = vec3 0 1000 0
     , canControl = { x = True, y = False, z = True }
     , cameraType = Orthographic
     }
@@ -116,7 +115,7 @@ viewportTop left top width height background =
     , width = width
     , height = height
     , background = background
-    , eye = (vec3 0 0 -1000)
+    , eye = vec3 0 0 -1000
     , canControl = { x = True, y = True, z = False }
     , cameraType = Orthographic
     }
@@ -130,7 +129,7 @@ viewportFront left top width height background =
     , width = width
     , height = height
     , background = background
-    , eye = (vec3 1000 0 0)
+    , eye = vec3 1000 0 0
     , canControl = { x = False, y = True, z = True }
     , cameraType = Orthographic
     }
@@ -144,7 +143,7 @@ viewportPerspective left top width height background =
     , width = width
     , height = height
     , background = background
-    , eye = (vec3 1000 1000 -1000)
+    , eye = vec3 1000 1000 -1000
     , canControl = { x = False, y = False, z = False }
     , cameraType = Perspective
     }
@@ -193,13 +192,13 @@ bottomRightCornerViewport background viewport =
 encodeColor : Color -> Encode.Value
 encodeColor color =
     let
-        rgb : { red : Int, green : Int, blue : Int, alpha : Float }
+        rgb : { red : Float, green : Float, blue : Float, alpha : Float }
         rgb =
-            Color.toRgb color
+            Color.toRgba color
     in
-        Encode.object
-            [ ( "red", Encode.int rgb.red )
-            , ( "green", Encode.int rgb.green )
-            , ( "blue", Encode.int rgb.blue )
-            , ( "alpha", Encode.float rgb.alpha )
-            ]
+    Encode.object
+        [ ( "red", Encode.float rgb.red )
+        , ( "green", Encode.float rgb.green )
+        , ( "blue", Encode.float rgb.blue )
+        , ( "alpha", Encode.float rgb.alpha )
+        ]

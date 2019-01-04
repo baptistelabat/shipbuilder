@@ -1,22 +1,22 @@
-module StringValueInput
-    exposing
-        ( FloatInput
-        , IntInput
-        , addToFloatInput
-        , asStringIn
-        , asValueIn
-        , decodeSpacingExceptions
-        , emptyFloat
-        , emptyInt
-        , floatInput
-        , floatInputDecoder
-        , fromInt
-        , fromNumber
-        , round_n
-        , setString
-        , syncNumberInput
-        , view
-        )
+module StringValueInput exposing
+    ( FloatInput
+    , IntInput
+    , addToFloatInput
+    , asStringIn
+    , asValueIn
+    , decodeSpacingExceptions
+    , emptyFloat
+    , emptyInt
+    , floatInput
+    , floatInputDecoder
+    , fromInt
+    , fromNumber
+    , round_n
+    , setString
+    , syncFloatInput
+    , syncIntInput
+    , view
+    )
 
 import Dict exposing (Dict)
 import ExtraEvents
@@ -60,9 +60,14 @@ type alias IntInput =
     }
 
 
-syncNumberInput : { a | value : b, string : String } -> { a | value : b, string : String }
-syncNumberInput input =
-    { input | string = toString input.value }
+syncFloatInput : { a | value : Float, string : String } -> { a | value : Float, string : String }
+syncFloatInput input =
+    { input | string = String.fromFloat input.value }
+
+
+syncIntInput : { a | value : Int, string : String } -> { a | value : Int, string : String }
+syncIntInput input =
+    { input | string = String.fromInt input.value }
 
 
 floatInputDecoder : String -> String -> Decode.Decoder FloatInput
@@ -72,7 +77,7 @@ floatInputDecoder unit description =
 
 decodeFloatInput : Decode.Decoder FloatInput
 decodeFloatInput =
-    Pipeline.decode FloatInput
+    Decode.succeed FloatInput
         |> Pipeline.required "value" Decode.float
         |> Pipeline.required "string" Decode.string
         |> Pipeline.optional "unit" Decode.string ""
@@ -85,7 +90,7 @@ fromNumber unit description value =
         roundedValue =
             round_n 1 value
     in
-        { value = roundedValue, string = toString roundedValue, unit = unit, description = description }
+    { value = roundedValue, string = String.fromFloat roundedValue, unit = unit, description = description }
 
 
 floatInput : Float -> FloatInput
@@ -95,24 +100,25 @@ floatInput value =
 
 fromInt : String -> Int -> IntInput
 fromInt description number =
-    { value = number, string = toString number, description = description }
+    { value = number, string = String.fromInt number, description = description }
 
 
 setString : String -> FloatInput -> FloatInput
-setString s floatInput =
+setString s floatInput_ =
     case String.toFloat s of
-        Ok value ->
+        Just value ->
             let
                 roundedValue =
                     round_n 1 value
             in
-                if value == roundedValue then
-                    { floatInput | value = roundedValue, string = s }
-                else
-                    { floatInput | value = roundedValue, string = toString roundedValue }
+            if value == roundedValue then
+                { floatInput_ | value = roundedValue, string = s }
 
-        Err e ->
-            { floatInput | string = s }
+            else
+                { floatInput_ | value = roundedValue, string = String.fromFloat roundedValue }
+
+        Nothing ->
+            { floatInput_ | string = s }
 
 
 decodeSpacingExceptions : Decode.Decoder (Dict Int FloatInput)
@@ -121,10 +127,10 @@ decodeSpacingExceptions =
         makeException : String -> Float -> Dict Int FloatInput -> Dict Int FloatInput
         makeException key value dict =
             case String.toInt key of
-                Ok intKey ->
+                Just intKey ->
                     Dict.insert intKey (fromNumber "" "" value) dict
 
-                Err message ->
+                Nothing ->
                     -- TODO: handle failure or only ignore ?
                     dict
 
@@ -132,18 +138,18 @@ decodeSpacingExceptions =
         parse dict =
             Dict.foldl makeException Dict.empty dict
     in
-        Decode.map parse (Decode.dict Decode.float)
+    Decode.map parse (Decode.dict Decode.float)
 
 
 addToFloatInput : Float -> FloatInput -> FloatInput
-addToFloatInput toAdd floatInput =
+addToFloatInput toAdd floatInput_ =
     let
         newValue : Float
         newValue =
             -- rounded to .2f
-            (toFloat (round ((floatInput.value + toAdd) * 100))) / 100
+            toFloat (round ((floatInput_.value + toAdd) * 100)) / 100
     in
-        { floatInput | value = newValue, string = toString newValue }
+    { floatInput_ | value = newValue, string = String.fromFloat newValue }
 
 
 asValueIn : { a | value : b, string : String } -> b -> { a | value : b, string : String }
@@ -175,6 +181,7 @@ makeID var =
         default =
             if dummy == "" then
                 "empty-float-input"
+
             else
                 dummy
 
@@ -182,14 +189,15 @@ makeID var =
         replaceByDefaultIfEmpty s =
             if s == "" then
                 default
+
             else
                 s
     in
-        var.description
-            |> String.toLower
-            |> String.split " "
-            |> String.join "-"
-            |> String.filter isAlphanumeric
+    var.description
+        |> String.toLower
+        |> String.split " "
+        |> String.join "-"
+        |> String.filter isAlphanumeric
 
 
 {-| Only keep a certain number of significant digits after coma
@@ -200,34 +208,35 @@ round_n nb_of_digits x =
         factor =
             10 ^ toFloat nb_of_digits
     in
-        factor
-            * x
-            + 0.5
-            |> floor
-            |> toFloat
-            |> \u ->
+    factor
+        * x
+        + 0.5
+        |> floor
+        |> toFloat
+        |> (\u ->
                 u
                     / factor
+           )
 
 
 view : FloatInput -> (String -> msg) -> Html msg
-view floatInput onChange =
+view floatInput_ onChange =
     let
         generatedID : String
         generatedID =
-            makeID floatInput
+            makeID floatInput_
     in
-        div
-            [ class "input-group" ]
-            [ label
-                [ for generatedID ]
-                [ text <| floatInput.description ++ " (" ++ floatInput.unit ++ ")" ]
-            , input
-                [ type_ "text"
-                , id generatedID
-                , value floatInput.string
-                , ExtraEvents.onKeyDown floatInput.string onChange
-                , onInput onChange
-                ]
-                []
+    div
+        [ class "input-group" ]
+        [ label
+            [ for generatedID ]
+            [ text <| floatInput_.description ++ " (" ++ floatInput_.unit ++ ")" ]
+        , input
+            [ type_ "text"
+            , id generatedID
+            , value floatInput_.string
+            , ExtraEvents.onKeyDown floatInput_.string onChange
+            , onInput onChange
             ]
+            []
+        ]

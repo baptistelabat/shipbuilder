@@ -1,8 +1,7 @@
-module ExtraEvents
-    exposing
-        ( onKeyDown
-        , KeyEvent
-        )
+module ExtraEvents exposing
+    ( KeyEvent
+    , onKeyDown
+    )
 
 import Html exposing (Attribute)
 import Html.Events exposing (on)
@@ -27,17 +26,21 @@ toIncrement keyEvent =
         magnitude =
             if keyEvent.shift && not keyEvent.alt then
                 10
+
             else if keyEvent.alt && not keyEvent.shift then
                 0.1
+
             else
                 1
     in
-        if isKeyArrowUp keyEvent then
-            Just magnitude
-        else if isKeyArrowDown keyEvent then
-            Just <| -1 * magnitude
-        else
-            Nothing
+    if isKeyArrowUp keyEvent then
+        Just magnitude
+
+    else if isKeyArrowDown keyEvent then
+        Just <| -1 * magnitude
+
+    else
+        Nothing
 
 
 onKeyDown : String -> (String -> msg) -> Attribute msg
@@ -65,16 +68,16 @@ keyEventDecoder currentValue =
 
                 Just inc ->
                     case String.toFloat currentValue of
-                        Err _ ->
+                        Nothing ->
                             keyEvent.targetValue
 
-                        Ok val ->
-                            toString (val + inc)
+                        Just val ->
+                            String.fromFloat (val + inc)
     in
-        Pipeline.decode KeyEvent
-            |> Pipeline.required "keyCode" Decode.int
-            |> Pipeline.required "shiftKey" Decode.bool
-            |> Pipeline.required "altKey" Decode.bool
-            |> Pipeline.required "ctrlKey" Decode.bool
-            |> Pipeline.requiredAt [ "target", "value" ] Decode.string
-            |> Decode.map convertToString
+    Decode.succeed KeyEvent
+        |> Pipeline.required "keyCode" Decode.int
+        |> Pipeline.required "shiftKey" Decode.bool
+        |> Pipeline.required "altKey" Decode.bool
+        |> Pipeline.required "ctrlKey" Decode.bool
+        |> Pipeline.requiredAt [ "target", "value" ] Decode.string
+        |> Decode.map convertToString
