@@ -1,27 +1,28 @@
-module MainTests exposing (..)
+module MainTests exposing (ParsedJSData, alt, ctrl, discardCmd, downArrow, keyDown, modellerView, press, setModel, setView, shift, suite, testField, testHullSliceDecoding, testHullSliceEncoding, toJS, upArrow, updateModel)
 
 import Color
 import Dict
-import DictList
 import Expect exposing (Expectation)
-import Fuzz
-import Main exposing (..)
 import ExtraEvents exposing (KeyEvent)
-import Test exposing (..)
+import Fuzz
 import Html exposing (Html)
 import Html.Attributes as Attributes
-import Test.Html.Query as Query
-import Test.Html.Event as Event
-import Test.Html.Selector as Selector
-import TestData exposing (..)
 import HullReferences
 import HullSlices
-import Json.Decode exposing (decodeString, decodeValue, Decoder)
+import Json.Decode as Decode exposing (Decoder, decodeString, decodeValue)
 import Json.Encode as Encode exposing (encode)
+import Main exposing (..)
+import OrderedDict as DictList
 import StringValueInput
+import Test exposing (..)
+import Test.Html.Event as Event
+import Test.Html.Query as Query
+import Test.Html.Selector as Selector
+import TestData exposing (..)
 
 
--- import Svg.Attributes
+type alias DictList k v =
+    DictList.OrderedDict k v
 
 
 setView : List Msg -> Html Msg
@@ -98,21 +99,21 @@ toJS msgs msg decoder =
         original =
             msg2json (setModel msgs) msg
     in
-        case original of
-            Nothing ->
-                Nothing
+    case original of
+        Nothing ->
+            Nothing
 
-            Just data ->
-                case decodeValue decoder data.data of
-                    Ok p ->
-                        Just { tag = data.tag, data = p }
+        Just data ->
+            case decodeValue decoder data.data of
+                Ok p ->
+                    Just { tag = data.tag, data = p }
 
-                    Err e ->
-                        let
-                            _ =
-                                Debug.log "In toJS, failed to parse:" e
-                        in
-                            Nothing
+                Err e ->
+                    let
+                        _ =
+                            Debug.log "In toJS, failed to parse:" e
+                    in
+                    Nothing
 
 
 setModel : List Msg -> Model
@@ -125,38 +126,48 @@ updateModel msgs modelToUpdate =
     List.foldl (\msg model -> update msg model |> discardCmd) modelToUpdate msgs
 
 
+fromList : List ( comparable, v ) -> DictList comparable v
+fromList l =
+    let
+        append : ( comparable, v ) -> DictList comparable v -> DictList comparable v
+        append ( key, value ) dict =
+            DictList.insert key value dict
+    in
+    List.foldr append DictList.empty l
+
+
 suite : Test
 suite =
     describe "Main"
         [ describe "Blocks"
             [ test "Add one block to an empty list" <|
                 \_ ->
-                    Expect.equal (DictList.fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo DictList.empty blockA)
+                    Expect.equal (fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo DictList.empty blockA)
             , test "Add one block to a list containing that exact block" <|
                 \_ ->
-                    Expect.equal (DictList.fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ]) blockA)
+                    Expect.equal (fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo (fromList [ ( blockA.uuid, blockA ) ]) blockA)
             , test "Add one block to a list containing a block with the same uuid" <|
                 \_ ->
                     Expect.equal
-                        (DictList.fromList
+                        (fromList
                             [ ( { blockA | color = Color.yellow }.uuid
                               , { blockA | color = Color.yellow }
                               )
                             ]
                         )
-                        (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ])
+                        (addBlockTo (fromList [ ( blockA.uuid, blockA ) ])
                             { blockA | color = Color.yellow }
                         )
             , test "Add one block to an existing list (same order)" <|
                 \_ ->
                     Expect.equal
-                        (DictList.fromList
+                        (fromList
                             [ ( blockA.uuid, blockA )
                             , ( blockB.uuid, blockB )
                             ]
                         )
                         (addBlockTo
-                            (DictList.fromList
+                            (fromList
                                 [ ( blockA.uuid, blockA )
                                 ]
                             )
@@ -165,13 +176,13 @@ suite =
             , test "Add one block to an existing list (different order)" <|
                 \_ ->
                     Expect.notEqual
-                        (DictList.fromList
+                        (fromList
                             [ ( blockA.uuid, blockA )
                             , ( blockB.uuid, blockB )
                             ]
                         )
                         (addBlockTo
-                            (DictList.fromList
+                            (fromList
                                 [ ( blockB.uuid, blockB )
                                 ]
                             )
@@ -182,23 +193,23 @@ suite =
                     Expect.equal
                         DictList.empty
                         (removeBlockFrom
-                            (DictList.fromList [ ( blockA.uuid, blockA ) ])
+                            (fromList [ ( blockA.uuid, blockA ) ])
                             blockA
                         )
             , test "Removing one block from a list with two block" <|
                 \_ ->
                     Expect.equal
-                        (DictList.fromList [ ( blockB.uuid, blockB ) ])
+                        (fromList [ ( blockB.uuid, blockB ) ])
                         (removeBlockFrom
-                            (DictList.fromList [ ( blockA.uuid, blockA ), ( blockB.uuid, blockB ) ])
+                            (fromList [ ( blockA.uuid, blockA ), ( blockB.uuid, blockB ) ])
                             blockA
                         )
             , test "Removing one block from a list without that block" <|
                 \_ ->
                     Expect.equal
-                        (DictList.fromList [ ( blockB.uuid, blockB ) ])
+                        (fromList [ ( blockB.uuid, blockB ) ])
                         (removeBlockFrom
-                            (DictList.fromList [ ( blockB.uuid, blockB ) ])
+                            (fromList [ ( blockB.uuid, blockB ) ])
                             blockC
                         )
             , test "Removing an updated version of a block from a list with that block" <|
@@ -206,7 +217,7 @@ suite =
                     Expect.equal
                         DictList.empty
                         (removeBlockFrom
-                            (DictList.fromList [ ( blockA.uuid, blockA ) ])
+                            (fromList [ ( blockA.uuid, blockA ) ])
                             { blockA | color = Color.yellow }
                         )
             , test "Removing one block from an empty list" <|
@@ -214,7 +225,7 @@ suite =
                     Expect.equal
                         DictList.empty
                         (removeBlockFrom
-                            (DictList.fromList [ ( blockB.uuid, blockB ) ])
+                            (fromList [ ( blockB.uuid, blockB ) ])
                             blockB
                         )
             ]
@@ -230,13 +241,13 @@ suite =
                         ( model, cmd ) =
                             init { buildSHA = "1.0.0", hullsJSON = "" }
                     in
-                        Expect.notEqual cmd Cmd.none
+                    Expect.notEqual cmd Cmd.none
             , test "initCmd is init-three" <|
                 \_ ->
                     Expect.equal
                         (initCmd initialModel)
                         { tag = "init-three"
-                        , data = (encodeInitThreeCommand initialModel)
+                        , data = encodeInitThreeCommand initialModel
                         }
             ]
         , describe "update"
@@ -261,25 +272,25 @@ suite =
                     [ describe "ChangeBlockColor"
                         [ test "updates only the color of the given block" <|
                             \_ ->
-                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
                                     |> Tuple.first
-                                    |> Expect.equal { initialModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
+                                    |> Expect.equal { initialModel | blocks = fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
                         , test "leaves model untouched if the block doesn't exist" <|
                             \_ ->
-                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
                                     |> Tuple.first
-                                    |> Expect.equal { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                    |> Expect.equal { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
                         , test "has a side effect" <|
                             \_ ->
-                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
                                     |> Tuple.second
                                     |> Expect.notEqual Cmd.none
                         , test "has no side effect if the block doesn't exist" <|
                             \_ ->
-                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
                                     |> Tuple.second
                                     |> Expect.equal Cmd.none
@@ -348,46 +359,46 @@ suite =
                     unselectFirstInJs =
                         updateModel [ FromJs <| RemoveFromSelection blockA.uuid ] selectSecondInJs
                 in
-                    [ test "Select a block in Elm" <|
-                        \_ ->
-                            selectOneInElm
-                                |> .selectedBlocks
-                                |> Expect.equal [ blockA.uuid ]
-                    , test "Select a block in Js" <|
-                        \_ ->
-                            selectOneInJs
-                                |> .selectedBlocks
-                                |> Expect.equal [ blockA.uuid ]
-                    , test "Select a block in Js == Select a block in Elm" <|
-                        \_ ->
-                            Expect.equal selectOneInElm selectOneInJs
-                    , test "Select second block in Elm" <|
-                        \_ ->
-                            selectSecondInElm
-                                |> .selectedBlocks
-                                |> Expect.equal [ blockA.uuid, blockB.uuid ]
-                    , test "Select second block in Js" <|
-                        \_ ->
-                            selectSecondInJs
-                                |> .selectedBlocks
-                                |> Expect.equal [ blockA.uuid, blockB.uuid ]
-                    , test "Select second block in Js == Select second block in Elm" <|
-                        \_ ->
-                            Expect.equal selectSecondInElm selectSecondInJs
-                    , test "Unselect first block in Elm" <|
-                        \_ ->
-                            unselectFirstInElm
-                                |> .selectedBlocks
-                                |> Expect.equal [ blockB.uuid ]
-                    , test "Unselect first block in Js" <|
-                        \_ ->
-                            unselectFirstInJs
-                                |> .selectedBlocks
-                                |> Expect.equal [ blockB.uuid ]
-                    , test "Unselect first block in Js == Unselect first block in Elm" <|
-                        \_ ->
-                            Expect.equal unselectFirstInElm unselectFirstInJs
-                    ]
+                [ test "Select a block in Elm" <|
+                    \_ ->
+                        selectOneInElm
+                            |> .selectedBlocks
+                            |> Expect.equal [ blockA.uuid ]
+                , test "Select a block in Js" <|
+                    \_ ->
+                        selectOneInJs
+                            |> .selectedBlocks
+                            |> Expect.equal [ blockA.uuid ]
+                , test "Select a block in Js == Select a block in Elm" <|
+                    \_ ->
+                        Expect.equal selectOneInElm selectOneInJs
+                , test "Select second block in Elm" <|
+                    \_ ->
+                        selectSecondInElm
+                            |> .selectedBlocks
+                            |> Expect.equal [ blockA.uuid, blockB.uuid ]
+                , test "Select second block in Js" <|
+                    \_ ->
+                        selectSecondInJs
+                            |> .selectedBlocks
+                            |> Expect.equal [ blockA.uuid, blockB.uuid ]
+                , test "Select second block in Js == Select second block in Elm" <|
+                    \_ ->
+                        Expect.equal selectSecondInElm selectSecondInJs
+                , test "Unselect first block in Elm" <|
+                    \_ ->
+                        unselectFirstInElm
+                            |> .selectedBlocks
+                            |> Expect.equal [ blockB.uuid ]
+                , test "Unselect first block in Js" <|
+                    \_ ->
+                        unselectFirstInJs
+                            |> .selectedBlocks
+                            |> Expect.equal [ blockB.uuid ]
+                , test "Unselect first block in Js == Unselect first block in Elm" <|
+                    \_ ->
+                        Expect.equal unselectFirstInElm unselectFirstInJs
+                ]
             , describe "Update the position of a block" <|
                 let
                     modelWithTwoBlocks : Model
@@ -425,37 +436,37 @@ suite =
                     updateMultipleAxisFromJs =
                         updateModel [ FromJs <| SynchronizePosition blockB.uuid (.position <| updateX <| updateZ <| updateY blockB) ] modelWithTwoBlocks
                 in
-                    [ test "Update X from Elm" <|
-                        \_ ->
-                            updateXInAFromElm
-                                |> .blocks
-                                |> toList
-                                |> Expect.equal [ updateX blockA, blockB ]
-                    , test "Update X from Js" <|
-                        \_ ->
-                            updateXInAFromJs
-                                |> .blocks
-                                |> toList
-                                |> Expect.equal [ updateX blockA, blockB ]
-                    , test "Update X from Elm == Update X from Js" <|
-                        \_ ->
-                            Expect.equal updateXInAFromElm updateXInAFromJs
-                    , test "Update the position on multiple axis from Elm" <|
-                        \_ ->
-                            updateMultipleAxisFromElm
-                                |> .blocks
-                                |> toList
-                                |> Expect.equal [ blockA, updateX <| updateY <| updateZ blockB ]
-                    , test "Update the position on multiple axis from Js" <|
-                        \_ ->
-                            updateMultipleAxisFromJs
-                                |> .blocks
-                                |> toList
-                                |> Expect.equal [ blockA, updateX <| updateY <| updateZ blockB ]
-                    , test "Update the position on multiple axis from Elm == from Js" <|
-                        \_ ->
-                            Expect.equal updateMultipleAxisFromElm updateMultipleAxisFromJs
-                    ]
+                [ test "Update X from Elm" <|
+                    \_ ->
+                        updateXInAFromElm
+                            |> .blocks
+                            |> toList
+                            |> Expect.equal [ updateX blockA, blockB ]
+                , test "Update X from Js" <|
+                    \_ ->
+                        updateXInAFromJs
+                            |> .blocks
+                            |> toList
+                            |> Expect.equal [ updateX blockA, blockB ]
+                , test "Update X from Elm == Update X from Js" <|
+                    \_ ->
+                        Expect.equal updateXInAFromElm updateXInAFromJs
+                , test "Update the position on multiple axis from Elm" <|
+                    \_ ->
+                        updateMultipleAxisFromElm
+                            |> .blocks
+                            |> toList
+                            |> Expect.equal [ blockA, updateX <| updateY <| updateZ blockB ]
+                , test "Update the position on multiple axis from Js" <|
+                    \_ ->
+                        updateMultipleAxisFromJs
+                            |> .blocks
+                            |> toList
+                            |> Expect.equal [ blockA, updateX <| updateY <| updateZ blockB ]
+                , test "Update the position on multiple axis from Elm == from Js" <|
+                    \_ ->
+                        Expect.equal updateMultipleAxisFromElm updateMultipleAxisFromJs
+                ]
             , describe "Update the size of a block" <|
                 let
                     modelWithTwoBlocks : Model
@@ -493,37 +504,37 @@ suite =
                     updateMultipleDimensionFromJs =
                         updateModel [ FromJs <| SynchronizeSize blockB.uuid (.size <| updateLength <| updateWidth <| updateHeight blockB) ] modelWithTwoBlocks
                 in
-                    [ test "Update length from Elm" <|
-                        \_ ->
-                            updateLengthInAFromElm
-                                |> .blocks
-                                |> toList
-                                |> Expect.equal [ updateLength blockA, blockB ]
-                    , test "Update length from Js" <|
-                        \_ ->
-                            updateLengthInAFromJs
-                                |> .blocks
-                                |> toList
-                                |> Expect.equal [ updateLength blockA, blockB ]
-                    , test "Update length from Elm == Update length from Js" <|
-                        \_ ->
-                            Expect.equal updateLengthInAFromElm updateLengthInAFromJs
-                    , test "Update the size on multiple dimensions from Elm" <|
-                        \_ ->
-                            updateMultipleDimensionFromElm
-                                |> .blocks
-                                |> toList
-                                |> Expect.equal [ blockA, updateLength <| updateWidth <| updateHeight blockB ]
-                    , test "Update the size on multiple dimensions from Js" <|
-                        \_ ->
-                            updateMultipleDimensionFromJs
-                                |> .blocks
-                                |> toList
-                                |> Expect.equal [ blockA, updateLength <| updateWidth <| updateHeight blockB ]
-                    , test "Update the size on multiple dimensions from Elm == from Js" <|
-                        \_ ->
-                            Expect.equal updateMultipleDimensionFromElm updateMultipleDimensionFromJs
-                    ]
+                [ test "Update length from Elm" <|
+                    \_ ->
+                        updateLengthInAFromElm
+                            |> .blocks
+                            |> toList
+                            |> Expect.equal [ updateLength blockA, blockB ]
+                , test "Update length from Js" <|
+                    \_ ->
+                        updateLengthInAFromJs
+                            |> .blocks
+                            |> toList
+                            |> Expect.equal [ updateLength blockA, blockB ]
+                , test "Update length from Elm == Update length from Js" <|
+                    \_ ->
+                        Expect.equal updateLengthInAFromElm updateLengthInAFromJs
+                , test "Update the size on multiple dimensions from Elm" <|
+                    \_ ->
+                        updateMultipleDimensionFromElm
+                            |> .blocks
+                            |> toList
+                            |> Expect.equal [ blockA, updateLength <| updateWidth <| updateHeight blockB ]
+                , test "Update the size on multiple dimensions from Js" <|
+                    \_ ->
+                        updateMultipleDimensionFromJs
+                            |> .blocks
+                            |> toList
+                            |> Expect.equal [ blockA, updateLength <| updateWidth <| updateHeight blockB ]
+                , test "Update the size on multiple dimensions from Elm == from Js" <|
+                    \_ ->
+                        Expect.equal updateMultipleDimensionFromElm updateMultipleDimensionFromJs
+                ]
             ]
         , describe "UI" <|
             [ describe "ViewMode"
@@ -628,36 +639,36 @@ suite =
                     hullRef =
                         Maybe.withDefault { path = "tests/assets", label = "Test asset" } <| List.head hullReferences
                 in
-                    [ test "None selected by default" <|
-                        \_ ->
-                            initialView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-none" ] ]
-                                |> Query.has [ Selector.class "hull-reference__selected" ]
-                    , test "None unselected if a hull-reference is selected" <|
-                        \_ ->
-                            setView
-                                [ ToJs <| SelectHullReference "anthineas" ]
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-none" ] ]
-                                |> Query.hasNot [ Selector.class "hull-reference__selected" ]
-                    , test "Selected HullReference correctly displayed" <|
-                        \_ ->
-                            setView
-                                [ ToJs <| SelectHullReference "anthineas" ]
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
-                                |> Query.find [ Selector.class "hull-label" ]
-                                |> Query.has [ Selector.text "anthineas" ]
-                    , test "Clicking a hull reference selects it" <|
-                        \_ ->
-                            initialView
-                                |> Query.fromHtml
-                                |> Query.findAll [ Selector.class "hull-reference" ]
-                                |> Query.index 1
-                                |> Event.simulate Event.click
-                                |> Event.expect (ToJs <| SelectHullReference "anthineas")
-                    ]
+                [ test "None selected by default" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-none" ] ]
+                            |> Query.has [ Selector.class "hull-reference__selected" ]
+                , test "None unselected if a hull-reference is selected" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SelectHullReference "anthineas" ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-none" ] ]
+                            |> Query.hasNot [ Selector.class "hull-reference__selected" ]
+                , test "Selected HullReference correctly displayed" <|
+                    \_ ->
+                        setView
+                            [ ToJs <| SelectHullReference "anthineas" ]
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
+                            |> Query.find [ Selector.class "hull-label" ]
+                            |> Query.has [ Selector.text "anthineas" ]
+                , test "Clicking a hull reference selects it" <|
+                    \_ ->
+                        initialView
+                            |> Query.fromHtml
+                            |> Query.findAll [ Selector.class "hull-reference" ]
+                            |> Query.index 1
+                            |> Event.simulate Event.click
+                            |> Event.expect (ToJs <| SelectHullReference "anthineas")
+                ]
             , describe "Partitions" <|
                 [ test "Show/hide partitions triggers the right event" <|
                     \_ ->
@@ -814,7 +825,7 @@ suite =
                     \numberOfDecks ->
                         setView
                             [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
-                            , ToJs <| UpdatePartitionNumber Deck (toString numberOfDecks)
+                            , ToJs <| UpdatePartitionNumber Deck (String.fromInt numberOfDecks)
                             , NoJs <| ToggleAccordion True "deck-spacing-details"
                             ]
                             |> Query.fromHtml
@@ -954,7 +965,7 @@ suite =
                     \numberOfBulkheads ->
                         setView
                             [ ToJs <| SwitchViewMode <| Partitioning PropertiesEdition
-                            , ToJs <| UpdatePartitionNumber Bulkhead (toString numberOfBulkheads)
+                            , ToJs <| UpdatePartitionNumber Bulkhead (String.fromInt numberOfBulkheads)
                             , NoJs <| ToggleAccordion True "bulkhead-spacing-details"
                             ]
                             |> Query.fromHtml
@@ -993,7 +1004,7 @@ suite =
                 , fuzz (Fuzz.intRange 0 20) "Block list has number of blocks + 1 elements" <|
                     \numberOfBlocks ->
                         List.repeat numberOfBlocks blockA
-                            |> List.indexedMap (\index block -> { block | uuid = toString index, label = toString index })
+                            |> List.indexedMap (\index block -> { block | uuid = String.fromInt index, label = String.fromInt index })
                             |> List.map (\block -> FromJs <| NewBlock block)
                             |> (++) [ ToJs <| SwitchViewMode <| SpaceReservation <| WholeList ]
                             |> setView
@@ -1030,226 +1041,226 @@ suite =
                             , ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock blockA.uuid
                             ]
                 in
-                    [ test "Block details view shows its name" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
-                                |> Query.has [ Selector.attribute <| Attributes.value blockA.label ]
-                    , test "Block details view allows renaming the block" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
-                                |> Event.simulate (Event.input "a")
-                                |> Event.expect (NoJs <| RenameBlock blockA "a")
-                    , test "Block details view displays the position" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.class "block-position" ]
-                    , test "Block details view displays the position on 3 axis" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.class "block-position" ]
-                                |> Query.children []
-                                |> Query.count (Expect.equal 3)
-                    , test "Block details view displays an input for the position on X" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.tag "input", Selector.id "position-x" ]
-                    , test "Input for the position of the block on X triggers UpdatePosition X" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "position-x" ]
-                                |> Event.simulate (Event.input "-8")
-                                |> Event.expect (ToJs <| UpdatePosition X blockA "-8")
-                    , test "onBlur on position on X triggers SyncBlockInputs" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "position-x" ]
-                                |> Event.simulate Event.blur
-                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
-                    , test "Block details view displays an input for the position on Y" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.tag "input", Selector.id "position-y" ]
-                    , test "Input for the position of the block on Y triggers UpdatePosition Y" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "position-y" ]
-                                |> Event.simulate (Event.input "1.2")
-                                |> Event.expect (ToJs <| UpdatePosition Y blockA "1.2")
-                    , test "onBlur on position on Y triggers SyncBlockInputs" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "position-y" ]
-                                |> Event.simulate Event.blur
-                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
-                    , test "Block details view displays an input for the position on Z" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.tag "input", Selector.id "position-z" ]
-                    , test "Input for the position of the block on Z triggers UpdatePosition Z" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "position-z" ]
-                                |> Event.simulate (Event.input "199")
-                                |> Event.expect (ToJs <| UpdatePosition Z blockA "199")
-                    , test "onBlur on position on Z triggers SyncBlockInputs" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "position-z" ]
-                                |> Event.simulate Event.blur
-                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
-                    , test "Block details view displays the size" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.class "block-size" ]
-                    , test "Block details view displays the size on 3 axis" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.class "block-size" ]
-                                |> Query.children []
-                                |> Query.count (Expect.equal 3)
-                    , test "Block details view displays an input for the length" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.tag "input", Selector.id "size-length" ]
-                    , test "Input for the length of the block triggers UpdateDimension Length" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "size-length" ]
-                                |> Event.simulate (Event.input "0")
-                                |> Event.expect (ToJs <| UpdateDimension Length blockA "0")
-                    , test "onBlur on length triggers SyncBlockInputs" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "size-length" ]
-                                |> Event.simulate Event.blur
-                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
-                    , test "Block details view displays an input for the width" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.tag "input", Selector.id "size-width" ]
-                    , test "Input for the width the block triggers UpdateDimension Width" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "size-width" ]
-                                |> Event.simulate (Event.input "1.2")
-                                |> Event.expect (ToJs <| UpdateDimension Width blockA "1.2")
-                    , test "onBlur on width triggers SyncBlockInputs" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "size-width" ]
-                                |> Event.simulate Event.blur
-                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
-                    , test "Block details view displays an input for the height" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.tag "input", Selector.id "size-height" ]
-                    , test "Input for the height the block triggers UpdateDimension Height" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "size-height" ]
-                                |> Event.simulate (Event.input "255")
-                                |> Event.expect (ToJs <| UpdateDimension Height blockA "255")
-                    , test "onBlur on height triggers SyncBlockInputs" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "size-height" ]
-                                |> Event.simulate Event.blur
-                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
-                    , test "Block details view displays an input for the density" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.tag "input", Selector.id "block-density-input" ]
-                    , test "Input for the density the block triggers UpdateDensity" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "block-density-input" ]
-                                |> Event.simulate (Event.input "0.5")
-                                |> Event.expect (NoJs <| UpdateDensity blockA "0.5")
-                    , test "onBlur on density triggers SyncBlockInputs" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "block-density-input" ]
-                                |> Event.simulate Event.blur
-                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
-                    , test "Block details view displays an input for the mass" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.has [ Selector.tag "input", Selector.id "block-mass-input" ]
-                    , test "Input for the mass the block triggers UpdateMass" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "block-mass-input" ]
-                                |> Event.simulate (Event.input "10.5")
-                                |> Event.expect (NoJs <| UpdateMass blockA "10.5")
-                    , test "onBlur on mass triggers SyncBlockInputs" <|
-                        \_ ->
-                            blockDetailsView
-                                |> Query.fromHtml
-                                |> Query.find [ Selector.class "panel" ]
-                                |> Query.find [ Selector.tag "input", Selector.id "block-mass-input" ]
-                                |> Event.simulate Event.blur
-                                |> Event.expect (NoJs <| SyncBlockInputs blockA)
-                    ]
+                [ test "Block details view shows its name" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
+                            |> Query.has [ Selector.attribute <| Attributes.value blockA.label ]
+                , test "Block details view allows renaming the block" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.class "block-label" ]
+                            |> Event.simulate (Event.input "a")
+                            |> Event.expect (NoJs <| RenameBlock blockA "a")
+                , test "Block details view displays the position" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.class "block-position" ]
+                , test "Block details view displays the position on 3 axis" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.class "block-position" ]
+                            |> Query.children []
+                            |> Query.count (Expect.equal 3)
+                , test "Block details view displays an input for the position on X" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.tag "input", Selector.id "position-x" ]
+                , test "Input for the position of the block on X triggers UpdatePosition X" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "position-x" ]
+                            |> Event.simulate (Event.input "-8")
+                            |> Event.expect (ToJs <| UpdatePosition X blockA "-8")
+                , test "onBlur on position on X triggers SyncBlockInputs" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "position-x" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                , test "Block details view displays an input for the position on Y" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.tag "input", Selector.id "position-y" ]
+                , test "Input for the position of the block on Y triggers UpdatePosition Y" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "position-y" ]
+                            |> Event.simulate (Event.input "1.2")
+                            |> Event.expect (ToJs <| UpdatePosition Y blockA "1.2")
+                , test "onBlur on position on Y triggers SyncBlockInputs" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "position-y" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                , test "Block details view displays an input for the position on Z" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.tag "input", Selector.id "position-z" ]
+                , test "Input for the position of the block on Z triggers UpdatePosition Z" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "position-z" ]
+                            |> Event.simulate (Event.input "199")
+                            |> Event.expect (ToJs <| UpdatePosition Z blockA "199")
+                , test "onBlur on position on Z triggers SyncBlockInputs" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "position-z" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                , test "Block details view displays the size" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.class "block-size" ]
+                , test "Block details view displays the size on 3 axis" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.class "block-size" ]
+                            |> Query.children []
+                            |> Query.count (Expect.equal 3)
+                , test "Block details view displays an input for the length" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.tag "input", Selector.id "size-length" ]
+                , test "Input for the length of the block triggers UpdateDimension Length" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "size-length" ]
+                            |> Event.simulate (Event.input "0")
+                            |> Event.expect (ToJs <| UpdateDimension Length blockA "0")
+                , test "onBlur on length triggers SyncBlockInputs" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "size-length" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                , test "Block details view displays an input for the width" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.tag "input", Selector.id "size-width" ]
+                , test "Input for the width the block triggers UpdateDimension Width" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "size-width" ]
+                            |> Event.simulate (Event.input "1.2")
+                            |> Event.expect (ToJs <| UpdateDimension Width blockA "1.2")
+                , test "onBlur on width triggers SyncBlockInputs" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "size-width" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                , test "Block details view displays an input for the height" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.tag "input", Selector.id "size-height" ]
+                , test "Input for the height the block triggers UpdateDimension Height" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "size-height" ]
+                            |> Event.simulate (Event.input "255")
+                            |> Event.expect (ToJs <| UpdateDimension Height blockA "255")
+                , test "onBlur on height triggers SyncBlockInputs" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "size-height" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                , test "Block details view displays an input for the density" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.tag "input", Selector.id "block-density-input" ]
+                , test "Input for the density the block triggers UpdateDensity" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "block-density-input" ]
+                            |> Event.simulate (Event.input "0.5")
+                            |> Event.expect (NoJs <| UpdateDensity blockA "0.5")
+                , test "onBlur on density triggers SyncBlockInputs" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "block-density-input" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                , test "Block details view displays an input for the mass" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.has [ Selector.tag "input", Selector.id "block-mass-input" ]
+                , test "Input for the mass the block triggers UpdateMass" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "block-mass-input" ]
+                            |> Event.simulate (Event.input "10.5")
+                            |> Event.expect (NoJs <| UpdateMass blockA "10.5")
+                , test "onBlur on mass triggers SyncBlockInputs" <|
+                    \_ ->
+                        blockDetailsView
+                            |> Query.fromHtml
+                            |> Query.find [ Selector.class "panel" ]
+                            |> Query.find [ Selector.tag "input", Selector.id "block-mass-input" ]
+                            |> Event.simulate Event.blur
+                            |> Event.expect (NoJs <| SyncBlockInputs blockA)
+                ]
             , describe "KPIs" <|
                 [ test "All KPIs are equal to 0 on init" <|
                     \_ ->
@@ -1387,13 +1398,13 @@ suite =
                             msg =
                                 ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4"
                         in
-                            Expect.equal
-                                (toJS [ ToJs msg ] msg (Json.Decode.map Just HullSlices.decoder))
-                            <|
-                                Just
-                                    { tag = "load-hull"
-                                    , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
-                                    }
+                        Expect.equal
+                            (toJS [ ToJs msg ] msg (Decode.map Just HullSlices.decoder))
+                        <|
+                            Just
+                                { tag = "load-hull"
+                                , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
+                                }
                 , test "Can press down arrow key to decrement length over all" <|
                     \_ ->
                         modellerView
@@ -1597,12 +1608,12 @@ testHullSliceEncoding =
         json =
             case Result.map (encode 0 << HullSlices.encoder) (decodeString HullSlices.decoder TestData.hullSliceJson) of
                 Err e ->
-                    e
+                    Decode.errorToString e
 
                 Ok s ->
                     s
     in
-        testField HullSlices.decoder json
+    testField HullSlices.decoder json
 
 
 testHullSliceDecoding : (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
@@ -1610,7 +1621,7 @@ testHullSliceDecoding =
     testField HullSlices.decoder TestData.hullSliceJson
 
 
-testField : Json.Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)
+testField : Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)
 testField decoder json extractor expectedValue =
     \() ->
-        Expect.equal (Ok expectedValue) <| Result.map extractor <| (decodeString decoder json)
+        Expect.equal (Ok expectedValue) <| Result.map extractor <| decodeString decoder json

@@ -23,7 +23,7 @@ shipBuilder/js/elm.js: src/* tests/* src/Interpolate/*
 
 test:
 	docker build -t elm .
-	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm test --skip-install --verbose
+	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work --entrypoint elm-test elm --skip-install --verbose
 
 shipBuilder/index.html: shipBuilder/index.template.json.html
 	@sed 's/GIT_SHA/$(VERSION)/g' shipBuilder/index.template.json.html > shipBuilder/index.html

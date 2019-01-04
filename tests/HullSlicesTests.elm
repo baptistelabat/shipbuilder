@@ -22,7 +22,7 @@ twoIncreasingFloats =
         f a ab =
             ( a, a + ab )
     in
-        Fuzz.map2 f Fuzz.float positiveFloat
+    Fuzz.map2 f Fuzz.float positiveFloat
 
 
 threeIncreasingFloats : Fuzz.Fuzzer ( Float, Float, Float )
@@ -32,17 +32,17 @@ threeIncreasingFloats =
         f a ab bc =
             ( a, a + ab, a + ab + bc )
     in
-        Fuzz.map3 f Fuzz.float positiveFloat positiveFloat
+    Fuzz.map3 f Fuzz.float positiveFloat positiveFloat
 
 
-fourIncreasingFloats : Fuzz.Fuzzer ( Float, Float, Float, Float )
+fourIncreasingFloats : Fuzz.Fuzzer { x1 : Float, x2 : Float, x3 : Float, x4 : Float }
 fourIncreasingFloats =
     let
-        f : Float -> Float -> Float -> Float -> ( Float, Float, Float, Float )
-        f a ab bzmin zminzmax =
-            ( a, a + ab, a + ab + bzmin, a + ab + bzmin + zminzmax )
+        f : Float -> Float -> Float -> Float -> { x1 : Float, x2 : Float, x3 : Float, x4 : Float }
+        f a_ ab bzmin zminzmax =
+            { x1 = a_, x2 = a_ + ab, x3 = a_ + ab + bzmin, x4 = a_ + ab + bzmin + zminzmax }
     in
-        Fuzz.map4 f Fuzz.float positiveFloat positiveFloat positiveFloat
+    Fuzz.map4 f Fuzz.float positiveFloat positiveFloat positiveFloat
 
 
 eps : FloatingPointTolerance
@@ -121,6 +121,11 @@ toblerone breadth depth =
         ]
     , draught = StringValueInput.floatInput 2
     }
+
+
+makeTriplet : a -> b -> c -> ( a, b, c )
+makeTriplet x y z =
+    ( x, y, z )
 
 
 suite : Test
@@ -212,14 +217,27 @@ suite =
                 , test "Can clip properly a=zmin and b=zmax" <|
                     \_ ->
                         Expect.equal [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ] <| HullSlices.clip 0 2 [ ( 0, 3 ), ( 1, 3 ), ( 2, 3 ) ]
-                , fuzz (Fuzz.map2 (,) (Fuzz.constant 2) (Fuzz.constant 3)) "Square" <|
+                , fuzz (Fuzz.map2 Tuple.pair (Fuzz.constant 2) (Fuzz.constant 3)) "Square" <|
                     \( width, height ) ->
                         Expect.equal (abs (width * height)) (HullSlices.area 0 (abs width) { zmin = 0, zmax = width, y = [ abs height, abs height, abs height ] })
                 ]
             , describe "Area tests"
                 [ describe "Area under straight line"
                     [ fuzz fourIncreasingFloats "Vertical line (case 1)" <|
-                        \( a, b, zmin, zmax ) ->
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x1
+
+                                b =
+                                    x2
+
+                                zmin =
+                                    x3
+
+                                zmax =
+                                    x4
+                            in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz threeIncreasingFloats "Vertical line (case 2)" <|
@@ -227,11 +245,37 @@ suite =
                             HullSlices.area a bzmin { zmin = bzmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Vertical line (case 3)" <|
-                        \( a, zmin, b, zmax ) ->
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x1
+
+                                b =
+                                    x3
+
+                                zmin =
+                                    x2
+
+                                zmax =
+                                    x4
+                            in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (b - zmin))
                     , fuzz fourIncreasingFloats "Vertical line (case 4)" <|
-                        \( zmin, a, b, zmax ) ->
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x2
+
+                                b =
+                                    x3
+
+                                zmin =
+                                    x1
+
+                                zmax =
+                                    x4
+                            in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (b - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 5)" <|
@@ -247,7 +291,20 @@ suite =
                             HullSlices.area zmina zmaxb { zmin = zmina, zmax = zmaxb, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (zmaxb - zmina))
                     , fuzz fourIncreasingFloats "Vertical line (case 8)" <|
-                        \( zmin, a, zmax, b ) ->
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x2
+
+                                b =
+                                    x4
+
+                                zmin =
+                                    x1
+
+                                zmax =
+                                    x3
+                            in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps (3 * (zmax - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 9)" <|
@@ -255,13 +312,39 @@ suite =
                             HullSlices.area zmaxa b { zmin = zmin, zmax = zmaxa, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Vertical line (case 10)" <|
-                        \( zmin, zmax, a, b ) ->
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x3
+
+                                b =
+                                    x4
+
+                                zmin =
+                                    x1
+
+                                zmax =
+                                    x2
+                            in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
                                 |> Expect.within eps 0
                     ]
                 , describe "Area under oblique line"
                     [ fuzz fourIncreasingFloats "Oblique line (case 1)" <|
-                        \( a, b, zmin, zmax ) ->
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x1
+
+                                b =
+                                    x2
+
+                                zmin =
+                                    x3
+
+                                zmax =
+                                    x4
+                            in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps 0
                     , fuzz threeIncreasingFloats "Oblique line (case 2)" <|
@@ -269,14 +352,40 @@ suite =
                             HullSlices.area a bzmin { zmin = bzmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps 0
                     , fuzz fourIncreasingFloats "Oblique line (case 3)" <|
-                        \( a, zmin, b, zmax ) ->
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x1
+
+                                b =
+                                    x3
+
+                                zmin =
+                                    x2
+
+                                zmax =
+                                    x4
+                            in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (((b - zmin) * (b + 2 * zmin - 3 * zmax)) / (zmin - zmax))
 
                     -- Computed by Wolfram: https://www.wolframalpha.com/input/?i=integrate+3-2*(x-zmin)%2F(zmax-zmin)+from+x+%3D+zmin+to+b
                     , fuzz fourIncreasingFloats "Oblique line (case 4)" <|
-                        \( zmin, a, b, zmax ) ->
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x2
+
+                                b =
+                                    x3
+
+                                zmin =
+                                    x1
+
+                                zmax =
+                                    x4
+                            in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (-((a - b) * (a + b + zmin - 3 * zmax)) / (zmin - zmax))
@@ -298,8 +407,21 @@ suite =
                                 |> Expect.within eps
                                     (2 * (zmaxb - zmina))
                     , fuzz fourIncreasingFloats "Oblique line (case 8)" <|
-                        \( zmin, a, zmax, b ) ->
-                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
+                        \{ x1, x2, x3, x4 } ->
+                            let
+                                a =
+                                    x2
+
+                                b =
+                                    x4
+
+                                zmin =
+                                    x1
+
+                                zmax =
+                                    x3
+                            in
+                            HullSlices.area a b { zmin = x1, zmax = x3, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     (-((a + zmin - 2 * zmax) * (a - zmax)) / (zmin - zmax))
                     , fuzz threeIncreasingFloats "Oblique line (case 9)" <|
@@ -308,15 +430,15 @@ suite =
                                 |> Expect.within eps
                                     0
                     , fuzz fourIncreasingFloats "Oblique line (case 10)" <|
-                        \( zmin, zmax, a, b ) ->
-                            HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 2, 1 ] }
+                        \{ x1, x2, x3, x4 } ->
+                            HullSlices.area x3 x4 { zmin = x1, zmax = x2, y = [ 3, 2, 1 ] }
                                 |> Expect.within eps
                                     0
                     , test "Bug detected when calculating toblerone area" <|
                         \_ ->
                             HullSlices.area 3.0100000959552076 3.010000694363696 { x = 0, zmin = 3, zmax = 3.010000694363696, y = [ -9.99, -9.9925, -9.995 ] }
                                 |> Expect.within (Absolute 1.0e-14)
-                                    (-0.00000598109275204103)
+                                    -0.00000598109275204103
                     ]
                 , describe "Real slice"
                     [ test "Anthineas" <|
@@ -326,15 +448,15 @@ suite =
                                     0.20027049633242555
                     , test "Cube" <|
                         \_ ->
-                            (List.map (HullSlices.calculateSliceArea cube) cube.slices)
+                            List.map (HullSlices.calculateSliceArea cube) cube.slices
                                 |> Expect.equal
                                     [ cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value ]
                     , test "Cube after changing breadth" <|
                         \_ ->
-                            (List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.interpolate cube) cube.slices)
+                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.interpolate cube) cube.slices
                                 |> Expect.equal
                                     [ 10 * cube.draught.value, 10 * cube.draught.value, 10 * cube.draught.value ]
-                    , fuzz (Fuzz.map3 (,,) positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|
+                    , fuzz (Fuzz.map3 makeTriplet positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|
                         \( breadth, depth, draughtDividedByDepth ) ->
                             let
                                 t =
@@ -348,14 +470,13 @@ suite =
                                 setDraught val slice =
                                     { slice | draught = val |> StringValueInput.asValueIn slice.draught }
                             in
-                                Expect.all
-                                    ((List.map
-                                        (HullSlices.calculateSliceArea t)
-                                        t.slices
-                                     )
-                                        |> List.map (\area -> (\e -> Expect.within e expectedArea area))
-                                    )
-                                    (Relative 1.0e-8)
+                            Expect.all
+                                (List.map
+                                    (HullSlices.calculateSliceArea t)
+                                    t.slices
+                                    |> List.map (\area -> \e -> Expect.within e expectedArea area)
+                                )
+                                (Relative 1.0e-8)
                     , test "Toblerone bug" <|
                         \_ ->
                             let
@@ -379,14 +500,13 @@ suite =
                                 setDraught val slice =
                                     { slice | draught = val |> StringValueInput.asValueIn slice.draught }
                             in
-                                Expect.all
-                                    ((List.map
-                                        (HullSlices.calculateSliceArea t)
-                                        t.slices
-                                     )
-                                        |> List.map (\area -> (\e -> Expect.within e expectedArea area))
-                                    )
-                                    eps
+                            Expect.all
+                                (List.map
+                                    (HullSlices.calculateSliceArea t)
+                                    t.slices
+                                    |> List.map (\area -> \e -> Expect.within e expectedArea area)
+                                )
+                                eps
                     ]
                 ]
             ]
@@ -438,22 +558,22 @@ suite =
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .y
                         |> Expect.equal
-                            ([ -89 + 10 * 0.1, -89 + 10 * 0.2, -89 + 10 * 0.5 ])
+                            [ -89 + 10 * 0.1, -89 + 10 * 0.2, -89 + 10 * 0.5 ]
             ]
         , describe "Volume"
             [ fuzz
-                (Fuzz.map2 (,) Fuzz.float Fuzz.float)
+                (Fuzz.map2 Tuple.pair Fuzz.float Fuzz.float)
                 "Triangular area curve"
               <|
                 \( xmin, length ) ->
                     let
-                        ( xmin, length ) =
+                        ( xmin_, length_ ) =
                             ( 0.000001, 0.00005116475268283904 )
                     in
-                        HullSlices.volume
-                            { xmin = xmin, length = StringValueInput.floatInput length }
-                            [ 0, 1, 2, 3, 2, 1, 0 ]
-                            |> Expect.within eps
-                                (3 * length / 2)
+                    HullSlices.volume
+                        { xmin = xmin_, length = StringValueInput.floatInput length_ }
+                        [ 0, 1, 2, 3, 2, 1, 0 ]
+                        |> Expect.within eps
+                            (3 * length_ / 2)
             ]
         ]

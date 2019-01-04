@@ -1,0 +1,21 @@
+{
+    "type": "package",
+    "name": "wittjosiah/elm-ordered-dict",
+    "summary": "A dictionary mapping unique keys to values preserving insert order.",
+    "license": "BSD-3-Clause",
+    "version": "1.0.1",
+    "exposed-modules": [
+        "OrderedDict"
+    ],
+    "elm-version": "0.19.0 <= v < 0.20.0",
+    "dependencies": {
+        "elm/core": "1.0.0 <= v < 2.0.0"
+    },
+    "test-dependencies": {
+        "elm/html": "1.0.0 <= v < 2.0.0",
+        "elm/json": "1.1.2 <= v < 2.0.0",
+        "elm/random": "1.0.0 <= v < 2.0.0",
+        "elm-community/json-extra": "4.0.0 <= v < 5.0.0",
+        "elm-explorations/test": "1.2.0 <= v < 2.0.0"
+    }
+}
