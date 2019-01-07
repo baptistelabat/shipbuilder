@@ -45,6 +45,7 @@ import CoordinatesTransform exposing (CoordinatesTransform)
 import DateFormat
 import Debug
 import Dict exposing (Dict)
+import DictList
 import ExtraEvents exposing (onKeyDown)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
@@ -57,7 +58,6 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import List.Extra
-import OrderedDict as DictList
 import SIRColorPicker
 import StringValueInput
 import Task
@@ -73,7 +73,7 @@ port fromJs : (JsData -> msg) -> Sub msg
 
 
 type alias DictList k v =
-    DictList.OrderedDict k v
+    DictList.DictList k v
 
 
 type alias JsData =
@@ -761,6 +761,21 @@ type alias Block =
     }
 
 
+emptyBlock : Block
+emptyBlock =
+    { uuid = ""
+    , label = ""
+    , color = Color.red
+    , position = { x = StringValueInput.emptyFloat, y = StringValueInput.emptyFloat, z = StringValueInput.emptyFloat }
+    , size = { length = StringValueInput.emptyFloat, width = StringValueInput.emptyFloat, height = StringValueInput.emptyFloat }
+    , referenceForMass = None
+    , mass = StringValueInput.emptyFloat
+    , density = StringValueInput.emptyFloat
+    , visible = False
+    , centerOfGravity = { x = StringValueInput.emptyFloat, y = StringValueInput.emptyFloat, z = StringValueInput.emptyFloat }
+    }
+
+
 referenceForMassToString : ReferenceForMass -> String
 referenceForMassToString referenceForMass =
     case referenceForMass of
@@ -1256,7 +1271,7 @@ addBlockTo blocks block =
 
 updateBlockInBlocks : Block -> Blocks -> Blocks
 updateBlockInBlocks block blocks =
-    if Dict.member block.uuid blocks.dict then
+    if DictList.member block.uuid blocks then
         addBlockTo blocks block
 
     else
@@ -1265,25 +1280,12 @@ updateBlockInBlocks block blocks =
 
 toList : Blocks -> List Block
 toList blocks =
-    DictList.orderedValues blocks
+    DictList.values blocks
 
 
 filterBlocksByColor : Color -> Blocks -> Blocks
 filterBlocksByColor color blocks =
-    let
-        filter : String -> Block -> Bool
-        filter uuid block =
-            block.color == color
-
-        newDict : Dict String Block
-        newDict =
-            Dict.filter filter blocks.dict
-
-        newOrder : List String
-        newOrder =
-            List.filter (\uuid -> Dict.member uuid newDict) blocks.order
-    in
-    { order = newOrder, dict = newDict }
+    DictList.filter emptyBlock (\uuid block -> block.color == color) blocks
 
 
 toMassList : Blocks -> List Float
@@ -1357,7 +1359,7 @@ getLength block =
 
 getBlockByUUID : String -> Blocks -> Maybe Block
 getBlockByUUID uuid blocks =
-    Dict.get uuid blocks.dict
+    DictList.get uuid blocks
 
 
 init : Flag -> ( Model, Cmd Msg )
@@ -1808,105 +1810,6 @@ type NoJsMsg
     | UpdateMass Block String
 
 
-{-| Given a key, get the key and value at the next position.
--}
-nextInDictList : comparable -> DictList comparable v -> Maybe ( comparable, v )
-nextInDictList key { order, dict } =
-    order
-        |> List.Extra.elemIndex key
-        |> Maybe.andThen (\index -> List.Extra.getAt (index + 1) order)
-        |> Maybe.andThen (\nextKey -> Maybe.map (\nextValue -> ( nextKey, nextValue )) <| Dict.get nextKey dict)
-
-
-{-| Given a key, get the key and value at the previous position.
--}
-previousInDictList : comparable -> DictList comparable v -> Maybe ( comparable, v )
-previousInDictList key { order, dict } =
-    let
-        makePair : comparable -> Maybe ( comparable, v )
-        makePair key_ =
-            case Dict.get key_ dict of
-                Nothing ->
-                    Nothing
-
-                Just val ->
-                    Just ( key_, val )
-    in
-    order
-        |> List.Extra.elemIndex key
-        |> Maybe.andThen (\index -> List.Extra.getAt (index - 1) order)
-        |> Maybe.andThen makePair
-
-
-mapDictList : (k -> v -> v) -> DictList k v -> DictList k v
-mapDictList f { order, dict } =
-    { order = order, dict = Dict.map f dict }
-
-
-insertAfter : comparable -> comparable -> v -> DictList comparable v -> DictList comparable v
-insertAfter afterKey newKey value { order, dict } =
-    let
-        newDict : Dict comparable v
-        newDict =
-            Dict.insert newKey value dict
-
-        orderWithoutNewKey : List comparable
-        orderWithoutNewKey =
-            List.filter ((/=) newKey) order
-
-        newOrder : List comparable
-        newOrder =
-            case List.Extra.splitWhen (\testedKey -> testedKey == afterKey) orderWithoutNewKey of
-                Nothing ->
-                    -- after key does not exist
-                    orderWithoutNewKey ++ [ newKey ]
-
-                Just ( before, after ) ->
-                    case after of
-                        [] ->
-                            before ++ [ newKey ]
-
-                        [ justKey ] ->
-                            before ++ [ justKey, newKey ]
-
-                        justKey :: rest ->
-                            before ++ [ justKey, newKey ] ++ rest
-    in
-    { order = newOrder, dict = newDict }
-
-
-insertBefore : comparable -> comparable -> v -> DictList comparable v -> DictList comparable v
-insertBefore afterKey newKey value { order, dict } =
-    let
-        newDict : Dict comparable v
-        newDict =
-            Dict.insert newKey value dict
-
-        orderWithoutNewKey : List comparable
-        orderWithoutNewKey =
-            List.filter ((/=) newKey) order
-
-        newOrder : List comparable
-        newOrder =
-            case List.Extra.splitWhen (\testedKey -> testedKey == afterKey) orderWithoutNewKey of
-                Nothing ->
-                    -- after key does not exist
-                    [ newKey ] ++ orderWithoutNewKey
-
-                Just ( before, after ) ->
-                    case after of
-                        [] ->
-                            before ++ [ newKey ]
-
-                        [ justKey ] ->
-                            before ++ [ newKey, justKey ]
-
-                        justKey :: rest ->
-                            before ++ [ newKey, justKey ] ++ rest
-    in
-    { order = newOrder, dict = newDict }
-
-
 updateNoJs : NoJsMsg -> Model -> ( Model, Cmd Msg )
 updateNoJs msg model =
     case msg of
@@ -1966,11 +1869,11 @@ updateNoJs msg model =
             let
                 maybeNext : Maybe ( String, Block )
                 maybeNext =
-                    nextInDictList block.uuid model.blocks
+                    DictList.next block.uuid model.blocks
 
                 updatedBlocks : Blocks
                 updatedBlocks =
-                    Maybe.withDefault model.blocks <| Maybe.map (\next -> insertAfter (Tuple.first next) block.uuid block model.blocks) maybeNext
+                    Maybe.withDefault model.blocks <| Maybe.map (\next -> DictList.insertAfter (Tuple.first next) block.uuid block model.blocks) maybeNext
             in
             ( { model | blocks = updatedBlocks }, Cmd.none )
 
@@ -1978,11 +1881,11 @@ updateNoJs msg model =
             let
                 maybePrevious : Maybe ( String, Block )
                 maybePrevious =
-                    previousInDictList block.uuid model.blocks
+                    DictList.previous block.uuid model.blocks
 
                 updatedBlocks : Blocks
                 updatedBlocks =
-                    Maybe.withDefault model.blocks <| Maybe.map (\previous -> insertBefore (Tuple.first previous) block.uuid block model.blocks) maybePrevious
+                    Maybe.withDefault model.blocks <| Maybe.map (\previous -> DictList.insertBefore (Tuple.first previous) block.uuid block model.blocks) maybePrevious
             in
             ( { model | blocks = updatedBlocks }, Cmd.none )
 
@@ -2355,7 +2258,7 @@ updateFromJs jsmsg model =
             let
                 updatedBlocks : Blocks
                 updatedBlocks =
-                    mapDictList
+                    DictList.map
                         (\uuid block ->
                             case Dict.get uuid syncDict of
                                 Just syncPosition ->
@@ -2499,7 +2402,7 @@ updateModelToJs msg model =
                     else
                         block
             in
-            { model | blocks = mapDictList updateVisibilityIfTargeted model.blocks }
+            { model | blocks = DictList.map updateVisibilityIfTargeted model.blocks }
 
         TogglePartitions ->
             let
@@ -3035,7 +2938,7 @@ viewToasts : Toasts -> Html Msg
 viewToasts toasts =
     ul [ class "toasts" ] <|
         List.map viewToast <|
-            DictList.orderedValues toasts
+            DictList.values toasts
 
 
 viewToast : Toast -> Html Msg

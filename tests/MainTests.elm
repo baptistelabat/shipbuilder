@@ -2,6 +2,7 @@ module MainTests exposing (ParsedJSData, alt, ctrl, discardCmd, downArrow, keyDo
 
 import Color
 import Dict
+import DictList exposing (DictList)
 import Expect exposing (Expectation)
 import ExtraEvents exposing (KeyEvent)
 import Fuzz
@@ -12,17 +13,12 @@ import HullSlices
 import Json.Decode as Decode exposing (Decoder, decodeString, decodeValue)
 import Json.Encode as Encode exposing (encode)
 import Main exposing (..)
-import OrderedDict as DictList
 import StringValueInput
 import Test exposing (..)
 import Test.Html.Event as Event
 import Test.Html.Query as Query
 import Test.Html.Selector as Selector
 import TestData exposing (..)
-
-
-type alias DictList k v =
-    DictList.OrderedDict k v
 
 
 setView : List Msg -> Html Msg
@@ -126,48 +122,38 @@ updateModel msgs modelToUpdate =
     List.foldl (\msg model -> update msg model |> discardCmd) modelToUpdate msgs
 
 
-fromList : List ( comparable, v ) -> DictList comparable v
-fromList l =
-    let
-        append : ( comparable, v ) -> DictList comparable v -> DictList comparable v
-        append ( key, value ) dict =
-            DictList.insert key value dict
-    in
-    List.foldr append DictList.empty l
-
-
 suite : Test
 suite =
     describe "Main"
         [ describe "Blocks"
             [ test "Add one block to an empty list" <|
                 \_ ->
-                    Expect.equal (fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo DictList.empty blockA)
+                    Expect.equal (DictList.fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo DictList.empty blockA)
             , test "Add one block to a list containing that exact block" <|
                 \_ ->
-                    Expect.equal (fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo (fromList [ ( blockA.uuid, blockA ) ]) blockA)
+                    Expect.equal (DictList.fromList [ ( blockA.uuid, blockA ) ]) (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ]) blockA)
             , test "Add one block to a list containing a block with the same uuid" <|
                 \_ ->
                     Expect.equal
-                        (fromList
+                        (DictList.fromList
                             [ ( { blockA | color = Color.yellow }.uuid
                               , { blockA | color = Color.yellow }
                               )
                             ]
                         )
-                        (addBlockTo (fromList [ ( blockA.uuid, blockA ) ])
+                        (addBlockTo (DictList.fromList [ ( blockA.uuid, blockA ) ])
                             { blockA | color = Color.yellow }
                         )
             , test "Add one block to an existing list (same order)" <|
                 \_ ->
                     Expect.equal
-                        (fromList
+                        (DictList.fromList
                             [ ( blockA.uuid, blockA )
                             , ( blockB.uuid, blockB )
                             ]
                         )
                         (addBlockTo
-                            (fromList
+                            (DictList.fromList
                                 [ ( blockA.uuid, blockA )
                                 ]
                             )
@@ -176,13 +162,13 @@ suite =
             , test "Add one block to an existing list (different order)" <|
                 \_ ->
                     Expect.notEqual
-                        (fromList
+                        (DictList.fromList
                             [ ( blockA.uuid, blockA )
                             , ( blockB.uuid, blockB )
                             ]
                         )
                         (addBlockTo
-                            (fromList
+                            (DictList.fromList
                                 [ ( blockB.uuid, blockB )
                                 ]
                             )
@@ -193,23 +179,23 @@ suite =
                     Expect.equal
                         DictList.empty
                         (removeBlockFrom
-                            (fromList [ ( blockA.uuid, blockA ) ])
+                            (DictList.fromList [ ( blockA.uuid, blockA ) ])
                             blockA
                         )
             , test "Removing one block from a list with two block" <|
                 \_ ->
                     Expect.equal
-                        (fromList [ ( blockB.uuid, blockB ) ])
+                        (DictList.fromList [ ( blockB.uuid, blockB ) ])
                         (removeBlockFrom
-                            (fromList [ ( blockA.uuid, blockA ), ( blockB.uuid, blockB ) ])
+                            (DictList.fromList [ ( blockA.uuid, blockA ), ( blockB.uuid, blockB ) ])
                             blockA
                         )
             , test "Removing one block from a list without that block" <|
                 \_ ->
                     Expect.equal
-                        (fromList [ ( blockB.uuid, blockB ) ])
+                        (DictList.fromList [ ( blockB.uuid, blockB ) ])
                         (removeBlockFrom
-                            (fromList [ ( blockB.uuid, blockB ) ])
+                            (DictList.fromList [ ( blockB.uuid, blockB ) ])
                             blockC
                         )
             , test "Removing an updated version of a block from a list with that block" <|
@@ -217,7 +203,7 @@ suite =
                     Expect.equal
                         DictList.empty
                         (removeBlockFrom
-                            (fromList [ ( blockA.uuid, blockA ) ])
+                            (DictList.fromList [ ( blockA.uuid, blockA ) ])
                             { blockA | color = Color.yellow }
                         )
             , test "Removing one block from an empty list" <|
@@ -225,7 +211,7 @@ suite =
                     Expect.equal
                         DictList.empty
                         (removeBlockFrom
-                            (fromList [ ( blockB.uuid, blockB ) ])
+                            (DictList.fromList [ ( blockB.uuid, blockB ) ])
                             blockB
                         )
             ]
@@ -272,25 +258,25 @@ suite =
                     [ describe "ChangeBlockColor"
                         [ test "updates only the color of the given block" <|
                             \_ ->
-                                { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
                                     |> Tuple.first
-                                    |> Expect.equal { initialModel | blocks = fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
+                                    |> Expect.equal { initialModel | blocks = DictList.fromList [ ( blockA.uuid, { blockA | color = Color.yellow } ) ] }
                         , test "leaves model untouched if the block doesn't exist" <|
                             \_ ->
-                                { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
                                     |> Tuple.first
-                                    |> Expect.equal { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
+                                    |> Expect.equal { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                         , test "has a side effect" <|
                             \_ ->
-                                { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
                                     |> Tuple.second
                                     |> Expect.notEqual Cmd.none
                         , test "has no side effect if the block doesn't exist" <|
                             \_ ->
-                                { initialModel | blocks = fromList [ ( blockA.uuid, blockA ) ] }
+                                { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
                                     |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
                                     |> Tuple.second
                                     |> Expect.equal Cmd.none
