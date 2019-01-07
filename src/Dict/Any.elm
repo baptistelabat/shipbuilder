@@ -1,12 +1,11 @@
 module Dict.Any exposing
     ( AnyDict
     , empty, singleton, insert, update, remove
-    , isEmpty, member, get, size
+    , isEmpty, member, get, size, getOrd
     , keys, values, toList, fromList
     , map, foldl, foldr, filter, partition
     , union, intersect, diff, merge
     , toDict
-    , getOrd
     )
 
 {-| A dictionary mapping unique keys to values.
@@ -70,7 +69,7 @@ and other are types within the constructor and you're good to go.
 
 # Query
 
-@docs isEmpty, member, get, size
+@docs isEmpty, member, get, size, getOrd
 
 
 # Lists
@@ -224,9 +223,9 @@ get k (AnyDict { dict, toKey }) =
 
 {-| Helper function for grabbing the default value used in the dict
 -}
-getOrd : AllDict k v comparable -> (k -> comparable)
-getOrd dict =
-    case dict of
+getOrd : AnyDict comparable k v -> (k -> comparable)
+getOrd d =
+    case d of
         AnyDict { dict, toKey } ->
             toKey
 

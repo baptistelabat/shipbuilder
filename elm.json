@@ -20,7 +20,6 @@
             "lattyware/elm-fontawesome": "1.0.1",
             "ryannhg/date-format": "2.3.0",
             "terezka/line-charts": "2.0.0",
-            "turboMaCk/any-dict": "1.0.1",
             "wittjosiah/elm-ordered-dict": "1.0.1"
         },
         "indirect": {
