@@ -142,7 +142,60 @@ fromColor color =
 
 getName : SirColor -> String
 getName sirColor =
-    Debug.toString sirColor
+    case sirColor of
+        Red ->
+            "Red"
+
+        Pink ->
+            "Pink"
+
+        Purple ->
+            "Purple"
+
+        DeepPurple ->
+            "DeepPurple"
+
+        Indigo ->
+            "Indigo"
+
+        Blue ->
+            "Blue"
+
+        LightBlue ->
+            "LightBlue"
+
+        Cyan ->
+            "Cyan"
+
+        Teal ->
+            "Teal"
+
+        Green ->
+            "Green"
+
+        LightGreen ->
+            "LightGreen"
+
+        Lime ->
+            "Lime"
+
+        Yellow ->
+            "Yellow"
+
+        Amber ->
+            "Amber"
+
+        Orange ->
+            "Orange"
+
+        DeepOrange ->
+            "DeepOrange"
+
+        Brown ->
+            "Brown"
+
+        Black ->
+            "Black"
 
 
 fromName : String -> Maybe SirColor

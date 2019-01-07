@@ -660,8 +660,8 @@ insertAfter afterKey key value (AllDictList dict list) =
 
                         Nothing ->
                             -- This shouldn't happen, since we tested that
-                            -- the afterKey was present.  So, crash.
-                            Debug.log "Internal error: AllDictList list not in sync with dict" []
+                            -- the afterKey was present.  Return empty list.
+                            []
 
             else
                 -- We didn't have the afterKey. So, just remove the key (in
@@ -717,8 +717,8 @@ insertBefore beforeKey key value (AllDictList dict list) =
 
                         Nothing ->
                             -- This shouldn't happen, since we tested that
-                            -- the afterKey was present.  So, crash.
-                            Debug.log "Internal error: AllDictList list not in sync with dict" []
+                            -- the afterKey was present. Return empty list.
+                            []
 
             else
                 -- We didn't have the beforeKey. So, just remove the key (in
@@ -1240,7 +1240,8 @@ unsafeGet default key dict =
             value
 
         Nothing ->
-            Debug.log "AllDictList.unsafeGet could not find requested key: returning default" default
+            -- AllDictList.unsafeGet could not find requested key: returning default
+            default
 
 
 {-| Make an new `AllDict` with the ord from the supplied `AllDict`

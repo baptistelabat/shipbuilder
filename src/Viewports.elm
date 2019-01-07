@@ -21,6 +21,16 @@ type CameraType
     | Perspective
 
 
+cameraTypeToString : CameraType -> String
+cameraTypeToString cameraType =
+    case cameraType of
+        Orthographic ->
+            "Orthographic"
+
+        Perspective ->
+            "Perspective"
+
+
 type alias Viewport =
     { label : String
     , left :
@@ -67,7 +77,7 @@ encodeViewport viewport =
         , ( "background", encodeColor viewport.background )
         , ( "eye", encodeVector3 viewport.eye )
         , ( "canControl", encodeCanControl viewport.canControl )
-        , ( "cameraType", Encode.string <| Debug.toString viewport.cameraType )
+        , ( "cameraType", Encode.string <| cameraTypeToString viewport.cameraType )
         ]
 
 

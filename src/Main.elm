@@ -43,7 +43,6 @@ import Browser.Events
 import Color exposing (Color)
 import CoordinatesTransform exposing (CoordinatesTransform)
 import DateFormat
-import Debug
 import Dict exposing (Dict)
 import DictList
 import ExtraEvents exposing (onKeyDown)
@@ -1409,17 +1408,9 @@ initModel flag =
             cuts =
                 case Decode.decodeString HullSlices.dictDecoder flag.hullsJSON of
                     Ok c ->
-                        let
-                            _ =
-                                Debug.log "Decoded JSON" "OK"
-                        in
                         c
 
                     Err e ->
-                        let
-                            _ =
-                                Debug.log "Error decoding JSON" e
-                        in
                         Dict.empty
         in
         cuts
@@ -2285,10 +2276,6 @@ updateFromJs jsmsg model =
             )
 
         JSError message ->
-            let
-                _ =
-                    Debug.log "error" message
-            in
             ( model, Cmd.none )
 
 
