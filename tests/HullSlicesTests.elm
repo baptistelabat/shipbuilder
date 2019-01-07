@@ -151,13 +151,16 @@ suite =
         , describe "Integrate"
             [ test "Integrating outside the spline bounds should give 0" <|
                 \_ ->
-                    Expect.equal 0 <| Interpolate.Cubic.integrate 8 9 s
+                    Interpolate.Cubic.integrate 8 9 s
+                        |> Expect.within eps 0
             , test "Integrating within the bounds" <|
                 \_ ->
-                    Expect.equal 127.5 <| Interpolate.Cubic.integrate 8 11 s
+                    Interpolate.Cubic.integrate 8 11 s
+                        |> Expect.within eps 127.5
             , test "Integrating a bit outside, a bit within the bounds" <|
                 \_ ->
-                    Expect.equal 127.5 <| Interpolate.Cubic.integrate 10 11 s
+                    Interpolate.Cubic.integrate 10 11 s
+                        |> Expect.within eps 127.5
             ]
         , describe "Setters"
             [ test "Can set length over all" <|
@@ -171,7 +174,8 @@ suite =
                     Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m" } (HullSlices.setDraught "13.4125" hullSlices |> .draught)
             , test "Resizing should not change centering: changing breadth should also change ymin" <|
                 \_ ->
-                    Expect.equal -3.5 (HullSlices.setBreadth "7" hullSlices |> .ymin)
+                    (HullSlices.setBreadth "7" hullSlices |> .ymin)
+                        |> Expect.within eps -3.5
             ]
         , describe "Area"
             [ test "Can calculate slice areas" <|
