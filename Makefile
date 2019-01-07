@@ -1,4 +1,4 @@
-.PHONY: all build build-optimized clean artifacts test
+.PHONY: all build build-optimized clean artifacts test selenium
 
 VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points-at HEAD),$(shell git rev-parse --short=8 HEAD))
 
@@ -50,3 +50,7 @@ shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html
 	docker run -t -u $(shell id -u):$(shell id -g) -v $(shell pwd):/work -w /work uglifyjs elm-compressed.js --mangle --output=elm.min.js
 	rm elm-compressed.js
 	mv elm.min.js shipBuilder/js/elm.min.js
+
+selenium: shipBuilder/index.html shipBuilder/js/elm.min.js
+	cd selenium && make
+	docker run -t -v $(shell pwd)/shipBuilder:/work -w /work python-selenium-firefox:firefox38
