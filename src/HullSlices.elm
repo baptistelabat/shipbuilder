@@ -1,25 +1,24 @@
-module HullSlices
-    exposing
-        ( area
-        , calculateSliceArea
-        , clip
-        , decoder
-        , empty
-        , encoder
-        , dictDecoder
-        , dictEncoder
-        , interpolate
-        , plotAreaCurve
-        , scale
-        , setBreadth
-        , setDraught
-        , setLengthOverAll
-        , setDepth
-        , volume
-        , HullSlices
-        , HullSlice
-        , JsonHullSlices
-        )
+module HullSlices exposing
+    ( HullSlice
+    , HullSlices
+    , JsonHullSlices
+    , area
+    , calculateSliceArea
+    , clip
+    , decoder
+    , dictDecoder
+    , dictEncoder
+    , empty
+    , encoder
+    , interpolate
+    , plotAreaCurve
+    , scale
+    , setBreadth
+    , setDepth
+    , setDraught
+    , setLengthOverAll
+    , volume
+    )
 
 import Array
 import Dict exposing (Dict)
@@ -39,7 +38,6 @@ import LineChart.Dots as Dots
 import LineChart.Events as Events
 import LineChart.Grid as Grid
 import LineChart.Interpolation as Interpolation
-import LineChart.Junk as Junk
 import LineChart.Junk as Junk
 import LineChart.Legends as Legends
 import LineChart.Line as Line
@@ -98,7 +96,7 @@ type alias HullSlice =
 
 hullSliceDecoder : Decode.Decoder HullSlice
 hullSliceDecoder =
-    Pipeline.decode HullSlice
+    Decode.succeed HullSlice
         |> Pipeline.required "x" Decode.float
         |> Pipeline.required "zmin" Decode.float
         |> Pipeline.required "zmax" Decode.float
@@ -121,16 +119,16 @@ scale json hullSlice =
         scaleZ z =
             z * json.depth.value + json.zmin
     in
-        { x = hullSlice.x
-        , zmin = scaleZ hullSlice.zmin
-        , zmax = scaleZ hullSlice.zmax
-        , y = List.map scaleY hullSlice.y
-        }
+    { x = hullSlice.x
+    , zmin = scaleZ hullSlice.zmin
+    , zmax = scaleZ hullSlice.zmax
+    , y = List.map scaleY hullSlice.y
+    }
 
 
 volume : { a | xmin : Float, length : StringValueInput.FloatInput } -> List Float -> Float
 volume json sliceAreas =
-    area json.xmin (json.xmin + json.length.value) { zmin = json.xmin, zmax = (json.xmin + json.length.value), y = sliceAreas }
+    area json.xmin (json.xmin + json.length.value) { zmin = json.xmin, zmax = json.xmin + json.length.value, y = sliceAreas }
 
 
 calculateSliceArea : JsonHullSlices a -> HullSlice -> Float
@@ -148,18 +146,18 @@ interpolate json =
         sliceAreas =
             List.map (calculateSliceArea json) json.slices
     in
-        { length = json.length
-        , breadth = json.breadth
-        , depth = json.depth
-        , xmin = json.xmin
-        , ymin = json.ymin
-        , zmin = json.zmin
-        , slices = json.slices
-        , draught = json.draught
-        , sliceAreas = sliceAreas
-        , blockCoefficient = StringValueInput.round_n 2 <| (Maybe.withDefault 0 <| List.maximum sliceAreas) / (json.breadth.value * json.draught.value)
-        , volume = StringValueInput.round_n 2 <| volume json sliceAreas
-        }
+    { length = json.length
+    , breadth = json.breadth
+    , depth = json.depth
+    , xmin = json.xmin
+    , ymin = json.ymin
+    , zmin = json.zmin
+    , slices = json.slices
+    , draught = json.draught
+    , sliceAreas = sliceAreas
+    , blockCoefficient = StringValueInput.round_n 2 <| (Maybe.withDefault 0 <| List.maximum sliceAreas) / (json.breadth.value * json.draught.value)
+    , volume = StringValueInput.round_n 2 <| volume json sliceAreas
+    }
 
 
 f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> JsonHullSlices {}
@@ -180,7 +178,7 @@ decoder =
     let
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder (JsonHullSlices {})
         helper ( depth, maybeDraught ) =
-            Pipeline.decode f
+            Decode.succeed f
                 |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)
                 |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth") Decode.float)
                 |> Pipeline.hardcoded depth
@@ -197,11 +195,11 @@ decoder =
                             StringValueInput.fromNumber "m" "Draught" (depth.value / 5)
                     )
     in
-        Pipeline.decode (,)
-            |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth") Decode.float)
-            |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught") (Decode.float)) Nothing
-            |> Decode.andThen helper
-            |> Decode.map interpolate
+    Decode.succeed Tuple.pair
+        |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth") Decode.float)
+        |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught") Decode.float) Nothing
+        |> Decode.andThen helper
+        |> Decode.map interpolate
 
 
 dictDecoder : Decode.Decoder (Dict String HullSlices)
@@ -220,7 +218,7 @@ hullSliceEncoder hullSlice =
         [ ( "x", Encode.float hullSlice.x )
         , ( "zmin", Encode.float hullSlice.zmin )
         , ( "zmax", Encode.float hullSlice.zmax )
-        , ( "y", Encode.list <| List.map Encode.float hullSlice.y )
+        , ( "y", Encode.list Encode.float hullSlice.y )
         ]
 
 
@@ -234,7 +232,7 @@ encoder hullSlices =
         , ( "xmin", Encode.float hullSlices.xmin )
         , ( "ymin", Encode.float hullSlices.ymin )
         , ( "zmin", Encode.float hullSlices.zmin )
-        , ( "slices", Encode.list <| List.map hullSliceEncoder hullSlices.slices )
+        , ( "slices", Encode.list hullSliceEncoder hullSlices.slices )
         ]
 
 
@@ -269,36 +267,36 @@ plotAreaCurve slices =
 
         xs : List Float
         xs =
-            List.map (\idx -> slices.xmin + slices.length.value * (toFloat idx) / ((toFloat n) - 1.0)) <| List.range 0 (n - 1)
+            List.map (\idx -> slices.xmin + slices.length.value * toFloat idx / (toFloat n - 1.0)) <| List.range 0 (n - 1)
 
         xys : List ( Float, Float )
         xys =
-            List.map2 (,) xs slices.sliceAreas
+            List.map2 Tuple.pair xs slices.sliceAreas
     in
-        div [ id "area-curve-plot-container" ]
-            [ LineChart.viewCustom
-                { x = Axis.default 231 "x" Tuple.first
-                , y = Axis.default 231 "Area" Tuple.second
-                , container =
-                    Container.custom
-                        { attributesHtml = [ Html.Attributes.style [ ( "font-family", "monospace" ) ] ]
-                        , attributesSvg = []
-                        , size = Container.static
-                        , margin = Container.Margin 0 10 20 30
-                        , id = "area-curve-plot"
-                        }
-                , interpolation = Interpolation.monotone
-                , intersection = Intersection.default
-                , legends = Legends.none
-                , events = Events.default
-                , junk = Junk.default
-                , grid = Grid.lines 1 Colors.gray
-                , area = Area.stacked 0.2
-                , line = Line.wider 3
-                , dots = Dots.custom (Dots.full 10)
-                }
-                [ LineChart.line Colors.blue Dots.circle "Area curve" xys ]
-            ]
+    div [ id "area-curve-plot-container" ]
+        [ LineChart.viewCustom
+            { x = Axis.default 231 "x" Tuple.first
+            , y = Axis.default 231 "Area" Tuple.second
+            , container =
+                Container.custom
+                    { attributesHtml = [ Html.Attributes.style "font-family" "monospace" ]
+                    , attributesSvg = []
+                    , size = Container.static
+                    , margin = Container.Margin 0 10 20 30
+                    , id = "area-curve-plot"
+                    }
+            , interpolation = Interpolation.monotone
+            , intersection = Intersection.default
+            , legends = Legends.none
+            , events = Events.default
+            , junk = Junk.default
+            , grid = Grid.lines 1 Colors.gray
+            , area = Area.stacked 0.2
+            , line = Line.wider 3
+            , dots = Dots.custom (Dots.full 10)
+            }
+            [ LineChart.line Colors.blue Dots.circle "Area curve" xys ]
+        ]
 
 
 toXY : { a | zmin : Float, zmax : Float, y : List Float } -> List ( Float, Float )
@@ -310,12 +308,12 @@ toXY { zmin, zmax, y } =
 
         acc : ( Int, Float ) -> ( Float, Float )
         acc ( idx, y_ ) =
-            ( zmin + (toFloat idx) * dz, y_ )
+            ( zmin + toFloat idx * dz, y_ )
     in
-        y
-            |> Array.fromList
-            |> Array.toIndexedList
-            |> List.map acc
+    y
+        |> Array.fromList
+        |> Array.toIndexedList
+        |> List.map acc
 
 
 removeDuplicates : List ( Float, Float ) -> List ( Float, Float )
@@ -330,8 +328,9 @@ removeDuplicates l =
         ( x1, y1 ) :: ( x2, y2 ) :: rest ->
             if x1 == x2 then
                 removeDuplicates (( x2, y2 ) :: rest)
+
             else
-                [ ( x1, y1 ) ] ++ (removeDuplicates (( x2, y2 ) :: rest))
+                [ ( x1, y1 ) ] ++ removeDuplicates (( x2, y2 ) :: rest)
 
 
 clip : Float -> Float -> List ( Float, Float ) -> List ( Float, Float )
@@ -354,26 +353,29 @@ clip_ a b xys =
                 _ =
                     ( x1, x2 )
             in
-                if x1 >= b then
-                    -- a--b--x1----x2
-                    []
-                else if x2 <= a then
-                    -- x1----x2--a--b
-                    clip a b (( x2, y2 ) :: rest)
-                else
-                    let
-                        left : Float
-                        left =
-                            min b <| max a x1
+            if x1 >= b then
+                -- a--b--x1----x2
+                []
 
-                        right : Float
-                        right =
-                            max a <| min b x2
-                    in
-                        if left == right then
-                            [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ (clip a b rest)
-                        else
-                            [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ (clip a b (( x2, y2 ) :: rest))
+            else if x2 <= a then
+                -- x1----x2--a--b
+                clip a b (( x2, y2 ) :: rest)
+
+            else
+                let
+                    left : Float
+                    left =
+                        min b <| max a x1
+
+                    right : Float
+                    right =
+                        max a <| min b x2
+                in
+                if left == right then
+                    [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ clip a b rest
+
+                else
+                    [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ clip a b (( x2, y2 ) :: rest)
 
 
 area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
@@ -389,9 +391,9 @@ area a b curve =
                     0
 
                 ( x1, y1 ) :: ( x2, y2 ) :: rest ->
-                    ((x2 - x1) * (y1 + y2) / 2) + (integrate (( x2, y2 ) :: rest))
+                    ((x2 - x1) * (y1 + y2) / 2) + integrate (( x2, y2 ) :: rest)
     in
-        curve
-            |> toXY
-            |> clip a b
-            |> integrate
+    curve
+        |> toXY
+        |> clip a b
+        |> integrate

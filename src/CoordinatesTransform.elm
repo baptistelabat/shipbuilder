@@ -1,15 +1,14 @@
-module CoordinatesTransform
-    exposing
-        ( CoordinatesTransform
-        , default
-        , encode
-        , fromList
-        , fromVectors
-        , toList
-        )
+module CoordinatesTransform exposing
+    ( CoordinatesTransform
+    , default
+    , encode
+    , fromList
+    , fromVectors
+    , toList
+    )
 
 import Json.Encode as Encode
-import Math.Vector3 exposing (Vec3, vec3, getX, getY, getZ)
+import Math.Vector3 exposing (Vec3, getX, getY, getZ, vec3)
 
 
 fromList : List Float -> Maybe CoordinatesTransform
@@ -31,7 +30,7 @@ type alias CoordinatesTransform =
 
 encode : CoordinatesTransform -> Encode.Value
 encode coordinatesTransform =
-    Encode.list <| List.map Encode.float (toList coordinatesTransform)
+    Encode.list Encode.float (toList coordinatesTransform)
 
 
 fromVectors : Vec3 -> Vec3 -> Vec3 -> CoordinatesTransform

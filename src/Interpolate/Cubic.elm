@@ -1,15 +1,8 @@
-module Interpolate.Cubic
-    exposing
-        ( Spline
-        , LocalCurve
-        , withRange
-        , withDelta
-        , valueAt
-        , slopeAt
-        , concavityAt
-        , curveAt
-        , integrate
-        )
+module Interpolate.Cubic exposing
+    ( withRange, withDelta, Spline
+    , valueAt, slopeAt, concavityAt, curveAt, LocalCurve
+    , integrate
+    )
 
 {-| This library interpolates cubic splines for one-dimensional sets of data.
 
@@ -72,7 +65,7 @@ curveAt =
             , concavity = secondDerivative x coeff
             }
     in
-        evaluate curve
+    evaluate curve
 
 
 {-| Integrates a spline between two bounds
@@ -93,7 +86,7 @@ integrate x0 x1 (Spline spline) =
             let
                 a : Float
                 a =
-                    spline.start + (toFloat idx) * spline.dx
+                    spline.start + toFloat idx * spline.dx
 
                 b : Float
                 b =
@@ -107,11 +100,11 @@ integrate x0 x1 (Spline spline) =
                 xmax =
                     max a <| min b x1
             in
-                sum + (primitive xmax coeffs) - (primitive xmin coeffs)
+            sum + primitive xmax coeffs - primitive xmin coeffs
     in
-        spline.coefficients
-            |> Array.toIndexedList
-            |> List.foldl f 0
+    spline.coefficients
+        |> Array.toIndexedList
+        |> List.foldl f 0
 
 
 cubic : Float -> Coefficients -> Float
@@ -142,13 +135,13 @@ evaluate f x (Spline spline) =
                 |> clamp 0 maxIndex
 
         offset =
-            x - spline.dx * (toFloat index) - spline.start
+            x - spline.dx * toFloat index - spline.start
 
         coeff =
             Array.get index spline.coefficients
                 |> Maybe.withDefault { a = 0, b = 0, c = 0, d = 0 }
     in
-        f offset coeff
+    f offset coeff
 
 
 {-| -}
@@ -193,22 +186,23 @@ withRange start end heights =
         dx =
             (end - start) / (n - 1)
     in
-        if 1 < n then
-            withDelta start dx heights
-        else
-            { coefficients = degenerateCoefficients heights
-            , start = 0
-            , dx = 0
-            }
-                |> Spline
+    if 1 < n then
+        withDelta start dx heights
+
+    else
+        { coefficients = degenerateCoefficients heights
+        , start = 0
+        , dx = 0
+        }
+            |> Spline
 
 
 {-| Same as `withRange`, except instead of passing the endpoint as the
 second argument, you pass the x-distance between data points.
 
+
     fSpline =
         withDelta 2 1 [ 1, 5.2, 3.2, 0.8 ]
-
 
     -- equivalent to withRange 2 6 [ 1, 5.2, 3.2, 0.8 ]
 
@@ -251,12 +245,12 @@ findCoefficients dx heights =
             , d = y0
             }
     in
-        mapTriple concavity heights
-            |> List.scanl sweep ( 0, 0 )
-            |> scanr backSub 0
-            |> List.map2 (,) heights
-            |> mapPair piece
-            |> Array.fromList
+    mapTriple concavity heights
+        |> scanl sweep ( 0, 0 )
+        |> scanr backSub 0
+        |> List.map2 Tuple.pair heights
+        |> mapPair piece
+        |> Array.fromList
 
 
 mapTriple : (a -> a -> a -> b) -> List a -> List b
@@ -268,17 +262,17 @@ mapTriple f x0 =
         doubleTail =
             tail |> Maybe.andThen List.tail
     in
-        case ( tail, doubleTail ) of
-            ( Just x1, Just x2 ) ->
-                List.map3 f x0 x1 x2
+    case ( tail, doubleTail ) of
+        ( Just x1, Just x2 ) ->
+            List.map3 f x0 x1 x2
 
-            otherwise ->
-                []
+        otherwise ->
+            []
 
 
 mapPair : (a -> a -> b) -> List a -> List b
 mapPair f x0 =
-    case (List.tail x0) of
+    case List.tail x0 of
         Just x1 ->
             List.map2 f x0 x1
 
@@ -286,9 +280,23 @@ mapPair f x0 =
             []
 
 
+scanl : (a -> b -> b) -> b -> List a -> List b
+scanl fn b =
+    let
+        scan a bs =
+            case bs of
+                hd :: tl ->
+                    fn a hd :: bs
+
+                _ ->
+                    []
+    in
+    List.foldl scan [ b ] >> List.reverse
+
+
 scanr : (a -> b -> b) -> b -> List a -> List b
 scanr f init =
-    List.reverse >> List.scanl f init >> List.reverse
+    List.reverse >> scanl f init >> List.reverse
 
 
 {-| -}

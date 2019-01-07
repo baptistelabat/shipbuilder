@@ -1,26 +1,26 @@
-module SIRColorPicker exposing (..)
+module SIRColorPicker exposing (SirColor(..), amber, black, blue, brown, cyan, deepOrange, deepPurple, fromColor, fromName, getColor, getName, green, indigo, lightBlue, lightGreen, lime, orange, palette, pink, purple, red, teal, toCssColor, view, viewColorItem, yellow)
 
 import Color exposing (Color, hsl)
-import Html.Events exposing (onClick)
-import Html.Attributes exposing (class, style, title)
 import Html exposing (Html, div)
+import Html.Attributes exposing (class, style, title)
+import Html.Events exposing (onClick)
 
 
 toCssColor : Color -> String
 toCssColor color =
     let
         rgb =
-            Color.toRgb color
+            Color.toRgba color
     in
-        "rgba("
-            ++ (toString rgb.red)
-            ++ ","
-            ++ (toString rgb.green)
-            ++ ","
-            ++ (toString rgb.blue)
-            ++ ","
-            ++ (toString rgb.alpha)
-            ++ ")"
+    "rgba("
+        ++ String.fromFloat rgb.red
+        ++ ","
+        ++ String.fromFloat rgb.green
+        ++ ","
+        ++ String.fromFloat rgb.blue
+        ++ ","
+        ++ String.fromFloat rgb.alpha
+        ++ ")"
 
 
 viewColorItem : (Color -> msg) -> Color -> SirColor -> Html msg
@@ -30,20 +30,21 @@ viewColorItem msg selectedColor sirColor =
         cssColor =
             toCssColor <| getColor sirColor
     in
-        div
-            (if selectedColor == (getColor sirColor) then
-                [ class "sir-color-item sir-color-item__selected"
-                , style [ ( "background-color", cssColor ) ]
-                , title <| getName sirColor
-                ]
-             else
-                [ class "sir-color-item"
-                , style [ ( "background-color", cssColor ) ]
-                , onClick (msg <| getColor sirColor)
-                , title <| getName sirColor
-                ]
-            )
-            []
+    div
+        (if selectedColor == getColor sirColor then
+            [ class "sir-color-item sir-color-item__selected"
+            , style "background-color" cssColor
+            , title <| getName sirColor
+            ]
+
+         else
+            [ class "sir-color-item"
+            , style "background-color" cssColor
+            , onClick (msg <| getColor sirColor)
+            , title <| getName sirColor
+            ]
+        )
+        []
 
 
 view : Color -> (Color -> msg) -> Html msg
@@ -141,7 +142,60 @@ fromColor color =
 
 getName : SirColor -> String
 getName sirColor =
-    toString sirColor
+    case sirColor of
+        Red ->
+            "Red"
+
+        Pink ->
+            "Pink"
+
+        Purple ->
+            "Purple"
+
+        DeepPurple ->
+            "DeepPurple"
+
+        Indigo ->
+            "Indigo"
+
+        Blue ->
+            "Blue"
+
+        LightBlue ->
+            "LightBlue"
+
+        Cyan ->
+            "Cyan"
+
+        Teal ->
+            "Teal"
+
+        Green ->
+            "Green"
+
+        LightGreen ->
+            "LightGreen"
+
+        Lime ->
+            "Lime"
+
+        Yellow ->
+            "Yellow"
+
+        Amber ->
+            "Amber"
+
+        Orange ->
+            "Orange"
+
+        DeepOrange ->
+            "DeepOrange"
+
+        Brown ->
+            "Brown"
+
+        Black ->
+            "Black"
 
 
 fromName : String -> Maybe SirColor

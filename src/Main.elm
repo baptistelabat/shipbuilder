@@ -1,75 +1,78 @@
-port module Main
-    exposing
-        ( main
-        , encodeInitThreeCommand
-        , init
-        , initCmd
-        , initModel
-        , initBlock
-        , Model
-        , Msg(..)
-        , NoJsMsg(..)
-        , FromJsMsg(..)
-        , ToJsMsg(..)
-        , toJs
-        , update
-        , view
-        , msg2json
-          --Blocks
-        , Block
-        , Blocks
-        , addBlockTo
-        , removeBlockFrom
-        , toList
-        , asXInPosition
-        , asYInPosition
-        , asZInPosition
-        , asLengthInSize
-        , asWidthInSize
-        , asHeightInSize
-        , Axis(..)
-        , Dimension(..)
-        , ViewMode(..)
-        , PartitioningView(..)
-        , PartitionType(..)
-        , SpaceReservationView(..)
-        , hullReferences
-        , JsData
-        )
+port module Main exposing
+    ( Axis(..)
+    , Block
+    , Blocks
+    , Dimension(..)
+    , FromJsMsg(..)
+    , JsData
+    , Model
+    , Msg(..)
+    , NoJsMsg(..)
+    , PartitionType(..)
+    , PartitioningView(..)
+    , SpaceReservationView(..)
+    , ToJsMsg(..)
+    , ViewMode(..)
+    , addBlockTo
+    , asHeightInSize
+    , asLengthInSize
+    , asWidthInSize
+    , asXInPosition
+    , asYInPosition
+    , asZInPosition
+    , encodeInitThreeCommand
+    , hullReferences
+    , init
+    , initBlock
+    , initCmd
+    , initModel
+    , main
+    ,  msg2json
+       --Blocks
 
+    , removeBlockFrom
+    , toJs
+    , toList
+    , update
+    , view
+    )
+
+import Browser
+import Browser.Dom
+import Browser.Events
 import Color exposing (Color)
-import Date
-import Date.Extra.Format
-import Date.Extra.Config.Config_fr_fr exposing (config)
-import SIRColorPicker
+import CoordinatesTransform exposing (CoordinatesTransform)
+import DateFormat
 import Dict exposing (Dict)
-import DictList exposing (DictList)
-import Dom
+import DictList
 import ExtraEvents exposing (onKeyDown)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
-import Http exposing (encodeUri)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import HullReferences exposing (HullReference, HullReferences)
 import HullSlices exposing (HullSlices)
-import Json.Encode as Encode
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
-import Keyboard exposing (KeyCode)
+import Json.Encode as Encode
+import List.Extra
+import SIRColorPicker
+import StringValueInput
 import Task
 import Time
-import Debug
+import Url
 import Viewports exposing (Viewports, encodeViewports)
-import CoordinatesTransform exposing (CoordinatesTransform)
-import HullReferences exposing (HullReference, HullReferences)
-import StringValueInput
 
 
 port toJs : JsData -> Cmd msg
 
 
 port fromJs : (JsData -> msg) -> Sub msg
+
+
+type alias DictList k v =
+    DictList.DictList k v
 
 
 type alias JsData =
@@ -86,7 +89,7 @@ type alias Flag =
 
 main : Program Flag Model Msg
 main =
-    Html.programWithFlags
+    Browser.element
         { init = init
         , view = view
         , update = update
@@ -98,15 +101,15 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ fromJs jsMsgToMsg
-        , Keyboard.downs keydownToMsg
-        , Keyboard.ups keyupToMsg
-        , Time.every (20 * Time.second) (NoJs << SetCurrentDate << Date.fromTime)
+        , Browser.Events.onKeyDown <| Decode.map keydownToMsg keyDecoder
+        , Browser.Events.onKeyUp <| Decode.map keyupToMsg keyDecoder
+        , Time.every (20 * 1000) (NoJs << SetCurrentDate)
         ]
 
 
 newBlockDecoder : Decode.Decoder Block
 newBlockDecoder =
-    Pipeline.decode Block
+    Decode.succeed Block
         |> Pipeline.required "uuid" Decode.string
         |> Pipeline.required "label" Decode.string
         |> Pipeline.required "color" decodeRgbRecord
@@ -125,7 +128,7 @@ type alias SyncPosition =
 
 syncPositionDecoder : Decode.Decoder SyncPosition
 syncPositionDecoder =
-    Pipeline.decode SyncPosition
+    Decode.succeed SyncPosition
         |> Pipeline.required "uuid" Decode.string
         |> Pipeline.required "position" decodePosition
 
@@ -145,7 +148,7 @@ type alias SaveFile =
 
 saveFileDecoderV1 : Decode.Decoder SaveFile
 saveFileDecoderV1 =
-    Pipeline.decode SaveFile
+    Decode.succeed SaveFile
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.hardcoded initPartitions
@@ -155,7 +158,7 @@ saveFileDecoderV1 =
 
 saveFileDecoderV2 : Decode.Decoder SaveFile
 saveFileDecoderV2 =
-    Pipeline.decode SaveFile
+    Decode.succeed SaveFile
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.required "partitions" decodePartitions
@@ -173,7 +176,7 @@ decodeSaveFile version =
             saveFileDecoderV2
 
         _ ->
-            Decode.fail <| "Unknown version " ++ toString version
+            Decode.fail <| "Unknown version " ++ String.fromInt version
 
 
 decodeVersion : Decode.Decoder Int
@@ -188,7 +191,7 @@ decodeCustomProperties =
 
 decodeCustomProperty : Decode.Decoder CustomProperty
 decodeCustomProperty =
-    Pipeline.decode CustomProperty
+    Decode.succeed CustomProperty
         |> Pipeline.required "label" Decode.string
         |> Pipeline.required "values" decodeCustomPropertyValues
 
@@ -207,7 +210,7 @@ type alias SelectPartitionData =
 
 selectPartitionDecoder : Decode.Decoder SelectPartitionData
 selectPartitionDecoder =
-    Pipeline.decode SelectPartitionData
+    Decode.succeed SelectPartitionData
         |> Pipeline.required "partitionType" (Decode.string |> Decode.andThen partitionTypeFromString)
         |> Pipeline.required "partitionIndex" Decode.int
         |> Pipeline.required "partitionPosition" Decode.float
@@ -236,7 +239,7 @@ decodeBlocks =
 
 decodeBlock : Decode.Decoder Block
 decodeBlock =
-    Pipeline.decode Block
+    Decode.succeed Block
         |> Pipeline.required "uuid" Decode.string
         |> Pipeline.required "label" Decode.string
         |> Pipeline.required "color" decodeColor
@@ -271,23 +274,23 @@ decodeReferenceForMass =
 
 decodeColor : Decode.Decoder Color
 decodeColor =
-    Pipeline.decode Color.rgba
-        |> Pipeline.required "red" Decode.int
-        |> Pipeline.required "green" Decode.int
-        |> Pipeline.required "blue" Decode.int
+    Decode.succeed Color.rgba
+        |> Pipeline.required "red" Decode.float
+        |> Pipeline.required "green" Decode.float
+        |> Pipeline.required "blue" Decode.float
         |> Pipeline.required "alpha" Decode.float
 
 
 syncSizeDecoder : Decode.Decoder SyncSize
 syncSizeDecoder =
-    Pipeline.decode SyncSize
+    Decode.succeed SyncSize
         |> Pipeline.required "uuid" Decode.string
         |> Pipeline.required "size" decodeSize
 
 
 decodePosition : Decode.Decoder Position
 decodePosition =
-    Pipeline.decode Position
+    Decode.succeed Position
         |> Pipeline.required "x" (StringValueInput.floatInputDecoder "m" "x")
         |> Pipeline.required "y" (StringValueInput.floatInputDecoder "m" "y")
         |> Pipeline.required "z" (StringValueInput.floatInputDecoder "m" "z")
@@ -295,7 +298,7 @@ decodePosition =
 
 decodeSize : Decode.Decoder Size
 decodeSize =
-    Pipeline.decode Size
+    Decode.succeed Size
         |> Pipeline.required "x" (StringValueInput.floatInputDecoder "m" "x")
         |> Pipeline.required "y" (StringValueInput.floatInputDecoder "m" "y")
         |> Pipeline.required "z" (StringValueInput.floatInputDecoder "m" "z")
@@ -303,15 +306,15 @@ decodeSize =
 
 decodeRgbRecord : Decode.Decoder Color
 decodeRgbRecord =
-    Pipeline.decode Color.rgb
-        |> Pipeline.required "red" Decode.int
-        |> Pipeline.required "green" Decode.int
-        |> Pipeline.required "blue" Decode.int
+    Decode.succeed Color.rgb
+        |> Pipeline.required "red" Decode.float
+        |> Pipeline.required "green" Decode.float
+        |> Pipeline.required "blue" Decode.float
 
 
 decodePartitions : Decode.Decoder PartitionsData
 decodePartitions =
-    Pipeline.decode PartitionsData
+    Decode.succeed PartitionsData
         |> Pipeline.required "decks" decodeDecks
         |> Pipeline.required "bulkheads" decodeBulkheads
         |> Pipeline.hardcoded True
@@ -319,7 +322,7 @@ decodePartitions =
 
 decodeDecks : Decode.Decoder Decks
 decodeDecks =
-    Pipeline.decode Decks
+    Decode.succeed Decks
         |> Pipeline.required "number" (Decode.map (StringValueInput.fromInt "Number of decks") Decode.int)
         |> Pipeline.required "spacing" (StringValueInput.floatInputDecoder "m" "Spacing")
         |> Pipeline.required "zero" decodePartitionZero
@@ -328,7 +331,7 @@ decodeDecks =
 
 decodeBulkheads : Decode.Decoder Bulkheads
 decodeBulkheads =
-    Pipeline.decode Bulkheads
+    Decode.succeed Bulkheads
         |> Pipeline.required "number" (Decode.map (StringValueInput.fromInt "Number of decks") Decode.int)
         |> Pipeline.required "spacing" (StringValueInput.floatInputDecoder "m" "Spacing")
         |> Pipeline.required "zero" decodePartitionZero
@@ -337,7 +340,7 @@ decodeBulkheads =
 
 decodePartitionZero : Decode.Decoder PartitionZero
 decodePartitionZero =
-    Pipeline.decode PartitionZero
+    Decode.succeed PartitionZero
         |> Pipeline.required "index" Decode.int
         |> Pipeline.required "position" (StringValueInput.floatInputDecoder "m" "Position")
 
@@ -375,6 +378,22 @@ type ToastType
     | Success
 
 
+toastTypeToString : ToastType -> String
+toastTypeToString toastType =
+    case toastType of
+        Error ->
+            "error"
+
+        Info ->
+            "info"
+
+        Processing ->
+            "processing"
+
+        Success ->
+            "success"
+
+
 toastTypeDecoder : Decode.Decoder ToastType
 toastTypeDecoder =
     Decode.string
@@ -400,16 +419,21 @@ toastTypeDecoder =
 
 toastDecoder : Decode.Decoder Toast
 toastDecoder =
-    Pipeline.decode Toast
+    Decode.succeed Toast
         |> Pipeline.required "key" Decode.string
         |> Pipeline.required "message" Decode.string
         |> Pipeline.required "type" toastTypeDecoder
 
 
-keydownToMsg : KeyCode -> Msg
+keyDecoder : Decode.Decoder String
+keyDecoder =
+    Decode.field "key" Decode.string
+
+
+keydownToMsg : String -> Msg
 keydownToMsg keyCode =
     case keyCode of
-        17 ->
+        "17" ->
             -- Control
             NoJs <| SetMultipleSelect True
 
@@ -417,10 +441,10 @@ keydownToMsg keyCode =
             NoJs NoOp
 
 
-keyupToMsg : KeyCode -> Msg
+keyupToMsg : String -> Msg
 keyupToMsg keyCode =
     case keyCode of
-        17 ->
+        "17" ->
             -- Control
             NoJs <| SetMultipleSelect False
 
@@ -437,7 +461,7 @@ jsMsgToMsg js =
                     FromJs <| AddToSelection uuid
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "dismiss-toast" ->
             case Decode.decodeValue Decode.string js.data of
@@ -445,7 +469,7 @@ jsMsgToMsg js =
                     NoJs <| DismissToast key
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "display-toast" ->
             case Decode.decodeValue toastDecoder js.data of
@@ -453,7 +477,7 @@ jsMsgToMsg js =
                     NoJs <| DisplayToast toast
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "save-data" ->
             case Decode.decodeValue (decodeVersion |> Decode.andThen decodeSaveFile) js.data of
@@ -461,7 +485,7 @@ jsMsgToMsg js =
                     FromJs <| RestoreSave fileContents
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "new-block" ->
             case Decode.decodeValue newBlockDecoder js.data of
@@ -469,7 +493,7 @@ jsMsgToMsg js =
                     FromJs <| NewBlock block
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "remove-from-selection" ->
             case Decode.decodeValue Decode.string js.data of
@@ -477,7 +501,7 @@ jsMsgToMsg js =
                     FromJs <| RemoveFromSelection uuid
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "select" ->
             case Decode.decodeValue Decode.string js.data of
@@ -485,7 +509,7 @@ jsMsgToMsg js =
                     FromJs <| Select uuid
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "select-partition" ->
             case Decode.decodeValue selectPartitionDecoder js.data of
@@ -493,7 +517,7 @@ jsMsgToMsg js =
                     FromJs <| SelectPartition selectionData.partitionType selectionData.partitionIndex selectionData.partitionPosition
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "sync-position" ->
             case Decode.decodeValue syncPositionDecoder js.data of
@@ -501,7 +525,7 @@ jsMsgToMsg js =
                     FromJs <| SynchronizePosition syncPosition.uuid syncPosition.position
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "sync-positions" ->
             case Decode.decodeValue (Decode.list syncPositionDecoder) js.data of
@@ -512,7 +536,7 @@ jsMsgToMsg js =
                                 List.map (\syncPos -> ( syncPos.uuid, syncPos )) syncPositions
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "sync-size" ->
             case Decode.decodeValue syncSizeDecoder js.data of
@@ -520,7 +544,7 @@ jsMsgToMsg js =
                     FromJs <| SynchronizeSize syncSize.uuid syncSize.size
 
                 Err message ->
-                    FromJs <| JSError message
+                    FromJs <| JSError <| Decode.errorToString message
 
         "unselect" ->
             FromJs Unselect
@@ -569,25 +593,35 @@ restoreSaveInModel model saveFile =
                 , hullsJSON = Encode.encode 0 <| HullSlices.dictEncoder model.slices
                 }
     in
-        case maybeCoordinatesTransform of
-            Just savedCoordinatesTransform ->
-                { cleanModel
-                  -- resets focused block and selections
-                    | currentDate = model.currentDate
-                    , blocks = savedBlocks
-                    , coordinatesTransform = savedCoordinatesTransform
-                    , partitions = partitions
-                    , tags = tags
-                    , customProperties = customProperties
-                }
+    case maybeCoordinatesTransform of
+        Just savedCoordinatesTransform ->
+            { cleanModel
+              -- resets focused block and selections
+                | currentDate = model.currentDate
+                , blocks = savedBlocks
+                , coordinatesTransform = savedCoordinatesTransform
+                , partitions = partitions
+                , tags = tags
+                , customProperties = customProperties
+            }
 
-            Nothing ->
-                model
+        Nothing ->
+            model
+
+
+fromList : List ( comparable, v ) -> DictList comparable v
+fromList l =
+    let
+        append : ( comparable, v ) -> DictList comparable v -> DictList comparable v
+        append ( key, value ) dict =
+            DictList.insert key value dict
+    in
+    List.foldr append DictList.empty l
 
 
 listOfBlocksToBlocks : List Block -> Blocks
 listOfBlocksToBlocks blockList =
-    DictList.fromList <| List.map (\block -> ( block.uuid, block )) blockList
+    fromList <| List.map (\block -> ( block.uuid, block )) blockList
 
 
 restoreSaveCmd : Model -> JsData
@@ -611,7 +645,7 @@ encodeToggleBlocksVisibilityCmd : List Block -> Bool -> Encode.Value
 encodeToggleBlocksVisibilityCmd blocks visible =
     Encode.object
         [ ( "visible", Encode.bool visible )
-        , ( "uuids", Encode.list <| List.map (Encode.string << .uuid) blocks )
+        , ( "uuids", Encode.list (Encode.string << .uuid) blocks )
         ]
 
 
@@ -621,7 +655,7 @@ encodeToggleBlocksVisibilityCmd blocks visible =
 
 type alias Model =
     { build : String
-    , currentDate : Date.Date
+    , currentDate : Time.Posix
     , viewMode : ViewMode
     , viewports : Viewports
     , coordinatesTransform : CoordinatesTransform
@@ -655,7 +689,7 @@ type alias Frame =
 
 initFrame : Frame
 initFrame =
-    { x = (StringValueInput.fromNumber "m" "x") 0
+    { x = StringValueInput.fromNumber "m" "x" 0
     , points = Dict.fromList [ ( 0, initFramePoint ), ( 1, initFramePoint ), ( 2, initFramePoint ), ( 3, initFramePoint ), ( 4, initFramePoint ) ]
     }
 
@@ -668,8 +702,8 @@ type alias FramePoint =
 
 initFramePoint : FramePoint
 initFramePoint =
-    { y = (StringValueInput.fromNumber "m" "y") 0.0
-    , z = (StringValueInput.fromNumber "m" "z") 0.0
+    { y = StringValueInput.fromNumber "m" "y" 0.0
+    , z = StringValueInput.fromNumber "m" "z" 0.0
     }
 
 
@@ -701,9 +735,9 @@ decodeTag =
         getColorFromName name =
             Maybe.withDefault SIRColorPicker.Black <| SIRColorPicker.fromName name
     in
-        Pipeline.decode Tag
-            |> Pipeline.required "label" Decode.string
-            |> Pipeline.required "color" (Decode.map getColorFromName Decode.string)
+    Decode.succeed Tag
+        |> Pipeline.required "label" Decode.string
+        |> Pipeline.required "color" (Decode.map getColorFromName Decode.string)
 
 
 type alias UiState =
@@ -724,6 +758,34 @@ type alias Block =
     , visible : Bool
     , centerOfGravity : CenterOfGravity
     }
+
+
+emptyBlock : Block
+emptyBlock =
+    { uuid = ""
+    , label = ""
+    , color = Color.red
+    , position = { x = StringValueInput.emptyFloat, y = StringValueInput.emptyFloat, z = StringValueInput.emptyFloat }
+    , size = { length = StringValueInput.emptyFloat, width = StringValueInput.emptyFloat, height = StringValueInput.emptyFloat }
+    , referenceForMass = None
+    , mass = StringValueInput.emptyFloat
+    , density = StringValueInput.emptyFloat
+    , visible = False
+    , centerOfGravity = { x = StringValueInput.emptyFloat, y = StringValueInput.emptyFloat, z = StringValueInput.emptyFloat }
+    }
+
+
+referenceForMassToString : ReferenceForMass -> String
+referenceForMassToString referenceForMass =
+    case referenceForMass of
+        None ->
+            "None"
+
+        Mass ->
+            "Mass"
+
+        Density ->
+            "Density"
 
 
 initBlock : String -> String -> Color -> Position -> Size -> Block
@@ -772,10 +834,10 @@ getAbsoluteCenterOfGravity block =
         p1 =
             getCenterOfVolume block
     in
-        { x = p1.x + block.centerOfGravity.x.value
-        , y = p1.y + block.centerOfGravity.y.value
-        , z = p1.z + block.centerOfGravity.z.value
-        }
+    { x = p1.x + block.centerOfGravity.x.value
+    , y = p1.y + block.centerOfGravity.y.value
+    , z = p1.z + block.centerOfGravity.z.value
+    }
 
 
 getCentroidOfBlocks : Blocks -> Point
@@ -792,10 +854,10 @@ getCentroidOfBlocks blocks =
                 cog =
                     getAbsoluteCenterOfGravity block
             in
-                { x = block.mass.value * cog.x
-                , y = block.mass.value * cog.y
-                , z = block.mass.value * cog.z
-                }
+            { x = block.mass.value * cog.x
+            , y = block.mass.value * cog.y
+            , z = block.mass.value * cog.z
+            }
 
         addWeightedCentersOfGravity : Point -> Point -> Point
         addWeightedCentersOfGravity centerA centerB =
@@ -811,13 +873,14 @@ getCentroidOfBlocks blocks =
                 , y = point.y / sumOfMasses
                 , z = point.z / sumOfMasses
                 }
+
             else
                 { x = 0, y = 0, z = 0 }
     in
-        toList blocks
-            |> List.map weightedCenterOfGravity
-            |> List.foldl addWeightedCentersOfGravity { x = 0, y = 0, z = 0 }
-            |> divideBySumOfMasses
+    toList blocks
+        |> List.map weightedCenterOfGravity
+        |> List.foldl addWeightedCentersOfGravity { x = 0, y = 0, z = 0 }
+        |> divideBySumOfMasses
 
 
 type ReferenceForMass
@@ -967,7 +1030,7 @@ stringifyEncodeValue value =
 
 encodeListBlocks : List Block -> Encode.Value
 encodeListBlocks blocks =
-    Encode.list <| List.map encodeBlock blocks
+    Encode.list encodeBlock blocks
 
 
 encodeBlocks : Blocks -> Encode.Value
@@ -989,7 +1052,7 @@ encodeModelForSave model =
 
 encodeCustomProperties : List CustomProperty -> Encode.Value
 encodeCustomProperties customProperties =
-    Encode.list <| List.map encodeCustomProperty customProperties
+    Encode.list encodeCustomProperty customProperties
 
 
 encodeCustomProperty : CustomProperty -> Encode.Value
@@ -1012,7 +1075,7 @@ encodeBlock block =
         , ( "color", encodeColor block.color )
         , ( "position", encodePosition block.position )
         , ( "size", encodeSize block.size )
-        , ( "referenceForMass", Encode.string <| toString block.referenceForMass )
+        , ( "referenceForMass", Encode.string <| referenceForMassToString block.referenceForMass )
         , ( "mass", Encode.float block.mass.value )
         , ( "density", Encode.float block.density.value )
         , ( "visible", Encode.bool block.visible )
@@ -1051,7 +1114,7 @@ encodeDecks decks =
           )
         , ( "spacingExceptions"
           , Dict.toList decks.spacingExceptions
-                |> List.map (\( index, input ) -> ( toString index, Encode.float input.value ))
+                |> List.map (\( index, input ) -> ( String.fromInt index, Encode.float input.value ))
                 |> Encode.object
           )
         ]
@@ -1070,7 +1133,7 @@ encodeBulkheads bulkheads =
           )
         , ( "spacingExceptions"
           , Dict.toList bulkheads.spacingExceptions
-                |> List.map (\( index, input ) -> ( toString index, Encode.float input.value ))
+                |> List.map (\( index, input ) -> ( String.fromInt index, Encode.float input.value ))
                 |> Encode.object
           )
         ]
@@ -1094,7 +1157,7 @@ encodeTag tag =
 
 encodeTags : Tags -> Encode.Value
 encodeTags tags =
-    Encode.list <| List.map encodeTag tags
+    Encode.list encodeTag tags
 
 
 type alias ComputedPartition =
@@ -1115,7 +1178,7 @@ encodeComputedPartition computedDeck =
 
 encodeComputedPartitions : List ComputedPartition -> Encode.Value
 encodeComputedPartitions computedPartitions =
-    Encode.list <| List.map encodeComputedPartition computedPartitions
+    Encode.list encodeComputedPartition computedPartitions
 
 
 computeDecks : Decks -> List ComputedPartition
@@ -1123,7 +1186,7 @@ computeDecks decks =
     let
         initialDeckList : List ComputedPartition
         initialDeckList =
-            List.repeat decks.number.value ({ index = 0, position = 0.0, number = 0 })
+            List.repeat decks.number.value { index = 0, position = 0.0, number = 0 }
 
         computeDeck : Int -> ComputedPartition -> ComputedPartition
         computeDeck index element =
@@ -1132,9 +1195,9 @@ computeDecks decks =
                 number =
                     index - decks.zero.index
             in
-                { index = index, position = decks.zero.position.value - 1 * (getPartitionOffset decks index), number = number }
+            { index = index, position = decks.zero.position.value - 1 * getPartitionOffset decks index, number = number }
     in
-        List.indexedMap computeDeck initialDeckList
+    List.indexedMap computeDeck initialDeckList
 
 
 getPartitionOffset : { a | number : StringValueInput.IntInput, spacing : StringValueInput.FloatInput, zero : PartitionZero, spacingExceptions : Dict Int StringValueInput.FloatInput } -> Int -> Float
@@ -1149,33 +1212,36 @@ getPartitionOffset partitionSummary index =
             Dict.filter (\key value -> key < (maxKey + partitionSummary.zero.index) && key >= (minKey + partitionSummary.zero.index)) partitionSummary.spacingExceptions
 
         total : Dict Int StringValueInput.FloatInput -> Float
-        total exceptions =
-            Dict.foldl (\key value currentTotal -> currentTotal + value.value) 0.0 exceptions
+        total exceptions_ =
+            Dict.foldl (\key value currentTotal -> currentTotal + value.value) 0.0 exceptions_
 
         exceptions : Dict Int StringValueInput.FloatInput
         exceptions =
             if number > 0 then
                 exceptionsToAccountFor 0 number
+
             else
                 exceptionsToAccountFor number 0
     in
-        if number > 0 then
-            exceptions
-                |> Dict.size
-                |> (-) number
-                |> toFloat
-                |> (*) partitionSummary.spacing.value
-                |> (+) (total exceptions)
-        else if number < 0 then
-            exceptions
-                |> Dict.size
-                |> (-) (-1 * number)
-                |> toFloat
-                |> (*) partitionSummary.spacing.value
-                |> (+) (total exceptions)
-                |> (*) -1
-        else
-            0
+    if number > 0 then
+        exceptions
+            |> Dict.size
+            |> (-) number
+            |> toFloat
+            |> (*) partitionSummary.spacing.value
+            |> (+) (total exceptions)
+
+    else if number < 0 then
+        exceptions
+            |> Dict.size
+            |> (-) (-1 * number)
+            |> toFloat
+            |> (*) partitionSummary.spacing.value
+            |> (+) (total exceptions)
+            |> (*) -1
+
+    else
+        0
 
 
 computeBulkheads : Bulkheads -> List ComputedPartition
@@ -1192,9 +1258,9 @@ computeBulkheads bulkheads =
                 number =
                     index - bulkheads.zero.index
             in
-                { index = index, position = bulkheads.zero.position.value + (getPartitionOffset bulkheads index), number = number }
+            { index = index, position = bulkheads.zero.position.value + getPartitionOffset bulkheads index, number = number }
     in
-        List.indexedMap computeBulkhead initialBulkheadList
+    List.indexedMap computeBulkhead initialBulkheadList
 
 
 addBlockTo : Blocks -> Block -> Blocks
@@ -1206,6 +1272,7 @@ updateBlockInBlocks : Block -> Blocks -> Blocks
 updateBlockInBlocks block blocks =
     if DictList.member block.uuid blocks then
         addBlockTo blocks block
+
     else
         blocks
 
@@ -1217,7 +1284,7 @@ toList blocks =
 
 filterBlocksByColor : Color -> Blocks -> Blocks
 filterBlocksByColor color blocks =
-    DictList.filter (\uuid block -> block.color == color) blocks
+    DictList.filter emptyBlock (\uuid block -> block.color == color) blocks
 
 
 toMassList : Blocks -> List Float
@@ -1300,12 +1367,12 @@ init flag =
         model =
             initModel flag
     in
-        ( model
-        , Cmd.batch
-            [ toJs <| initCmd model
-            , Task.perform (NoJs << SetCurrentDate) Date.now
-            ]
-        )
+    ( model
+    , Cmd.batch
+        [ toJs <| initCmd model
+        , Task.perform (NoJs << SetCurrentDate) Time.now
+        ]
+    )
 
 
 initModel : Flag -> Model
@@ -1319,50 +1386,42 @@ initModel flag =
         viewMode =
             HullStudio
     in
-        { build = flag.buildSHA
-        , currentDate = Date.fromTime 0
-        , viewMode = viewMode
-        , viewports = viewports
-        , coordinatesTransform = CoordinatesTransform.default
-        , selectedBlocks = []
-        , multipleSelect = False
-        , selectedHullReference = Nothing
-        , blocks = DictList.empty
-        , toasts = emptyToasts
-        , partitions = initPartitions
-        , uiState =
-            { accordions = Dict.empty
-            , blockContextualMenu = Nothing
-            }
-        , tags = []
-        , customProperties = []
-        , slices =
-            let
-                cuts =
-                    case Decode.decodeString HullSlices.dictDecoder flag.hullsJSON of
-                        Ok c ->
-                            let
-                                _ =
-                                    Debug.log "Decoded JSON" "OK"
-                            in
-                                c
-
-                        Err e ->
-                            let
-                                _ =
-                                    Debug.log "Error decoding JSON" e
-                            in
-                                Dict.empty
-            in
-                cuts
+    { build = flag.buildSHA
+    , currentDate = Time.millisToPosix 0
+    , viewMode = viewMode
+    , viewports = viewports
+    , coordinatesTransform = CoordinatesTransform.default
+    , selectedBlocks = []
+    , multipleSelect = False
+    , selectedHullReference = Nothing
+    , blocks = DictList.empty
+    , toasts = emptyToasts
+    , partitions = initPartitions
+    , uiState =
+        { accordions = Dict.empty
+        , blockContextualMenu = Nothing
         }
+    , tags = []
+    , customProperties = []
+    , slices =
+        let
+            cuts =
+                case Decode.decodeString HullSlices.dictDecoder flag.hullsJSON of
+                    Ok c ->
+                        c
+
+                    Err e ->
+                        Dict.empty
+        in
+        cuts
+    }
 
 
 initPartitions : PartitionsData
 initPartitions =
     { decks =
         { number = StringValueInput.emptyInt
-        , spacing = (StringValueInput.fromNumber "m" "Spacing") 3.0
+        , spacing = StringValueInput.fromNumber "m" "Spacing" 3.0
         , zero =
             { index = 0
             , position = StringValueInput.emptyFloat
@@ -1371,10 +1430,10 @@ initPartitions =
         }
     , bulkheads =
         { number = StringValueInput.emptyInt
-        , spacing = (StringValueInput.fromNumber "m" "Spacing") 5
+        , spacing = StringValueInput.fromNumber "m" "Spacing" 5
         , zero =
             { index = 0
-            , position = (StringValueInput.fromNumber "m" "Position of bulckhead zero") 0
+            , position = StringValueInput.fromNumber "m" "Position of bulckhead zero" 0
             }
         , spacingExceptions = Dict.empty
         }
@@ -1440,16 +1499,16 @@ encodeViewMode viewMode =
 encodeColor : Color -> Encode.Value
 encodeColor color =
     let
-        rgb : { red : Int, green : Int, blue : Int, alpha : Float }
+        rgb : { red : Float, green : Float, blue : Float, alpha : Float }
         rgb =
-            Color.toRgb color
+            Color.toRgba color
     in
-        Encode.object
-            [ ( "red", Encode.int rgb.red )
-            , ( "green", Encode.int rgb.green )
-            , ( "blue", Encode.int rgb.blue )
-            , ( "alpha", Encode.float rgb.alpha )
-            ]
+    Encode.object
+        [ ( "red", Encode.float rgb.red )
+        , ( "green", Encode.float rgb.green )
+        , ( "blue", Encode.float rgb.blue )
+        , ( "alpha", Encode.float rgb.alpha )
+        ]
 
 
 
@@ -1568,7 +1627,7 @@ computeVolume block =
         size =
             block.size
     in
-        size.height.value * size.width.value * size.length.value
+    size.height.value * size.width.value * size.length.value
 
 
 updateBlockMassAndDensity : Block -> Block
@@ -1578,10 +1637,10 @@ updateBlockMassAndDensity block =
             block
 
         Mass ->
-            { block | density = StringValueInput.fromNumber "kg" "Mass" <| block.mass.value / (computeVolume block) }
+            { block | density = StringValueInput.fromNumber "kg" "Mass" <| block.mass.value / computeVolume block }
 
         Density ->
-            { block | mass = StringValueInput.fromNumber "kg/m^3" "Density" <| block.density.value * (computeVolume block) }
+            { block | mass = StringValueInput.fromNumber "kg/m^3" "Density" <| block.density.value * computeVolume block }
 
 
 type alias BoundingBox =
@@ -1605,8 +1664,8 @@ getBlockBoundingBox block =
         , z = block.position.z.value
         }
     , max =
-        { x = (block.position.x.value + block.size.length.value)
-        , y = (block.position.y.value + block.size.width.value)
+        { x = block.position.x.value + block.size.length.value
+        , y = block.position.y.value + block.size.width.value
         , z = block.position.z.value - block.size.height.value
         }
     }
@@ -1619,52 +1678,52 @@ getBlocksBoundingBox blocks =
         boundingBoxList =
             List.map getBlockBoundingBox (toList blocks)
     in
-        List.foldl
-            (\a b ->
-                { min =
-                    { x =
-                        (if a.min.x < b.min.x then
-                            a.min.x
-                         else
-                            b.min.x
-                        )
-                    , y =
-                        (if a.min.y < b.min.y then
-                            a.min.y
-                         else
-                            b.min.y
-                        )
-                    , z =
-                        (if a.min.z > b.min.z then
-                            a.min.z
-                         else
-                            b.min.z
-                        )
-                    }
-                , max =
-                    { x =
-                        (if a.max.x > b.max.x then
-                            a.max.x
-                         else
-                            b.max.x
-                        )
-                    , y =
-                        (if a.max.y > b.max.y then
-                            a.max.y
-                         else
-                            b.max.y
-                        )
-                    , z =
-                        (if a.max.z < b.max.z then
-                            a.max.z
-                         else
-                            b.max.z
-                        )
-                    }
+    List.foldl
+        (\a b ->
+            { min =
+                { x =
+                    if a.min.x < b.min.x then
+                        a.min.x
+
+                    else
+                        b.min.x
+                , y =
+                    if a.min.y < b.min.y then
+                        a.min.y
+
+                    else
+                        b.min.y
+                , z =
+                    if a.min.z > b.min.z then
+                        a.min.z
+
+                    else
+                        b.min.z
                 }
-            )
-            (Maybe.withDefault { min = { x = 0.0, y = 0.0, z = 0.0 }, max = { x = 0.0, y = 0.0, z = 0.0 } } <| List.head boundingBoxList)
-            boundingBoxList
+            , max =
+                { x =
+                    if a.max.x > b.max.x then
+                        a.max.x
+
+                    else
+                        b.max.x
+                , y =
+                    if a.max.y > b.max.y then
+                        a.max.y
+
+                    else
+                        b.max.y
+                , z =
+                    if a.max.z < b.max.z then
+                        a.max.z
+
+                    else
+                        b.max.z
+                }
+            }
+        )
+        (Maybe.withDefault { min = { x = 0.0, y = 0.0, z = 0.0 }, max = { x = 0.0, y = 0.0, z = 0.0 } } <| List.head boundingBoxList)
+        boundingBoxList
 
 
 getBoundingBoxSize : BoundingBox -> { length : Float, height : Float, width : Float }
@@ -1729,7 +1788,7 @@ type NoJsMsg
     | RenameBlock Block String
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
-    | SetCurrentDate Date.Date
+    | SetCurrentDate Time.Posix
     | SetMultipleSelect Bool
     | SetTagForColor Color String
     | SetValueForCustomProperty CustomProperty Block String
@@ -1753,21 +1812,21 @@ updateNoJs msg model =
 
                 newCustomPropertyId : String
                 newCustomPropertyId =
-                    "custom-property-" ++ (toString <| List.length updatedCustomProperties)
+                    "custom-property-" ++ (String.fromInt <| List.length updatedCustomProperties)
             in
-                { model | customProperties = updatedCustomProperties } ! [ Task.attempt (\_ -> NoJs NoOp) (Dom.focus newCustomPropertyId) ]
+            ( { model | customProperties = updatedCustomProperties }, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus newCustomPropertyId) ] )
 
         CleanTags ->
-            { model | tags = List.filter ((/=) 0 << String.length << .label) model.tags } ! []
+            ( { model | tags = List.filter ((/=) 0 << String.length << .label) model.tags }, Cmd.none )
 
         DeleteCustomProperty property ->
-            { model | customProperties = List.filter ((/=) property) model.customProperties } ! []
+            ( { model | customProperties = List.filter ((/=) property) model.customProperties }, Cmd.none )
 
         DismissToast keyToDismiss ->
-            { model | toasts = removeToast keyToDismiss model.toasts } ! []
+            ( { model | toasts = removeToast keyToDismiss model.toasts }, Cmd.none )
 
         DisplayToast toast ->
-            { model | toasts = addToast toast model.toasts } ! []
+            ( { model | toasts = addToast toast model.toasts }, Cmd.none )
 
         FreeCenterOfGravity block ->
             let
@@ -1779,13 +1838,13 @@ updateNoJs msg model =
                 updatedBlock =
                     { block
                         | centerOfGravity =
-                            { x = (StringValueInput.fromNumber "m" "x") centerOfVolume.x
-                            , y = (StringValueInput.fromNumber "m" "y") centerOfVolume.y
-                            , z = (StringValueInput.fromNumber "m" "z") centerOfVolume.z
+                            { x = StringValueInput.fromNumber "m" "x" centerOfVolume.x
+                            , y = StringValueInput.fromNumber "m" "y" centerOfVolume.y
+                            , z = StringValueInput.fromNumber "m" "z" centerOfVolume.z
                             }
                     }
             in
-                { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
+            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
 
         LockCenterOfGravityToCenterOfVolume block ->
             let
@@ -1795,7 +1854,7 @@ updateNoJs msg model =
                         | centerOfGravity = initPosition
                     }
             in
-                { model | blocks = updateBlockInBlocks updatedBlock model.blocks } ! []
+            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
 
         MoveBlockDown block ->
             let
@@ -1807,7 +1866,7 @@ updateNoJs msg model =
                 updatedBlocks =
                     Maybe.withDefault model.blocks <| Maybe.map (\next -> DictList.insertAfter (Tuple.first next) block.uuid block model.blocks) maybeNext
             in
-                { model | blocks = updatedBlocks } ! []
+            ( { model | blocks = updatedBlocks }, Cmd.none )
 
         MoveBlockUp block ->
             let
@@ -1819,10 +1878,10 @@ updateNoJs msg model =
                 updatedBlocks =
                     Maybe.withDefault model.blocks <| Maybe.map (\previous -> DictList.insertBefore (Tuple.first previous) block.uuid block model.blocks) maybePrevious
             in
-                { model | blocks = updatedBlocks } ! []
+            ( { model | blocks = updatedBlocks }, Cmd.none )
 
         NoOp ->
-            model ! []
+            ( model, Cmd.none )
 
         SetBlockContextualMenu uuid ->
             let
@@ -1834,13 +1893,13 @@ updateNoJs msg model =
                 newUiState =
                     { uiState | blockContextualMenu = Just uuid }
             in
-                { model | uiState = newUiState } ! []
+            ( { model | uiState = newUiState }, Cmd.none )
 
         SetCurrentDate date ->
-            { model | currentDate = date } ! []
+            ( { model | currentDate = date }, Cmd.none )
 
         SetMultipleSelect boolean ->
-            { model | multipleSelect = boolean } ! []
+            ( { model | multipleSelect = boolean }, Cmd.none )
 
         SetTagForColor color label ->
             let
@@ -1852,12 +1911,14 @@ updateNoJs msg model =
                 newTags =
                     model.tags
                         |> List.filter ((/=) color << SIRColorPicker.getColor << .color)
-                        |> if sirColor /= Nothing then
-                            (::) { color = Maybe.withDefault SIRColorPicker.Black sirColor, label = label }
-                           else
-                            List.map identity
+                        |> (if sirColor /= Nothing then
+                                (::) { color = Maybe.withDefault SIRColorPicker.Black sirColor, label = label }
+
+                            else
+                                List.map identity
+                           )
             in
-                { model | tags = newTags } ! []
+            ( { model | tags = newTags }, Cmd.none )
 
         SetValueForCustomProperty property block value ->
             let
@@ -1867,6 +1928,7 @@ updateNoJs msg model =
                         | values =
                             if String.length value > 0 then
                                 Dict.insert block.uuid value property.values
+
                             else
                                 Dict.remove block.uuid property.values
                     }
@@ -1875,40 +1937,41 @@ updateNoJs msg model =
                 replaceProperty customProperty =
                     if property == customProperty then
                         updatedProperty
+
                     else
                         customProperty
             in
-                { model | customProperties = List.map replaceProperty model.customProperties } ! []
+            ( { model | customProperties = List.map replaceProperty model.customProperties }, Cmd.none )
 
         SyncBlockInputs block ->
             let
                 syncedSize : Size
                 syncedSize =
-                    { length = StringValueInput.syncNumberInput block.size.length
-                    , width = StringValueInput.syncNumberInput block.size.width
-                    , height = StringValueInput.syncNumberInput block.size.height
+                    { length = StringValueInput.syncFloatInput block.size.length
+                    , width = StringValueInput.syncFloatInput block.size.width
+                    , height = StringValueInput.syncFloatInput block.size.height
                     }
 
                 syncedPosition : Position
                 syncedPosition =
-                    { x = StringValueInput.syncNumberInput block.position.x
-                    , y = StringValueInput.syncNumberInput block.position.y
-                    , z = StringValueInput.syncNumberInput block.position.z
+                    { x = StringValueInput.syncFloatInput block.position.x
+                    , y = StringValueInput.syncFloatInput block.position.y
+                    , z = StringValueInput.syncFloatInput block.position.z
                     }
 
                 syncedMass : StringValueInput.FloatInput
                 syncedMass =
-                    StringValueInput.syncNumberInput block.mass
+                    StringValueInput.syncFloatInput block.mass
 
                 syncedDensity : StringValueInput.FloatInput
                 syncedDensity =
-                    StringValueInput.syncNumberInput block.density
+                    StringValueInput.syncFloatInput block.density
 
                 syncedCenterOfGravity : CenterOfGravity
                 syncedCenterOfGravity =
-                    { x = StringValueInput.syncNumberInput block.centerOfGravity.x
-                    , y = StringValueInput.syncNumberInput block.centerOfGravity.y
-                    , z = StringValueInput.syncNumberInput block.centerOfGravity.z
+                    { x = StringValueInput.syncFloatInput block.centerOfGravity.x
+                    , y = StringValueInput.syncFloatInput block.centerOfGravity.y
+                    , z = StringValueInput.syncFloatInput block.centerOfGravity.z
                     }
 
                 syncedBlock : Block
@@ -1921,38 +1984,38 @@ updateNoJs msg model =
                         , centerOfGravity = syncedCenterOfGravity
                     }
             in
-                { model | blocks = updateBlockInBlocks syncedBlock model.blocks } ! []
+            ( { model | blocks = updateBlockInBlocks syncedBlock model.blocks }, Cmd.none )
 
         SyncPartitions ->
             let
                 syncedDecks : Decks
                 syncedDecks =
                     { number =
-                        StringValueInput.syncNumberInput model.partitions.decks.number
+                        StringValueInput.syncIntInput model.partitions.decks.number
                     , spacing =
-                        StringValueInput.syncNumberInput model.partitions.decks.spacing
+                        StringValueInput.syncFloatInput model.partitions.decks.spacing
                     , zero =
                         { index = model.partitions.decks.zero.index
-                        , position = StringValueInput.syncNumberInput model.partitions.decks.zero.position
+                        , position = StringValueInput.syncFloatInput model.partitions.decks.zero.position
                         }
                     , spacingExceptions =
                         -- we want to remove useless exceptions => those equal to the default value
-                        Dict.map (\key input -> StringValueInput.syncNumberInput input) model.partitions.decks.spacingExceptions
+                        Dict.map (\key input -> StringValueInput.syncFloatInput input) model.partitions.decks.spacingExceptions
                             |> Dict.filter (\key input -> input.value /= model.partitions.decks.spacing.value)
                     }
 
                 syncedBulkheads : Bulkheads
                 syncedBulkheads =
                     { number =
-                        StringValueInput.syncNumberInput model.partitions.bulkheads.number
+                        StringValueInput.syncIntInput model.partitions.bulkheads.number
                     , spacing =
-                        StringValueInput.syncNumberInput model.partitions.bulkheads.spacing
+                        StringValueInput.syncFloatInput model.partitions.bulkheads.spacing
                     , zero =
                         { index = model.partitions.bulkheads.zero.index
-                        , position = StringValueInput.syncNumberInput model.partitions.bulkheads.zero.position
+                        , position = StringValueInput.syncFloatInput model.partitions.bulkheads.zero.position
                         }
                     , spacingExceptions =
-                        Dict.map (\key input -> StringValueInput.syncNumberInput input) model.partitions.bulkheads.spacingExceptions
+                        Dict.map (\key input -> StringValueInput.syncFloatInput input) model.partitions.bulkheads.spacingExceptions
                             |> Dict.filter (\key input -> input.value /= model.partitions.bulkheads.spacing.value)
                     }
 
@@ -1963,10 +2026,10 @@ updateNoJs msg model =
                         |> flip asBulkheadsInPartitions syncedBulkheads
                         |> asPartitionsInModel model
             in
-                updatedModel ! []
+            ( updatedModel, Cmd.none )
 
         RenameBlock blockToRename newLabel ->
-            updateBlockInModel (renameBlock newLabel blockToRename) model ! []
+            ( updateBlockInModel (renameBlock newLabel blockToRename) model, Cmd.none )
 
         ToggleAccordion isOpen accordionId ->
             let
@@ -1978,7 +2041,7 @@ updateNoJs msg model =
                 newUiState =
                     { uiState | accordions = Dict.insert accordionId isOpen uiState.accordions }
             in
-                { model | uiState = newUiState } ! []
+            ( { model | uiState = newUiState }, Cmd.none )
 
         UpdateCenterOfGravity axis block input ->
             let
@@ -1994,35 +2057,37 @@ updateNoJs msg model =
                     { block
                         | centerOfGravity =
                             (case String.toFloat input of
-                                Ok value ->
+                                Just value ->
                                     value
                                         |> StringValueInput.asValueIn axisFloatInput
                                         |> flip StringValueInput.asStringIn input
 
-                                Err error ->
+                                Nothing ->
                                     input
                                         |> StringValueInput.asStringIn axisFloatInput
                             )
-                                |> (asAxisInPosition axis) position
+                                |> asAxisInPosition axis position
 
                         -- |> UserInput
                     }
             in
-                updateBlockInModel updatedBlock model ! []
+            ( updateBlockInModel updatedBlock model, Cmd.none )
 
         UpdateCustomPropertyLabel property newLabel ->
-            { model
+            ( { model
                 | customProperties =
                     List.map
                         (\p ->
                             if p == property then
                                 { p | label = newLabel }
+
                             else
                                 p
                         )
                         model.customProperties
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         UpdateMass block input ->
             let
@@ -2037,7 +2102,7 @@ updateNoJs msg model =
                 updatedModel =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
             in
-                updatedModel ! []
+            ( updatedModel, Cmd.none )
 
         UpdateDensity block input ->
             let
@@ -2052,7 +2117,7 @@ updateNoJs msg model =
                 updatedModel =
                     { model | blocks = updateBlockInBlocks updatedBlock model.blocks }
             in
-                updatedModel ! []
+            ( updatedModel, Cmd.none )
 
         UnsetBlockContextualMenu ->
             let
@@ -2064,7 +2129,7 @@ updateNoJs msg model =
                 newUiState =
                     { uiState | blockContextualMenu = Nothing }
             in
-                { model | uiState = newUiState } ! []
+            ( { model | uiState = newUiState }, Cmd.none )
 
 
 updateToJs : ToJsMsg -> Model -> ( Model, Cmd Msg )
@@ -2073,17 +2138,17 @@ updateToJs msg model =
         updatedModel =
             updateModelToJs msg model
     in
-        ( updatedModel, sendCmdToJs updatedModel msg )
+    ( updatedModel, sendCmdToJs updatedModel msg )
 
 
 updateFromJs : FromJsMsg -> Model -> ( Model, Cmd Msg )
 updateFromJs jsmsg model =
     case jsmsg of
         AddToSelection uuid ->
-            { model | selectedBlocks = model.selectedBlocks ++ [ uuid ] } ! []
+            ( { model | selectedBlocks = model.selectedBlocks ++ [ uuid ] }, Cmd.none )
 
         RemoveFromSelection uuid ->
-            { model | selectedBlocks = List.filter ((/=) uuid) model.selectedBlocks } ! []
+            ( { model | selectedBlocks = List.filter ((/=) uuid) model.selectedBlocks }, Cmd.none )
 
         NewBlock block ->
             let
@@ -2091,7 +2156,7 @@ updateFromJs jsmsg model =
                 blocks =
                     addBlockTo model.blocks block
             in
-                { model | blocks = blocks } ! [ Task.attempt (\_ -> NoJs NoOp) (Dom.focus block.uuid) ]
+            ( { model | blocks = blocks }, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus block.uuid) ] )
 
         RestoreSave saveFile ->
             let
@@ -2099,8 +2164,8 @@ updateFromJs jsmsg model =
                 newModel =
                     restoreSaveInModel model saveFile
             in
-                -- TODO: split and move in ToJs ?
-                newModel ! [ toJs <| restoreSaveCmd newModel ]
+            -- TODO: split and move in ToJs ?
+            ( newModel, Cmd.batch [ toJs <| restoreSaveCmd newModel ] )
 
         Select uuid ->
             let
@@ -2113,18 +2178,26 @@ updateFromJs jsmsg model =
                         otherViewMode ->
                             otherViewMode
             in
-                { model | selectedBlocks = [ uuid ], viewMode = updatedViewMode } ! []
+            ( { model | selectedBlocks = [ uuid ], viewMode = updatedViewMode }, Cmd.none )
 
         SelectPartition partitionType index position ->
             if model.viewMode == (Partitioning <| OriginDefinition partitionType) then
                 let
-                    ( partition, updatePartition, tag, computePartition ) =
+                    ( partition, updatePartition ) =
                         case partitionType of
                             Deck ->
-                                ( .partitions >> .decks, asDecksInPartitions model.partitions, "make-decks", computeDecks )
+                                ( .partitions >> .decks, asDecksInPartitions model.partitions )
 
                             Bulkhead ->
-                                ( .partitions >> .bulkheads, asBulkheadsInPartitions model.partitions, "make-bulkheads", computeBulkheads )
+                                ( .partitions >> .bulkheads, asBulkheadsInPartitions model.partitions )
+
+                    ( tag, computePartition ) =
+                        case partitionType of
+                            Deck ->
+                                ( "make-decks", computeDecks )
+
+                            Bulkhead ->
+                                ( "make-bulkheads", computeBulkheads )
 
                     updatedModel : Model
                     updatedModel =
@@ -2133,10 +2206,11 @@ updateFromJs jsmsg model =
                                 | partitions =
                                     updatePartition <|
                                         asZeroInPartition (partition model) <|
-                                            flip asPositionInPartitionZero ((StringValueInput.fromNumber "m" "Position") position) <|
+                                            flip asPositionInPartitionZero (StringValueInput.fromNumber "m" "Position" position) <|
                                                 asIndexInPartitionZero (.zero <| partition model) index
                                 , viewMode = Partitioning PropertiesEdition
                             }
+
                         else
                             model
 
@@ -2149,16 +2223,18 @@ updateFromJs jsmsg model =
                                     computePartition (partition updatedModel)
                             }
                 in
-                    updatedModel ! [ jsCmd ]
+                ( updatedModel, jsCmd )
+
             else
-                model ! []
+                ( model, Cmd.none )
 
         Unselect ->
-            { model | selectedBlocks = [] }
-                ! []
+            ( { model | selectedBlocks = [] }
+            , Cmd.none
+            )
 
         SynchronizePosition uuid position ->
-            (case getBlockByUUID uuid model.blocks of
+            ( case getBlockByUUID uuid model.blocks of
                 Just block ->
                     position
                         |> asPositionInBlock block
@@ -2166,8 +2242,8 @@ updateFromJs jsmsg model =
 
                 Nothing ->
                     model
+            , Cmd.none
             )
-                ! []
 
         SynchronizePositions syncDict ->
             let
@@ -2184,10 +2260,10 @@ updateFromJs jsmsg model =
                         )
                         model.blocks
             in
-                { model | blocks = updatedBlocks } ! []
+            ( { model | blocks = updatedBlocks }, Cmd.none )
 
         SynchronizeSize uuid size ->
-            (case getBlockByUUID uuid model.blocks of
+            ( case getBlockByUUID uuid model.blocks of
                 Just block ->
                     size
                         |> asSizeInBlock block
@@ -2196,15 +2272,11 @@ updateFromJs jsmsg model =
 
                 Nothing ->
                     model
+            , Cmd.none
             )
-                ! []
 
         JSError message ->
-            let
-                _ =
-                    Debug.log "error" message
-            in
-                model ! []
+            ( model, Cmd.none )
 
 
 updateModelToJs : ToJsMsg -> Model -> Model
@@ -2221,7 +2293,7 @@ updateModelToJs msg model =
                         updatedBlock =
                             { block | color = newColor }
                     in
-                        updateBlockInModel updatedBlock model
+                    updateBlockInModel updatedBlock model
 
                 Nothing ->
                     model
@@ -2235,22 +2307,24 @@ updateModelToJs msg model =
                 blocks =
                     removeBlockFrom model.blocks block
             in
-                { model | blocks = blocks }
+            { model | blocks = blocks }
 
         RemoveBlocks blocks ->
             let
                 nblocks =
                     removeListBlocksFrom model.blocks blocks
             in
-                { model | blocks = nblocks }
+            { model | blocks = nblocks }
 
         SelectBlock block ->
             if model.multipleSelect == False then
                 -- set selection as only this block
                 { model | selectedBlocks = [ block.uuid ] }
+
             else if List.member block.uuid model.selectedBlocks then
                 -- remove from selection
                 { model | selectedBlocks = List.filter ((/=) block.uuid) model.selectedBlocks }
+
             else
                 -- add to selection
                 { model | selectedBlocks = model.selectedBlocks ++ [ block.uuid ] }
@@ -2278,28 +2352,29 @@ updateModelToJs msg model =
                 previousException =
                     Maybe.withDefault (.spacing partition) <| Dict.get index <| .spacingExceptions partition
 
-                parsedInput : Result String Float
+                parsedInput : Maybe Float
                 parsedInput =
                     if input == "" then
                         -- an empty input should result in the default spacing
-                        Ok <| .value <| .spacing partition
+                        Just <| .value <| .spacing partition
+
                     else
                         String.toFloat input
             in
-                (case parsedInput of
-                    Ok value ->
-                        abs value
-                            |> StringValueInput.asValueIn previousException
-                            |> flip StringValueInput.asStringIn input
+            (case parsedInput of
+                Just value ->
+                    abs value
+                        |> StringValueInput.asValueIn previousException
+                        |> flip StringValueInput.asStringIn input
 
-                    Err error ->
-                        input
-                            |> StringValueInput.asStringIn previousException
-                )
-                    |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
-                    |> asSpacingExceptionsInPartition partition
-                    |> asPartitionInPartitions model.partitions
-                    |> asPartitionsInModel model
+                Nothing ->
+                    input
+                        |> StringValueInput.asStringIn previousException
+            )
+                |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
+                |> asSpacingExceptionsInPartition partition
+                |> asPartitionInPartitions model.partitions
+                |> asPartitionsInModel model
 
         SwitchViewMode newViewMode ->
             { model | viewMode = newViewMode }
@@ -2310,10 +2385,11 @@ updateModelToJs msg model =
                 updateVisibilityIfTargeted uuid block =
                     if List.member block blocks then
                         { block | visible = isVisible }
+
                     else
                         block
             in
-                { model | blocks = DictList.map updateVisibilityIfTargeted model.blocks }
+            { model | blocks = DictList.map updateVisibilityIfTargeted model.blocks }
 
         TogglePartitions ->
             let
@@ -2324,7 +2400,7 @@ updateModelToJs msg model =
                 updatedPartitions =
                     { partitions | showing = not partitions.showing }
             in
-                { model | partitions = updatedPartitions }
+            { model | partitions = updatedPartitions }
 
         UpdatePartitionNumber partitionType input ->
             let
@@ -2336,19 +2412,19 @@ updateModelToJs msg model =
                         Bulkhead ->
                             ( .bulkheads, asBulkheadsInPartitions )
             in
-                (case String.toInt input of
-                    Ok value ->
-                        abs value
-                            |> StringValueInput.asValueIn (.number <| getPartition model.partitions)
-                            |> flip StringValueInput.asStringIn input
+            (case String.toInt input of
+                Just value ->
+                    abs value
+                        |> StringValueInput.asValueIn (.number <| getPartition model.partitions)
+                        |> flip StringValueInput.asStringIn input
 
-                    Err error ->
-                        input
-                            |> StringValueInput.asStringIn (.number <| getPartition model.partitions)
-                )
-                    |> asNumberInPartition (getPartition model.partitions)
-                    |> asPartitionInPartitions model.partitions
-                    |> asPartitionsInModel model
+                Nothing ->
+                    input
+                        |> StringValueInput.asStringIn (.number <| getPartition model.partitions)
+            )
+                |> asNumberInPartition (getPartition model.partitions)
+                |> asPartitionInPartitions model.partitions
+                |> asPartitionsInModel model
 
         UpdatePartitionSpacing partitionType input ->
             let
@@ -2360,19 +2436,19 @@ updateModelToJs msg model =
                         Bulkhead ->
                             ( .bulkheads, asBulkheadsInPartitions )
             in
-                (case String.toFloat input of
-                    Ok value ->
-                        abs value
-                            |> StringValueInput.asValueIn (.spacing <| getPartition model.partitions)
-                            |> flip StringValueInput.asStringIn input
+            (case String.toFloat input of
+                Just value ->
+                    abs value
+                        |> StringValueInput.asValueIn (.spacing <| getPartition model.partitions)
+                        |> flip StringValueInput.asStringIn input
 
-                    Err error ->
-                        input
-                            |> StringValueInput.asStringIn (.spacing <| getPartition model.partitions)
-                )
-                    |> asSpacingInPartition (getPartition model.partitions)
-                    |> asPartitionInPartitions model.partitions
-                    |> asPartitionsInModel model
+                Nothing ->
+                    input
+                        |> StringValueInput.asStringIn (.spacing <| getPartition model.partitions)
+            )
+                |> asSpacingInPartition (getPartition model.partitions)
+                |> asPartitionInPartitions model.partitions
+                |> asPartitionsInModel model
 
         UpdatePartitionZeroPosition partitionType input ->
             let
@@ -2384,20 +2460,20 @@ updateModelToJs msg model =
                         Bulkhead ->
                             ( .bulkheads, asBulkheadsInPartitions )
             in
-                (case String.toFloat input of
-                    Ok value ->
-                        value
-                            |> StringValueInput.asValueIn (.spacing <| getPartition model.partitions)
-                            |> flip StringValueInput.asStringIn input
+            (case String.toFloat input of
+                Just value ->
+                    value
+                        |> StringValueInput.asValueIn (.spacing <| getPartition model.partitions)
+                        |> flip StringValueInput.asStringIn input
 
-                    Err error ->
-                        input
-                            |> StringValueInput.asStringIn (.spacing <| getPartition model.partitions)
-                )
-                    |> asPositionInPartitionZero (.zero <| getPartition model.partitions)
-                    |> asZeroInPartition (getPartition model.partitions)
-                    |> asPartitionInPartitions model.partitions
-                    |> asPartitionsInModel model
+                Nothing ->
+                    input
+                        |> StringValueInput.asStringIn (.spacing <| getPartition model.partitions)
+            )
+                |> asPositionInPartitionZero (.zero <| getPartition model.partitions)
+                |> asZeroInPartition (getPartition model.partitions)
+                |> asPartitionInPartitions model.partitions
+                |> asPartitionsInModel model
 
         UpdatePosition axis block input ->
             let
@@ -2409,25 +2485,25 @@ updateModelToJs msg model =
                 blockInModel =
                     Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
             in
-                case String.toFloat input of
-                    Ok value ->
-                        let
-                            updatedBlock : Block
-                            updatedBlock =
-                                value
-                                    |> StringValueInput.asValueIn axisFloatInput
-                                    |> flip StringValueInput.asStringIn input
-                                    |> (asAxisInPosition axis) blockInModel.position
-                                    |> asPositionInBlock blockInModel
-                        in
-                            updateBlockInModel updatedBlock model
+            case String.toFloat input of
+                Just value ->
+                    let
+                        updatedBlock : Block
+                        updatedBlock =
+                            value
+                                |> StringValueInput.asValueIn axisFloatInput
+                                |> flip StringValueInput.asStringIn input
+                                |> asAxisInPosition axis blockInModel.position
+                                |> asPositionInBlock blockInModel
+                    in
+                    updateBlockInModel updatedBlock model
 
-                    Err error ->
-                        input
-                            |> StringValueInput.asStringIn axisFloatInput
-                            |> (asAxisInPosition axis) blockInModel.position
-                            |> asPositionInBlock blockInModel
-                            |> flip updateBlockInModel model
+                Nothing ->
+                    input
+                        |> StringValueInput.asStringIn axisFloatInput
+                        |> asAxisInPosition axis blockInModel.position
+                        |> asPositionInBlock blockInModel
+                        |> flip updateBlockInModel model
 
         UpdateDimension dimension block input ->
             let
@@ -2438,33 +2514,34 @@ updateModelToJs msg model =
                 blockInModel =
                     Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
             in
-                case String.toFloat input of
-                    Ok value ->
-                        let
-                            newValue : Float
-                            newValue =
-                                if value == 0 then
-                                    0.1
-                                else
-                                    (abs value)
+            case String.toFloat input of
+                Just value ->
+                    let
+                        newValue : Float
+                        newValue =
+                            if value == 0 then
+                                0.1
 
-                            updatedBlock : Block
-                            updatedBlock =
-                                newValue
-                                    |> StringValueInput.asValueIn dimensionFloatInput
-                                    |> flip StringValueInput.asStringIn input
-                                    |> (asDimensionInSize dimension) blockInModel.size
-                                    |> asSizeInBlock blockInModel
-                                    |> updateBlockMassAndDensity
-                        in
-                            updateBlockInModel updatedBlock model
+                            else
+                                abs value
 
-                    Err message ->
-                        input
-                            |> StringValueInput.asStringIn dimensionFloatInput
-                            |> (asDimensionInSize dimension) blockInModel.size
-                            |> asSizeInBlock blockInModel
-                            |> flip updateBlockInModel model
+                        updatedBlock : Block
+                        updatedBlock =
+                            newValue
+                                |> StringValueInput.asValueIn dimensionFloatInput
+                                |> flip StringValueInput.asStringIn input
+                                |> asDimensionInSize dimension blockInModel.size
+                                |> asSizeInBlock blockInModel
+                                |> updateBlockMassAndDensity
+                    in
+                    updateBlockInModel updatedBlock model
+
+                Nothing ->
+                    input
+                        |> StringValueInput.asStringIn dimensionFloatInput
+                        |> asDimensionInSize dimension blockInModel.size
+                        |> asSizeInBlock blockInModel
+                        |> flip updateBlockInModel model
 
 
 sendCmdToJs : Model -> ToJsMsg -> Cmd msg
@@ -2487,13 +2564,13 @@ msg2json model action =
                         updatedBlock =
                             { block | color = newColor }
                     in
-                        { tag = "update-color", data = (encodeChangeColorCommand updatedBlock) }
+                    { tag = "update-color", data = encodeChangeColorCommand updatedBlock }
                 )
             <|
                 getBlockByUUID block.uuid model.blocks
 
         AddBlock label ->
-            Just { tag = "add-block", data = (encodeAddBlockCommand label) }
+            Just { tag = "add-block", data = encodeAddBlockCommand label }
 
         OpenSaveFile ->
             Just { tag = "read-json-file", data = Encode.string "open-save-file" }
@@ -2510,9 +2587,11 @@ msg2json model action =
                 if model.multipleSelect == False then
                     -- set selection as only this block
                     { tag = "select-block", data = encodeBlock block }
+
                 else if List.member block.uuid model.selectedBlocks then
                     -- remove from selection
                     { tag = "remove-block-from-selection", data = encodeBlock block }
+
                 else
                     -- add to selection
                     { tag = "add-block-to-selection", data = encodeBlock block }
@@ -2550,30 +2629,31 @@ msg2json model action =
                 previousException =
                     Maybe.withDefault (.spacing partition) <| Dict.get index <| .spacingExceptions partition
 
-                parsedInput : Result String Float
+                parsedInput : Maybe Float
                 parsedInput =
                     if input == "" then
                         -- an empty input should result in the default spacing
-                        Ok (.value <| .spacing partition)
+                        Just (.value <| .spacing partition)
+
                     else
                         String.toFloat input
             in
-                case parsedInput of
-                    Ok value ->
-                        Just
-                            { tag = tag
-                            , data =
-                                abs value
-                                    |> StringValueInput.asValueIn previousException
-                                    |> flip StringValueInput.asStringIn input
-                                    |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
-                                    |> asSpacingExceptionsInPartition partition
-                                    |> computePartition
-                                    |> encodeComputedPartitions
-                            }
+            case parsedInput of
+                Just value ->
+                    Just
+                        { tag = tag
+                        , data =
+                            abs value
+                                |> StringValueInput.asValueIn previousException
+                                |> flip StringValueInput.asStringIn input
+                                |> (\floatInput -> Dict.insert index floatInput <| .spacingExceptions partition)
+                                |> asSpacingExceptionsInPartition partition
+                                |> computePartition
+                                |> encodeComputedPartitions
+                        }
 
-                    Err error ->
-                        Nothing
+                Nothing ->
+                    Nothing
 
         SwitchViewMode newViewMode ->
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
@@ -2594,18 +2674,18 @@ msg2json model action =
                         Bulkhead ->
                             ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
             in
-                case String.toInt input of
-                    Ok value ->
-                        Just
-                            { tag = tag
-                            , data =
-                                encodeComputedPartitions <|
-                                    computePartition
-                                        { partition | number = (StringValueInput.fromInt "Number of partitions") <| abs value }
-                            }
+            case String.toInt input of
+                Just value ->
+                    Just
+                        { tag = tag
+                        , data =
+                            encodeComputedPartitions <|
+                                computePartition
+                                    { partition | number = StringValueInput.fromInt "Number of partitions" <| abs value }
+                        }
 
-                    Err error ->
-                        Nothing
+                Nothing ->
+                    Nothing
 
         UpdatePartitionSpacing partitionType input ->
             let
@@ -2617,18 +2697,18 @@ msg2json model action =
                         Bulkhead ->
                             ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
             in
-                case String.toFloat input of
-                    Ok value ->
-                        Just
-                            { tag = tag
-                            , data =
-                                encodeComputedPartitions <|
-                                    computePartition
-                                        { partition | spacing = (StringValueInput.fromNumber "m" "Spacing") <| abs value }
-                            }
+            case String.toFloat input of
+                Just value ->
+                    Just
+                        { tag = tag
+                        , data =
+                            encodeComputedPartitions <|
+                                computePartition
+                                    { partition | spacing = StringValueInput.fromNumber "m" "Spacing" <| abs value }
+                        }
 
-                    Err error ->
-                        Nothing
+                Nothing ->
+                    Nothing
 
         UpdatePartitionZeroPosition partitionType input ->
             let
@@ -2640,20 +2720,20 @@ msg2json model action =
                         Bulkhead ->
                             ( "make-bulkheads", model.partitions.bulkheads, computeBulkheads )
             in
-                case String.toFloat input of
-                    Ok value ->
-                        Just
-                            { tag = tag
-                            , data =
-                                encodeComputedPartitions <|
-                                    computePartition <|
-                                        asZeroInPartition partition <|
-                                            asPositionInPartitionZero partition.zero <|
-                                                (StringValueInput.fromNumber "m" "Position of partition zero") value
-                            }
+            case String.toFloat input of
+                Just value ->
+                    Just
+                        { tag = tag
+                        , data =
+                            encodeComputedPartitions <|
+                                computePartition <|
+                                    asZeroInPartition partition <|
+                                        asPositionInPartitionZero partition.zero <|
+                                            StringValueInput.fromNumber "m" "Position of partition zero" value
+                        }
 
-                    Err error ->
-                        Nothing
+                Nothing ->
+                    Nothing
 
         UpdatePosition axis block input ->
             Maybe.map
@@ -2672,14 +2752,13 @@ msg2json model action =
                             value
                                 |> StringValueInput.asValueIn axisFloatInput
                                 |> flip StringValueInput.asStringIn input
-                                |> (asAxisInPosition axis) blockInModel.position
+                                |> asAxisInPosition axis blockInModel.position
                                 |> asPositionInBlock blockInModel
                     in
-                        { tag = "update-position", data = encodeUpdatePositionCommand updatedBlock }
+                    { tag = "update-position", data = encodeUpdatePositionCommand updatedBlock }
                 )
             <|
-                Result.toMaybe <|
-                    String.toFloat input
+                String.toFloat input
 
         UpdateDimension dimension block input ->
             Maybe.map
@@ -2693,8 +2772,9 @@ msg2json model action =
                         newValue =
                             if value == 0 then
                                 0.1
+
                             else
-                                (abs value)
+                                abs value
 
                         blockInModel : Block
                         blockInModel =
@@ -2705,14 +2785,13 @@ msg2json model action =
                             newValue
                                 |> StringValueInput.asValueIn dimensionFloatInput
                                 |> flip StringValueInput.asStringIn input
-                                |> (asDimensionInSize dimension) blockInModel.size
+                                |> asDimensionInSize dimension blockInModel.size
                                 |> asSizeInBlock blockInModel
                     in
-                        { tag = "update-size", data = (encodeUpdateSizeCommand updatedBlock) }
+                    { tag = "update-size", data = encodeUpdateSizeCommand updatedBlock }
                 )
             <|
-                Result.toMaybe <|
-                    String.toFloat input
+                String.toFloat input
 
 
 
@@ -2740,11 +2819,11 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Hull", icon = FASolid.ship, viewMode = HullStudio }
-    , { title = "Partitions", icon = FASolid.bars, viewMode = Partitioning PropertiesEdition }
-    , { title = "Blocks", icon = FARegular.clone, viewMode = SpaceReservation WholeList }
-    , { title = "KPIs", icon = FASolid.tachometer_alt, viewMode = KpiStudio }
-    , { title = "Modeller", icon = FASolid.clone, viewMode = Modeller }
+    [ { title = "Hull", icon = FASolid.ship [], viewMode = HullStudio }
+    , { title = "Partitions", icon = FASolid.bars [], viewMode = Partitioning PropertiesEdition }
+    , { title = "Blocks", icon = FARegular.clone [], viewMode = SpaceReservation WholeList }
+    , { title = "KPIs", icon = FASolid.tachometerAlt [], viewMode = KpiStudio }
+    , { title = "Modeller", icon = FASolid.clone [], viewMode = Modeller }
     ]
 
 
@@ -2778,11 +2857,11 @@ updateBlockSizeForDimension dimension block floatInput =
     let
         validFloatInput =
             Basics.max 0.1 floatInput.value
-                |> (StringValueInput.fromNumber "m" "Dimension")
+                |> StringValueInput.fromNumber "m" "Dimension"
     in
-        validFloatInput
-            |> (asDimensionInSize dimension) block.size
-            |> asSizeInBlock block
+    validFloatInput
+        |> asDimensionInSize dimension block.size
+        |> asSizeInBlock block
 
 
 updateSpacingOfPartition : { a | spacing : StringValueInput.FloatInput } -> StringValueInput.FloatInput -> { a | spacing : StringValueInput.FloatInput }
@@ -2790,10 +2869,10 @@ updateSpacingOfPartition partition floatInput =
     let
         validFloatInput =
             Basics.max 0 floatInput.value
-                |> (StringValueInput.fromNumber "m" "Spacing")
+                |> StringValueInput.fromNumber "m" "Spacing"
     in
-        validFloatInput
-            |> asSpacingInPartition partition
+    validFloatInput
+        |> asSpacingInPartition partition
 
 
 updateBlockLength : Block -> StringValueInput.FloatInput -> Block
@@ -2801,11 +2880,11 @@ updateBlockLength block floatInput =
     let
         validFloatInput =
             Basics.max 0.1 floatInput.value
-                |> (StringValueInput.fromNumber "m" "Block length")
+                |> StringValueInput.fromNumber "m" "Block length"
     in
-        validFloatInput
-            |> asLengthInSize block.size
-            |> asSizeInBlock block
+    validFloatInput
+        |> asLengthInSize block.size
+        |> asSizeInBlock block
 
 
 view : Model -> Html Msg
@@ -2856,43 +2935,49 @@ viewToast toast =
         icon =
             case toast.type_ of
                 Info ->
-                    FASolid.info
+                    FASolid.info []
 
                 Success ->
-                    FASolid.check
+                    FASolid.check []
 
                 Error ->
-                    FASolid.exclamation_triangle
+                    FASolid.exclamationTriangle []
 
                 Processing ->
-                    FASolid.spinner
+                    FASolid.spinner []
     in
-        li
-            [ class <| "toast toast__" ++ (String.toLower <| toString toast.type_)
-            , onClick <| NoJs <| DismissToast toast.key
-            ]
-            [ icon
-            , p [] [ text toast.message ]
-            ]
+    li
+        [ class <| "toast toast__" ++ toastTypeToString toast.type_
+        , onClick <| NoJs <| DismissToast toast.key
+        ]
+        [ icon
+        , p [] [ text toast.message ]
+        ]
 
 
 colorToCssRgbString : Color -> String
 colorToCssRgbString color =
     let
         rgb =
-            Color.toRgb color
+            Color.toRgba color
     in
-        "rgb(" ++ (toString rgb.red) ++ "," ++ (toString rgb.green) ++ "," ++ (toString rgb.blue) ++ ")"
+    "rgb(" ++ String.fromFloat rgb.red ++ "," ++ String.fromFloat rgb.green ++ "," ++ String.fromFloat rgb.blue ++ ")"
 
 
-getDateForFilename : { a | currentDate : Date.Date } -> String
+dateFormatter : Time.Zone -> Time.Posix -> String
+dateFormatter =
+    DateFormat.format
+        [ DateFormat.yearNumber
+        , DateFormat.dayOfMonthNumber
+        , DateFormat.text "-"
+        , DateFormat.hourMilitaryFixed
+        , DateFormat.minuteFixed
+        ]
+
+
+getDateForFilename : { a | currentDate : Time.Posix } -> String
 getDateForFilename dateSha =
-    let
-        offsetFromUTC : Int
-        offsetFromUTC =
-            -120
-    in
-        Date.Extra.Format.format config "%Y%m%d-%Hh%M" dateSha.currentDate
+    dateFormatter Time.utc dateSha.currentDate
 
 
 
@@ -2909,13 +2994,13 @@ viewSaveMenuItem model =
             [ type_ "button"
             , href <|
                 "data:application/json;charset=utf-8,"
-                    ++ (encodeUri <|
+                    ++ (Url.percentEncode <|
                             stringifyEncodeValue <|
                                 encodeModelForSave model
                        )
-            , downloadAs <| (getDateForFilename model) ++ "_Project_Shipbuilder_" ++ model.build ++ ".json"
+            , download <| getDateForFilename model ++ "_Project_Shipbuilder_" ++ model.build ++ ".json"
             ]
-            [ FASolid.download ]
+            [ FASolid.download [] ]
         ]
 
 
@@ -2935,7 +3020,7 @@ viewOpenMenuItem =
         ]
         [ label
             [ for "open-save-file" ]
-            [ FASolid.folder_open ]
+            [ FASolid.folderOpen [] ]
         , input
             [ type_ "file"
             , accept "application/json, .json"
@@ -3024,16 +3109,17 @@ viewTab model tab =
         classes =
             if viewModesMatch tab.viewMode model.viewMode then
                 "tab-item active"
+
             else
                 "tab-item"
     in
-        div
-            [ class classes
-            , onClick <| ToJs <| SwitchViewMode tab.viewMode
-            ]
-            [ tab.icon
-            , p [] [ text tab.title ]
-            ]
+    div
+        [ class classes
+        , onClick <| ToJs <| SwitchViewMode tab.viewMode
+        ]
+        [ tab.icon
+        , p [] [ text tab.title ]
+        ]
 
 
 viewBuild : Model -> Html Msg
@@ -3103,26 +3189,26 @@ viewPartitioning partitioningView model =
         isBulkheadSpacingDetailsOpen =
             isAccordionOpened model.uiState "bulkhead-spacing-details"
     in
-        div
-            [ class "panel partitioning-panel" ]
-        <|
-            viewShowingPartitions model.partitions.showing
-                :: (case partitioningView of
-                        PropertiesEdition ->
-                            [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
-                            , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
-                            ]
+    div
+        [ class "panel partitioning-panel" ]
+    <|
+        viewShowingPartitions model.partitions.showing
+            :: (case partitioningView of
+                    PropertiesEdition ->
+                        [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
+                        , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
+                        ]
 
-                        OriginDefinition Deck ->
-                            [ viewDecks True isDeckSpacingDetailsOpen model.partitions.decks
-                            , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
-                            ]
+                    OriginDefinition Deck ->
+                        [ viewDecks True isDeckSpacingDetailsOpen model.partitions.decks
+                        , viewBulkheads False isBulkheadSpacingDetailsOpen model.partitions.bulkheads
+                        ]
 
-                        OriginDefinition Bulkhead ->
-                            [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
-                            , viewBulkheads True isBulkheadSpacingDetailsOpen model.partitions.bulkheads
-                            ]
-                   )
+                    OriginDefinition Bulkhead ->
+                        [ viewDecks False isDeckSpacingDetailsOpen model.partitions.decks
+                        , viewBulkheads True isBulkheadSpacingDetailsOpen model.partitions.bulkheads
+                        ]
+               )
 
 
 viewModeller : Model -> Html Msg
@@ -3142,17 +3228,18 @@ viewModeller model =
                         , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
                         , viewSimpleKpi "Displacement (t)" "displacement" slices.volume
                         ]
+
             else
                 Nothing
     in
-        div
-            [ class "panel modeller-panel" ]
-            ([ h2
-                [ class "modeller-panel-title" ]
-                [ text "Modeller" ]
-             ]
-                ++ (model.slices |> Dict.toList |> List.filterMap viewSlices)
-            )
+    div
+        [ class "panel modeller-panel" ]
+        ([ h2
+            [ class "modeller-panel-title" ]
+            [ text "Modeller" ]
+         ]
+            ++ (model.slices |> Dict.toList |> List.filterMap viewSlices)
+        )
 
 
 viewKpiStudio : Model -> Html Msg
@@ -3170,31 +3257,31 @@ viewKpiStudio model =
         cog =
             getCentroidOfBlocks model.blocks
     in
-        div
-            [ class "panel kpi-panel" ]
-            [ h2
-                [ class "kpi-panel-title" ]
-                [ text "KPIs" ]
-            , a
-                [ class "download-kpis"
-                , type_ "button"
-                , href <|
-                    "data:text/csv;charset=utf-8,"
-                        ++ (encodeUri <|
-                                kpisAsCsv model.blocks model.tags
-                           )
-                , downloadAs <| (getDateForFilename model) ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
-                ]
-                [ FASolid.download, text "Download as CSV" ]
-            , viewLengthKpi blocksBoundingBoxSize.length
-            , viewWidthKpi blocksBoundingBoxSize.width
-            , viewHeightKpi blocksBoundingBoxSize.height
-            , viewCenterOfGravityXKpi cog.x
-            , viewCenterOfGravityYKpi cog.y
-            , viewCenterOfGravityZKpi cog.z
-            , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
-            , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
+    div
+        [ class "panel kpi-panel" ]
+        [ h2
+            [ class "kpi-panel-title" ]
+            [ text "KPIs" ]
+        , a
+            [ class "download-kpis"
+            , type_ "button"
+            , href <|
+                "data:text/csv;charset=utf-8,"
+                    ++ (Url.percentEncode <|
+                            kpisAsCsv model.blocks model.tags
+                       )
+            , download <| getDateForFilename model ++ "_KPIs_Shipbuilder_" ++ model.build ++ ".csv"
             ]
+            [ FASolid.download [], text "Download as CSV" ]
+        , viewLengthKpi blocksBoundingBoxSize.length
+        , viewWidthKpi blocksBoundingBoxSize.width
+        , viewHeightKpi blocksBoundingBoxSize.height
+        , viewCenterOfGravityXKpi cog.x
+        , viewCenterOfGravityYKpi cog.y
+        , viewCenterOfGravityZKpi cog.z
+        , viewVolumeKpi model.blocks model.tags <| isAccordionOpened model.uiState "volume-kpi"
+        , viewMassKpi model.blocks model.tags <| isAccordionOpened model.uiState "mass-kpi"
+        ]
 
 
 roundToNearestHundredth : Float -> Float
@@ -3259,62 +3346,62 @@ kpisAsCsv blocks tags =
         summaryList =
             List.map (computeKpisForColor blocks) SIRColorPicker.palette
     in
-        -- Length, width and height are not in KpiSummary because they only apply for the whole ship
-        -- We add the corresponding headers to the end of the list of those inside KpiSummary
-        listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)", "Center of gravity : x", "Center of gravity : y", "Center of gravity : z" ]
-            :: ((kpiSummaryToStringList tags totalSummary
-                    |> flip (++)
-                        -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
-                        [ toString <| blocksBoundingBoxSize.length
-                        , toString <| blocksBoundingBoxSize.width
-                        , toString <| blocksBoundingBoxSize.height
+    -- Length, width and height are not in KpiSummary because they only apply for the whole ship
+    -- We add the corresponding headers to the end of the list of those inside KpiSummary
+    listToCsvLine [ "Target", "Mass (T)", "Volume (m³)", "Length (m)", "Width (m)", "Height (m)", "Center of gravity : x", "Center of gravity : y", "Center of gravity : z" ]
+        :: ((kpiSummaryToStringList tags totalSummary
+                |> flip (++)
+                    -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+                    [ String.fromFloat <| blocksBoundingBoxSize.length
+                    , String.fromFloat <| blocksBoundingBoxSize.width
+                    , String.fromFloat <| blocksBoundingBoxSize.height
 
-                        -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
-                        , toString <| cog.x
-                        , toString <| cog.y
-                        , toString <| cog.z
-                        ]
-                    |> listToCsvLine
-                )
-                    :: List.map
-                        (\summary ->
-                            kpiSummaryToStringList tags summary
-                                |> flip (++) [ "", "", "", "", "", "" ]
-                                -- We add empty values for the color groups because length, width, height and the center of gravity don't apply
-                                |> listToCsvLine
-                        )
-                        summaryList
-               )
-            |> String.join "\n"
+                    -- We add the values for the whole ship at the end of the list with the values inside KpiSummary
+                    , String.fromFloat <| cog.x
+                    , String.fromFloat <| cog.y
+                    , String.fromFloat <| cog.z
+                    ]
+                |> listToCsvLine
+            )
+                :: List.map
+                    (\summary ->
+                        kpiSummaryToStringList tags summary
+                            |> flip (++) [ "", "", "", "", "", "" ]
+                            -- We add empty values for the color groups because length, width, height and the center of gravity don't apply
+                            |> listToCsvLine
+                    )
+                    summaryList
+           )
+        |> String.join "\n"
 
 
 kpiSummaryToStringList : Tags -> KpiSummary -> List String
 kpiSummaryToStringList tags summary =
     let
-        getColorName : SIRColorPicker.SirColor -> String
-        getColorName sirColor =
+        getColorName_ : SIRColorPicker.SirColor -> String
+        getColorName_ sirColor =
             SIRColorPicker.getName sirColor
 
-        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
-        getTagLabelForColor sirColor =
+        getTagLabelForColor_ : SIRColorPicker.SirColor -> Maybe String
+        getTagLabelForColor_ sirColor =
             List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
 
-        getLabelForColor : SIRColorPicker.SirColor -> String
-        getLabelForColor sirColor =
-            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+        getLabelForColor_ : SIRColorPicker.SirColor -> String
+        getLabelForColor_ sirColor =
+            Maybe.withDefault (getColorName_ sirColor) (getTagLabelForColor_ sirColor)
     in
-        [ case summary.target of
-            WholeShip ->
-                "Total"
+    [ case summary.target of
+        WholeShip ->
+            "Total"
 
-            ColorGroup color ->
-                getLabelForColor color
+        ColorGroup color ->
+            getLabelForColor_ color
 
-            SingleBlock uuid ->
-                uuid
-        , toString <| round <| summary.mass
-        , toString <| roundToNearestHundredth summary.volume
-        ]
+        SingleBlock uuid ->
+            uuid
+    , String.fromInt <| round <| summary.mass
+    , String.fromFloat <| roundToNearestHundredth summary.volume
+    ]
 
 
 listToCsvLine : List String -> String
@@ -3327,18 +3414,19 @@ listToCsvLine items =
 viewMassKpi : Blocks -> Tags -> Bool -> Html Msg
 viewMassKpi blocks tags showKpiForColors =
     let
-        transform : Float -> Int
+        transform : Float -> Float
         transform value =
-            round value
+            toFloat <| round value
 
-        viewMassKpiContent : String -> String -> Int -> (Color -> Int) -> Tags -> Html Msg
+        viewMassKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewMassKpiContent =
             if showKpiForColors then
                 viewKpiWithColors
+
             else
                 viewKpi
     in
-        viewMassKpiContent "Σ Mass (T)" "mass" (transform <| getSumOfMasses blocks) (transform << getSumOfMassesForColor blocks) tags
+    viewMassKpiContent "Σ Mass (T)" "mass" (transform <| getSumOfMasses blocks) (transform << getSumOfMassesForColor blocks) tags
 
 
 viewVolumeKpi : Blocks -> Tags -> Bool -> Html Msg
@@ -3352,10 +3440,11 @@ viewVolumeKpi blocks tags showKpiForColors =
         viewVolumeKpiContent =
             if showKpiForColors then
                 viewKpiWithColors
+
             else
                 viewKpi
     in
-        viewVolumeKpiContent "Σ Volume (m³)" "volume" (transform <| getSumOfVolumes blocks) (transform << getSumOfVolumesForColor blocks) tags
+    viewVolumeKpiContent "Σ Volume (m³)" "volume" (transform <| getSumOfVolumes blocks) (transform << getSumOfVolumesForColor blocks) tags
 
 
 getColor : SIRColorPicker.SirColor -> Color
@@ -3378,19 +3467,19 @@ getLabelForColor sirColor tags =
     Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor tags)
 
 
-viewSimpleKpi : String -> String -> number -> Html Msg
+viewSimpleKpi : String -> String -> Float -> Html Msg
 viewSimpleKpi kpiTitle className totalValue =
     div [ class <| "kpi " ++ className ] <|
         [ div
             [ class "kpi-total kpi-group"
             ]
             [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
-            , p [ class "kpi-value" ] [ text <| toString totalValue ]
+            , p [ class "kpi-value" ] [ text <| String.fromFloat totalValue ]
             ]
         ]
 
 
-viewKpi : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
+viewKpi : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
 viewKpi kpiTitle className totalValue valueForColor tags =
     div [ class <| "kpi " ++ className ] <|
         [ div
@@ -3398,24 +3487,23 @@ viewKpi kpiTitle className totalValue valueForColor tags =
             , onClick <| NoJs <| ToggleAccordion True <| className ++ "-kpi"
             ]
             [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
-            , p [ class "kpi-value" ] [ text <| toString totalValue ]
-            , FASolid.angle_right
+            , p [ class "kpi-value" ] [ text <| String.fromFloat totalValue ]
+            , FASolid.angleRight []
             ]
         ]
 
 
-viewKpiWithColors : String -> String -> number -> (Color -> number) -> Tags -> Html Msg
+viewKpiWithColors : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
 viewKpiWithColors kpiTitle className totalValue valueForColor tags =
     div [ class <| "kpi " ++ className ] <|
-        (div
+        div
             [ class "kpi-total kpi-group"
             , onClick <| NoJs <| ToggleAccordion False <| className ++ "-kpi"
             ]
             [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
-            , p [ class "kpi-value" ] [ text <| toString totalValue ]
-            , FASolid.angle_down
+            , p [ class "kpi-value" ] [ text <| String.fromFloat totalValue ]
+            , FASolid.angleDown []
             ]
-        )
             :: List.map
                 (\sirColor ->
                     viewKpiByColor className (getColor sirColor) (getLabelForColor sirColor tags) (valueForColor <| SIRColorPicker.getColor sirColor)
@@ -3426,17 +3514,15 @@ viewKpiWithColors kpiTitle className totalValue valueForColor tags =
 getFullKpiSummary : Blocks -> List KpiSummary
 getFullKpiSummary blocks =
     computeKpisForAll blocks
-        :: (List.map (computeKpisForColor blocks) SIRColorPicker.palette)
+        :: List.map (computeKpisForColor blocks) SIRColorPicker.palette
 
 
-viewKpiByColor : String -> Color -> String -> number -> Html Msg
+viewKpiByColor : String -> Color -> String -> Float -> Html Msg
 viewKpiByColor kpiClass color colorLabel kpiValue =
     div [ class <| "input-group kpi-group " ++ kpiClass ]
         [ label
             [ class "kpi-color-label"
-            , style
-                [ ( "background-color", colorToCssRgbString color )
-                ]
+            , style "background-color" <| colorToCssRgbString color
             , title colorLabel
             ]
             []
@@ -3450,7 +3536,7 @@ viewKpiByColor kpiClass color colorLabel kpiValue =
             []
         , p
             [ class "kpi-value" ]
-            [ text <| toString kpiValue ]
+            [ text <| String.fromFloat kpiValue ]
         ]
 
 
@@ -3463,11 +3549,12 @@ viewShowingPartitions showing =
     <|
         if showing then
             [ text "Hide partitions"
-            , FASolid.eye_slash
+            , FASolid.eyeSlash []
             ]
+
         else
             [ text "Show partitions"
-            , FASolid.eye
+            , FASolid.eye []
             ]
 
 
@@ -3516,6 +3603,7 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
                 [ class "deck-zero" ]
                 [ if isDefiningOrigin then
                     p [] [ text "Defining deck n°0..." ]
+
                   else
                     button
                         [ disabled <| decks.number.value == 0
@@ -3543,6 +3631,16 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
         ]
 
 
+partitionTypeToString : PartitionType -> String
+partitionTypeToString partitionType =
+    case partitionType of
+        Bulkhead ->
+            "bulkhead"
+
+        Deck ->
+            "deck"
+
+
 viewPartitionSpacingDetails : PartitionType -> Bool -> { a | number : StringValueInput.IntInput, spacing : StringValueInput.FloatInput, zero : PartitionZero, spacingExceptions : Dict Int StringValueInput.FloatInput } -> Html Msg
 viewPartitionSpacingDetails partitionType isDetailsOpen partitionSummary =
     let
@@ -3550,31 +3648,33 @@ viewPartitionSpacingDetails partitionType isDetailsOpen partitionSummary =
         rootClass =
             "spacing-details"
     in
-        div
-            [ class rootClass ]
-        <|
-            if isDetailsOpen then
-                [ p
-                    [ class <| rootClass ++ "-title"
-                    , onClick <| NoJs <| ToggleAccordion False <| (String.toLower <| toString partitionType) ++ "-spacing-details"
-                    ]
-                    [ text "Spacing details"
-                    , FASolid.angle_down
-                    ]
-                , if partitionSummary.number.value > 0 then
-                    viewPartitionSpacingList partitionType partitionSummary
-                  else
-                    p [ class "text-muted" ] [ text <| "There's no " ++ (String.toLower <| toString partitionType) ++ " yet" ]
+    div
+        [ class rootClass ]
+    <|
+        if isDetailsOpen then
+            [ p
+                [ class <| rootClass ++ "-title"
+                , onClick <| NoJs <| ToggleAccordion False <| partitionTypeToString partitionType ++ "-spacing-details"
                 ]
-            else
-                [ p
-                    [ class <| rootClass ++ "-title"
-                    , onClick <| NoJs <| ToggleAccordion True <| (String.toLower <| toString partitionType) ++ "-spacing-details"
-                    ]
-                    [ text "Spacing details"
-                    , FASolid.angle_right
-                    ]
+                [ text "Spacing details"
+                , FASolid.angleDown []
                 ]
+            , if partitionSummary.number.value > 0 then
+                viewPartitionSpacingList partitionType partitionSummary
+
+              else
+                p [ class "text-muted" ] [ text <| "There's no " ++ partitionTypeToString partitionType ++ " yet" ]
+            ]
+
+        else
+            [ p
+                [ class <| rootClass ++ "-title"
+                , onClick <| NoJs <| ToggleAccordion True <| partitionTypeToString partitionType ++ "-spacing-details"
+                ]
+                [ text "Spacing details"
+                , FASolid.angleRight []
+                ]
+            ]
 
 
 viewPartitionSpacingList : PartitionType -> { a | number : StringValueInput.IntInput, spacing : StringValueInput.FloatInput, zero : PartitionZero, spacingExceptions : Dict Int StringValueInput.FloatInput } -> Html Msg
@@ -3592,7 +3692,7 @@ viewPartitionSpacingList partitionType partitionSummary =
                 |> List.map getPartitionSpacingData
                 |> List.reverse
     in
-        ul [ class "spacing-list" ] <| List.map (viewPartitionSpacingListItem partitionType partitionSummary.spacing.value) partitionList
+    ul [ class "spacing-list" ] <| List.map (viewPartitionSpacingListItem partitionType partitionSummary.spacing.value) partitionList
 
 
 viewPartitionSpacingListItem : PartitionType -> Float -> { number : Int, index : Int, maybeSpacing : Maybe StringValueInput.FloatInput } -> Html Msg
@@ -3601,10 +3701,10 @@ viewPartitionSpacingListItem partitionType defaultSpacing partitionSpacingData =
         [ class "spacing-item input-group" ]
         [ label
             []
-            [ text <| toString partitionSpacingData.number ]
+            [ text <| String.fromInt partitionSpacingData.number ]
         , input
             [ type_ "text"
-            , placeholder <| toString defaultSpacing
+            , placeholder <| String.fromFloat defaultSpacing
             , value <|
                 case partitionSpacingData.maybeSpacing of
                     Just spacing ->
@@ -3664,6 +3764,7 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
                 [ class "bulkhead-zero" ]
                 [ if isDefiningOrigin then
                     p [] [ text "Defining bulkhead n°0..." ]
+
                   else
                     button
                         [ disabled <| bulkheads.number.value == 0
@@ -3725,10 +3826,10 @@ downloadBlocksAsCsv blocksList model =
         [ type_ "button"
         , href <|
             "data:text/csv;charset=utf-8,"
-                ++ (encodeUri <|
+                ++ (Url.percentEncode <|
                         blocksAsCsv blocksList model.tags model.customProperties
                    )
-        , downloadAs <| (getDateForFilename model) ++ "_Blocks_Shipbuilder_" ++ model.build ++ ".csv"
+        , download <| getDateForFilename model ++ "_Blocks_Shipbuilder_" ++ model.build ++ ".csv"
         , title "Download blocks as CSV"
         ]
         [ viewCsvButton ]
@@ -3741,25 +3842,25 @@ blocksAsCsv blocksList tags customProperties =
         customPropertyLabels =
             List.map .label customProperties
     in
-        listToCsvLine ([ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "Center of gravity: x", "Center of gravity: y", "Center of gravity: z", "volume", "mass", "density" ] ++ customPropertyLabels)
-            :: List.map (blockToCsvLine tags customProperties) blocksList
-            |> String.join "\n"
+    listToCsvLine ([ "uuid", "label", "color", "x", "y", "z", "length", "height", "width", "Center of gravity: x", "Center of gravity: y", "Center of gravity: z", "volume", "mass", "density" ] ++ customPropertyLabels)
+        :: List.map (blockToCsvLine tags customProperties) blocksList
+        |> String.join "\n"
 
 
 blockToCsvLine : Tags -> List CustomProperty -> Block -> String
 blockToCsvLine tags customProperties block =
     let
-        getColorName : SIRColorPicker.SirColor -> String
-        getColorName sirColor =
+        getColorName_ : SIRColorPicker.SirColor -> String
+        getColorName_ sirColor =
             SIRColorPicker.getName sirColor
 
-        getTagLabelForColor : SIRColorPicker.SirColor -> Maybe String
-        getTagLabelForColor sirColor =
+        getTagLabelForColor_ : SIRColorPicker.SirColor -> Maybe String
+        getTagLabelForColor_ sirColor =
             List.head <| List.map .label <| List.filter ((==) sirColor << .color) tags
 
-        getLabelForColor : SIRColorPicker.SirColor -> String
-        getLabelForColor sirColor =
-            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor sirColor)
+        getLabelForColor_ : SIRColorPicker.SirColor -> String
+        getLabelForColor_ sirColor =
+            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor_ sirColor)
 
         customPropertyValues : List String
         customPropertyValues =
@@ -3769,25 +3870,25 @@ blockToCsvLine tags customProperties block =
         cog =
             getCenterOfGravity block
     in
-        listToCsvLine
-            ([ block.uuid
-             , block.label
-             , Maybe.withDefault "" <| Maybe.map getLabelForColor <| SIRColorPicker.fromColor block.color
-             , block.position.x.string
-             , block.position.y.string
-             , block.position.z.string
-             , block.size.length.string
-             , block.size.height.string
-             , block.size.width.string
-             , toString cog.x
-             , toString cog.y
-             , toString cog.z
-             , toString <| computeVolume block
-             , block.mass.string
-             , block.density.string
-             ]
-                ++ customPropertyValues
-            )
+    listToCsvLine
+        ([ block.uuid
+         , block.label
+         , Maybe.withDefault "" <| Maybe.map getLabelForColor_ <| SIRColorPicker.fromColor block.color
+         , block.position.x.string
+         , block.position.y.string
+         , block.position.z.string
+         , block.size.length.string
+         , block.size.height.string
+         , block.size.width.string
+         , String.fromFloat cog.x
+         , String.fromFloat cog.y
+         , String.fromFloat cog.z
+         , String.fromFloat <| computeVolume block
+         , block.mass.string
+         , block.density.string
+         ]
+            ++ customPropertyValues
+        )
 
 
 viewSelectedBlocksSummary : Model -> Html Msg
@@ -3797,24 +3898,25 @@ viewSelectedBlocksSummary model =
         selectedBlocks =
             List.filter (\block -> List.member block.uuid model.selectedBlocks) <| toList model.blocks
     in
-        div
-            [ if List.length selectedBlocks > 1 then
-                class "selected-blocks-summary selected-blocks-summary__visible"
-              else
-                class "selected-blocks-summary"
-            ]
-            [ text <| (toString <| List.length selectedBlocks) ++ " selected blocks"
+    div
+        [ if List.length selectedBlocks > 1 then
+            class "selected-blocks-summary selected-blocks-summary__visible"
+
+          else
+            class "selected-blocks-summary"
+        ]
+        [ text <| (String.fromInt <| List.length selectedBlocks) ++ " selected blocks"
+        , div
+            [ class "blocks-actions" ]
+            [ downloadBlocksAsCsv selectedBlocks model
             , div
-                [ class "blocks-actions" ]
-                [ downloadBlocksAsCsv selectedBlocks model
-                , div
-                    [ class "blocks-visibility" ]
-                    [ viewShowBlocksAction selectedBlocks
-                    , viewHideBlocksAction selectedBlocks
-                    , viewDeleteBlocksAction selectedBlocks
-                    ]
+                [ class "blocks-visibility" ]
+                [ viewShowBlocksAction selectedBlocks
+                , viewHideBlocksAction selectedBlocks
+                , viewDeleteBlocksAction selectedBlocks
                 ]
             ]
+        ]
 
 
 viewShowBlocksAction : List Block -> Html Msg
@@ -3824,7 +3926,7 @@ viewShowBlocksAction blocks =
         , onClick <| ToJs <| ToggleBlocksVisibility blocks True
         , title "Show all blocks"
         ]
-        [ FASolid.eye ]
+        [ FASolid.eye [] ]
 
 
 viewHideBlocksAction : List Block -> Html Msg
@@ -3834,7 +3936,7 @@ viewHideBlocksAction blocks =
         , onClick <| ToJs <| ToggleBlocksVisibility blocks False
         , title "Hide all blocks"
         ]
-        [ FASolid.eye_slash ]
+        [ FASolid.eyeSlash [] ]
 
 
 viewDetailedBlock : String -> Model -> Html Msg
@@ -3880,7 +3982,7 @@ viewBackToWholeList =
         [ class "focus-back"
         , onClick <| ToJs <| SwitchViewMode <| SpaceReservation WholeList
         ]
-        [ FASolid.arrow_left ]
+        [ FASolid.arrowLeft [] ]
 
 
 viewBlockProperties : Block -> List (Html Msg)
@@ -3891,15 +3993,16 @@ viewBlockProperties block =
             , onClick <| ToJs <| ToggleBlocksVisibility [ block ] False
             ]
             [ text "Hide block"
-            , FASolid.eye_slash
+            , FASolid.eyeSlash []
             ]
+
       else
         div
             [ class "block-visibility primary-button"
             , onClick <| ToJs <| ToggleBlocksVisibility [ block ] True
             ]
             [ text "Show block"
-            , FASolid.eye
+            , FASolid.eye []
             ]
     , div
         [ class "input-group block-color" ]
@@ -3931,40 +4034,40 @@ viewBlockCustomProperty block propertyIndex property =
         -- used to focus the newly created properties
         labelId : String
         labelId =
-            "custom-property-" ++ (toString <| propertyIndex + 1)
+            "custom-property-" ++ (String.fromInt <| propertyIndex + 1)
 
         propertyValue : String
         propertyValue =
             Maybe.withDefault "" <| Dict.get block.uuid property.values
     in
-        div
-            [ class "custom-property input-group" ]
-            [ div
-                [ class "custom-property-header" ]
-                [ input
-                    [ type_ "text"
-                    , class "custom-property-label label-like input-label"
-                    , id labelId
-                    , value property.label
-                    , onInput <| NoJs << UpdateCustomPropertyLabel property
-                    ]
-                    []
-                , p
-                    [ class "delete-custom-property"
-                    , title <| "Delete " ++ property.label
-                    , onClick <| NoJs <| DeleteCustomProperty property
-                    ]
-                    [ FASolid.trash ]
-                ]
-            , input
+    div
+        [ class "custom-property input-group" ]
+        [ div
+            [ class "custom-property-header" ]
+            [ input
                 [ type_ "text"
-                , class "custom-property-value"
-                , placeholder <| property.label ++ " value"
-                , onInput <| NoJs << SetValueForCustomProperty property block
-                , value propertyValue
+                , class "custom-property-label label-like input-label"
+                , id labelId
+                , value property.label
+                , onInput <| NoJs << UpdateCustomPropertyLabel property
                 ]
                 []
+            , p
+                [ class "delete-custom-property"
+                , title <| "Delete " ++ property.label
+                , onClick <| NoJs <| DeleteCustomProperty property
+                ]
+                [ FASolid.trash [] ]
             ]
+        , input
+            [ type_ "text"
+            , class "custom-property-value"
+            , placeholder <| property.label ++ " value"
+            , onInput <| NoJs << SetValueForCustomProperty property block
+            , value propertyValue
+            ]
+            []
+        ]
 
 
 viewBlockAddCustomProperty : Html Msg
@@ -3991,7 +4094,7 @@ viewBlockMassInfo block =
                 [ text "volume" ]
             , p
                 [ class "block-volume-value" ]
-                [ text <| toString <| computeVolume block ]
+                [ text <| String.fromFloat <| computeVolume block ]
             ]
         , div
             [ class "input-group block-density" ]
@@ -4024,6 +4127,16 @@ viewBlockMassInfo block =
         ]
 
 
+flip : (a -> b -> c) -> (b -> a -> c)
+flip f =
+    let
+        g : b -> a -> c
+        g y x =
+            f x y
+    in
+    g
+
+
 viewBlockCenterOfGravity : Block -> Html Msg
 viewBlockCenterOfGravity block =
     div [ class "block-cog form-group" ] <|
@@ -4040,7 +4153,7 @@ viewBlockCenterOfGravityUserInput block cog =
             , title "Set to the center of the volume"
             , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
             ]
-            [ FASolid.crosshairs ]
+            [ FASolid.crosshairs [] ]
         ]
     , viewCenterOfGravityUserInputCoordinate X block cog.x
     , viewCenterOfGravityUserInputCoordinate Y block cog.y
@@ -4053,24 +4166,24 @@ viewCenterOfGravityUserInputCoordinate axis block coordinateInput =
     let
         axisLabel : String
         axisLabel =
-            String.toLower <| toString axis
+            axisToString axis
     in
-        div
-            [ class "input-group cog-coordinate" ]
-            [ label
-                [ for <| "block-cog-" ++ axisLabel ++ "-input"
-                , title <| "Center of gravity: " ++ axisLabel ++ " coordinate"
-                ]
-                [ text "CoG", sub [] [ text axisLabel ] ]
-            , input
-                [ type_ "text"
-                , id <| "block-cog-" ++ axisLabel ++ "-input"
-                , value coordinateInput.string
-                , onInput <| NoJs << UpdateCenterOfGravity axis block
-                , onBlur <| NoJs <| SyncBlockInputs block
-                ]
-                []
+    div
+        [ class "input-group cog-coordinate" ]
+        [ label
+            [ for <| "block-cog-" ++ axisLabel ++ "-input"
+            , title <| "Center of gravity: " ++ axisLabel ++ " coordinate"
             ]
+            [ text "CoG", sub [] [ text axisLabel ] ]
+        , input
+            [ type_ "text"
+            , id <| "block-cog-" ++ axisLabel ++ "-input"
+            , value coordinateInput.string
+            , onInput <| NoJs << UpdateCenterOfGravity axis block
+            , onBlur <| NoJs <| SyncBlockInputs block
+            ]
+            []
+        ]
 
 
 type Axis
@@ -4092,16 +4205,29 @@ axisAccessor axis =
             .z
 
 
+axisToString : Axis -> String
+axisToString axis =
+    case axis of
+        X ->
+            "x"
+
+        Y ->
+            "y"
+
+        Z ->
+            "z"
+
+
 viewPositionInput : Axis -> Block -> Html Msg
 viewPositionInput axis block =
     let
         axisLabel =
-            String.toLower <| toString axis
+            axisToString axis
     in
-        div [ class "input-group" ]
-            [ viewPositionInputLabel axisLabel
-            , viewPositionInputInput axis block axisLabel
-            ]
+    div [ class "input-group" ]
+        [ viewPositionInputLabel axisLabel
+        , viewPositionInputInput axis block axisLabel
+        ]
 
 
 viewPositionInputLabel : String -> Html Msg
@@ -4117,22 +4243,22 @@ viewPositionInputInput axis block axisLabel =
         val =
             .string <| axisAccessor axis <| .position block
     in
-        input
-            [ class "block-position-input"
-            , id <| "position-" ++ axisLabel
-            , type_ "text"
-            , value val
-            , onInput <| ToJs << UpdatePosition axis block
-            , onBlur <| NoJs <| SyncBlockInputs block
-            , onKeyDown val <| ToJs << UpdatePosition axis block
-            ]
-            []
+    input
+        [ class "block-position-input"
+        , id <| "position-" ++ axisLabel
+        , type_ "text"
+        , value val
+        , onInput <| ToJs << UpdatePosition axis block
+        , onBlur <| NoJs <| SyncBlockInputs block
+        , onKeyDown val <| ToJs << UpdatePosition axis block
+        ]
+        []
 
 
 updateBlockPositionOnAxis : Axis -> Block -> StringValueInput.FloatInput -> Block
 updateBlockPositionOnAxis axis block floatInput =
     floatInput
-        |> (asAxisInPosition axis) block.position
+        |> asAxisInPosition axis block.position
         |> asPositionInBlock block
 
 
@@ -4159,12 +4285,20 @@ viewSizeInput : Dimension -> Block -> Html Msg
 viewSizeInput dimension block =
     let
         dimensionLabel =
-            String.toLower <| toString dimension
+            case dimension of
+                Length ->
+                    "length"
+
+                Width ->
+                    "width"
+
+                Height ->
+                    "height"
     in
-        div [ class "input-group" ]
-            [ viewSizeInputLabel dimensionLabel
-            , viewSizeInputInput dimension block dimensionLabel
-            ]
+    div [ class "input-group" ]
+        [ viewSizeInputLabel dimensionLabel
+        , viewSizeInputInput dimension block dimensionLabel
+        ]
 
 
 viewSizeInputLabel : String -> Html Msg
@@ -4178,18 +4312,18 @@ viewSizeInputInput dimension block dimensionLabel =
     let
         val : String
         val =
-            .string <| (dimensionAccessor dimension) <| .size block
+            .string <| dimensionAccessor dimension <| .size block
     in
-        input
-            [ class "block-size-input"
-            , id ("size-" ++ dimensionLabel)
-            , type_ "text"
-            , value val
-            , onInput <| ToJs << UpdateDimension dimension block
-            , onBlur <| NoJs <| SyncBlockInputs block
-            , onKeyDown val <| ToJs << UpdateDimension dimension block
-            ]
-            []
+    input
+        [ class "block-size-input"
+        , id ("size-" ++ dimensionLabel)
+        , type_ "text"
+        , value val
+        , onInput <| ToJs << UpdateDimension dimension block
+        , onBlur <| NoJs <| SyncBlockInputs block
+        , onKeyDown val <| ToJs << UpdateDimension dimension block
+        ]
+        []
 
 
 viewEditableBlockName : Block -> Html Msg
@@ -4218,15 +4352,16 @@ viewBlockList model =
         viewBlockWithoutSelection block =
             viewBlockItem (showContextualMenuFor block) block
     in
-        ul
-            [ class "blocks" ]
-        <|
-            if List.length model.selectedBlocks > 0 then
-                (List.map viewBlockWithSelection <| toList model.blocks)
-                    ++ [ viewNewBlockItem ]
-            else
-                (List.map viewBlockWithoutSelection <| toList model.blocks)
-                    ++ [ viewNewBlockItem ]
+    ul
+        [ class "blocks" ]
+    <|
+        if List.length model.selectedBlocks > 0 then
+            (List.map viewBlockWithSelection <| toList model.blocks)
+                ++ [ viewNewBlockItem ]
+
+        else
+            (List.map viewBlockWithoutSelection <| toList model.blocks)
+                ++ [ viewNewBlockItem ]
 
 
 viewNewBlockItem : Html Msg
@@ -4248,9 +4383,10 @@ viewBlockItem showContextualMenu block =
     li
         [ if block.visible then
             class "block-item"
+
           else
             class "block-item hidden"
-        , style [ ( "borderColor", colorToCssRgbString block.color ) ]
+        , style "borderColor" <| colorToCssRgbString block.color
         , onMouseLeave <| NoJs <| UnsetBlockContextualMenu
         ]
     <|
@@ -4276,6 +4412,7 @@ viewBlockItemContent showContextualMenu block =
             , viewCloseBlockContextualMenuAction
             ]
         ]
+
     else
         [ div
             [ class "block-info-wrapper"
@@ -4290,13 +4427,13 @@ viewBlockItemContent showContextualMenu block =
                 , onClickWithoutPropagation <| NoJs <| MoveBlockUp block
                 , title "Move up"
                 ]
-                [ FASolid.angle_up ]
+                [ FASolid.angleUp [] ]
             , div
                 [ class "move-down move-block"
                 , onClickWithoutPropagation <| NoJs <| MoveBlockDown block
                 , title "Move down"
                 ]
-                [ FASolid.angle_down ]
+                [ FASolid.angleDown [] ]
             ]
         , div
             [ class "block-actions" ]
@@ -4313,7 +4450,7 @@ viewOpenBlockContextualMenuAction block =
         , onClick <| NoJs <| SetBlockContextualMenu block.uuid
         , title "See extra actions"
         ]
-        [ FASolid.ellipsis_h ]
+        [ FASolid.ellipsisH [] ]
 
 
 viewCloseBlockContextualMenuAction : Html Msg
@@ -4323,7 +4460,7 @@ viewCloseBlockContextualMenuAction =
         , onClick <| NoJs <| UnsetBlockContextualMenu
         , title "Hide extra actions"
         ]
-        [ FARegular.times_circle ]
+        [ FARegular.timesCircle [] ]
 
 
 viewBlockContextualMenu : Block -> Html Msg
@@ -4335,6 +4472,7 @@ viewBlockContextualMenu block =
         [ viewDeleteBlockAction block
         , if block.visible then
             viewHideBlockAction block
+
           else
             viewShowBlockAction block
         ]
@@ -4347,7 +4485,7 @@ viewFocusBlockAction block =
         , onClick <| ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock block.uuid
         , title "Focus block"
         ]
-        [ FASolid.arrow_right
+        [ FASolid.arrowRight []
         ]
 
 
@@ -4358,7 +4496,7 @@ viewDeleteBlocksAction blocks =
         , onClick <| ToJs <| RemoveBlocks blocks
         , title "Delete all blocks"
         ]
-        [ FASolid.trash ]
+        [ FASolid.trash [] ]
 
 
 viewDeleteBlockAction : Block -> Html Msg
@@ -4368,12 +4506,12 @@ viewDeleteBlockAction block =
         , onClickWithoutPropagation <| ToJs <| RemoveBlock block
         , title "Delete block"
         ]
-        [ FASolid.trash ]
+        [ FASolid.trash [] ]
 
 
 onClickWithoutPropagation : Msg -> Html.Attribute Msg
 onClickWithoutPropagation msg =
-    onWithOptions "click" { stopPropagation = True, preventDefault = False } (Decode.succeed msg)
+    Html.Events.custom "click" <| Decode.map (\_ -> { message = msg, stopPropagation = True, preventDefault = False }) (Decode.succeed msg)
 
 
 viewShowBlockAction : Block -> Html Msg
@@ -4383,7 +4521,7 @@ viewShowBlockAction block =
         , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [ block ] True
         , title "Show block"
         ]
-        [ FASolid.eye ]
+        [ FASolid.eye [] ]
 
 
 viewHideBlockAction : Block -> Html Msg
@@ -4393,7 +4531,7 @@ viewHideBlockAction block =
         , onClickWithoutPropagation <| ToJs <| ToggleBlocksVisibility [ block ] False
         , title "Hide block"
         ]
-        [ FASolid.eye_slash ]
+        [ FASolid.eyeSlash [] ]
 
 
 viewBlockItemWithSelection : Bool -> List String -> Block -> Html Msg
@@ -4402,12 +4540,14 @@ viewBlockItemWithSelection showContextualMenu selectedBlocks block =
         li
             [ if block.visible then
                 class "block-item block-item__selected"
+
               else
                 class "block-item block-item__selected hidden"
-            , style [ ( "borderColor", colorToCssRgbString block.color ) ]
+            , style "borderColor" <| colorToCssRgbString block.color
             ]
         <|
             viewBlockItemContent showContextualMenu block
+
     else
         viewBlockItem showContextualMenu block
 

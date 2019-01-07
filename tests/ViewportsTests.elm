@@ -1,16 +1,16 @@
 module ViewportsTests exposing (suite)
 
-import Viewports
-    exposing
-        ( Viewport
-        , Viewports
-        , encodeViewport
-        , encodeViewports
-        , CameraType(..)
-        )
 import Expect exposing (..)
 import Test exposing (..)
 import TestData exposing (..)
+import Viewports
+    exposing
+        ( CameraType(..)
+        , Viewport
+        , Viewports
+        , encodeViewport
+        , encodeViewports
+        )
 
 
 stringifyViewport : Viewport -> String
