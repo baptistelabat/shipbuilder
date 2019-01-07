@@ -49,9 +49,12 @@ RUN apt-get update \
     libgtk2.0-0 \
  && apt-get autoremove -y
 
-RUN pip install selenium==2.53.0
+RUN pip install\
+        selenium==2.53.0 \
+        nose \
+        rednose
 RUN export DISPLAY=:20
 RUN mkdir /test && chmod a+rwx /test
 ADD tests.py /test
 
-CMD export DISPLAY=:20 ; Xvfb :20 -screen 0 1366x768x16 & python /test/tests.py
+CMD export DISPLAY=:20 ; Xvfb :20 -screen 0 1366x768x16 & cd /test && nosetests -x -v -d --nocapture --nologcapture --rednose

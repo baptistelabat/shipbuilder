@@ -1,4 +1,4 @@
-.PHONY: all build build-optimized clean artifacts test selenium
+.PHONY: all build build-optimized clean artifacts test selenium babel
 
 VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points-at HEAD),$(shell git rev-parse --short=8 HEAD))
 
@@ -50,6 +50,13 @@ shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html
 	docker run -t -u $(shell id -u):$(shell id -g) -v $(shell pwd):/work -w /work uglifyjs elm-compressed.js --mangle --output=elm.min.js
 	rm elm-compressed.js
 	mv elm.min.js shipBuilder/js/elm.min.js
+
+babel:
+	cd babel && make && cd ..
+	docker run -t --rm -v $(shell pwd):/work -w /work -u $(shell id -u):$(shell id -g) babel
+	mv shipBuilder/js/main.babel.js shipBuilder/js/main.js
+	mv shipBuilder/js/lib/TransformControls.babel.js shipBuilder/js/lib/TransformControls.js
+	mv buildHull/*.json shipBuilder/assets
 
 selenium: shipBuilder/index.html shipBuilder/js/elm.min.js
 	cd selenium && make
