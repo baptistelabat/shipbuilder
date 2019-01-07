@@ -197,8 +197,8 @@ encodeColor color =
             Color.toRgba color
     in
     Encode.object
-        [ ( "red", Encode.float rgb.red )
-        , ( "green", Encode.float rgb.green )
-        , ( "blue", Encode.float rgb.blue )
+        [ ( "red", Encode.int <| floor <| 0.5 + 255 * rgb.red )
+        , ( "green", Encode.int <| floor <| 0.5 + 255 * rgb.green )
+        , ( "blue", Encode.int <| floor <| 0.5 + 255 * rgb.blue )
         , ( "alpha", Encode.float rgb.alpha )
         ]
