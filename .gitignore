@@ -1,9 +1,11 @@
 index.html
+shipBuilder/index-not-optimized.html
 0.19.0/package/versions.dat
 # elm-package generated files
 elm-stuff
 generated-code
 shipBuilder/js/elm.js
+shipBuilder/js/elm.min.js
 shipBuilder/*.json
 shipBuilder/index.template.json.html
 *.babel.js
