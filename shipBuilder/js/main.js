@@ -1,7 +1,6 @@
 'use strict';
 
-const div = document.getElementById('elm-app');
-const app = Elm.Main.embed(div, flags);
+const app = Elm.Main.init({node: document.getElementById('elm-app'), flags: flags});
 
 const mouse = new THREE.Vector2(); // used to store the cursor's position
 const wrapperId = "three-wrapper"; // defined in elm
