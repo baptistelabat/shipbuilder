@@ -205,11 +205,11 @@ decodeWithKeys ord keys_ func =
                     -- If we've been successful so far, and OK this time, then accumulate
                     Ok <| insert key thisTime goodSoFar
 
-                ( Ok goodSoFar, Err err ) ->
+                ( Ok _, Err err ) ->
                     -- If we were OK until now, but this one erred, then the whole thing fails
                     Err err
 
-                ( Err err, Ok _ ) ->
+                ( Err _, Ok _ ) ->
                     -- If we've already had an error, but this one is good, just keep the error
                     accum
 
@@ -421,21 +421,21 @@ concat ord lists =
 {-| Get the sum of the values.
 -}
 sum : AllDictList k number comparable -> number
-sum (AllDictList dict list) =
+sum (AllDictList dict _) =
     Dict.Any.foldl (always (+)) 0 dict
 
 
 {-| Get the product of the values.
 -}
 product : AllDictList k number comparable -> number
-product (AllDictList dict list) =
+product (AllDictList dict _) =
     Dict.Any.foldl (always (*)) 1 dict
 
 
 {-| Find the maximum value. Returns `Nothing` if empty.
 -}
 maximum : AllDictList k comparable1 comparable2 -> Maybe comparable1
-maximum (AllDictList dict list) =
+maximum (AllDictList dict _) =
     -- I considered having `maximum` and `minimum` return the key
     -- as well, but there is a bit of a puzzle there. What would
     -- one do when there are ties for the maximum value?
@@ -454,7 +454,7 @@ maximum (AllDictList dict list) =
 {-| Find the minimum value. Returns `Nothing` if empty.
 -}
 minimum : AllDictList k comparable1 comparable2 -> Maybe comparable1
-minimum (AllDictList dict list) =
+minimum (AllDictList dict _) =
     let
         go _ value acc =
             case acc of
@@ -598,7 +598,7 @@ reorder newKeys dictlist =
 {-| Gets the key at the specified index (0-based).
 -}
 getKeyAt : Int -> AllDictList k v comparable -> Maybe k
-getKeyAt index (AllDictList dict list) =
+getKeyAt index (AllDictList _ list) =
     List.Extra.getAt index list
 
 
@@ -813,7 +813,7 @@ fullEq first second =
 {-| Get the ord function used by the dictionary.
 -}
 getOrd : AllDictList k v comparable -> (k -> comparable)
-getOrd (AllDictList dict list) =
+getOrd (AllDictList dict _) =
     Dict.Any.getOrd dict
 
 
@@ -821,7 +821,7 @@ getOrd (AllDictList dict list) =
 `Nothing`.
 -}
 get : k -> AllDictList k v comparable -> Maybe v
-get key (AllDictList dict list) =
+get key (AllDictList dict _) =
     -- So, this is basically the key thing that is optimized, compared
     -- to an association list.
     Dict.Any.get key dict
@@ -830,21 +830,21 @@ get key (AllDictList dict list) =
 {-| Determine whether a key is in the dictionary.
 -}
 member : k -> AllDictList k v comparable -> Bool
-member key (AllDictList dict list) =
+member key (AllDictList dict _) =
     Dict.Any.member key dict
 
 
 {-| Determine the number of key-value pairs in the dictionary.
 -}
 size : AllDictList k v comparable -> Int
-size (AllDictList dict list) =
+size (AllDictList dict _) =
     Dict.Any.size dict
 
 
 {-| Determine whether a dictionary is empty.
 -}
 isEmpty : AllDictList k v comparable -> Bool
-isEmpty (AllDictList dict list) =
+isEmpty (AllDictList _ list) =
     List.isEmpty list
 
 
@@ -1078,7 +1078,7 @@ filter default predicate dictList =
 {-| Get all of the keys in a dictionary, in the order maintained by the dictionary.
 -}
 keys : AllDictList k v comparable -> List k
-keys (AllDictList dict list) =
+keys (AllDictList _ list) =
     list
 
 
@@ -1086,7 +1086,7 @@ keys (AllDictList dict list) =
 -}
 values : AllDictList k v comparable -> List v
 values dictList =
-    foldr (\key value valueList -> value :: valueList) [] dictList
+    foldr (\_ value valueList -> value :: valueList) [] dictList
 
 
 {-| Convert a dictionary into an association list of key-value pairs, in the order maintained by the dictionary.
@@ -1106,7 +1106,7 @@ fromList ord assocs =
 {-| Extract an `AllDict` from an `AllDictList`
 -}
 toAllDict : AllDictList k v comparable -> AllDict k v comparable
-toAllDict (AllDictList dict list) =
+toAllDict (AllDictList dict _) =
     dict
 
 
@@ -1121,7 +1121,7 @@ fromAllDict dict =
 {-| Extract a `Dict` from an `AllDictList`.
 -}
 toDict : AllDictList comparable1 v comparable2 -> Dict comparable1 v
-toDict (AllDictList dict list) =
+toDict (AllDictList dict _) =
     Dict.Any.foldl Dict.insert Dict.empty dict
 
 

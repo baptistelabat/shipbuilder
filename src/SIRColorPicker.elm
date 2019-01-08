@@ -1,6 +1,6 @@
 module SIRColorPicker exposing (SirColor(..), amber, black, blue, brown, cyan, deepOrange, deepPurple, fromColor, fromName, getColor, getName, green, indigo, lightBlue, lightGreen, lime, orange, palette, pink, purple, red, teal, toCssColor, view, viewColorItem, yellow)
 
-import Color exposing (Color, hsl)
+import Color exposing (Color)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class, style, title)
 import Html.Events exposing (onClick)

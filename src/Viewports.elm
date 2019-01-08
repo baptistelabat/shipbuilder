@@ -47,7 +47,11 @@ type alias Viewport =
         Float
     , background : Color
     , eye : Vec3
-    , canControl : { x : Bool, y : Bool, z : Bool }
+    , canControl :
+        { x : Bool
+        , y : Bool
+        , z : Bool
+        }
     , cameraType : CameraType
     }
 
@@ -157,26 +161,6 @@ viewportPerspective left top width height background =
     , canControl = { x = False, y = False, z = False }
     , cameraType = Perspective
     }
-
-
-topHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-topHalfViewport background viewport =
-    viewport 0 0 1 0.5 background
-
-
-bottomHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-bottomHalfViewport background viewport =
-    viewport 0 0.5 1 0.5 background
-
-
-leftHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-leftHalfViewport background viewport =
-    viewport 0 0 0.5 1 background
-
-
-rightHalfViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
-rightHalfViewport background viewport =
-    viewport 0.5 0 0.5 1 background
 
 
 topLeftCornerViewport : Color -> (Float -> Float -> Float -> Float -> Color -> Viewport) -> Viewport
