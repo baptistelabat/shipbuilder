@@ -24,7 +24,6 @@ import Array
 import Dict exposing (Dict)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id)
-import Interpolate.Cubic as Spline exposing (Spline)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -101,11 +100,6 @@ hullSliceDecoder =
         |> Pipeline.required "zmin" Decode.float
         |> Pipeline.required "zmax" Decode.float
         |> Pipeline.required "y" (Decode.list Decode.float)
-
-
-makeSliceSpline : (Float -> Float) -> (Float -> Float) -> HullSlice -> Spline
-makeSliceSpline scaleY scaleZ slice =
-    Spline.withRange (scaleZ slice.zmin) (scaleZ slice.zmax) <| List.map scaleY slice.y
 
 
 scale : JsonHullSlices a -> HullSlice -> HullSlice
@@ -330,7 +324,7 @@ removeDuplicates l =
                 removeDuplicates (( x2, y2 ) :: rest)
 
             else
-                [ ( x1, y1 ) ] ++ removeDuplicates (( x2, y2 ) :: rest)
+                ( x1, y1 ) :: removeDuplicates (( x2, y2 ) :: rest)
 
 
 clip : Float -> Float -> List ( Float, Float ) -> List ( Float, Float )
@@ -345,7 +339,7 @@ clip_ a b xys =
         [] ->
             []
 
-        [ ( x, y ) ] ->
+        [ ( _, _ ) ] ->
             []
 
         ( x1, y1 ) :: ( x2, y2 ) :: rest ->
@@ -387,7 +381,7 @@ area a b curve =
                 [] ->
                     0
 
-                [ xy ] ->
+                [ _ ] ->
                     0
 
                 ( x1, y1 ) :: ( x2, y2 ) :: rest ->
