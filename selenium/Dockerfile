@@ -1,3 +1,5 @@
+# Heavily inspired by https://qxf2.com/blog/building-your-own-docker-images-for-different-browser-versions/
+
 #Step 1
 #Dockerfile to build an image for different versions of firefox
 #Pull ubuntu 16.04 base image
