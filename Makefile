@@ -36,7 +36,7 @@ shipBuilder.zip: shipBuilder/index.html shipBuilder/js/hull.js shipBuilder/js/ma
 	zip -r -9 shipBuilder.zip shipBuilder/index.html shipBuilder/js shipBuilder/css shipBuilder/assets
 
 clean:
-	rm -rf shipBuilder/js/elm.js shipBuilder/js/elm.min.js shipBuilder/index.html shipBuilder/index-not-optimized.html shipBuilder.zip shipBuilder/index.template.json.html 
+	rm -rf shipBuilder/js/elm.js shipBuilder/js/elm.min.js shipBuilder/index.html shipBuilder/index-not-optimized.html shipBuilder.zip shipBuilder/index.template.json.html
 
 shipBuilder/index.html: shipBuilder/index-not-optimized.html
 	@sed 's/elm.js/elm.min.js/g' shipBuilder/index-not-optimized.html > shipBuilder/index.html
@@ -44,7 +44,7 @@ shipBuilder/index.html: shipBuilder/index-not-optimized.html
 
 elm-analyse:
 	cd elm-analyse && make
-	docker run -it --rm -v $(shell pwd):/work -v $(shell pwd)/.elm-analyse:/root/.elm-analyse -w /work elm-analyse
+	docker run -t --rm -v $(shell pwd):/work -v $(shell pwd)/.elm-analyse:/root/.elm-analyse -w /work elm-analyse
 
 shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html elm-analyse
 	cd uglifyjs && docker build -t uglifyjs . ; cd ..
