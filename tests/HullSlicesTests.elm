@@ -50,6 +50,11 @@ eps =
     Absolute 1.0e-5
 
 
+epsRelative : FloatingPointTolerance
+epsRelative =
+    Relative 1.0e-5
+
+
 s : Interpolate.Cubic.Spline
 s =
     Interpolate.Cubic.withRange 10 16 [ 12, 23, 34, 45, 56, 67, 78 ]
@@ -310,7 +315,7 @@ suite =
                                     x3
                             in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
-                                |> Expect.within eps (3 * (zmax - a))
+                                |> Expect.within epsRelative (3 * (zmax - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 9)" <|
                         \( zmin, zmaxa, b ) ->
                             HullSlices.area zmaxa b { zmin = zmin, zmax = zmaxa, y = [ 3, 3, 3 ] }
@@ -575,5 +580,15 @@ suite =
                         [ 0, 1, 2, 3, 2, 1, 0 ]
                         |> Expect.within eps
                             (max 0 (3 * length_ / 2))
+            , fuzz
+                (Fuzz.map3 (\length_ a b -> { length_ = length_, a = a, b = b }) positiveFloat positiveFloat positiveFloat)
+                "Four-part area curve"
+              <|
+                \{ length_, a, b } ->
+                    HullSlices.volume
+                        { xmin = 0, length = StringValueInput.floatInput length_ }
+                        [ 0, a, a + b, a, 0 ]
+                        |> Expect.within epsRelative
+                            (3 * a * length_ / 4 + b * length_ / 4)
             ]
         ]
