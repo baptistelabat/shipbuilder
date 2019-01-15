@@ -569,15 +569,11 @@ suite =
                 (Fuzz.map2 Tuple.pair Fuzz.float Fuzz.float)
                 "Triangular area curve"
               <|
-                \( xmin, length ) ->
-                    let
-                        ( xmin_, length_ ) =
-                            ( 0.000001, 0.00005116475268283904 )
-                    in
+                \( xmin_, length_ ) ->
                     HullSlices.volume
                         { xmin = xmin_, length = StringValueInput.floatInput length_ }
                         [ 0, 1, 2, 3, 2, 1, 0 ]
                         |> Expect.within eps
-                            (3 * length_ / 2)
+                            (max 0 (3 * length_ / 2))
             ]
         ]
