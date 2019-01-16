@@ -12,7 +12,7 @@ import TestData
 
 positiveFloat : Fuzz.Fuzzer Float
 positiveFloat =
-    Fuzz.floatRange 0.01 1.0e10
+    Fuzz.floatRange 1.0e-6 1.0e8
 
 
 negativeFloat : Fuzz.Fuzzer Float
@@ -27,11 +27,11 @@ type alias DBInput =
 dbInput : Fuzz.Fuzzer Float -> Fuzz.Fuzzer DBInput
 dbInput alphaFuzzer =
     let
-        f : ( Float, Float ) -> Float -> DBInput
-        f ( currentBreadth, maxSliceBreadth ) alpha =
-            { maxSliceBreadth = maxSliceBreadth, alpha = alpha, currentBreadth = currentBreadth }
+        f : Float -> Float -> Float -> DBInput
+        f currentBreadth delta alpha =
+            { maxSliceBreadth = currentBreadth + delta, alpha = alpha, currentBreadth = currentBreadth }
     in
-    Fuzz.map2 f twoIncreasingFloats alphaFuzzer
+    Fuzz.map3 f positiveFloat positiveFloat alphaFuzzer
 
 
 twoIncreasingFloats : Fuzz.Fuzzer ( Float, Float )
@@ -334,7 +334,7 @@ suite =
                                     x3
                             in
                             HullSlices.area a b { zmin = zmin, zmax = zmax, y = [ 3, 3, 3 ] }
-                                |> Expect.within epsRelative (3 * (zmax - a))
+                                |> Expect.within eps (3 * (zmax - a))
                     , fuzz threeIncreasingFloats "Vertical line (case 9)" <|
                         \( zmin, zmaxa, b ) ->
                             HullSlices.area zmaxa b { zmin = zmin, zmax = zmaxa, y = [ 3, 3, 3 ] }
@@ -504,7 +504,7 @@ suite =
                                     t.slices
                                     |> List.map (\area -> \e -> Expect.within e expectedArea area)
                                 )
-                                (Relative 1.0e-8)
+                                (Relative 1.0e-2)
                     , test "Toblerone bug" <|
                         \_ ->
                             let
@@ -623,5 +623,9 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.dB maxSliceBreadth alpha currentBreadth
                         |> Expect.greaterThan 1
+            , fuzz (dbInput <| Fuzz.constant 0) "dB = 1 for alpha = 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.dB maxSliceBreadth alpha currentBreadth
+                        |> Expect.within epsRelative 1
             ]
         ]
