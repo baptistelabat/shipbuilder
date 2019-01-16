@@ -44,7 +44,7 @@ shipBuilder/index.html: shipBuilder/index-not-optimized.html
 
 elm-analyse:
 	cd elm-analyse && make
-	docker run -t --rm -v $(shell pwd):/work -v $(shell pwd)/.elm-analyse:/root/.elm-analyse -w /work elm-analyse
+	docker run -t --rm -u $(shell id -u):$(shell id -g) -v $(shell pwd):/work -v $(shell pwd)/.elm-analyse:/root/.elm-analyse -w /work elm-analyse
 
 shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html elm-analyse
 	cd uglifyjs && docker build -t uglifyjs . ; cd ..
