@@ -13,6 +13,7 @@ module HullSlices exposing
     , empty
     , encoder
     , interpolate
+    , modifiedBreadth
     , plotAreaCurve
     , scale
     , setBreadth
@@ -392,6 +393,11 @@ dB maxSliceBreadth alpha currentBreadth =
 
     else
         z ^ alpha
+
+
+modifiedBreadth : Float -> Float -> Float -> Float
+modifiedBreadth maxSliceBreadth alpha currentBreadth =
+    currentBreadth
 
 
 area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float

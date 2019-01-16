@@ -654,4 +654,10 @@ suite =
                     HullSlices.dB maxSliceBreadth 1.0e15 maxSliceBreadth
                         |> Expect.within epsRelative 0
             ]
+        , describe "modifiedBreadth"
+            [ fuzz (dbInput negativeFloat) "modifiedBreadth = currentBreadth for alpha = 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.modifiedBreadth maxSliceBreadth 0 currentBreadth
+                        |> Expect.within epsRelative currentBreadth
+            ]
         ]
