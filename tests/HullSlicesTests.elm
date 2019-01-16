@@ -627,5 +627,9 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.dB maxSliceBreadth alpha currentBreadth
                         |> Expect.within epsRelative 1
+            , fuzz (dbInput positiveFloat) "dB <= 1 for alpha >= 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.dB maxSliceBreadth alpha currentBreadth
+                        |> Expect.lessThan 1
             ]
         ]
