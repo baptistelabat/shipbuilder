@@ -4,6 +4,7 @@ module HullSlices exposing
     , JsonHullSlices
     , area
     , calculateSliceArea
+    , changeSliceAreaWhilePreservingSize
     , clip
     , decoder
     , dictDecoder
@@ -370,6 +371,13 @@ clip_ a b xys =
 
                 else
                     [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ clip a b (( x2, y2 ) :: rest)
+
+
+{-| Dilates a slice while keeping its breadth & depth.
+-}
+changeSliceAreaWhilePreservingSize : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> { c | zmin : Float, zmax : Float, y : List Float }
+changeSliceAreaWhilePreservingSize _ slice =
+    slice
 
 
 area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float

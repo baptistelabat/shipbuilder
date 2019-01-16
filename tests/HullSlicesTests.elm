@@ -591,4 +591,12 @@ suite =
                         |> Expect.within epsRelative
                             (3 * a * length_ / 4 + b * length_ / 4)
             ]
+        , describe "Can change slice area"
+            [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Can find original area by setting parameter to 0" <|
+                \( width, height ) ->
+                    { zmin = 0, zmax = width, y = [ abs height, abs height, abs height ] }
+                        |> HullSlices.changeSliceAreaWhilePreservingSize 0
+                        |> HullSlices.area 0 (abs width)
+                        |> Expect.within epsRelative (width * height)
+            ]
         ]
