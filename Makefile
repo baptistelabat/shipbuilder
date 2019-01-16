@@ -46,7 +46,7 @@ elm-analyse:
 	cd elm-analyse && make
 	docker run -t --rm -u $(shell id -u):$(shell id -g) -v $(shell pwd):/work -v $(shell pwd)/.elm-analyse:/root/.elm-analyse -w /work elm-analyse
 
-shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html elm-analyse
+shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html
 	cd uglifyjs && docker build -t uglifyjs . ; cd ..
 	cp shipBuilder/js/elm.js .
 	docker run -t -u $(shell id -u):$(shell id -g) -v $(shell pwd):/work -w /work uglifyjs elm.js --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' > elm-compressed.js
