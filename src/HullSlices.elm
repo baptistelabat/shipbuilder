@@ -383,7 +383,15 @@ changeSliceAreaWhilePreservingSize _ slice =
 
 dB : Float -> Float -> Float -> Float
 dB maxSliceBreadth alpha currentBreadth =
-    (((maxSliceBreadth - currentBreadth) / maxSliceBreadth) * currentBreadth / maxSliceBreadth) ^ alpha
+    let
+        z =
+            ((maxSliceBreadth - currentBreadth) / maxSliceBreadth) * currentBreadth / maxSliceBreadth
+    in
+    if z == 0 then
+        0
+
+    else
+        z ^ alpha
 
 
 area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float

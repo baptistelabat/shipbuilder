@@ -1,1 +1,1 @@
-cmd: (make build) && ((make test && git config --global core.editor "gedit" && git commit src/* tests/* && git config --global core.editor "vim" && return 0 ) || (git checkout HEAD -- src/ && return -1))
+cmd: (make build) && ((make test && git config --global core.editor "gedit" && git commit src/*.elm tests/*.elm && git config --global core.editor "vim" && return 0 ) || (git checkout HEAD -- src/ && return -1))

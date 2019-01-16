@@ -20,6 +20,20 @@ negativeFloat =
     Fuzz.map (\x -> -x) positiveFloat
 
 
+nonZero : Fuzz.Fuzzer Float
+nonZero =
+    let
+        chooseFuzzer : Bool -> Float -> Float -> Float
+        chooseFuzzer choosePositive positive negative =
+            if choosePositive then
+                positive
+
+            else
+                negative
+    in
+    Fuzz.map3 chooseFuzzer Fuzz.bool positiveFloat negativeFloat
+
+
 type alias DBInput =
     { maxSliceBreadth : Float, alpha : Float, currentBreadth : Float }
 
@@ -631,5 +645,9 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.dB maxSliceBreadth alpha currentBreadth
                         |> Expect.lessThan 1
+            , fuzz (dbInput nonZero) "dB = 0 for z = 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.dB maxSliceBreadth alpha 0
+                        |> Expect.within epsRelative 0
             ]
         ]
