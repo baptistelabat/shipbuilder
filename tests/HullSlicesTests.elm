@@ -671,5 +671,9 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
                         |> Expect.atMost currentBreadth
+            , fuzz (dbInput positiveFloat) "modifiedBreadth > currentBreadth for alpha > 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
+                        |> Expect.atLeast currentBreadth
             ]
         ]
