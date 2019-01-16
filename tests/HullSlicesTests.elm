@@ -679,5 +679,9 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
                         |> Expect.within epsRelative maxSliceBreadth
+            , fuzz (dbInput (Fuzz.constant -1.0e15)) "modifiedBreadth -> 0 when alpha << 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
+                        |> Expect.within epsRelative 0
             ]
         ]
