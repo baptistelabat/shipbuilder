@@ -15,6 +15,25 @@ positiveFloat =
     Fuzz.floatRange 0.01 1.0e10
 
 
+negativeFloat : Fuzz.Fuzzer Float
+negativeFloat =
+    Fuzz.map (\x -> -x) positiveFloat
+
+
+type alias DBInput =
+    { maxSliceBreadth : Float, alpha : Float, currentBreadth : Float }
+
+
+dbInput : Fuzz.Fuzzer Float -> Fuzz.Fuzzer DBInput
+dbInput alphaFuzzer =
+    let
+        f : ( Float, Float ) -> Float -> DBInput
+        f ( currentBreadth, maxSliceBreadth ) alpha =
+            { maxSliceBreadth = maxSliceBreadth, alpha = alpha, currentBreadth = currentBreadth }
+    in
+    Fuzz.map2 f twoIncreasingFloats alphaFuzzer
+
+
 twoIncreasingFloats : Fuzz.Fuzzer ( Float, Float )
 twoIncreasingFloats =
     let
@@ -598,5 +617,11 @@ suite =
                         |> HullSlices.changeSliceAreaWhilePreservingSize 0
                         |> HullSlices.area 0 (abs width)
                         |> Expect.within epsRelative (width * height)
+            ]
+        , describe "Auxiliary function dB"
+            [ fuzz (dbInput negativeFloat) "dB > 1 for alpha < 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.dB maxSliceBreadth alpha currentBreadth
+                        |> Expect.greaterThan 1
             ]
         ]

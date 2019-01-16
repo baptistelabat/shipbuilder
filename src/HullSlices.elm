@@ -6,6 +6,7 @@ module HullSlices exposing
     , calculateSliceArea
     , changeSliceAreaWhilePreservingSize
     , clip
+    , dB
     , decoder
     , dictDecoder
     , dictEncoder
@@ -378,6 +379,11 @@ clip_ a b xys =
 changeSliceAreaWhilePreservingSize : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> { c | zmin : Float, zmax : Float, y : List Float }
 changeSliceAreaWhilePreservingSize _ slice =
     slice
+
+
+dB : Float -> Float -> Float -> Float
+dB maxSliceBreadth alpha currentBreadth =
+    (((maxSliceBreadth - currentBreadth) / maxSliceBreadth) * currentBreadth / maxSliceBreadth) ^ alpha
 
 
 area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
