@@ -649,9 +649,9 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.dB maxSliceBreadth alpha 0
                         |> Expect.within epsRelative 0
-            , fuzz (dbInput nonZero) "dB = 0 for z = T" <|
+            , fuzz (dbInput nonZero) "dB -> 0 for alpha -> infinity" <|
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.dB maxSliceBreadth alpha maxSliceBreadth
+                    HullSlices.dB maxSliceBreadth 1.0e15 maxSliceBreadth
                         |> Expect.within epsRelative 0
             ]
         ]
