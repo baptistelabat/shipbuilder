@@ -1,4 +1,4 @@
-.PHONY: all build build-optimized clean artifacts test
+.PHONY: all build build-optimized clean artifacts test selenium babel elm-analyse
 
 VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points-at HEAD),$(shell git rev-parse --short=8 HEAD))
 
@@ -36,11 +36,15 @@ shipBuilder.zip: shipBuilder/index.html shipBuilder/js/hull.js shipBuilder/js/ma
 	zip -r -9 shipBuilder.zip shipBuilder/index.html shipBuilder/js shipBuilder/css shipBuilder/assets
 
 clean:
-	rm -rf shipBuilder/js/elm.js shipBuilder/js/elm.min.js shipBuilder/index.html shipBuilder/index-not-optimized.html shipBuilder.zip shipBuilder/index.template.json.html 
+	rm -rf shipBuilder/js/elm.js shipBuilder/js/elm.min.js shipBuilder/index.html shipBuilder/index-not-optimized.html shipBuilder.zip shipBuilder/index.template.json.html
 
 shipBuilder/index.html: shipBuilder/index-not-optimized.html
 	@sed 's/elm.js/elm.min.js/g' shipBuilder/index-not-optimized.html > shipBuilder/index.html
 	@echo "Replaced elm.js by elm.min.js in index.html"
+
+elm-analyse:
+	cd elm-analyse && make
+	docker run -t --rm -u $(shell id -u):$(shell id -g) -v $(shell pwd):/work -v $(shell pwd)/.elm-analyse:/root/.elm-analyse -w /work elm-analyse
 
 shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html
 	cd uglifyjs && docker build -t uglifyjs . ; cd ..
@@ -50,3 +54,14 @@ shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html
 	docker run -t -u $(shell id -u):$(shell id -g) -v $(shell pwd):/work -w /work uglifyjs elm-compressed.js --mangle --output=elm.min.js
 	rm elm-compressed.js
 	mv elm.min.js shipBuilder/js/elm.min.js
+
+babel:
+	cd babel && make && cd ..
+	docker run -t --rm -v $(shell pwd):/work -w /work -u $(shell id -u):$(shell id -g) babel
+	mv shipBuilder/js/main.babel.js shipBuilder/js/main.js
+	mv shipBuilder/js/lib/TransformControls.babel.js shipBuilder/js/lib/TransformControls.js
+	mv buildHull/*.json shipBuilder/assets
+
+selenium: shipBuilder/index.html shipBuilder/js/elm.min.js
+	cd selenium && make
+	docker run -t -v $(shell pwd)/shipBuilder:/work -w /work python-selenium-firefox:firefox38

@@ -226,8 +226,8 @@ get k (AnyDict { dict, toKey }) =
 getOrd : AnyDict comparable k v -> (k -> comparable)
 getOrd d =
     case d of
-        AnyDict { dict, toKey } ->
-            toKey
+        AnyDict dd ->
+            dd.toKey
 
 
 {-| Determine the number of key-value pairs in the dictionary.

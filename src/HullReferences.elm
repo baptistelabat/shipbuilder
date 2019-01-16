@@ -1,14 +1,13 @@
-module HullReferences
-    exposing
-        ( HullReferences
-        , HullReference
-        , viewHullStudioPanel
-        , viewHullStudioPanelWithSelection
-        )
+module HullReferences exposing
+    ( HullReference
+    , HullReferences
+    , viewHullStudioPanel
+    , viewHullStudioPanelWithSelection
+    )
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html exposing (Html, div, h2, li, p, text, ul)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 
 
 type alias HullReferences =
@@ -34,7 +33,7 @@ viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg unselectMsg sele
 viewHullReferencesWithSelection : List String -> (String -> msg) -> msg -> String -> Html msg
 viewHullReferencesWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
     ul [ class "hull-references" ] <|
-        (viewUnselectHullReference True unselectMsg)
+        viewUnselectHullReference True unselectMsg
             :: List.map (viewHullReferenceWithSelection referenceSelectionMsg selectedHullReferencePath) hullRefs
 
 
@@ -43,6 +42,7 @@ viewHullReferenceWithSelection referenceSelectionMsg selectedHullReference ref =
     li
         (if ref == selectedHullReference then
             [ class "hull-reference hull-reference__selected" ]
+
          else
             [ class "hull-reference"
             , onClick <| referenceSelectionMsg ref
@@ -70,7 +70,7 @@ viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg =
 viewHullReferences : List String -> (String -> msg) -> msg -> Html msg
 viewHullReferences hullRefs referenceSelectionMsg unselectMsg =
     ul [ class "hull-references" ] <|
-        (viewUnselectHullReference False unselectMsg)
+        viewUnselectHullReference False unselectMsg
             :: List.map (viewHullReference referenceSelectionMsg) hullRefs
 
 
@@ -90,6 +90,7 @@ viewUnselectHullReference isAHullSelected unselectMsg =
             [ class "hull-reference"
             , onClick <| unselectMsg
             ]
+
          else
             [ class "hull-reference hull-reference-none hull-reference__selected" ]
         )

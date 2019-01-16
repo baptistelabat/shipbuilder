@@ -113,13 +113,13 @@ cubic x { a, b, c, d } =
 
 
 firstDerivative : Float -> Coefficients -> Float
-firstDerivative x { a, b, c, d } =
-    3 * a * x ^ 2 + 2 * b * x + c
+firstDerivative x coeff =
+    3 * coeff.a * x ^ 2 + 2 * coeff.b * x + coeff.c
 
 
 secondDerivative : Float -> Coefficients -> Float
-secondDerivative x { a, b, c, d } =
-    6 * a * x + 2 * b
+secondDerivative x coeff =
+    6 * coeff.a * x + 2 * coeff.b
 
 
 evaluate : (Float -> Coefficients -> a) -> Float -> Spline -> a
@@ -266,7 +266,7 @@ mapTriple f x0 =
         ( Just x1, Just x2 ) ->
             List.map3 f x0 x1 x2
 
-        otherwise ->
+        _ ->
             []
 
 
@@ -276,7 +276,7 @@ mapPair f x0 =
         Just x1 ->
             List.map2 f x0 x1
 
-        otherwise ->
+        Nothing ->
             []
 
 
@@ -285,7 +285,7 @@ scanl fn b =
     let
         scan a bs =
             case bs of
-                hd :: tl ->
+                hd :: _ ->
                     fn a hd :: bs
 
                 _ ->

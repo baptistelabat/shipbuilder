@@ -24,7 +24,6 @@ import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (class, for, id, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode as Decode
-import Json.Decode.Pipeline as Pipeline
 import String
 
 
@@ -75,15 +74,6 @@ floatInputDecoder unit description =
     Decode.map (fromNumber unit description) Decode.float
 
 
-decodeFloatInput : Decode.Decoder FloatInput
-decodeFloatInput =
-    Decode.succeed FloatInput
-        |> Pipeline.required "value" Decode.float
-        |> Pipeline.required "string" Decode.string
-        |> Pipeline.optional "unit" Decode.string ""
-        |> Pipeline.optional "description" Decode.string ""
-
-
 fromNumber : String -> String -> Float -> FloatInput
 fromNumber unit description value =
     let
@@ -131,7 +121,6 @@ decodeSpacingExceptions =
                     Dict.insert intKey (fromNumber "" "" value) dict
 
                 Nothing ->
-                    -- TODO: handle failure or only ignore ?
                     dict
 
         parse : Dict String Float -> Dict Int FloatInput
@@ -172,26 +161,6 @@ makeID var =
         alphanumeric : String
         alphanumeric =
             "abcdefghijklmnopqrstuvxwyz0123456789-_"
-
-        dummy : String
-        dummy =
-            var.string ++ var.unit
-
-        default : String
-        default =
-            if dummy == "" then
-                "empty-float-input"
-
-            else
-                dummy
-
-        replaceByDefaultIfEmpty : String -> String
-        replaceByDefaultIfEmpty s =
-            if s == "" then
-                default
-
-            else
-                s
     in
     var.description
         |> String.toLower

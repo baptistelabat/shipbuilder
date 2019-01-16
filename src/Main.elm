@@ -48,15 +48,14 @@ import DictList
 import ExtraEvents exposing (onKeyDown)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import HullReferences exposing (HullReference, HullReferences)
+import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p, sub, text, ul)
+import Html.Attributes exposing (accept, class, disabled, download, for, href, id, name, placeholder, src, style, title, type_, value)
+import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
+import HullReferences exposing (HullReferences)
 import HullSlices exposing (HullSlices)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
-import List.Extra
 import SIRColorPicker
 import StringValueInput
 import Task
@@ -98,7 +97,7 @@ main =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.batch
         [ fromJs jsMsgToMsg
         , Browser.Events.onKeyDown <| Decode.map keydownToMsg keyDecoder
@@ -123,7 +122,9 @@ newBlockDecoder =
 
 
 type alias SyncPosition =
-    { uuid : String, position : Position }
+    { uuid : String
+    , position : Position
+    }
 
 
 syncPositionDecoder : Decode.Decoder SyncPosition
@@ -134,7 +135,9 @@ syncPositionDecoder =
 
 
 type alias SyncSize =
-    { uuid : String, size : Size }
+    { uuid : String
+    , size : Size
+    }
 
 
 type alias SaveFile =
@@ -672,41 +675,6 @@ type alias Model =
     }
 
 
-type alias Frames =
-    Dict Int Frame
-
-
-initFrames : Frames
-initFrames =
-    Dict.fromList [ ( 0, initFrame ), ( 1, initFrame ), ( 2, initFrame ) ]
-
-
-type alias Frame =
-    { x : StringValueInput.FloatInput
-    , points : Dict Int FramePoint
-    }
-
-
-initFrame : Frame
-initFrame =
-    { x = StringValueInput.fromNumber "m" "x" 0
-    , points = Dict.fromList [ ( 0, initFramePoint ), ( 1, initFramePoint ), ( 2, initFramePoint ), ( 3, initFramePoint ), ( 4, initFramePoint ) ]
-    }
-
-
-type alias FramePoint =
-    { y : StringValueInput.FloatInput
-    , z : StringValueInput.FloatInput
-    }
-
-
-initFramePoint : FramePoint
-initFramePoint =
-    { y = StringValueInput.fromNumber "m" "y" 0.0
-    , z = StringValueInput.fromNumber "m" "z" 0.0
-    }
-
-
 type alias CustomProperty =
     { label : String
     , values : Dict String String
@@ -890,16 +858,25 @@ type ReferenceForMass
 
 
 type alias Position =
-    { x : StringValueInput.FloatInput, y : StringValueInput.FloatInput, z : StringValueInput.FloatInput }
+    { x : StringValueInput.FloatInput
+    , y : StringValueInput.FloatInput
+    , z : StringValueInput.FloatInput
+    }
 
 
 initPosition : Position
 initPosition =
-    { x = StringValueInput.emptyFloat, y = StringValueInput.emptyFloat, z = StringValueInput.emptyFloat }
+    { x = StringValueInput.emptyFloat
+    , y = StringValueInput.emptyFloat
+    , z = StringValueInput.emptyFloat
+    }
 
 
 type alias Size =
-    { length : StringValueInput.FloatInput, width : StringValueInput.FloatInput, height : StringValueInput.FloatInput }
+    { length : StringValueInput.FloatInput
+    , width : StringValueInput.FloatInput
+    , height : StringValueInput.FloatInput
+    }
 
 
 type alias Blocks =
@@ -910,14 +887,6 @@ type alias KpiSummary =
     { target : KpiTarget
     , volume : Float
     , mass : Float
-    }
-
-
-computeKpisForBlock : Block -> KpiSummary
-computeKpisForBlock block =
-    { target = SingleBlock block.uuid
-    , volume = computeVolume block
-    , mass = block.mass.value
     }
 
 
@@ -939,7 +908,6 @@ computeKpisForAll blocks =
 
 type KpiTarget
     = WholeShip
-    | SingleBlock String
     | ColorGroup SIRColorPicker.SirColor
 
 
@@ -1189,7 +1157,7 @@ computeDecks decks =
             List.repeat decks.number.value { index = 0, position = 0.0, number = 0 }
 
         computeDeck : Int -> ComputedPartition -> ComputedPartition
-        computeDeck index element =
+        computeDeck index _ =
             let
                 number : Int
                 number =
@@ -1209,11 +1177,11 @@ getPartitionOffset partitionSummary index =
 
         exceptionsToAccountFor : Int -> Int -> Dict Int StringValueInput.FloatInput
         exceptionsToAccountFor minKey maxKey =
-            Dict.filter (\key value -> key < (maxKey + partitionSummary.zero.index) && key >= (minKey + partitionSummary.zero.index)) partitionSummary.spacingExceptions
+            Dict.filter (\key _ -> key < (maxKey + partitionSummary.zero.index) && key >= (minKey + partitionSummary.zero.index)) partitionSummary.spacingExceptions
 
         total : Dict Int StringValueInput.FloatInput -> Float
         total exceptions_ =
-            Dict.foldl (\key value currentTotal -> currentTotal + value.value) 0.0 exceptions_
+            Dict.foldl (\_ value currentTotal -> currentTotal + value.value) 0.0 exceptions_
 
         exceptions : Dict Int StringValueInput.FloatInput
         exceptions =
@@ -1252,7 +1220,7 @@ computeBulkheads bulkheads =
             List.repeat bulkheads.number.value { index = 0, position = 0.0, number = 0 }
 
         computeBulkhead : Int -> ComputedPartition -> ComputedPartition
-        computeBulkhead index element =
+        computeBulkhead index _ =
             let
                 number : Int
                 number =
@@ -1284,7 +1252,7 @@ toList blocks =
 
 filterBlocksByColor : Color -> Blocks -> Blocks
 filterBlocksByColor color blocks =
-    DictList.filter emptyBlock (\uuid block -> block.color == color) blocks
+    DictList.filter emptyBlock (\_ block -> block.color == color) blocks
 
 
 toMassList : Blocks -> List Float
@@ -1341,21 +1309,6 @@ renameBlock label block =
     { block | label = label }
 
 
-getHeight : { a | size : Size } -> Float
-getHeight block =
-    block.size.height.value
-
-
-getWidth : { a | size : Size } -> Float
-getWidth block =
-    block.size.width.value
-
-
-getLength : { a | size : Size } -> Float
-getLength block =
-    block.size.length.value
-
-
 getBlockByUUID : String -> Blocks -> Maybe Block
 getBlockByUUID uuid blocks =
     DictList.get uuid blocks
@@ -1410,7 +1363,7 @@ initModel flag =
                     Ok c ->
                         c
 
-                    Err e ->
+                    Err _ ->
                         Dict.empty
         in
         cuts
@@ -2000,8 +1953,8 @@ updateNoJs msg model =
                         }
                     , spacingExceptions =
                         -- we want to remove useless exceptions => those equal to the default value
-                        Dict.map (\key input -> StringValueInput.syncFloatInput input) model.partitions.decks.spacingExceptions
-                            |> Dict.filter (\key input -> input.value /= model.partitions.decks.spacing.value)
+                        Dict.map (\_ input -> StringValueInput.syncFloatInput input) model.partitions.decks.spacingExceptions
+                            |> Dict.filter (\_ input -> input.value /= model.partitions.decks.spacing.value)
                     }
 
                 syncedBulkheads : Bulkheads
@@ -2015,8 +1968,8 @@ updateNoJs msg model =
                         , position = StringValueInput.syncFloatInput model.partitions.bulkheads.zero.position
                         }
                     , spacingExceptions =
-                        Dict.map (\key input -> StringValueInput.syncFloatInput input) model.partitions.bulkheads.spacingExceptions
-                            |> Dict.filter (\key input -> input.value /= model.partitions.bulkheads.spacing.value)
+                        Dict.map (\_ input -> StringValueInput.syncFloatInput input) model.partitions.bulkheads.spacingExceptions
+                            |> Dict.filter (\_ input -> input.value /= model.partitions.bulkheads.spacing.value)
                     }
 
                 updatedModel : Model
@@ -2164,7 +2117,6 @@ updateFromJs jsmsg model =
                 newModel =
                     restoreSaveInModel model saveFile
             in
-            -- TODO: split and move in ToJs ?
             ( newModel, Cmd.batch [ toJs <| restoreSaveCmd newModel ] )
 
         Select uuid ->
@@ -2275,7 +2227,7 @@ updateFromJs jsmsg model =
             , Cmd.none
             )
 
-        JSError message ->
+        JSError _ ->
             ( model, Cmd.none )
 
 
@@ -2287,7 +2239,7 @@ updateModelToJs msg model =
 
         ChangeBlockColor block newColor ->
             case getBlockByUUID block.uuid model.blocks of
-                Just recoveredBlock ->
+                Just _ ->
                     let
                         updatedBlock : Block
                         updatedBlock =
@@ -2298,7 +2250,7 @@ updateModelToJs msg model =
                 Nothing ->
                     model
 
-        AddBlock label ->
+        AddBlock _ ->
             model
 
         RemoveBlock block ->
@@ -2382,7 +2334,7 @@ updateModelToJs msg model =
         ToggleBlocksVisibility blocks isVisible ->
             let
                 updateVisibilityIfTargeted : String -> Block -> Block
-                updateVisibilityIfTargeted uuid block =
+                updateVisibilityIfTargeted _ block =
                     if List.member block blocks then
                         { block | visible = isVisible }
 
@@ -2559,7 +2511,7 @@ msg2json model action =
     case action of
         ChangeBlockColor block newColor ->
             Maybe.map
-                (\recoveredBlock ->
+                (\_ ->
                     let
                         updatedBlock =
                             { block | color = newColor }
@@ -2798,14 +2750,6 @@ msg2json model action =
 -- VIEW
 
 
-type alias MenuItem =
-    ( String, Html Msg )
-
-
-type alias MenuItems =
-    List MenuItem
-
-
 type alias Tab =
     { title : String
     , icon : Html Msg
@@ -2827,12 +2771,6 @@ tabItems =
     ]
 
 
-type alias HullReference =
-    { label : String
-    , path : String
-    }
-
-
 hullReferences : HullReferences
 hullReferences =
     [ { label = "Anthineas", path = "assets/anthineas.stl" }
@@ -2840,51 +2778,6 @@ hullReferences =
     , { label = "DTMB 5415", path = "assets/DTMB_5415.stl" }
     , { label = "OPV", path = "assets/OPV.stl" }
     ]
-
-
-sendSizeUpdate : Block -> JsData
-sendSizeUpdate block =
-    { tag = "update-size", data = encodeUpdateSizeCommand block }
-
-
-sendPositionUpdate : Block -> JsData
-sendPositionUpdate block =
-    { tag = "update-position", data = encodeUpdatePositionCommand block }
-
-
-updateBlockSizeForDimension : Dimension -> Block -> StringValueInput.FloatInput -> Block
-updateBlockSizeForDimension dimension block floatInput =
-    let
-        validFloatInput =
-            Basics.max 0.1 floatInput.value
-                |> StringValueInput.fromNumber "m" "Dimension"
-    in
-    validFloatInput
-        |> asDimensionInSize dimension block.size
-        |> asSizeInBlock block
-
-
-updateSpacingOfPartition : { a | spacing : StringValueInput.FloatInput } -> StringValueInput.FloatInput -> { a | spacing : StringValueInput.FloatInput }
-updateSpacingOfPartition partition floatInput =
-    let
-        validFloatInput =
-            Basics.max 0 floatInput.value
-                |> StringValueInput.fromNumber "m" "Spacing"
-    in
-    validFloatInput
-        |> asSpacingInPartition partition
-
-
-updateBlockLength : Block -> StringValueInput.FloatInput -> Block
-updateBlockLength block floatInput =
-    let
-        validFloatInput =
-            Basics.max 0.1 floatInput.value
-                |> StringValueInput.fromNumber "m" "Block length"
-    in
-    validFloatInput
-        |> asLengthInSize block.size
-        |> asSizeInBlock block
 
 
 view : Model -> Html Msg
@@ -3234,11 +3127,10 @@ viewModeller model =
     in
     div
         [ class "panel modeller-panel" ]
-        ([ h2
+        (h2
             [ class "modeller-panel-title" ]
             [ text "Modeller" ]
-         ]
-            ++ (model.slices |> Dict.toList |> List.filterMap viewSlices)
+            :: (model.slices |> Dict.toList |> List.filterMap viewSlices)
         )
 
 
@@ -3396,9 +3288,6 @@ kpiSummaryToStringList tags summary =
 
         ColorGroup color ->
             getLabelForColor_ color
-
-        SingleBlock uuid ->
-            uuid
     , String.fromInt <| round <| summary.mass
     , String.fromFloat <| roundToNearestHundredth summary.volume
     ]
@@ -3480,7 +3369,7 @@ viewSimpleKpi kpiTitle className totalValue =
 
 
 viewKpi : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
-viewKpi kpiTitle className totalValue valueForColor tags =
+viewKpi kpiTitle className totalValue _ _ =
     div [ class <| "kpi " ++ className ] <|
         [ div
             [ class "kpi-total kpi-group"
@@ -3509,12 +3398,6 @@ viewKpiWithColors kpiTitle className totalValue valueForColor tags =
                     viewKpiByColor className (getColor sirColor) (getLabelForColor sirColor tags) (valueForColor <| SIRColorPicker.getColor sirColor)
                 )
                 SIRColorPicker.palette
-
-
-getFullKpiSummary : Blocks -> List KpiSummary
-getFullKpiSummary blocks =
-    computeKpisForAll blocks
-        :: List.map (computeKpisForColor blocks) SIRColorPicker.palette
 
 
 viewKpiByColor : String -> Color -> String -> Float -> Html Msg
@@ -3860,7 +3743,7 @@ blockToCsvLine tags customProperties block =
 
         getLabelForColor_ : SIRColorPicker.SirColor -> String
         getLabelForColor_ sirColor =
-            Maybe.withDefault (getColorName sirColor) (getTagLabelForColor_ sirColor)
+            Maybe.withDefault (getColorName_ sirColor) (getTagLabelForColor_ sirColor)
 
         customPropertyValues : List String
         customPropertyValues =
@@ -4255,13 +4138,6 @@ viewPositionInputInput axis block axisLabel =
         []
 
 
-updateBlockPositionOnAxis : Axis -> Block -> StringValueInput.FloatInput -> Block
-updateBlockPositionOnAxis axis block floatInput =
-    floatInput
-        |> asAxisInPosition axis block.position
-        |> asPositionInBlock block
-
-
 type Dimension
     = Length
     | Width
@@ -4557,7 +4433,7 @@ viewBlockItemWithSelection showContextualMenu selectedBlocks block =
 
 
 viewWorkspace : Model -> Html Msg
-viewWorkspace model =
+viewWorkspace _ =
     div [ class "workspace" ]
         [ div [ id "three-wrapper" ] []
         ]

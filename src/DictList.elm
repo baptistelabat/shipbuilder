@@ -123,11 +123,8 @@ Functions that help to decode a dictionary.
 
 import AllDictList exposing (AllDictList, RelativePosition(..))
 import Dict exposing (Dict)
-import Json.Decode as Json18 exposing (Decoder, decodeValue, keyValuePairs, value)
-import List.Extra
-import Maybe as Maybe18
+import Json.Decode exposing (Decoder)
 import Set exposing (Set)
-import Tuple exposing (first, second)
 
 
 {-| A `Dict` that maintains an arbitrary ordering of keys (rather than sorting

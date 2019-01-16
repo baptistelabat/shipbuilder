@@ -1,0 +1,188 @@
+{
+  "name": "avh4/elm-color",
+  "version": "1.0.0",
+  "interfaces": [
+    {
+      "key": [
+        "Color"
+      ],
+      "value": [
+        {
+          "type": "type_",
+          "value": {
+            "name": "Color",
+            "constructors": []
+          }
+        },
+        {
+          "type": "function",
+          "value": "black"
+        },
+        {
+          "type": "function",
+          "value": "blue"
+        },
+        {
+          "type": "function",
+          "value": "brown"
+        },
+        {
+          "type": "function",
+          "value": "charcoal"
+        },
+        {
+          "type": "function",
+          "value": "darkBlue"
+        },
+        {
+          "type": "function",
+          "value": "darkBrown"
+        },
+        {
+          "type": "function",
+          "value": "darkCharcoal"
+        },
+        {
+          "type": "function",
+          "value": "darkGray"
+        },
+        {
+          "type": "function",
+          "value": "darkGreen"
+        },
+        {
+          "type": "function",
+          "value": "darkGrey"
+        },
+        {
+          "type": "function",
+          "value": "darkOrange"
+        },
+        {
+          "type": "function",
+          "value": "darkPurple"
+        },
+        {
+          "type": "function",
+          "value": "darkRed"
+        },
+        {
+          "type": "function",
+          "value": "darkYellow"
+        },
+        {
+          "type": "function",
+          "value": "fromHsla"
+        },
+        {
+          "type": "function",
+          "value": "fromRgba"
+        },
+        {
+          "type": "function",
+          "value": "gray"
+        },
+        {
+          "type": "function",
+          "value": "green"
+        },
+        {
+          "type": "function",
+          "value": "grey"
+        },
+        {
+          "type": "function",
+          "value": "hsl"
+        },
+        {
+          "type": "function",
+          "value": "hsla"
+        },
+        {
+          "type": "function",
+          "value": "lightBlue"
+        },
+        {
+          "type": "function",
+          "value": "lightBrown"
+        },
+        {
+          "type": "function",
+          "value": "lightCharcoal"
+        },
+        {
+          "type": "function",
+          "value": "lightGray"
+        },
+        {
+          "type": "function",
+          "value": "lightGreen"
+        },
+        {
+          "type": "function",
+          "value": "lightGrey"
+        },
+        {
+          "type": "function",
+          "value": "lightOrange"
+        },
+        {
+          "type": "function",
+          "value": "lightPurple"
+        },
+        {
+          "type": "function",
+          "value": "lightRed"
+        },
+        {
+          "type": "function",
+          "value": "lightYellow"
+        },
+        {
+          "type": "function",
+          "value": "orange"
+        },
+        {
+          "type": "function",
+          "value": "purple"
+        },
+        {
+          "type": "function",
+          "value": "red"
+        },
+        {
+          "type": "function",
+          "value": "rgb"
+        },
+        {
+          "type": "function",
+          "value": "rgb255"
+        },
+        {
+          "type": "function",
+          "value": "rgba"
+        },
+        {
+          "type": "function",
+          "value": "toCssString"
+        },
+        {
+          "type": "function",
+          "value": "toHsla"
+        },
+        {
+          "type": "function",
+          "value": "toRgba"
+        },
+        {
+          "type": "function",
+          "value": "white"
+        },
+        {
+          "type": "function",
+          "value": "yellow"
+        }
+      ]
+    }
+  ]
+}
