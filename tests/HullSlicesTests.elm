@@ -649,9 +649,9 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.dB maxSliceBreadth alpha 0
                         |> Expect.within epsRelative 0
-            , fuzz (dbInput nonZero) "dB -> 0 for alpha -> infinity" <|
+            , fuzz (dbInput (Fuzz.constant 1.0e15)) "dB -> 0 for alpha -> infinity" <|
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.dB maxSliceBreadth 1.0e15 maxSliceBreadth
+                    HullSlices.dB maxSliceBreadth alpha maxSliceBreadth
                         |> Expect.within epsRelative 0
             , test "dB should not be NaN" <|
                 \_ ->
@@ -675,5 +675,9 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
                         |> Expect.atLeast currentBreadth
+            , fuzz (dbInput (Fuzz.constant 1.0e15)) "modifiedBreadth -> maxSliceBreadth when alpha >> 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
+                        |> Expect.within epsRelative maxSliceBreadth
             ]
         ]
