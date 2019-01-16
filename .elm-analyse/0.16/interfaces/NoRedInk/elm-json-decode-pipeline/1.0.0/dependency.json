@@ -1,0 +1,43 @@
+{
+  "name": "NoRedInk/elm-json-decode-pipeline",
+  "version": "1.0.0",
+  "interfaces": [
+    {
+      "key": [
+        "Json",
+        "Decode",
+        "Pipeline"
+      ],
+      "value": [
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "hardcoded"
+        },
+        {
+          "type": "function",
+          "value": "optional"
+        },
+        {
+          "type": "function",
+          "value": "optionalAt"
+        },
+        {
+          "type": "function",
+          "value": "required"
+        },
+        {
+          "type": "function",
+          "value": "requiredAt"
+        },
+        {
+          "type": "function",
+          "value": "resolve"
+        }
+      ]
+    }
+  ]
+}

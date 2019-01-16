@@ -1,0 +1,5798 @@
+{
+  "name": "lattyware/elm-fontawesome",
+  "version": "1.0.1",
+  "interfaces": [
+    {
+      "key": [
+        "FontAwesome",
+        "Attributes"
+      ],
+      "value": [
+        {
+          "type": "function",
+          "value": "border"
+        },
+        {
+          "type": "function",
+          "value": "fa10x"
+        },
+        {
+          "type": "function",
+          "value": "fa2x"
+        },
+        {
+          "type": "function",
+          "value": "fa3x"
+        },
+        {
+          "type": "function",
+          "value": "fa5x"
+        },
+        {
+          "type": "function",
+          "value": "fa7x"
+        },
+        {
+          "type": "function",
+          "value": "flipHorizontal"
+        },
+        {
+          "type": "function",
+          "value": "flipVertical"
+        },
+        {
+          "type": "function",
+          "value": "fw"
+        },
+        {
+          "type": "function",
+          "value": "inverse"
+        },
+        {
+          "type": "function",
+          "value": "lg"
+        },
+        {
+          "type": "function",
+          "value": "li"
+        },
+        {
+          "type": "function",
+          "value": "pullLeft"
+        },
+        {
+          "type": "function",
+          "value": "pullRight"
+        },
+        {
+          "type": "function",
+          "value": "pulse"
+        },
+        {
+          "type": "function",
+          "value": "rotate180"
+        },
+        {
+          "type": "function",
+          "value": "rotate270"
+        },
+        {
+          "type": "function",
+          "value": "rotate90"
+        },
+        {
+          "type": "function",
+          "value": "sm"
+        },
+        {
+          "type": "function",
+          "value": "spin"
+        },
+        {
+          "type": "function",
+          "value": "stack"
+        },
+        {
+          "type": "function",
+          "value": "stack1x"
+        },
+        {
+          "type": "function",
+          "value": "stack2x"
+        },
+        {
+          "type": "function",
+          "value": "ul"
+        },
+        {
+          "type": "function",
+          "value": "xs"
+        }
+      ]
+    },
+    {
+      "key": [
+        "FontAwesome",
+        "Brands"
+      ],
+      "value": [
+        {
+          "type": "function",
+          "value": "accessibleIcon"
+        },
+        {
+          "type": "function",
+          "value": "accusoft"
+        },
+        {
+          "type": "function",
+          "value": "acquisitionsIncorporated"
+        },
+        {
+          "type": "function",
+          "value": "adn"
+        },
+        {
+          "type": "function",
+          "value": "adversal"
+        },
+        {
+          "type": "function",
+          "value": "affiliatetheme"
+        },
+        {
+          "type": "function",
+          "value": "algolia"
+        },
+        {
+          "type": "function",
+          "value": "alipay"
+        },
+        {
+          "type": "function",
+          "value": "amazon"
+        },
+        {
+          "type": "function",
+          "value": "amazonPay"
+        },
+        {
+          "type": "function",
+          "value": "amilia"
+        },
+        {
+          "type": "function",
+          "value": "android"
+        },
+        {
+          "type": "function",
+          "value": "angellist"
+        },
+        {
+          "type": "function",
+          "value": "angrycreative"
+        },
+        {
+          "type": "function",
+          "value": "angular"
+        },
+        {
+          "type": "function",
+          "value": "appStore"
+        },
+        {
+          "type": "function",
+          "value": "appStoreIos"
+        },
+        {
+          "type": "function",
+          "value": "apper"
+        },
+        {
+          "type": "function",
+          "value": "apple"
+        },
+        {
+          "type": "function",
+          "value": "applePay"
+        },
+        {
+          "type": "function",
+          "value": "asymmetrik"
+        },
+        {
+          "type": "function",
+          "value": "audible"
+        },
+        {
+          "type": "function",
+          "value": "autoprefixer"
+        },
+        {
+          "type": "function",
+          "value": "avianex"
+        },
+        {
+          "type": "function",
+          "value": "aviato"
+        },
+        {
+          "type": "function",
+          "value": "aws"
+        },
+        {
+          "type": "function",
+          "value": "bandcamp"
+        },
+        {
+          "type": "function",
+          "value": "behance"
+        },
+        {
+          "type": "function",
+          "value": "behanceSquare"
+        },
+        {
+          "type": "function",
+          "value": "bimobject"
+        },
+        {
+          "type": "function",
+          "value": "bitbucket"
+        },
+        {
+          "type": "function",
+          "value": "bitcoin"
+        },
+        {
+          "type": "function",
+          "value": "bity"
+        },
+        {
+          "type": "function",
+          "value": "blackTie"
+        },
+        {
+          "type": "function",
+          "value": "blackberry"
+        },
+        {
+          "type": "function",
+          "value": "blogger"
+        },
+        {
+          "type": "function",
+          "value": "bloggerB"
+        },
+        {
+          "type": "function",
+          "value": "bluetooth"
+        },
+        {
+          "type": "function",
+          "value": "bluetoothB"
+        },
+        {
+          "type": "function",
+          "value": "btc"
+        },
+        {
+          "type": "function",
+          "value": "buromobelexperte"
+        },
+        {
+          "type": "function",
+          "value": "buysellads"
+        },
+        {
+          "type": "function",
+          "value": "ccAmazonPay"
+        },
+        {
+          "type": "function",
+          "value": "ccAmex"
+        },
+        {
+          "type": "function",
+          "value": "ccApplePay"
+        },
+        {
+          "type": "function",
+          "value": "ccDinersClub"
+        },
+        {
+          "type": "function",
+          "value": "ccDiscover"
+        },
+        {
+          "type": "function",
+          "value": "ccJcb"
+        },
+        {
+          "type": "function",
+          "value": "ccMastercard"
+        },
+        {
+          "type": "function",
+          "value": "ccPaypal"
+        },
+        {
+          "type": "function",
+          "value": "ccStripe"
+        },
+        {
+          "type": "function",
+          "value": "ccVisa"
+        },
+        {
+          "type": "function",
+          "value": "centercode"
+        },
+        {
+          "type": "function",
+          "value": "chrome"
+        },
+        {
+          "type": "function",
+          "value": "cloudscale"
+        },
+        {
+          "type": "function",
+          "value": "cloudsmith"
+        },
+        {
+          "type": "function",
+          "value": "cloudversify"
+        },
+        {
+          "type": "function",
+          "value": "codepen"
+        },
+        {
+          "type": "function",
+          "value": "codiepie"
+        },
+        {
+          "type": "function",
+          "value": "connectdevelop"
+        },
+        {
+          "type": "function",
+          "value": "contao"
+        },
+        {
+          "type": "function",
+          "value": "cpanel"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommons"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsBy"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsNc"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsNcEu"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsNcJp"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsNd"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsPd"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsPdAlt"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsRemix"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsSa"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsSampling"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsSamplingPlus"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsShare"
+        },
+        {
+          "type": "function",
+          "value": "creativeCommonsZero"
+        },
+        {
+          "type": "function",
+          "value": "criticalRole"
+        },
+        {
+          "type": "function",
+          "value": "css3"
+        },
+        {
+          "type": "function",
+          "value": "css3Alt"
+        },
+        {
+          "type": "function",
+          "value": "cuttlefish"
+        },
+        {
+          "type": "function",
+          "value": "dAndD"
+        },
+        {
+          "type": "function",
+          "value": "dAndDBeyond"
+        },
+        {
+          "type": "function",
+          "value": "dashcube"
+        },
+        {
+          "type": "function",
+          "value": "delicious"
+        },
+        {
+          "type": "function",
+          "value": "deploydog"
+        },
+        {
+          "type": "function",
+          "value": "deskpro"
+        },
+        {
+          "type": "function",
+          "value": "dev"
+        },
+        {
+          "type": "function",
+          "value": "deviantart"
+        },
+        {
+          "type": "function",
+          "value": "digg"
+        },
+        {
+          "type": "function",
+          "value": "digitalOcean"
+        },
+        {
+          "type": "function",
+          "value": "discord"
+        },
+        {
+          "type": "function",
+          "value": "discourse"
+        },
+        {
+          "type": "function",
+          "value": "dochub"
+        },
+        {
+          "type": "function",
+          "value": "docker"
+        },
+        {
+          "type": "function",
+          "value": "draft2digital"
+        },
+        {
+          "type": "function",
+          "value": "dribbble"
+        },
+        {
+          "type": "function",
+          "value": "dribbbleSquare"
+        },
+        {
+          "type": "function",
+          "value": "dropbox"
+        },
+        {
+          "type": "function",
+          "value": "drupal"
+        },
+        {
+          "type": "function",
+          "value": "dyalog"
+        },
+        {
+          "type": "function",
+          "value": "earlybirds"
+        },
+        {
+          "type": "function",
+          "value": "ebay"
+        },
+        {
+          "type": "function",
+          "value": "edge"
+        },
+        {
+          "type": "function",
+          "value": "elementor"
+        },
+        {
+          "type": "function",
+          "value": "ello"
+        },
+        {
+          "type": "function",
+          "value": "ember"
+        },
+        {
+          "type": "function",
+          "value": "empire"
+        },
+        {
+          "type": "function",
+          "value": "envira"
+        },
+        {
+          "type": "function",
+          "value": "erlang"
+        },
+        {
+          "type": "function",
+          "value": "ethereum"
+        },
+        {
+          "type": "function",
+          "value": "etsy"
+        },
+        {
+          "type": "function",
+          "value": "expeditedssl"
+        },
+        {
+          "type": "function",
+          "value": "fa500px"
+        },
+        {
+          "type": "function",
+          "value": "facebook"
+        },
+        {
+          "type": "function",
+          "value": "facebookF"
+        },
+        {
+          "type": "function",
+          "value": "facebookMessenger"
+        },
+        {
+          "type": "function",
+          "value": "facebookSquare"
+        },
+        {
+          "type": "function",
+          "value": "fantasyFlightGames"
+        },
+        {
+          "type": "function",
+          "value": "firefox"
+        },
+        {
+          "type": "function",
+          "value": "firstOrder"
+        },
+        {
+          "type": "function",
+          "value": "firstOrderAlt"
+        },
+        {
+          "type": "function",
+          "value": "firstdraft"
+        },
+        {
+          "type": "function",
+          "value": "flickr"
+        },
+        {
+          "type": "function",
+          "value": "flipboard"
+        },
+        {
+          "type": "function",
+          "value": "fly"
+        },
+        {
+          "type": "function",
+          "value": "fontAwesome"
+        },
+        {
+          "type": "function",
+          "value": "fontAwesomeAlt"
+        },
+        {
+          "type": "function",
+          "value": "fontAwesomeFlag"
+        },
+        {
+          "type": "function",
+          "value": "fontAwesomeLogoFull"
+        },
+        {
+          "type": "function",
+          "value": "fonticons"
+        },
+        {
+          "type": "function",
+          "value": "fonticonsFi"
+        },
+        {
+          "type": "function",
+          "value": "fortAwesome"
+        },
+        {
+          "type": "function",
+          "value": "fortAwesomeAlt"
+        },
+        {
+          "type": "function",
+          "value": "forumbee"
+        },
+        {
+          "type": "function",
+          "value": "foursquare"
+        },
+        {
+          "type": "function",
+          "value": "freeCodeCamp"
+        },
+        {
+          "type": "function",
+          "value": "freebsd"
+        },
+        {
+          "type": "function",
+          "value": "fulcrum"
+        },
+        {
+          "type": "function",
+          "value": "galacticRepublic"
+        },
+        {
+          "type": "function",
+          "value": "galacticSenate"
+        },
+        {
+          "type": "function",
+          "value": "getPocket"
+        },
+        {
+          "type": "function",
+          "value": "gg"
+        },
+        {
+          "type": "function",
+          "value": "ggCircle"
+        },
+        {
+          "type": "function",
+          "value": "git"
+        },
+        {
+          "type": "function",
+          "value": "gitSquare"
+        },
+        {
+          "type": "function",
+          "value": "github"
+        },
+        {
+          "type": "function",
+          "value": "githubAlt"
+        },
+        {
+          "type": "function",
+          "value": "githubSquare"
+        },
+        {
+          "type": "function",
+          "value": "gitkraken"
+        },
+        {
+          "type": "function",
+          "value": "gitlab"
+        },
+        {
+          "type": "function",
+          "value": "gitter"
+        },
+        {
+          "type": "function",
+          "value": "glide"
+        },
+        {
+          "type": "function",
+          "value": "glideG"
+        },
+        {
+          "type": "function",
+          "value": "gofore"
+        },
+        {
+          "type": "function",
+          "value": "goodreads"
+        },
+        {
+          "type": "function",
+          "value": "goodreadsG"
+        },
+        {
+          "type": "function",
+          "value": "google"
+        },
+        {
+          "type": "function",
+          "value": "googleDrive"
+        },
+        {
+          "type": "function",
+          "value": "googlePlay"
+        },
+        {
+          "type": "function",
+          "value": "googlePlus"
+        },
+        {
+          "type": "function",
+          "value": "googlePlusG"
+        },
+        {
+          "type": "function",
+          "value": "googlePlusSquare"
+        },
+        {
+          "type": "function",
+          "value": "googleWallet"
+        },
+        {
+          "type": "function",
+          "value": "gratipay"
+        },
+        {
+          "type": "function",
+          "value": "grav"
+        },
+        {
+          "type": "function",
+          "value": "gripfire"
+        },
+        {
+          "type": "function",
+          "value": "grunt"
+        },
+        {
+          "type": "function",
+          "value": "gulp"
+        },
+        {
+          "type": "function",
+          "value": "hackerNews"
+        },
+        {
+          "type": "function",
+          "value": "hackerNewsSquare"
+        },
+        {
+          "type": "function",
+          "value": "hackerrank"
+        },
+        {
+          "type": "function",
+          "value": "hips"
+        },
+        {
+          "type": "function",
+          "value": "hireAHelper"
+        },
+        {
+          "type": "function",
+          "value": "hooli"
+        },
+        {
+          "type": "function",
+          "value": "hornbill"
+        },
+        {
+          "type": "function",
+          "value": "hotjar"
+        },
+        {
+          "type": "function",
+          "value": "houzz"
+        },
+        {
+          "type": "function",
+          "value": "html5"
+        },
+        {
+          "type": "function",
+          "value": "hubspot"
+        },
+        {
+          "type": "function",
+          "value": "imdb"
+        },
+        {
+          "type": "function",
+          "value": "instagram"
+        },
+        {
+          "type": "function",
+          "value": "internetExplorer"
+        },
+        {
+          "type": "function",
+          "value": "ioxhost"
+        },
+        {
+          "type": "function",
+          "value": "itunes"
+        },
+        {
+          "type": "function",
+          "value": "itunesNote"
+        },
+        {
+          "type": "function",
+          "value": "java"
+        },
+        {
+          "type": "function",
+          "value": "jediOrder"
+        },
+        {
+          "type": "function",
+          "value": "jenkins"
+        },
+        {
+          "type": "function",
+          "value": "joget"
+        },
+        {
+          "type": "function",
+          "value": "joomla"
+        },
+        {
+          "type": "function",
+          "value": "js"
+        },
+        {
+          "type": "function",
+          "value": "jsSquare"
+        },
+        {
+          "type": "function",
+          "value": "jsfiddle"
+        },
+        {
+          "type": "function",
+          "value": "kaggle"
+        },
+        {
+          "type": "function",
+          "value": "keybase"
+        },
+        {
+          "type": "function",
+          "value": "keycdn"
+        },
+        {
+          "type": "function",
+          "value": "kickstarter"
+        },
+        {
+          "type": "function",
+          "value": "kickstarterK"
+        },
+        {
+          "type": "function",
+          "value": "korvue"
+        },
+        {
+          "type": "function",
+          "value": "laravel"
+        },
+        {
+          "type": "function",
+          "value": "lastfm"
+        },
+        {
+          "type": "function",
+          "value": "lastfmSquare"
+        },
+        {
+          "type": "function",
+          "value": "leanpub"
+        },
+        {
+          "type": "function",
+          "value": "less"
+        },
+        {
+          "type": "function",
+          "value": "line"
+        },
+        {
+          "type": "function",
+          "value": "linkedin"
+        },
+        {
+          "type": "function",
+          "value": "linkedinIn"
+        },
+        {
+          "type": "function",
+          "value": "linode"
+        },
+        {
+          "type": "function",
+          "value": "linux"
+        },
+        {
+          "type": "function",
+          "value": "lyft"
+        },
+        {
+          "type": "function",
+          "value": "magento"
+        },
+        {
+          "type": "function",
+          "value": "mailchimp"
+        },
+        {
+          "type": "function",
+          "value": "mandalorian"
+        },
+        {
+          "type": "function",
+          "value": "markdown"
+        },
+        {
+          "type": "function",
+          "value": "mastodon"
+        },
+        {
+          "type": "function",
+          "value": "maxcdn"
+        },
+        {
+          "type": "function",
+          "value": "medapps"
+        },
+        {
+          "type": "function",
+          "value": "medium"
+        },
+        {
+          "type": "function",
+          "value": "mediumM"
+        },
+        {
+          "type": "function",
+          "value": "medrt"
+        },
+        {
+          "type": "function",
+          "value": "meetup"
+        },
+        {
+          "type": "function",
+          "value": "megaport"
+        },
+        {
+          "type": "function",
+          "value": "microsoft"
+        },
+        {
+          "type": "function",
+          "value": "mix"
+        },
+        {
+          "type": "function",
+          "value": "mixcloud"
+        },
+        {
+          "type": "function",
+          "value": "mizuni"
+        },
+        {
+          "type": "function",
+          "value": "modx"
+        },
+        {
+          "type": "function",
+          "value": "monero"
+        },
+        {
+          "type": "function",
+          "value": "napster"
+        },
+        {
+          "type": "function",
+          "value": "neos"
+        },
+        {
+          "type": "function",
+          "value": "nimblr"
+        },
+        {
+          "type": "function",
+          "value": "nintendoSwitch"
+        },
+        {
+          "type": "function",
+          "value": "node"
+        },
+        {
+          "type": "function",
+          "value": "nodeJs"
+        },
+        {
+          "type": "function",
+          "value": "npm"
+        },
+        {
+          "type": "function",
+          "value": "ns8"
+        },
+        {
+          "type": "function",
+          "value": "nutritionix"
+        },
+        {
+          "type": "function",
+          "value": "odnoklassniki"
+        },
+        {
+          "type": "function",
+          "value": "odnoklassnikiSquare"
+        },
+        {
+          "type": "function",
+          "value": "oldRepublic"
+        },
+        {
+          "type": "function",
+          "value": "opencart"
+        },
+        {
+          "type": "function",
+          "value": "openid"
+        },
+        {
+          "type": "function",
+          "value": "opera"
+        },
+        {
+          "type": "function",
+          "value": "optinMonster"
+        },
+        {
+          "type": "function",
+          "value": "osi"
+        },
+        {
+          "type": "function",
+          "value": "page4"
+        },
+        {
+          "type": "function",
+          "value": "pagelines"
+        },
+        {
+          "type": "function",
+          "value": "palfed"
+        },
+        {
+          "type": "function",
+          "value": "patreon"
+        },
+        {
+          "type": "function",
+          "value": "paypal"
+        },
+        {
+          "type": "function",
+          "value": "pennyArcade"
+        },
+        {
+          "type": "function",
+          "value": "periscope"
+        },
+        {
+          "type": "function",
+          "value": "phabricator"
+        },
+        {
+          "type": "function",
+          "value": "phoenixFramework"
+        },
+        {
+          "type": "function",
+          "value": "phoenixSquadron"
+        },
+        {
+          "type": "function",
+          "value": "php"
+        },
+        {
+          "type": "function",
+          "value": "piedPiper"
+        },
+        {
+          "type": "function",
+          "value": "piedPiperAlt"
+        },
+        {
+          "type": "function",
+          "value": "piedPiperHat"
+        },
+        {
+          "type": "function",
+          "value": "piedPiperPp"
+        },
+        {
+          "type": "function",
+          "value": "pinterest"
+        },
+        {
+          "type": "function",
+          "value": "pinterestP"
+        },
+        {
+          "type": "function",
+          "value": "pinterestSquare"
+        },
+        {
+          "type": "function",
+          "value": "playstation"
+        },
+        {
+          "type": "function",
+          "value": "productHunt"
+        },
+        {
+          "type": "function",
+          "value": "pushed"
+        },
+        {
+          "type": "function",
+          "value": "python"
+        },
+        {
+          "type": "function",
+          "value": "qq"
+        },
+        {
+          "type": "function",
+          "value": "quinscape"
+        },
+        {
+          "type": "function",
+          "value": "quora"
+        },
+        {
+          "type": "function",
+          "value": "rProject"
+        },
+        {
+          "type": "function",
+          "value": "ravelry"
+        },
+        {
+          "type": "function",
+          "value": "react"
+        },
+        {
+          "type": "function",
+          "value": "reacteurope"
+        },
+        {
+          "type": "function",
+          "value": "readme"
+        },
+        {
+          "type": "function",
+          "value": "rebel"
+        },
+        {
+          "type": "function",
+          "value": "redRiver"
+        },
+        {
+          "type": "function",
+          "value": "reddit"
+        },
+        {
+          "type": "function",
+          "value": "redditAlien"
+        },
+        {
+          "type": "function",
+          "value": "redditSquare"
+        },
+        {
+          "type": "function",
+          "value": "renren"
+        },
+        {
+          "type": "function",
+          "value": "replyd"
+        },
+        {
+          "type": "function",
+          "value": "researchgate"
+        },
+        {
+          "type": "function",
+          "value": "resolving"
+        },
+        {
+          "type": "function",
+          "value": "rev"
+        },
+        {
+          "type": "function",
+          "value": "rocketchat"
+        },
+        {
+          "type": "function",
+          "value": "rockrms"
+        },
+        {
+          "type": "function",
+          "value": "safari"
+        },
+        {
+          "type": "function",
+          "value": "sass"
+        },
+        {
+          "type": "function",
+          "value": "schlix"
+        },
+        {
+          "type": "function",
+          "value": "scribd"
+        },
+        {
+          "type": "function",
+          "value": "searchengin"
+        },
+        {
+          "type": "function",
+          "value": "sellcast"
+        },
+        {
+          "type": "function",
+          "value": "sellsy"
+        },
+        {
+          "type": "function",
+          "value": "servicestack"
+        },
+        {
+          "type": "function",
+          "value": "shirtsinbulk"
+        },
+        {
+          "type": "function",
+          "value": "shopware"
+        },
+        {
+          "type": "function",
+          "value": "simplybuilt"
+        },
+        {
+          "type": "function",
+          "value": "sistrix"
+        },
+        {
+          "type": "function",
+          "value": "sith"
+        },
+        {
+          "type": "function",
+          "value": "skyatlas"
+        },
+        {
+          "type": "function",
+          "value": "skype"
+        },
+        {
+          "type": "function",
+          "value": "slack"
+        },
+        {
+          "type": "function",
+          "value": "slackHash"
+        },
+        {
+          "type": "function",
+          "value": "slideshare"
+        },
+        {
+          "type": "function",
+          "value": "snapchat"
+        },
+        {
+          "type": "function",
+          "value": "snapchatGhost"
+        },
+        {
+          "type": "function",
+          "value": "snapchatSquare"
+        },
+        {
+          "type": "function",
+          "value": "soundcloud"
+        },
+        {
+          "type": "function",
+          "value": "speakap"
+        },
+        {
+          "type": "function",
+          "value": "spotify"
+        },
+        {
+          "type": "function",
+          "value": "squarespace"
+        },
+        {
+          "type": "function",
+          "value": "stackExchange"
+        },
+        {
+          "type": "function",
+          "value": "stackOverflow"
+        },
+        {
+          "type": "function",
+          "value": "staylinked"
+        },
+        {
+          "type": "function",
+          "value": "steam"
+        },
+        {
+          "type": "function",
+          "value": "steamSquare"
+        },
+        {
+          "type": "function",
+          "value": "steamSymbol"
+        },
+        {
+          "type": "function",
+          "value": "stickerMule"
+        },
+        {
+          "type": "function",
+          "value": "strava"
+        },
+        {
+          "type": "function",
+          "value": "stripe"
+        },
+        {
+          "type": "function",
+          "value": "stripeS"
+        },
+        {
+          "type": "function",
+          "value": "studiovinari"
+        },
+        {
+          "type": "function",
+          "value": "stumbleupon"
+        },
+        {
+          "type": "function",
+          "value": "stumbleuponCircle"
+        },
+        {
+          "type": "function",
+          "value": "superpowers"
+        },
+        {
+          "type": "function",
+          "value": "supple"
+        },
+        {
+          "type": "function",
+          "value": "teamspeak"
+        },
+        {
+          "type": "function",
+          "value": "telegram"
+        },
+        {
+          "type": "function",
+          "value": "telegramPlane"
+        },
+        {
+          "type": "function",
+          "value": "tencentWeibo"
+        },
+        {
+          "type": "function",
+          "value": "theRedYeti"
+        },
+        {
+          "type": "function",
+          "value": "themeco"
+        },
+        {
+          "type": "function",
+          "value": "themeisle"
+        },
+        {
+          "type": "function",
+          "value": "thinkPeaks"
+        },
+        {
+          "type": "function",
+          "value": "tradeFederation"
+        },
+        {
+          "type": "function",
+          "value": "trello"
+        },
+        {
+          "type": "function",
+          "value": "tripadvisor"
+        },
+        {
+          "type": "function",
+          "value": "tumblr"
+        },
+        {
+          "type": "function",
+          "value": "tumblrSquare"
+        },
+        {
+          "type": "function",
+          "value": "twitch"
+        },
+        {
+          "type": "function",
+          "value": "twitter"
+        },
+        {
+          "type": "function",
+          "value": "twitterSquare"
+        },
+        {
+          "type": "function",
+          "value": "typo3"
+        },
+        {
+          "type": "function",
+          "value": "uber"
+        },
+        {
+          "type": "function",
+          "value": "uikit"
+        },
+        {
+          "type": "function",
+          "value": "uniregistry"
+        },
+        {
+          "type": "function",
+          "value": "untappd"
+        },
+        {
+          "type": "function",
+          "value": "usb"
+        },
+        {
+          "type": "function",
+          "value": "ussunnah"
+        },
+        {
+          "type": "function",
+          "value": "vaadin"
+        },
+        {
+          "type": "function",
+          "value": "viacoin"
+        },
+        {
+          "type": "function",
+          "value": "viadeo"
+        },
+        {
+          "type": "function",
+          "value": "viadeoSquare"
+        },
+        {
+          "type": "function",
+          "value": "viber"
+        },
+        {
+          "type": "function",
+          "value": "vimeo"
+        },
+        {
+          "type": "function",
+          "value": "vimeoSquare"
+        },
+        {
+          "type": "function",
+          "value": "vimeoV"
+        },
+        {
+          "type": "function",
+          "value": "vine"
+        },
+        {
+          "type": "function",
+          "value": "vk"
+        },
+        {
+          "type": "function",
+          "value": "vnv"
+        },
+        {
+          "type": "function",
+          "value": "vuejs"
+        },
+        {
+          "type": "function",
+          "value": "weebly"
+        },
+        {
+          "type": "function",
+          "value": "weibo"
+        },
+        {
+          "type": "function",
+          "value": "weixin"
+        },
+        {
+          "type": "function",
+          "value": "whatsapp"
+        },
+        {
+          "type": "function",
+          "value": "whatsappSquare"
+        },
+        {
+          "type": "function",
+          "value": "whmcs"
+        },
+        {
+          "type": "function",
+          "value": "wikipediaW"
+        },
+        {
+          "type": "function",
+          "value": "windows"
+        },
+        {
+          "type": "function",
+          "value": "wix"
+        },
+        {
+          "type": "function",
+          "value": "wizardsOfTheCoast"
+        },
+        {
+          "type": "function",
+          "value": "wolfPackBattalion"
+        },
+        {
+          "type": "function",
+          "value": "wordpress"
+        },
+        {
+          "type": "function",
+          "value": "wordpressSimple"
+        },
+        {
+          "type": "function",
+          "value": "wpbeginner"
+        },
+        {
+          "type": "function",
+          "value": "wpexplorer"
+        },
+        {
+          "type": "function",
+          "value": "wpforms"
+        },
+        {
+          "type": "function",
+          "value": "wpressr"
+        },
+        {
+          "type": "function",
+          "value": "xbox"
+        },
+        {
+          "type": "function",
+          "value": "xing"
+        },
+        {
+          "type": "function",
+          "value": "xingSquare"
+        },
+        {
+          "type": "function",
+          "value": "yCombinator"
+        },
+        {
+          "type": "function",
+          "value": "yahoo"
+        },
+        {
+          "type": "function",
+          "value": "yandex"
+        },
+        {
+          "type": "function",
+          "value": "yandexInternational"
+        },
+        {
+          "type": "function",
+          "value": "yelp"
+        },
+        {
+          "type": "function",
+          "value": "yoast"
+        },
+        {
+          "type": "function",
+          "value": "youtube"
+        },
+        {
+          "type": "function",
+          "value": "youtubeSquare"
+        },
+        {
+          "type": "function",
+          "value": "zhihu"
+        }
+      ]
+    },
+    {
+      "key": [
+        "FontAwesome",
+        "Regular"
+      ],
+      "value": [
+        {
+          "type": "function",
+          "value": "addressBook"
+        },
+        {
+          "type": "function",
+          "value": "addressCard"
+        },
+        {
+          "type": "function",
+          "value": "angry"
+        },
+        {
+          "type": "function",
+          "value": "arrowAltCircleDown"
+        },
+        {
+          "type": "function",
+          "value": "arrowAltCircleLeft"
+        },
+        {
+          "type": "function",
+          "value": "arrowAltCircleRight"
+        },
+        {
+          "type": "function",
+          "value": "arrowAltCircleUp"
+        },
+        {
+          "type": "function",
+          "value": "bell"
+        },
+        {
+          "type": "function",
+          "value": "bellSlash"
+        },
+        {
+          "type": "function",
+          "value": "bookmark"
+        },
+        {
+          "type": "function",
+          "value": "building"
+        },
+        {
+          "type": "function",
+          "value": "calendar"
+        },
+        {
+          "type": "function",
+          "value": "calendarAlt"
+        },
+        {
+          "type": "function",
+          "value": "calendarCheck"
+        },
+        {
+          "type": "function",
+          "value": "calendarMinus"
+        },
+        {
+          "type": "function",
+          "value": "calendarPlus"
+        },
+        {
+          "type": "function",
+          "value": "calendarTimes"
+        },
+        {
+          "type": "function",
+          "value": "caretSquareDown"
+        },
+        {
+          "type": "function",
+          "value": "caretSquareLeft"
+        },
+        {
+          "type": "function",
+          "value": "caretSquareRight"
+        },
+        {
+          "type": "function",
+          "value": "caretSquareUp"
+        },
+        {
+          "type": "function",
+          "value": "chartBar"
+        },
+        {
+          "type": "function",
+          "value": "checkCircle"
+        },
+        {
+          "type": "function",
+          "value": "checkSquare"
+        },
+        {
+          "type": "function",
+          "value": "circle"
+        },
+        {
+          "type": "function",
+          "value": "clipboard"
+        },
+        {
+          "type": "function",
+          "value": "clock"
+        },
+        {
+          "type": "function",
+          "value": "clone"
+        },
+        {
+          "type": "function",
+          "value": "closedCaptioning"
+        },
+        {
+          "type": "function",
+          "value": "comment"
+        },
+        {
+          "type": "function",
+          "value": "commentAlt"
+        },
+        {
+          "type": "function",
+          "value": "commentDots"
+        },
+        {
+          "type": "function",
+          "value": "comments"
+        },
+        {
+          "type": "function",
+          "value": "compass"
+        },
+        {
+          "type": "function",
+          "value": "copy"
+        },
+        {
+          "type": "function",
+          "value": "copyright"
+        },
+        {
+          "type": "function",
+          "value": "creditCard"
+        },
+        {
+          "type": "function",
+          "value": "dizzy"
+        },
+        {
+          "type": "function",
+          "value": "dotCircle"
+        },
+        {
+          "type": "function",
+          "value": "edit"
+        },
+        {
+          "type": "function",
+          "value": "envelope"
+        },
+        {
+          "type": "function",
+          "value": "envelopeOpen"
+        },
+        {
+          "type": "function",
+          "value": "eye"
+        },
+        {
+          "type": "function",
+          "value": "eyeSlash"
+        },
+        {
+          "type": "function",
+          "value": "file"
+        },
+        {
+          "type": "function",
+          "value": "fileAlt"
+        },
+        {
+          "type": "function",
+          "value": "fileArchive"
+        },
+        {
+          "type": "function",
+          "value": "fileAudio"
+        },
+        {
+          "type": "function",
+          "value": "fileCode"
+        },
+        {
+          "type": "function",
+          "value": "fileExcel"
+        },
+        {
+          "type": "function",
+          "value": "fileImage"
+        },
+        {
+          "type": "function",
+          "value": "filePdf"
+        },
+        {
+          "type": "function",
+          "value": "filePowerpoint"
+        },
+        {
+          "type": "function",
+          "value": "fileVideo"
+        },
+        {
+          "type": "function",
+          "value": "fileWord"
+        },
+        {
+          "type": "function",
+          "value": "flag"
+        },
+        {
+          "type": "function",
+          "value": "flushed"
+        },
+        {
+          "type": "function",
+          "value": "folder"
+        },
+        {
+          "type": "function",
+          "value": "folderOpen"
+        },
+        {
+          "type": "function",
+          "value": "fontAwesomeLogoFull"
+        },
+        {
+          "type": "function",
+          "value": "frown"
+        },
+        {
+          "type": "function",
+          "value": "frownOpen"
+        },
+        {
+          "type": "function",
+          "value": "futbol"
+        },
+        {
+          "type": "function",
+          "value": "gem"
+        },
+        {
+          "type": "function",
+          "value": "grimace"
+        },
+        {
+          "type": "function",
+          "value": "grin"
+        },
+        {
+          "type": "function",
+          "value": "grinAlt"
+        },
+        {
+          "type": "function",
+          "value": "grinBeam"
+        },
+        {
+          "type": "function",
+          "value": "grinBeamSweat"
+        },
+        {
+          "type": "function",
+          "value": "grinHearts"
+        },
+        {
+          "type": "function",
+          "value": "grinSquint"
+        },
+        {
+          "type": "function",
+          "value": "grinSquintTears"
+        },
+        {
+          "type": "function",
+          "value": "grinStars"
+        },
+        {
+          "type": "function",
+          "value": "grinTears"
+        },
+        {
+          "type": "function",
+          "value": "grinTongue"
+        },
+        {
+          "type": "function",
+          "value": "grinTongueSquint"
+        },
+        {
+          "type": "function",
+          "value": "grinTongueWink"
+        },
+        {
+          "type": "function",
+          "value": "grinWink"
+        },
+        {
+          "type": "function",
+          "value": "handLizard"
+        },
+        {
+          "type": "function",
+          "value": "handPaper"
+        },
+        {
+          "type": "function",
+          "value": "handPeace"
+        },
+        {
+          "type": "function",
+          "value": "handPointDown"
+        },
+        {
+          "type": "function",
+          "value": "handPointLeft"
+        },
+        {
+          "type": "function",
+          "value": "handPointRight"
+        },
+        {
+          "type": "function",
+          "value": "handPointUp"
+        },
+        {
+          "type": "function",
+          "value": "handPointer"
+        },
+        {
+          "type": "function",
+          "value": "handRock"
+        },
+        {
+          "type": "function",
+          "value": "handScissors"
+        },
+        {
+          "type": "function",
+          "value": "handSpock"
+        },
+        {
+          "type": "function",
+          "value": "handshake"
+        },
+        {
+          "type": "function",
+          "value": "hdd"
+        },
+        {
+          "type": "function",
+          "value": "heart"
+        },
+        {
+          "type": "function",
+          "value": "hospital"
+        },
+        {
+          "type": "function",
+          "value": "hourglass"
+        },
+        {
+          "type": "function",
+          "value": "idBadge"
+        },
+        {
+          "type": "function",
+          "value": "idCard"
+        },
+        {
+          "type": "function",
+          "value": "image"
+        },
+        {
+          "type": "function",
+          "value": "images"
+        },
+        {
+          "type": "function",
+          "value": "keyboard"
+        },
+        {
+          "type": "function",
+          "value": "kiss"
+        },
+        {
+          "type": "function",
+          "value": "kissBeam"
+        },
+        {
+          "type": "function",
+          "value": "kissWinkHeart"
+        },
+        {
+          "type": "function",
+          "value": "laugh"
+        },
+        {
+          "type": "function",
+          "value": "laughBeam"
+        },
+        {
+          "type": "function",
+          "value": "laughSquint"
+        },
+        {
+          "type": "function",
+          "value": "laughWink"
+        },
+        {
+          "type": "function",
+          "value": "lemon"
+        },
+        {
+          "type": "function",
+          "value": "lifeRing"
+        },
+        {
+          "type": "function",
+          "value": "lightbulb"
+        },
+        {
+          "type": "function",
+          "value": "listAlt"
+        },
+        {
+          "type": "function",
+          "value": "map"
+        },
+        {
+          "type": "function",
+          "value": "meh"
+        },
+        {
+          "type": "function",
+          "value": "mehBlank"
+        },
+        {
+          "type": "function",
+          "value": "mehRollingEyes"
+        },
+        {
+          "type": "function",
+          "value": "minusSquare"
+        },
+        {
+          "type": "function",
+          "value": "moneyBillAlt"
+        },
+        {
+          "type": "function",
+          "value": "moon"
+        },
+        {
+          "type": "function",
+          "value": "newspaper"
+        },
+        {
+          "type": "function",
+          "value": "objectGroup"
+        },
+        {
+          "type": "function",
+          "value": "objectUngroup"
+        },
+        {
+          "type": "function",
+          "value": "paperPlane"
+        },
+        {
+          "type": "function",
+          "value": "pauseCircle"
+        },
+        {
+          "type": "function",
+          "value": "playCircle"
+        },
+        {
+          "type": "function",
+          "value": "plusSquare"
+        },
+        {
+          "type": "function",
+          "value": "questionCircle"
+        },
+        {
+          "type": "function",
+          "value": "registered"
+        },
+        {
+          "type": "function",
+          "value": "sadCry"
+        },
+        {
+          "type": "function",
+          "value": "sadTear"
+        },
+        {
+          "type": "function",
+          "value": "save"
+        },
+        {
+          "type": "function",
+          "value": "shareSquare"
+        },
+        {
+          "type": "function",
+          "value": "smile"
+        },
+        {
+          "type": "function",
+          "value": "smileBeam"
+        },
+        {
+          "type": "function",
+          "value": "smileWink"
+        },
+        {
+          "type": "function",
+          "value": "snowflake"
+        },
+        {
+          "type": "function",
+          "value": "square"
+        },
+        {
+          "type": "function",
+          "value": "star"
+        },
+        {
+          "type": "function",
+          "value": "starHalf"
+        },
+        {
+          "type": "function",
+          "value": "stickyNote"
+        },
+        {
+          "type": "function",
+          "value": "stopCircle"
+        },
+        {
+          "type": "function",
+          "value": "sun"
+        },
+        {
+          "type": "function",
+          "value": "surprise"
+        },
+        {
+          "type": "function",
+          "value": "thumbsDown"
+        },
+        {
+          "type": "function",
+          "value": "thumbsUp"
+        },
+        {
+          "type": "function",
+          "value": "timesCircle"
+        },
+        {
+          "type": "function",
+          "value": "tired"
+        },
+        {
+          "type": "function",
+          "value": "trashAlt"
+        },
+        {
+          "type": "function",
+          "value": "user"
+        },
+        {
+          "type": "function",
+          "value": "userCircle"
+        },
+        {
+          "type": "function",
+          "value": "windowClose"
+        },
+        {
+          "type": "function",
+          "value": "windowMaximize"
+        },
+        {
+          "type": "function",
+          "value": "windowMinimize"
+        },
+        {
+          "type": "function",
+          "value": "windowRestore"
+        }
+      ]
+    },
+    {
+      "key": [
+        "FontAwesome",
+        "Solid"
+      ],
+      "value": [
+        {
+          "type": "function",
+          "value": "ad"
+        },
+        {
+          "type": "function",
+          "value": "addressBook"
+        },
+        {
+          "type": "function",
+          "value": "addressCard"
+        },
+        {
+          "type": "function",
+          "value": "adjust"
+        },
+        {
+          "type": "function",
+          "value": "airFreshener"
+        },
+        {
+          "type": "function",
+          "value": "alignCenter"
+        },
+        {
+          "type": "function",
+          "value": "alignJustify"
+        },
+        {
+          "type": "function",
+          "value": "alignLeft"
+        },
+        {
+          "type": "function",
+          "value": "alignRight"
+        },
+        {
+          "type": "function",
+          "value": "allergies"
+        },
+        {
+          "type": "function",
+          "value": "ambulance"
+        },
+        {
+          "type": "function",
+          "value": "americanSignLanguageInterpreting"
+        },
+        {
+          "type": "function",
+          "value": "anchor"
+        },
+        {
+          "type": "function",
+          "value": "angleDoubleDown"
+        },
+        {
+          "type": "function",
+          "value": "angleDoubleLeft"
+        },
+        {
+          "type": "function",
+          "value": "angleDoubleRight"
+        },
+        {
+          "type": "function",
+          "value": "angleDoubleUp"
+        },
+        {
+          "type": "function",
+          "value": "angleDown"
+        },
+        {
+          "type": "function",
+          "value": "angleLeft"
+        },
+        {
+          "type": "function",
+          "value": "angleRight"
+        },
+        {
+          "type": "function",
+          "value": "angleUp"
+        },
+        {
+          "type": "function",
+          "value": "angry"
+        },
+        {
+          "type": "function",
+          "value": "ankh"
+        },
+        {
+          "type": "function",
+          "value": "appleAlt"
+        },
+        {
+          "type": "function",
+          "value": "archive"
+        },
+        {
+          "type": "function",
+          "value": "archway"
+        },
+        {
+          "type": "function",
+          "value": "arrowAltCircleDown"
+        },
+        {
+          "type": "function",
+          "value": "arrowAltCircleLeft"
+        },
+        {
+          "type": "function",
+          "value": "arrowAltCircleRight"
+        },
+        {
+          "type": "function",
+          "value": "arrowAltCircleUp"
+        },
+        {
+          "type": "function",
+          "value": "arrowCircleDown"
+        },
+        {
+          "type": "function",
+          "value": "arrowCircleLeft"
+        },
+        {
+          "type": "function",
+          "value": "arrowCircleRight"
+        },
+        {
+          "type": "function",
+          "value": "arrowCircleUp"
+        },
+        {
+          "type": "function",
+          "value": "arrowDown"
+        },
+        {
+          "type": "function",
+          "value": "arrowLeft"
+        },
+        {
+          "type": "function",
+          "value": "arrowRight"
+        },
+        {
+          "type": "function",
+          "value": "arrowUp"
+        },
+        {
+          "type": "function",
+          "value": "arrowsAlt"
+        },
+        {
+          "type": "function",
+          "value": "arrowsAltH"
+        },
+        {
+          "type": "function",
+          "value": "arrowsAltV"
+        },
+        {
+          "type": "function",
+          "value": "assistiveListeningSystems"
+        },
+        {
+          "type": "function",
+          "value": "asterisk"
+        },
+        {
+          "type": "function",
+          "value": "at"
+        },
+        {
+          "type": "function",
+          "value": "atlas"
+        },
+        {
+          "type": "function",
+          "value": "atom"
+        },
+        {
+          "type": "function",
+          "value": "audioDescription"
+        },
+        {
+          "type": "function",
+          "value": "award"
+        },
+        {
+          "type": "function",
+          "value": "backspace"
+        },
+        {
+          "type": "function",
+          "value": "backward"
+        },
+        {
+          "type": "function",
+          "value": "balanceScale"
+        },
+        {
+          "type": "function",
+          "value": "ban"
+        },
+        {
+          "type": "function",
+          "value": "bandAid"
+        },
+        {
+          "type": "function",
+          "value": "barcode"
+        },
+        {
+          "type": "function",
+          "value": "bars"
+        },
+        {
+          "type": "function",
+          "value": "baseballBall"
+        },
+        {
+          "type": "function",
+          "value": "basketballBall"
+        },
+        {
+          "type": "function",
+          "value": "bath"
+        },
+        {
+          "type": "function",
+          "value": "batteryEmpty"
+        },
+        {
+          "type": "function",
+          "value": "batteryFull"
+        },
+        {
+          "type": "function",
+          "value": "batteryHalf"
+        },
+        {
+          "type": "function",
+          "value": "batteryQuarter"
+        },
+        {
+          "type": "function",
+          "value": "batteryThreeQuarters"
+        },
+        {
+          "type": "function",
+          "value": "bed"
+        },
+        {
+          "type": "function",
+          "value": "beer"
+        },
+        {
+          "type": "function",
+          "value": "bell"
+        },
+        {
+          "type": "function",
+          "value": "bellSlash"
+        },
+        {
+          "type": "function",
+          "value": "bezierCurve"
+        },
+        {
+          "type": "function",
+          "value": "bible"
+        },
+        {
+          "type": "function",
+          "value": "bicycle"
+        },
+        {
+          "type": "function",
+          "value": "binoculars"
+        },
+        {
+          "type": "function",
+          "value": "birthdayCake"
+        },
+        {
+          "type": "function",
+          "value": "blender"
+        },
+        {
+          "type": "function",
+          "value": "blenderPhone"
+        },
+        {
+          "type": "function",
+          "value": "blind"
+        },
+        {
+          "type": "function",
+          "value": "bold"
+        },
+        {
+          "type": "function",
+          "value": "bolt"
+        },
+        {
+          "type": "function",
+          "value": "bomb"
+        },
+        {
+          "type": "function",
+          "value": "bone"
+        },
+        {
+          "type": "function",
+          "value": "bong"
+        },
+        {
+          "type": "function",
+          "value": "book"
+        },
+        {
+          "type": "function",
+          "value": "bookDead"
+        },
+        {
+          "type": "function",
+          "value": "bookOpen"
+        },
+        {
+          "type": "function",
+          "value": "bookReader"
+        },
+        {
+          "type": "function",
+          "value": "bookmark"
+        },
+        {
+          "type": "function",
+          "value": "bowlingBall"
+        },
+        {
+          "type": "function",
+          "value": "box"
+        },
+        {
+          "type": "function",
+          "value": "boxOpen"
+        },
+        {
+          "type": "function",
+          "value": "boxes"
+        },
+        {
+          "type": "function",
+          "value": "braille"
+        },
+        {
+          "type": "function",
+          "value": "brain"
+        },
+        {
+          "type": "function",
+          "value": "briefcase"
+        },
+        {
+          "type": "function",
+          "value": "briefcaseMedical"
+        },
+        {
+          "type": "function",
+          "value": "broadcastTower"
+        },
+        {
+          "type": "function",
+          "value": "broom"
+        },
+        {
+          "type": "function",
+          "value": "brush"
+        },
+        {
+          "type": "function",
+          "value": "bug"
+        },
+        {
+          "type": "function",
+          "value": "building"
+        },
+        {
+          "type": "function",
+          "value": "bullhorn"
+        },
+        {
+          "type": "function",
+          "value": "bullseye"
+        },
+        {
+          "type": "function",
+          "value": "burn"
+        },
+        {
+          "type": "function",
+          "value": "bus"
+        },
+        {
+          "type": "function",
+          "value": "busAlt"
+        },
+        {
+          "type": "function",
+          "value": "businessTime"
+        },
+        {
+          "type": "function",
+          "value": "calculator"
+        },
+        {
+          "type": "function",
+          "value": "calendar"
+        },
+        {
+          "type": "function",
+          "value": "calendarAlt"
+        },
+        {
+          "type": "function",
+          "value": "calendarCheck"
+        },
+        {
+          "type": "function",
+          "value": "calendarMinus"
+        },
+        {
+          "type": "function",
+          "value": "calendarPlus"
+        },
+        {
+          "type": "function",
+          "value": "calendarTimes"
+        },
+        {
+          "type": "function",
+          "value": "camera"
+        },
+        {
+          "type": "function",
+          "value": "cameraRetro"
+        },
+        {
+          "type": "function",
+          "value": "campground"
+        },
+        {
+          "type": "function",
+          "value": "cannabis"
+        },
+        {
+          "type": "function",
+          "value": "capsules"
+        },
+        {
+          "type": "function",
+          "value": "car"
+        },
+        {
+          "type": "function",
+          "value": "carAlt"
+        },
+        {
+          "type": "function",
+          "value": "carBattery"
+        },
+        {
+          "type": "function",
+          "value": "carCrash"
+        },
+        {
+          "type": "function",
+          "value": "carSide"
+        },
+        {
+          "type": "function",
+          "value": "caretDown"
+        },
+        {
+          "type": "function",
+          "value": "caretLeft"
+        },
+        {
+          "type": "function",
+          "value": "caretRight"
+        },
+        {
+          "type": "function",
+          "value": "caretSquareDown"
+        },
+        {
+          "type": "function",
+          "value": "caretSquareLeft"
+        },
+        {
+          "type": "function",
+          "value": "caretSquareRight"
+        },
+        {
+          "type": "function",
+          "value": "caretSquareUp"
+        },
+        {
+          "type": "function",
+          "value": "caretUp"
+        },
+        {
+          "type": "function",
+          "value": "cartArrowDown"
+        },
+        {
+          "type": "function",
+          "value": "cartPlus"
+        },
+        {
+          "type": "function",
+          "value": "cat"
+        },
+        {
+          "type": "function",
+          "value": "certificate"
+        },
+        {
+          "type": "function",
+          "value": "chair"
+        },
+        {
+          "type": "function",
+          "value": "chalkboard"
+        },
+        {
+          "type": "function",
+          "value": "chalkboardTeacher"
+        },
+        {
+          "type": "function",
+          "value": "chargingStation"
+        },
+        {
+          "type": "function",
+          "value": "chartArea"
+        },
+        {
+          "type": "function",
+          "value": "chartBar"
+        },
+        {
+          "type": "function",
+          "value": "chartLine"
+        },
+        {
+          "type": "function",
+          "value": "chartPie"
+        },
+        {
+          "type": "function",
+          "value": "check"
+        },
+        {
+          "type": "function",
+          "value": "checkCircle"
+        },
+        {
+          "type": "function",
+          "value": "checkDouble"
+        },
+        {
+          "type": "function",
+          "value": "checkSquare"
+        },
+        {
+          "type": "function",
+          "value": "chess"
+        },
+        {
+          "type": "function",
+          "value": "chessBishop"
+        },
+        {
+          "type": "function",
+          "value": "chessBoard"
+        },
+        {
+          "type": "function",
+          "value": "chessKing"
+        },
+        {
+          "type": "function",
+          "value": "chessKnight"
+        },
+        {
+          "type": "function",
+          "value": "chessPawn"
+        },
+        {
+          "type": "function",
+          "value": "chessQueen"
+        },
+        {
+          "type": "function",
+          "value": "chessRook"
+        },
+        {
+          "type": "function",
+          "value": "chevronCircleDown"
+        },
+        {
+          "type": "function",
+          "value": "chevronCircleLeft"
+        },
+        {
+          "type": "function",
+          "value": "chevronCircleRight"
+        },
+        {
+          "type": "function",
+          "value": "chevronCircleUp"
+        },
+        {
+          "type": "function",
+          "value": "chevronDown"
+        },
+        {
+          "type": "function",
+          "value": "chevronLeft"
+        },
+        {
+          "type": "function",
+          "value": "chevronRight"
+        },
+        {
+          "type": "function",
+          "value": "chevronUp"
+        },
+        {
+          "type": "function",
+          "value": "child"
+        },
+        {
+          "type": "function",
+          "value": "church"
+        },
+        {
+          "type": "function",
+          "value": "circle"
+        },
+        {
+          "type": "function",
+          "value": "circleNotch"
+        },
+        {
+          "type": "function",
+          "value": "city"
+        },
+        {
+          "type": "function",
+          "value": "clipboard"
+        },
+        {
+          "type": "function",
+          "value": "clipboardCheck"
+        },
+        {
+          "type": "function",
+          "value": "clipboardList"
+        },
+        {
+          "type": "function",
+          "value": "clock"
+        },
+        {
+          "type": "function",
+          "value": "clone"
+        },
+        {
+          "type": "function",
+          "value": "closedCaptioning"
+        },
+        {
+          "type": "function",
+          "value": "cloud"
+        },
+        {
+          "type": "function",
+          "value": "cloudDownloadAlt"
+        },
+        {
+          "type": "function",
+          "value": "cloudMeatball"
+        },
+        {
+          "type": "function",
+          "value": "cloudMoon"
+        },
+        {
+          "type": "function",
+          "value": "cloudMoonRain"
+        },
+        {
+          "type": "function",
+          "value": "cloudRain"
+        },
+        {
+          "type": "function",
+          "value": "cloudShowersHeavy"
+        },
+        {
+          "type": "function",
+          "value": "cloudSun"
+        },
+        {
+          "type": "function",
+          "value": "cloudSunRain"
+        },
+        {
+          "type": "function",
+          "value": "cloudUploadAlt"
+        },
+        {
+          "type": "function",
+          "value": "cocktail"
+        },
+        {
+          "type": "function",
+          "value": "code"
+        },
+        {
+          "type": "function",
+          "value": "codeBranch"
+        },
+        {
+          "type": "function",
+          "value": "coffee"
+        },
+        {
+          "type": "function",
+          "value": "cog"
+        },
+        {
+          "type": "function",
+          "value": "cogs"
+        },
+        {
+          "type": "function",
+          "value": "coins"
+        },
+        {
+          "type": "function",
+          "value": "columns"
+        },
+        {
+          "type": "function",
+          "value": "comment"
+        },
+        {
+          "type": "function",
+          "value": "commentAlt"
+        },
+        {
+          "type": "function",
+          "value": "commentDollar"
+        },
+        {
+          "type": "function",
+          "value": "commentDots"
+        },
+        {
+          "type": "function",
+          "value": "commentSlash"
+        },
+        {
+          "type": "function",
+          "value": "comments"
+        },
+        {
+          "type": "function",
+          "value": "commentsDollar"
+        },
+        {
+          "type": "function",
+          "value": "compactDisc"
+        },
+        {
+          "type": "function",
+          "value": "compass"
+        },
+        {
+          "type": "function",
+          "value": "compress"
+        },
+        {
+          "type": "function",
+          "value": "conciergeBell"
+        },
+        {
+          "type": "function",
+          "value": "cookie"
+        },
+        {
+          "type": "function",
+          "value": "cookieBite"
+        },
+        {
+          "type": "function",
+          "value": "copy"
+        },
+        {
+          "type": "function",
+          "value": "copyright"
+        },
+        {
+          "type": "function",
+          "value": "couch"
+        },
+        {
+          "type": "function",
+          "value": "creditCard"
+        },
+        {
+          "type": "function",
+          "value": "crop"
+        },
+        {
+          "type": "function",
+          "value": "cropAlt"
+        },
+        {
+          "type": "function",
+          "value": "cross"
+        },
+        {
+          "type": "function",
+          "value": "crosshairs"
+        },
+        {
+          "type": "function",
+          "value": "crow"
+        },
+        {
+          "type": "function",
+          "value": "crown"
+        },
+        {
+          "type": "function",
+          "value": "cube"
+        },
+        {
+          "type": "function",
+          "value": "cubes"
+        },
+        {
+          "type": "function",
+          "value": "cut"
+        },
+        {
+          "type": "function",
+          "value": "database"
+        },
+        {
+          "type": "function",
+          "value": "deaf"
+        },
+        {
+          "type": "function",
+          "value": "democrat"
+        },
+        {
+          "type": "function",
+          "value": "desktop"
+        },
+        {
+          "type": "function",
+          "value": "dharmachakra"
+        },
+        {
+          "type": "function",
+          "value": "diagnoses"
+        },
+        {
+          "type": "function",
+          "value": "dice"
+        },
+        {
+          "type": "function",
+          "value": "diceD20"
+        },
+        {
+          "type": "function",
+          "value": "diceD6"
+        },
+        {
+          "type": "function",
+          "value": "diceFive"
+        },
+        {
+          "type": "function",
+          "value": "diceFour"
+        },
+        {
+          "type": "function",
+          "value": "diceOne"
+        },
+        {
+          "type": "function",
+          "value": "diceSix"
+        },
+        {
+          "type": "function",
+          "value": "diceThree"
+        },
+        {
+          "type": "function",
+          "value": "diceTwo"
+        },
+        {
+          "type": "function",
+          "value": "digitalTachograph"
+        },
+        {
+          "type": "function",
+          "value": "directions"
+        },
+        {
+          "type": "function",
+          "value": "divide"
+        },
+        {
+          "type": "function",
+          "value": "dizzy"
+        },
+        {
+          "type": "function",
+          "value": "dna"
+        },
+        {
+          "type": "function",
+          "value": "dog"
+        },
+        {
+          "type": "function",
+          "value": "dollarSign"
+        },
+        {
+          "type": "function",
+          "value": "dolly"
+        },
+        {
+          "type": "function",
+          "value": "dollyFlatbed"
+        },
+        {
+          "type": "function",
+          "value": "donate"
+        },
+        {
+          "type": "function",
+          "value": "doorClosed"
+        },
+        {
+          "type": "function",
+          "value": "doorOpen"
+        },
+        {
+          "type": "function",
+          "value": "dotCircle"
+        },
+        {
+          "type": "function",
+          "value": "dove"
+        },
+        {
+          "type": "function",
+          "value": "download"
+        },
+        {
+          "type": "function",
+          "value": "draftingCompass"
+        },
+        {
+          "type": "function",
+          "value": "dragon"
+        },
+        {
+          "type": "function",
+          "value": "drawPolygon"
+        },
+        {
+          "type": "function",
+          "value": "drum"
+        },
+        {
+          "type": "function",
+          "value": "drumSteelpan"
+        },
+        {
+          "type": "function",
+          "value": "drumstickBite"
+        },
+        {
+          "type": "function",
+          "value": "dumbbell"
+        },
+        {
+          "type": "function",
+          "value": "dungeon"
+        },
+        {
+          "type": "function",
+          "value": "edit"
+        },
+        {
+          "type": "function",
+          "value": "eject"
+        },
+        {
+          "type": "function",
+          "value": "ellipsisH"
+        },
+        {
+          "type": "function",
+          "value": "ellipsisV"
+        },
+        {
+          "type": "function",
+          "value": "envelope"
+        },
+        {
+          "type": "function",
+          "value": "envelopeOpen"
+        },
+        {
+          "type": "function",
+          "value": "envelopeOpenText"
+        },
+        {
+          "type": "function",
+          "value": "envelopeSquare"
+        },
+        {
+          "type": "function",
+          "value": "equals"
+        },
+        {
+          "type": "function",
+          "value": "eraser"
+        },
+        {
+          "type": "function",
+          "value": "euroSign"
+        },
+        {
+          "type": "function",
+          "value": "exchangeAlt"
+        },
+        {
+          "type": "function",
+          "value": "exclamation"
+        },
+        {
+          "type": "function",
+          "value": "exclamationCircle"
+        },
+        {
+          "type": "function",
+          "value": "exclamationTriangle"
+        },
+        {
+          "type": "function",
+          "value": "expand"
+        },
+        {
+          "type": "function",
+          "value": "expandArrowsAlt"
+        },
+        {
+          "type": "function",
+          "value": "externalLinkAlt"
+        },
+        {
+          "type": "function",
+          "value": "externalLinkSquareAlt"
+        },
+        {
+          "type": "function",
+          "value": "eye"
+        },
+        {
+          "type": "function",
+          "value": "eyeDropper"
+        },
+        {
+          "type": "function",
+          "value": "eyeSlash"
+        },
+        {
+          "type": "function",
+          "value": "fastBackward"
+        },
+        {
+          "type": "function",
+          "value": "fastForward"
+        },
+        {
+          "type": "function",
+          "value": "fax"
+        },
+        {
+          "type": "function",
+          "value": "feather"
+        },
+        {
+          "type": "function",
+          "value": "featherAlt"
+        },
+        {
+          "type": "function",
+          "value": "female"
+        },
+        {
+          "type": "function",
+          "value": "fighterJet"
+        },
+        {
+          "type": "function",
+          "value": "file"
+        },
+        {
+          "type": "function",
+          "value": "fileAlt"
+        },
+        {
+          "type": "function",
+          "value": "fileArchive"
+        },
+        {
+          "type": "function",
+          "value": "fileAudio"
+        },
+        {
+          "type": "function",
+          "value": "fileCode"
+        },
+        {
+          "type": "function",
+          "value": "fileContract"
+        },
+        {
+          "type": "function",
+          "value": "fileCsv"
+        },
+        {
+          "type": "function",
+          "value": "fileDownload"
+        },
+        {
+          "type": "function",
+          "value": "fileExcel"
+        },
+        {
+          "type": "function",
+          "value": "fileExport"
+        },
+        {
+          "type": "function",
+          "value": "fileImage"
+        },
+        {
+          "type": "function",
+          "value": "fileImport"
+        },
+        {
+          "type": "function",
+          "value": "fileInvoice"
+        },
+        {
+          "type": "function",
+          "value": "fileInvoiceDollar"
+        },
+        {
+          "type": "function",
+          "value": "fileMedical"
+        },
+        {
+          "type": "function",
+          "value": "fileMedicalAlt"
+        },
+        {
+          "type": "function",
+          "value": "filePdf"
+        },
+        {
+          "type": "function",
+          "value": "filePowerpoint"
+        },
+        {
+          "type": "function",
+          "value": "filePrescription"
+        },
+        {
+          "type": "function",
+          "value": "fileSignature"
+        },
+        {
+          "type": "function",
+          "value": "fileUpload"
+        },
+        {
+          "type": "function",
+          "value": "fileVideo"
+        },
+        {
+          "type": "function",
+          "value": "fileWord"
+        },
+        {
+          "type": "function",
+          "value": "fill"
+        },
+        {
+          "type": "function",
+          "value": "fillDrip"
+        },
+        {
+          "type": "function",
+          "value": "film"
+        },
+        {
+          "type": "function",
+          "value": "filter"
+        },
+        {
+          "type": "function",
+          "value": "fingerprint"
+        },
+        {
+          "type": "function",
+          "value": "fire"
+        },
+        {
+          "type": "function",
+          "value": "fireExtinguisher"
+        },
+        {
+          "type": "function",
+          "value": "firstAid"
+        },
+        {
+          "type": "function",
+          "value": "fish"
+        },
+        {
+          "type": "function",
+          "value": "fistRaised"
+        },
+        {
+          "type": "function",
+          "value": "flag"
+        },
+        {
+          "type": "function",
+          "value": "flagCheckered"
+        },
+        {
+          "type": "function",
+          "value": "flagUsa"
+        },
+        {
+          "type": "function",
+          "value": "flask"
+        },
+        {
+          "type": "function",
+          "value": "flushed"
+        },
+        {
+          "type": "function",
+          "value": "folder"
+        },
+        {
+          "type": "function",
+          "value": "folderMinus"
+        },
+        {
+          "type": "function",
+          "value": "folderOpen"
+        },
+        {
+          "type": "function",
+          "value": "folderPlus"
+        },
+        {
+          "type": "function",
+          "value": "font"
+        },
+        {
+          "type": "function",
+          "value": "fontAwesomeLogoFull"
+        },
+        {
+          "type": "function",
+          "value": "footballBall"
+        },
+        {
+          "type": "function",
+          "value": "forward"
+        },
+        {
+          "type": "function",
+          "value": "frog"
+        },
+        {
+          "type": "function",
+          "value": "frown"
+        },
+        {
+          "type": "function",
+          "value": "frownOpen"
+        },
+        {
+          "type": "function",
+          "value": "funnelDollar"
+        },
+        {
+          "type": "function",
+          "value": "futbol"
+        },
+        {
+          "type": "function",
+          "value": "gamepad"
+        },
+        {
+          "type": "function",
+          "value": "gasPump"
+        },
+        {
+          "type": "function",
+          "value": "gavel"
+        },
+        {
+          "type": "function",
+          "value": "gem"
+        },
+        {
+          "type": "function",
+          "value": "genderless"
+        },
+        {
+          "type": "function",
+          "value": "ghost"
+        },
+        {
+          "type": "function",
+          "value": "gift"
+        },
+        {
+          "type": "function",
+          "value": "glassMartini"
+        },
+        {
+          "type": "function",
+          "value": "glassMartiniAlt"
+        },
+        {
+          "type": "function",
+          "value": "glasses"
+        },
+        {
+          "type": "function",
+          "value": "globe"
+        },
+        {
+          "type": "function",
+          "value": "globeAfrica"
+        },
+        {
+          "type": "function",
+          "value": "globeAmericas"
+        },
+        {
+          "type": "function",
+          "value": "globeAsia"
+        },
+        {
+          "type": "function",
+          "value": "golfBall"
+        },
+        {
+          "type": "function",
+          "value": "gopuram"
+        },
+        {
+          "type": "function",
+          "value": "graduationCap"
+        },
+        {
+          "type": "function",
+          "value": "greaterThan"
+        },
+        {
+          "type": "function",
+          "value": "greaterThanEqual"
+        },
+        {
+          "type": "function",
+          "value": "grimace"
+        },
+        {
+          "type": "function",
+          "value": "grin"
+        },
+        {
+          "type": "function",
+          "value": "grinAlt"
+        },
+        {
+          "type": "function",
+          "value": "grinBeam"
+        },
+        {
+          "type": "function",
+          "value": "grinBeamSweat"
+        },
+        {
+          "type": "function",
+          "value": "grinHearts"
+        },
+        {
+          "type": "function",
+          "value": "grinSquint"
+        },
+        {
+          "type": "function",
+          "value": "grinSquintTears"
+        },
+        {
+          "type": "function",
+          "value": "grinStars"
+        },
+        {
+          "type": "function",
+          "value": "grinTears"
+        },
+        {
+          "type": "function",
+          "value": "grinTongue"
+        },
+        {
+          "type": "function",
+          "value": "grinTongueSquint"
+        },
+        {
+          "type": "function",
+          "value": "grinTongueWink"
+        },
+        {
+          "type": "function",
+          "value": "grinWink"
+        },
+        {
+          "type": "function",
+          "value": "gripHorizontal"
+        },
+        {
+          "type": "function",
+          "value": "gripVertical"
+        },
+        {
+          "type": "function",
+          "value": "hSquare"
+        },
+        {
+          "type": "function",
+          "value": "hammer"
+        },
+        {
+          "type": "function",
+          "value": "hamsa"
+        },
+        {
+          "type": "function",
+          "value": "handHolding"
+        },
+        {
+          "type": "function",
+          "value": "handHoldingHeart"
+        },
+        {
+          "type": "function",
+          "value": "handHoldingUsd"
+        },
+        {
+          "type": "function",
+          "value": "handLizard"
+        },
+        {
+          "type": "function",
+          "value": "handPaper"
+        },
+        {
+          "type": "function",
+          "value": "handPeace"
+        },
+        {
+          "type": "function",
+          "value": "handPointDown"
+        },
+        {
+          "type": "function",
+          "value": "handPointLeft"
+        },
+        {
+          "type": "function",
+          "value": "handPointRight"
+        },
+        {
+          "type": "function",
+          "value": "handPointUp"
+        },
+        {
+          "type": "function",
+          "value": "handPointer"
+        },
+        {
+          "type": "function",
+          "value": "handRock"
+        },
+        {
+          "type": "function",
+          "value": "handScissors"
+        },
+        {
+          "type": "function",
+          "value": "handSpock"
+        },
+        {
+          "type": "function",
+          "value": "hands"
+        },
+        {
+          "type": "function",
+          "value": "handsHelping"
+        },
+        {
+          "type": "function",
+          "value": "handshake"
+        },
+        {
+          "type": "function",
+          "value": "hanukiah"
+        },
+        {
+          "type": "function",
+          "value": "hashtag"
+        },
+        {
+          "type": "function",
+          "value": "hatWizard"
+        },
+        {
+          "type": "function",
+          "value": "haykal"
+        },
+        {
+          "type": "function",
+          "value": "hdd"
+        },
+        {
+          "type": "function",
+          "value": "heading"
+        },
+        {
+          "type": "function",
+          "value": "headphones"
+        },
+        {
+          "type": "function",
+          "value": "headphonesAlt"
+        },
+        {
+          "type": "function",
+          "value": "headset"
+        },
+        {
+          "type": "function",
+          "value": "heart"
+        },
+        {
+          "type": "function",
+          "value": "heartbeat"
+        },
+        {
+          "type": "function",
+          "value": "helicopter"
+        },
+        {
+          "type": "function",
+          "value": "highlighter"
+        },
+        {
+          "type": "function",
+          "value": "hiking"
+        },
+        {
+          "type": "function",
+          "value": "hippo"
+        },
+        {
+          "type": "function",
+          "value": "history"
+        },
+        {
+          "type": "function",
+          "value": "hockeyPuck"
+        },
+        {
+          "type": "function",
+          "value": "home"
+        },
+        {
+          "type": "function",
+          "value": "horse"
+        },
+        {
+          "type": "function",
+          "value": "hospital"
+        },
+        {
+          "type": "function",
+          "value": "hospitalAlt"
+        },
+        {
+          "type": "function",
+          "value": "hospitalSymbol"
+        },
+        {
+          "type": "function",
+          "value": "hotTub"
+        },
+        {
+          "type": "function",
+          "value": "hotel"
+        },
+        {
+          "type": "function",
+          "value": "hourglass"
+        },
+        {
+          "type": "function",
+          "value": "hourglassEnd"
+        },
+        {
+          "type": "function",
+          "value": "hourglassHalf"
+        },
+        {
+          "type": "function",
+          "value": "hourglassStart"
+        },
+        {
+          "type": "function",
+          "value": "houseDamage"
+        },
+        {
+          "type": "function",
+          "value": "hryvnia"
+        },
+        {
+          "type": "function",
+          "value": "iCursor"
+        },
+        {
+          "type": "function",
+          "value": "idBadge"
+        },
+        {
+          "type": "function",
+          "value": "idCard"
+        },
+        {
+          "type": "function",
+          "value": "idCardAlt"
+        },
+        {
+          "type": "function",
+          "value": "image"
+        },
+        {
+          "type": "function",
+          "value": "images"
+        },
+        {
+          "type": "function",
+          "value": "inbox"
+        },
+        {
+          "type": "function",
+          "value": "indent"
+        },
+        {
+          "type": "function",
+          "value": "industry"
+        },
+        {
+          "type": "function",
+          "value": "infinity"
+        },
+        {
+          "type": "function",
+          "value": "info"
+        },
+        {
+          "type": "function",
+          "value": "infoCircle"
+        },
+        {
+          "type": "function",
+          "value": "italic"
+        },
+        {
+          "type": "function",
+          "value": "jedi"
+        },
+        {
+          "type": "function",
+          "value": "joint"
+        },
+        {
+          "type": "function",
+          "value": "journalWhills"
+        },
+        {
+          "type": "function",
+          "value": "kaaba"
+        },
+        {
+          "type": "function",
+          "value": "key"
+        },
+        {
+          "type": "function",
+          "value": "keyboard"
+        },
+        {
+          "type": "function",
+          "value": "khanda"
+        },
+        {
+          "type": "function",
+          "value": "kiss"
+        },
+        {
+          "type": "function",
+          "value": "kissBeam"
+        },
+        {
+          "type": "function",
+          "value": "kissWinkHeart"
+        },
+        {
+          "type": "function",
+          "value": "kiwiBird"
+        },
+        {
+          "type": "function",
+          "value": "landmark"
+        },
+        {
+          "type": "function",
+          "value": "language"
+        },
+        {
+          "type": "function",
+          "value": "laptop"
+        },
+        {
+          "type": "function",
+          "value": "laptopCode"
+        },
+        {
+          "type": "function",
+          "value": "laugh"
+        },
+        {
+          "type": "function",
+          "value": "laughBeam"
+        },
+        {
+          "type": "function",
+          "value": "laughSquint"
+        },
+        {
+          "type": "function",
+          "value": "laughWink"
+        },
+        {
+          "type": "function",
+          "value": "layerGroup"
+        },
+        {
+          "type": "function",
+          "value": "leaf"
+        },
+        {
+          "type": "function",
+          "value": "lemon"
+        },
+        {
+          "type": "function",
+          "value": "lessThan"
+        },
+        {
+          "type": "function",
+          "value": "lessThanEqual"
+        },
+        {
+          "type": "function",
+          "value": "levelDownAlt"
+        },
+        {
+          "type": "function",
+          "value": "levelUpAlt"
+        },
+        {
+          "type": "function",
+          "value": "lifeRing"
+        },
+        {
+          "type": "function",
+          "value": "lightbulb"
+        },
+        {
+          "type": "function",
+          "value": "link"
+        },
+        {
+          "type": "function",
+          "value": "liraSign"
+        },
+        {
+          "type": "function",
+          "value": "list"
+        },
+        {
+          "type": "function",
+          "value": "listAlt"
+        },
+        {
+          "type": "function",
+          "value": "listOl"
+        },
+        {
+          "type": "function",
+          "value": "listUl"
+        },
+        {
+          "type": "function",
+          "value": "locationArrow"
+        },
+        {
+          "type": "function",
+          "value": "lock"
+        },
+        {
+          "type": "function",
+          "value": "lockOpen"
+        },
+        {
+          "type": "function",
+          "value": "longArrowAltDown"
+        },
+        {
+          "type": "function",
+          "value": "longArrowAltLeft"
+        },
+        {
+          "type": "function",
+          "value": "longArrowAltRight"
+        },
+        {
+          "type": "function",
+          "value": "longArrowAltUp"
+        },
+        {
+          "type": "function",
+          "value": "lowVision"
+        },
+        {
+          "type": "function",
+          "value": "luggageCart"
+        },
+        {
+          "type": "function",
+          "value": "magic"
+        },
+        {
+          "type": "function",
+          "value": "magnet"
+        },
+        {
+          "type": "function",
+          "value": "mailBulk"
+        },
+        {
+          "type": "function",
+          "value": "male"
+        },
+        {
+          "type": "function",
+          "value": "map"
+        },
+        {
+          "type": "function",
+          "value": "mapMarked"
+        },
+        {
+          "type": "function",
+          "value": "mapMarkedAlt"
+        },
+        {
+          "type": "function",
+          "value": "mapMarker"
+        },
+        {
+          "type": "function",
+          "value": "mapMarkerAlt"
+        },
+        {
+          "type": "function",
+          "value": "mapPin"
+        },
+        {
+          "type": "function",
+          "value": "mapSigns"
+        },
+        {
+          "type": "function",
+          "value": "marker"
+        },
+        {
+          "type": "function",
+          "value": "mars"
+        },
+        {
+          "type": "function",
+          "value": "marsDouble"
+        },
+        {
+          "type": "function",
+          "value": "marsStroke"
+        },
+        {
+          "type": "function",
+          "value": "marsStrokeH"
+        },
+        {
+          "type": "function",
+          "value": "marsStrokeV"
+        },
+        {
+          "type": "function",
+          "value": "mask"
+        },
+        {
+          "type": "function",
+          "value": "medal"
+        },
+        {
+          "type": "function",
+          "value": "medkit"
+        },
+        {
+          "type": "function",
+          "value": "meh"
+        },
+        {
+          "type": "function",
+          "value": "mehBlank"
+        },
+        {
+          "type": "function",
+          "value": "mehRollingEyes"
+        },
+        {
+          "type": "function",
+          "value": "memory"
+        },
+        {
+          "type": "function",
+          "value": "menorah"
+        },
+        {
+          "type": "function",
+          "value": "mercury"
+        },
+        {
+          "type": "function",
+          "value": "meteor"
+        },
+        {
+          "type": "function",
+          "value": "microchip"
+        },
+        {
+          "type": "function",
+          "value": "microphone"
+        },
+        {
+          "type": "function",
+          "value": "microphoneAlt"
+        },
+        {
+          "type": "function",
+          "value": "microphoneAltSlash"
+        },
+        {
+          "type": "function",
+          "value": "microphoneSlash"
+        },
+        {
+          "type": "function",
+          "value": "microscope"
+        },
+        {
+          "type": "function",
+          "value": "minus"
+        },
+        {
+          "type": "function",
+          "value": "minusCircle"
+        },
+        {
+          "type": "function",
+          "value": "minusSquare"
+        },
+        {
+          "type": "function",
+          "value": "mobile"
+        },
+        {
+          "type": "function",
+          "value": "mobileAlt"
+        },
+        {
+          "type": "function",
+          "value": "moneyBill"
+        },
+        {
+          "type": "function",
+          "value": "moneyBillAlt"
+        },
+        {
+          "type": "function",
+          "value": "moneyBillWave"
+        },
+        {
+          "type": "function",
+          "value": "moneyBillWaveAlt"
+        },
+        {
+          "type": "function",
+          "value": "moneyCheck"
+        },
+        {
+          "type": "function",
+          "value": "moneyCheckAlt"
+        },
+        {
+          "type": "function",
+          "value": "monument"
+        },
+        {
+          "type": "function",
+          "value": "moon"
+        },
+        {
+          "type": "function",
+          "value": "mortarPestle"
+        },
+        {
+          "type": "function",
+          "value": "mosque"
+        },
+        {
+          "type": "function",
+          "value": "motorcycle"
+        },
+        {
+          "type": "function",
+          "value": "mountain"
+        },
+        {
+          "type": "function",
+          "value": "mousePointer"
+        },
+        {
+          "type": "function",
+          "value": "music"
+        },
+        {
+          "type": "function",
+          "value": "networkWired"
+        },
+        {
+          "type": "function",
+          "value": "neuter"
+        },
+        {
+          "type": "function",
+          "value": "newspaper"
+        },
+        {
+          "type": "function",
+          "value": "notEqual"
+        },
+        {
+          "type": "function",
+          "value": "notesMedical"
+        },
+        {
+          "type": "function",
+          "value": "objectGroup"
+        },
+        {
+          "type": "function",
+          "value": "objectUngroup"
+        },
+        {
+          "type": "function",
+          "value": "oilCan"
+        },
+        {
+          "type": "function",
+          "value": "om"
+        },
+        {
+          "type": "function",
+          "value": "otter"
+        },
+        {
+          "type": "function",
+          "value": "outdent"
+        },
+        {
+          "type": "function",
+          "value": "paintBrush"
+        },
+        {
+          "type": "function",
+          "value": "paintRoller"
+        },
+        {
+          "type": "function",
+          "value": "palette"
+        },
+        {
+          "type": "function",
+          "value": "pallet"
+        },
+        {
+          "type": "function",
+          "value": "paperPlane"
+        },
+        {
+          "type": "function",
+          "value": "paperclip"
+        },
+        {
+          "type": "function",
+          "value": "parachuteBox"
+        },
+        {
+          "type": "function",
+          "value": "paragraph"
+        },
+        {
+          "type": "function",
+          "value": "parking"
+        },
+        {
+          "type": "function",
+          "value": "passport"
+        },
+        {
+          "type": "function",
+          "value": "pastafarianism"
+        },
+        {
+          "type": "function",
+          "value": "paste"
+        },
+        {
+          "type": "function",
+          "value": "pause"
+        },
+        {
+          "type": "function",
+          "value": "pauseCircle"
+        },
+        {
+          "type": "function",
+          "value": "paw"
+        },
+        {
+          "type": "function",
+          "value": "peace"
+        },
+        {
+          "type": "function",
+          "value": "pen"
+        },
+        {
+          "type": "function",
+          "value": "penAlt"
+        },
+        {
+          "type": "function",
+          "value": "penFancy"
+        },
+        {
+          "type": "function",
+          "value": "penNib"
+        },
+        {
+          "type": "function",
+          "value": "penSquare"
+        },
+        {
+          "type": "function",
+          "value": "pencilAlt"
+        },
+        {
+          "type": "function",
+          "value": "pencilRuler"
+        },
+        {
+          "type": "function",
+          "value": "peopleCarry"
+        },
+        {
+          "type": "function",
+          "value": "percent"
+        },
+        {
+          "type": "function",
+          "value": "percentage"
+        },
+        {
+          "type": "function",
+          "value": "personBooth"
+        },
+        {
+          "type": "function",
+          "value": "phone"
+        },
+        {
+          "type": "function",
+          "value": "phoneSlash"
+        },
+        {
+          "type": "function",
+          "value": "phoneSquare"
+        },
+        {
+          "type": "function",
+          "value": "phoneVolume"
+        },
+        {
+          "type": "function",
+          "value": "piggyBank"
+        },
+        {
+          "type": "function",
+          "value": "pills"
+        },
+        {
+          "type": "function",
+          "value": "placeOfWorship"
+        },
+        {
+          "type": "function",
+          "value": "plane"
+        },
+        {
+          "type": "function",
+          "value": "planeArrival"
+        },
+        {
+          "type": "function",
+          "value": "planeDeparture"
+        },
+        {
+          "type": "function",
+          "value": "play"
+        },
+        {
+          "type": "function",
+          "value": "playCircle"
+        },
+        {
+          "type": "function",
+          "value": "plug"
+        },
+        {
+          "type": "function",
+          "value": "plus"
+        },
+        {
+          "type": "function",
+          "value": "plusCircle"
+        },
+        {
+          "type": "function",
+          "value": "plusSquare"
+        },
+        {
+          "type": "function",
+          "value": "podcast"
+        },
+        {
+          "type": "function",
+          "value": "poll"
+        },
+        {
+          "type": "function",
+          "value": "pollH"
+        },
+        {
+          "type": "function",
+          "value": "poo"
+        },
+        {
+          "type": "function",
+          "value": "pooStorm"
+        },
+        {
+          "type": "function",
+          "value": "poop"
+        },
+        {
+          "type": "function",
+          "value": "portrait"
+        },
+        {
+          "type": "function",
+          "value": "poundSign"
+        },
+        {
+          "type": "function",
+          "value": "powerOff"
+        },
+        {
+          "type": "function",
+          "value": "pray"
+        },
+        {
+          "type": "function",
+          "value": "prayingHands"
+        },
+        {
+          "type": "function",
+          "value": "prescription"
+        },
+        {
+          "type": "function",
+          "value": "prescriptionBottle"
+        },
+        {
+          "type": "function",
+          "value": "prescriptionBottleAlt"
+        },
+        {
+          "type": "function",
+          "value": "print"
+        },
+        {
+          "type": "function",
+          "value": "procedures"
+        },
+        {
+          "type": "function",
+          "value": "projectDiagram"
+        },
+        {
+          "type": "function",
+          "value": "puzzlePiece"
+        },
+        {
+          "type": "function",
+          "value": "qrcode"
+        },
+        {
+          "type": "function",
+          "value": "question"
+        },
+        {
+          "type": "function",
+          "value": "questionCircle"
+        },
+        {
+          "type": "function",
+          "value": "quidditch"
+        },
+        {
+          "type": "function",
+          "value": "quoteLeft"
+        },
+        {
+          "type": "function",
+          "value": "quoteRight"
+        },
+        {
+          "type": "function",
+          "value": "quran"
+        },
+        {
+          "type": "function",
+          "value": "rainbow"
+        },
+        {
+          "type": "function",
+          "value": "random"
+        },
+        {
+          "type": "function",
+          "value": "receipt"
+        },
+        {
+          "type": "function",
+          "value": "recycle"
+        },
+        {
+          "type": "function",
+          "value": "redo"
+        },
+        {
+          "type": "function",
+          "value": "redoAlt"
+        },
+        {
+          "type": "function",
+          "value": "registered"
+        },
+        {
+          "type": "function",
+          "value": "reply"
+        },
+        {
+          "type": "function",
+          "value": "replyAll"
+        },
+        {
+          "type": "function",
+          "value": "republican"
+        },
+        {
+          "type": "function",
+          "value": "retweet"
+        },
+        {
+          "type": "function",
+          "value": "ribbon"
+        },
+        {
+          "type": "function",
+          "value": "ring"
+        },
+        {
+          "type": "function",
+          "value": "road"
+        },
+        {
+          "type": "function",
+          "value": "robot"
+        },
+        {
+          "type": "function",
+          "value": "rocket"
+        },
+        {
+          "type": "function",
+          "value": "route"
+        },
+        {
+          "type": "function",
+          "value": "rss"
+        },
+        {
+          "type": "function",
+          "value": "rssSquare"
+        },
+        {
+          "type": "function",
+          "value": "rubleSign"
+        },
+        {
+          "type": "function",
+          "value": "ruler"
+        },
+        {
+          "type": "function",
+          "value": "rulerCombined"
+        },
+        {
+          "type": "function",
+          "value": "rulerHorizontal"
+        },
+        {
+          "type": "function",
+          "value": "rulerVertical"
+        },
+        {
+          "type": "function",
+          "value": "running"
+        },
+        {
+          "type": "function",
+          "value": "rupeeSign"
+        },
+        {
+          "type": "function",
+          "value": "sadCry"
+        },
+        {
+          "type": "function",
+          "value": "sadTear"
+        },
+        {
+          "type": "function",
+          "value": "save"
+        },
+        {
+          "type": "function",
+          "value": "school"
+        },
+        {
+          "type": "function",
+          "value": "screwdriver"
+        },
+        {
+          "type": "function",
+          "value": "scroll"
+        },
+        {
+          "type": "function",
+          "value": "search"
+        },
+        {
+          "type": "function",
+          "value": "searchDollar"
+        },
+        {
+          "type": "function",
+          "value": "searchLocation"
+        },
+        {
+          "type": "function",
+          "value": "searchMinus"
+        },
+        {
+          "type": "function",
+          "value": "searchPlus"
+        },
+        {
+          "type": "function",
+          "value": "seedling"
+        },
+        {
+          "type": "function",
+          "value": "server"
+        },
+        {
+          "type": "function",
+          "value": "shapes"
+        },
+        {
+          "type": "function",
+          "value": "share"
+        },
+        {
+          "type": "function",
+          "value": "shareAlt"
+        },
+        {
+          "type": "function",
+          "value": "shareAltSquare"
+        },
+        {
+          "type": "function",
+          "value": "shareSquare"
+        },
+        {
+          "type": "function",
+          "value": "shekelSign"
+        },
+        {
+          "type": "function",
+          "value": "shieldAlt"
+        },
+        {
+          "type": "function",
+          "value": "ship"
+        },
+        {
+          "type": "function",
+          "value": "shippingFast"
+        },
+        {
+          "type": "function",
+          "value": "shoePrints"
+        },
+        {
+          "type": "function",
+          "value": "shoppingBag"
+        },
+        {
+          "type": "function",
+          "value": "shoppingBasket"
+        },
+        {
+          "type": "function",
+          "value": "shoppingCart"
+        },
+        {
+          "type": "function",
+          "value": "shower"
+        },
+        {
+          "type": "function",
+          "value": "shuttleVan"
+        },
+        {
+          "type": "function",
+          "value": "sign"
+        },
+        {
+          "type": "function",
+          "value": "signInAlt"
+        },
+        {
+          "type": "function",
+          "value": "signLanguage"
+        },
+        {
+          "type": "function",
+          "value": "signOutAlt"
+        },
+        {
+          "type": "function",
+          "value": "signal"
+        },
+        {
+          "type": "function",
+          "value": "signature"
+        },
+        {
+          "type": "function",
+          "value": "sitemap"
+        },
+        {
+          "type": "function",
+          "value": "skull"
+        },
+        {
+          "type": "function",
+          "value": "skullCrossbones"
+        },
+        {
+          "type": "function",
+          "value": "slash"
+        },
+        {
+          "type": "function",
+          "value": "slidersH"
+        },
+        {
+          "type": "function",
+          "value": "smile"
+        },
+        {
+          "type": "function",
+          "value": "smileBeam"
+        },
+        {
+          "type": "function",
+          "value": "smileWink"
+        },
+        {
+          "type": "function",
+          "value": "smog"
+        },
+        {
+          "type": "function",
+          "value": "smoking"
+        },
+        {
+          "type": "function",
+          "value": "smokingBan"
+        },
+        {
+          "type": "function",
+          "value": "snowflake"
+        },
+        {
+          "type": "function",
+          "value": "socks"
+        },
+        {
+          "type": "function",
+          "value": "solarPanel"
+        },
+        {
+          "type": "function",
+          "value": "sort"
+        },
+        {
+          "type": "function",
+          "value": "sortAlphaDown"
+        },
+        {
+          "type": "function",
+          "value": "sortAlphaUp"
+        },
+        {
+          "type": "function",
+          "value": "sortAmountDown"
+        },
+        {
+          "type": "function",
+          "value": "sortAmountUp"
+        },
+        {
+          "type": "function",
+          "value": "sortDown"
+        },
+        {
+          "type": "function",
+          "value": "sortNumericDown"
+        },
+        {
+          "type": "function",
+          "value": "sortNumericUp"
+        },
+        {
+          "type": "function",
+          "value": "sortUp"
+        },
+        {
+          "type": "function",
+          "value": "spa"
+        },
+        {
+          "type": "function",
+          "value": "spaceShuttle"
+        },
+        {
+          "type": "function",
+          "value": "spider"
+        },
+        {
+          "type": "function",
+          "value": "spinner"
+        },
+        {
+          "type": "function",
+          "value": "splotch"
+        },
+        {
+          "type": "function",
+          "value": "sprayCan"
+        },
+        {
+          "type": "function",
+          "value": "square"
+        },
+        {
+          "type": "function",
+          "value": "squareFull"
+        },
+        {
+          "type": "function",
+          "value": "squareRootAlt"
+        },
+        {
+          "type": "function",
+          "value": "stamp"
+        },
+        {
+          "type": "function",
+          "value": "star"
+        },
+        {
+          "type": "function",
+          "value": "starAndCrescent"
+        },
+        {
+          "type": "function",
+          "value": "starHalf"
+        },
+        {
+          "type": "function",
+          "value": "starHalfAlt"
+        },
+        {
+          "type": "function",
+          "value": "starOfDavid"
+        },
+        {
+          "type": "function",
+          "value": "starOfLife"
+        },
+        {
+          "type": "function",
+          "value": "stepBackward"
+        },
+        {
+          "type": "function",
+          "value": "stepForward"
+        },
+        {
+          "type": "function",
+          "value": "stethoscope"
+        },
+        {
+          "type": "function",
+          "value": "stickyNote"
+        },
+        {
+          "type": "function",
+          "value": "stop"
+        },
+        {
+          "type": "function",
+          "value": "stopCircle"
+        },
+        {
+          "type": "function",
+          "value": "stopwatch"
+        },
+        {
+          "type": "function",
+          "value": "store"
+        },
+        {
+          "type": "function",
+          "value": "storeAlt"
+        },
+        {
+          "type": "function",
+          "value": "stream"
+        },
+        {
+          "type": "function",
+          "value": "streetView"
+        },
+        {
+          "type": "function",
+          "value": "strikethrough"
+        },
+        {
+          "type": "function",
+          "value": "stroopwafel"
+        },
+        {
+          "type": "function",
+          "value": "subscript"
+        },
+        {
+          "type": "function",
+          "value": "subway"
+        },
+        {
+          "type": "function",
+          "value": "suitcase"
+        },
+        {
+          "type": "function",
+          "value": "suitcaseRolling"
+        },
+        {
+          "type": "function",
+          "value": "sun"
+        },
+        {
+          "type": "function",
+          "value": "superscript"
+        },
+        {
+          "type": "function",
+          "value": "surprise"
+        },
+        {
+          "type": "function",
+          "value": "swatchbook"
+        },
+        {
+          "type": "function",
+          "value": "swimmer"
+        },
+        {
+          "type": "function",
+          "value": "swimmingPool"
+        },
+        {
+          "type": "function",
+          "value": "synagogue"
+        },
+        {
+          "type": "function",
+          "value": "sync"
+        },
+        {
+          "type": "function",
+          "value": "syncAlt"
+        },
+        {
+          "type": "function",
+          "value": "syringe"
+        },
+        {
+          "type": "function",
+          "value": "table"
+        },
+        {
+          "type": "function",
+          "value": "tableTennis"
+        },
+        {
+          "type": "function",
+          "value": "tablet"
+        },
+        {
+          "type": "function",
+          "value": "tabletAlt"
+        },
+        {
+          "type": "function",
+          "value": "tablets"
+        },
+        {
+          "type": "function",
+          "value": "tachometerAlt"
+        },
+        {
+          "type": "function",
+          "value": "tag"
+        },
+        {
+          "type": "function",
+          "value": "tags"
+        },
+        {
+          "type": "function",
+          "value": "tape"
+        },
+        {
+          "type": "function",
+          "value": "tasks"
+        },
+        {
+          "type": "function",
+          "value": "taxi"
+        },
+        {
+          "type": "function",
+          "value": "teeth"
+        },
+        {
+          "type": "function",
+          "value": "teethOpen"
+        },
+        {
+          "type": "function",
+          "value": "temperatureHigh"
+        },
+        {
+          "type": "function",
+          "value": "temperatureLow"
+        },
+        {
+          "type": "function",
+          "value": "terminal"
+        },
+        {
+          "type": "function",
+          "value": "textHeight"
+        },
+        {
+          "type": "function",
+          "value": "textWidth"
+        },
+        {
+          "type": "function",
+          "value": "th"
+        },
+        {
+          "type": "function",
+          "value": "thLarge"
+        },
+        {
+          "type": "function",
+          "value": "thList"
+        },
+        {
+          "type": "function",
+          "value": "theaterMasks"
+        },
+        {
+          "type": "function",
+          "value": "thermometer"
+        },
+        {
+          "type": "function",
+          "value": "thermometerEmpty"
+        },
+        {
+          "type": "function",
+          "value": "thermometerFull"
+        },
+        {
+          "type": "function",
+          "value": "thermometerHalf"
+        },
+        {
+          "type": "function",
+          "value": "thermometerQuarter"
+        },
+        {
+          "type": "function",
+          "value": "thermometerThreeQuarters"
+        },
+        {
+          "type": "function",
+          "value": "thumbsDown"
+        },
+        {
+          "type": "function",
+          "value": "thumbsUp"
+        },
+        {
+          "type": "function",
+          "value": "thumbtack"
+        },
+        {
+          "type": "function",
+          "value": "ticketAlt"
+        },
+        {
+          "type": "function",
+          "value": "times"
+        },
+        {
+          "type": "function",
+          "value": "timesCircle"
+        },
+        {
+          "type": "function",
+          "value": "tint"
+        },
+        {
+          "type": "function",
+          "value": "tintSlash"
+        },
+        {
+          "type": "function",
+          "value": "tired"
+        },
+        {
+          "type": "function",
+          "value": "toggleOff"
+        },
+        {
+          "type": "function",
+          "value": "toggleOn"
+        },
+        {
+          "type": "function",
+          "value": "toiletPaper"
+        },
+        {
+          "type": "function",
+          "value": "toolbox"
+        },
+        {
+          "type": "function",
+          "value": "tooth"
+        },
+        {
+          "type": "function",
+          "value": "torah"
+        },
+        {
+          "type": "function",
+          "value": "toriiGate"
+        },
+        {
+          "type": "function",
+          "value": "tractor"
+        },
+        {
+          "type": "function",
+          "value": "trademark"
+        },
+        {
+          "type": "function",
+          "value": "trafficLight"
+        },
+        {
+          "type": "function",
+          "value": "train"
+        },
+        {
+          "type": "function",
+          "value": "transgender"
+        },
+        {
+          "type": "function",
+          "value": "transgenderAlt"
+        },
+        {
+          "type": "function",
+          "value": "trash"
+        },
+        {
+          "type": "function",
+          "value": "trashAlt"
+        },
+        {
+          "type": "function",
+          "value": "tree"
+        },
+        {
+          "type": "function",
+          "value": "trophy"
+        },
+        {
+          "type": "function",
+          "value": "truck"
+        },
+        {
+          "type": "function",
+          "value": "truckLoading"
+        },
+        {
+          "type": "function",
+          "value": "truckMonster"
+        },
+        {
+          "type": "function",
+          "value": "truckMoving"
+        },
+        {
+          "type": "function",
+          "value": "truckPickup"
+        },
+        {
+          "type": "function",
+          "value": "tshirt"
+        },
+        {
+          "type": "function",
+          "value": "tty"
+        },
+        {
+          "type": "function",
+          "value": "tv"
+        },
+        {
+          "type": "function",
+          "value": "umbrella"
+        },
+        {
+          "type": "function",
+          "value": "umbrellaBeach"
+        },
+        {
+          "type": "function",
+          "value": "underline"
+        },
+        {
+          "type": "function",
+          "value": "undo"
+        },
+        {
+          "type": "function",
+          "value": "undoAlt"
+        },
+        {
+          "type": "function",
+          "value": "universalAccess"
+        },
+        {
+          "type": "function",
+          "value": "university"
+        },
+        {
+          "type": "function",
+          "value": "unlink"
+        },
+        {
+          "type": "function",
+          "value": "unlock"
+        },
+        {
+          "type": "function",
+          "value": "unlockAlt"
+        },
+        {
+          "type": "function",
+          "value": "upload"
+        },
+        {
+          "type": "function",
+          "value": "user"
+        },
+        {
+          "type": "function",
+          "value": "userAlt"
+        },
+        {
+          "type": "function",
+          "value": "userAltSlash"
+        },
+        {
+          "type": "function",
+          "value": "userAstronaut"
+        },
+        {
+          "type": "function",
+          "value": "userCheck"
+        },
+        {
+          "type": "function",
+          "value": "userCircle"
+        },
+        {
+          "type": "function",
+          "value": "userClock"
+        },
+        {
+          "type": "function",
+          "value": "userCog"
+        },
+        {
+          "type": "function",
+          "value": "userEdit"
+        },
+        {
+          "type": "function",
+          "value": "userFriends"
+        },
+        {
+          "type": "function",
+          "value": "userGraduate"
+        },
+        {
+          "type": "function",
+          "value": "userInjured"
+        },
+        {
+          "type": "function",
+          "value": "userLock"
+        },
+        {
+          "type": "function",
+          "value": "userMd"
+        },
+        {
+          "type": "function",
+          "value": "userMinus"
+        },
+        {
+          "type": "function",
+          "value": "userNinja"
+        },
+        {
+          "type": "function",
+          "value": "userPlus"
+        },
+        {
+          "type": "function",
+          "value": "userSecret"
+        },
+        {
+          "type": "function",
+          "value": "userShield"
+        },
+        {
+          "type": "function",
+          "value": "userSlash"
+        },
+        {
+          "type": "function",
+          "value": "userTag"
+        },
+        {
+          "type": "function",
+          "value": "userTie"
+        },
+        {
+          "type": "function",
+          "value": "userTimes"
+        },
+        {
+          "type": "function",
+          "value": "users"
+        },
+        {
+          "type": "function",
+          "value": "usersCog"
+        },
+        {
+          "type": "function",
+          "value": "utensilSpoon"
+        },
+        {
+          "type": "function",
+          "value": "utensils"
+        },
+        {
+          "type": "function",
+          "value": "vectorSquare"
+        },
+        {
+          "type": "function",
+          "value": "venus"
+        },
+        {
+          "type": "function",
+          "value": "venusDouble"
+        },
+        {
+          "type": "function",
+          "value": "venusMars"
+        },
+        {
+          "type": "function",
+          "value": "vial"
+        },
+        {
+          "type": "function",
+          "value": "vials"
+        },
+        {
+          "type": "function",
+          "value": "video"
+        },
+        {
+          "type": "function",
+          "value": "videoSlash"
+        },
+        {
+          "type": "function",
+          "value": "vihara"
+        },
+        {
+          "type": "function",
+          "value": "volleyballBall"
+        },
+        {
+          "type": "function",
+          "value": "volumeDown"
+        },
+        {
+          "type": "function",
+          "value": "volumeMute"
+        },
+        {
+          "type": "function",
+          "value": "volumeOff"
+        },
+        {
+          "type": "function",
+          "value": "volumeUp"
+        },
+        {
+          "type": "function",
+          "value": "voteYea"
+        },
+        {
+          "type": "function",
+          "value": "vrCardboard"
+        },
+        {
+          "type": "function",
+          "value": "walking"
+        },
+        {
+          "type": "function",
+          "value": "wallet"
+        },
+        {
+          "type": "function",
+          "value": "warehouse"
+        },
+        {
+          "type": "function",
+          "value": "water"
+        },
+        {
+          "type": "function",
+          "value": "weight"
+        },
+        {
+          "type": "function",
+          "value": "weightHanging"
+        },
+        {
+          "type": "function",
+          "value": "wheelchair"
+        },
+        {
+          "type": "function",
+          "value": "wifi"
+        },
+        {
+          "type": "function",
+          "value": "wind"
+        },
+        {
+          "type": "function",
+          "value": "windowClose"
+        },
+        {
+          "type": "function",
+          "value": "windowMaximize"
+        },
+        {
+          "type": "function",
+          "value": "windowMinimize"
+        },
+        {
+          "type": "function",
+          "value": "windowRestore"
+        },
+        {
+          "type": "function",
+          "value": "wineBottle"
+        },
+        {
+          "type": "function",
+          "value": "wineGlass"
+        },
+        {
+          "type": "function",
+          "value": "wineGlassAlt"
+        },
+        {
+          "type": "function",
+          "value": "wonSign"
+        },
+        {
+          "type": "function",
+          "value": "wrench"
+        },
+        {
+          "type": "function",
+          "value": "xRay"
+        },
+        {
+          "type": "function",
+          "value": "yenSign"
+        },
+        {
+          "type": "function",
+          "value": "yinYang"
+        }
+      ]
+    },
+    {
+      "key": [
+        "FontAwesome",
+        "Styles"
+      ],
+      "value": [
+        {
+          "type": "function",
+          "value": "css"
+        }
+      ]
+    }
+  ]
+}

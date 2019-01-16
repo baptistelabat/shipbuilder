@@ -1,0 +1,1043 @@
+{
+  "name": "terezka/line-charts",
+  "version": "2.0.0",
+  "interfaces": [
+    {
+      "key": [
+        "LineChart"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Series"
+        },
+        {
+          "type": "function",
+          "value": "dash"
+        },
+        {
+          "type": "function",
+          "value": "line"
+        },
+        {
+          "type": "function",
+          "value": "view"
+        },
+        {
+          "type": "function",
+          "value": "view1"
+        },
+        {
+          "type": "function",
+          "value": "view2"
+        },
+        {
+          "type": "function",
+          "value": "view3"
+        },
+        {
+          "type": "function",
+          "value": "viewCustom"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Area"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "normal"
+        },
+        {
+          "type": "function",
+          "value": "stacked"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Axis"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "full"
+        },
+        {
+          "type": "function",
+          "value": "none"
+        },
+        {
+          "type": "function",
+          "value": "picky"
+        },
+        {
+          "type": "function",
+          "value": "time"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Axis",
+        "Intersection"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "function",
+          "value": "at"
+        },
+        {
+          "type": "function",
+          "value": "atOrigin"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Axis",
+        "Line"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Properties"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "full"
+        },
+        {
+          "type": "function",
+          "value": "none"
+        },
+        {
+          "type": "function",
+          "value": "rangeFrame"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Axis",
+        "Range"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "padded"
+        },
+        {
+          "type": "function",
+          "value": "window"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Axis",
+        "Tick"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Direction"
+        },
+        {
+          "type": "alias",
+          "value": "Interval"
+        },
+        {
+          "type": "alias",
+          "value": "Properties"
+        },
+        {
+          "type": "alias",
+          "value": "Time"
+        },
+        {
+          "type": "type_",
+          "value": {
+            "name": "Unit",
+            "constructors": [
+              "Millisecond",
+              "Second",
+              "Minute",
+              "Hour",
+              "Day",
+              "Month",
+              "Year"
+            ]
+          }
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "float"
+        },
+        {
+          "type": "function",
+          "value": "format"
+        },
+        {
+          "type": "function",
+          "value": "gridless"
+        },
+        {
+          "type": "function",
+          "value": "int"
+        },
+        {
+          "type": "function",
+          "value": "labelless"
+        },
+        {
+          "type": "function",
+          "value": "long"
+        },
+        {
+          "type": "function",
+          "value": "negative"
+        },
+        {
+          "type": "function",
+          "value": "opposite"
+        },
+        {
+          "type": "function",
+          "value": "positive"
+        },
+        {
+          "type": "function",
+          "value": "time"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Axis",
+        "Ticks"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "float"
+        },
+        {
+          "type": "function",
+          "value": "floatCustom"
+        },
+        {
+          "type": "function",
+          "value": "int"
+        },
+        {
+          "type": "function",
+          "value": "intCustom"
+        },
+        {
+          "type": "function",
+          "value": "time"
+        },
+        {
+          "type": "function",
+          "value": "timeCustom"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Axis",
+        "Title"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "function",
+          "value": "atAxisMax"
+        },
+        {
+          "type": "function",
+          "value": "atDataMax"
+        },
+        {
+          "type": "function",
+          "value": "atPosition"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Axis",
+        "Values"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Amount"
+        },
+        {
+          "type": "function",
+          "value": "around"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "exactly"
+        },
+        {
+          "type": "function",
+          "value": "float"
+        },
+        {
+          "type": "function",
+          "value": "int"
+        },
+        {
+          "type": "function",
+          "value": "time"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Colors"
+      ],
+      "value": [
+        {
+          "type": "function",
+          "value": "black"
+        },
+        {
+          "type": "function",
+          "value": "blue"
+        },
+        {
+          "type": "function",
+          "value": "blueLight"
+        },
+        {
+          "type": "function",
+          "value": "cyan"
+        },
+        {
+          "type": "function",
+          "value": "cyanLight"
+        },
+        {
+          "type": "function",
+          "value": "gold"
+        },
+        {
+          "type": "function",
+          "value": "goldLight"
+        },
+        {
+          "type": "function",
+          "value": "gray"
+        },
+        {
+          "type": "function",
+          "value": "grayLight"
+        },
+        {
+          "type": "function",
+          "value": "grayLightest"
+        },
+        {
+          "type": "function",
+          "value": "green"
+        },
+        {
+          "type": "function",
+          "value": "greenLight"
+        },
+        {
+          "type": "function",
+          "value": "pink"
+        },
+        {
+          "type": "function",
+          "value": "pinkLight"
+        },
+        {
+          "type": "function",
+          "value": "purple"
+        },
+        {
+          "type": "function",
+          "value": "purpleLight"
+        },
+        {
+          "type": "function",
+          "value": "red"
+        },
+        {
+          "type": "function",
+          "value": "redLight"
+        },
+        {
+          "type": "function",
+          "value": "rust"
+        },
+        {
+          "type": "function",
+          "value": "strongBlue"
+        },
+        {
+          "type": "function",
+          "value": "teal"
+        },
+        {
+          "type": "function",
+          "value": "tealLight"
+        },
+        {
+          "type": "function",
+          "value": "transparent"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Container"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Margin"
+        },
+        {
+          "type": "alias",
+          "value": "Properties"
+        },
+        {
+          "type": "alias",
+          "value": "Size"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "relative"
+        },
+        {
+          "type": "function",
+          "value": "responsive"
+        },
+        {
+          "type": "function",
+          "value": "spaced"
+        },
+        {
+          "type": "function",
+          "value": "static"
+        },
+        {
+          "type": "function",
+          "value": "styled"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Coordinate"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Frame"
+        },
+        {
+          "type": "alias",
+          "value": "Point"
+        },
+        {
+          "type": "alias",
+          "value": "Range"
+        },
+        {
+          "type": "alias",
+          "value": "Size"
+        },
+        {
+          "type": "alias",
+          "value": "System"
+        },
+        {
+          "type": "function",
+          "value": "scaleDataX"
+        },
+        {
+          "type": "function",
+          "value": "scaleDataY"
+        },
+        {
+          "type": "function",
+          "value": "scaleSvgX"
+        },
+        {
+          "type": "function",
+          "value": "scaleSvgY"
+        },
+        {
+          "type": "function",
+          "value": "toData"
+        },
+        {
+          "type": "function",
+          "value": "toDataX"
+        },
+        {
+          "type": "function",
+          "value": "toDataY"
+        },
+        {
+          "type": "function",
+          "value": "toSvg"
+        },
+        {
+          "type": "function",
+          "value": "toSvgX"
+        },
+        {
+          "type": "function",
+          "value": "toSvgY"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Dots"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Shape"
+        },
+        {
+          "type": "alias",
+          "value": "Style"
+        },
+        {
+          "type": "function",
+          "value": "aura"
+        },
+        {
+          "type": "function",
+          "value": "circle"
+        },
+        {
+          "type": "function",
+          "value": "cross"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "customAny"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "diamond"
+        },
+        {
+          "type": "function",
+          "value": "disconnected"
+        },
+        {
+          "type": "function",
+          "value": "empty"
+        },
+        {
+          "type": "function",
+          "value": "full"
+        },
+        {
+          "type": "function",
+          "value": "hoverMany"
+        },
+        {
+          "type": "function",
+          "value": "hoverOne"
+        },
+        {
+          "type": "function",
+          "value": "none"
+        },
+        {
+          "type": "function",
+          "value": "plus"
+        },
+        {
+          "type": "function",
+          "value": "square"
+        },
+        {
+          "type": "function",
+          "value": "triangle"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Events"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Decoder"
+        },
+        {
+          "type": "alias",
+          "value": "Event"
+        },
+        {
+          "type": "alias",
+          "value": "Options"
+        },
+        {
+          "type": "function",
+          "value": "click"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "getData"
+        },
+        {
+          "type": "function",
+          "value": "getNearest"
+        },
+        {
+          "type": "function",
+          "value": "getNearestX"
+        },
+        {
+          "type": "function",
+          "value": "getSvg"
+        },
+        {
+          "type": "function",
+          "value": "getWithin"
+        },
+        {
+          "type": "function",
+          "value": "getWithinX"
+        },
+        {
+          "type": "function",
+          "value": "hoverMany"
+        },
+        {
+          "type": "function",
+          "value": "hoverOne"
+        },
+        {
+          "type": "function",
+          "value": "map"
+        },
+        {
+          "type": "function",
+          "value": "map2"
+        },
+        {
+          "type": "function",
+          "value": "map3"
+        },
+        {
+          "type": "function",
+          "value": "on"
+        },
+        {
+          "type": "function",
+          "value": "onClick"
+        },
+        {
+          "type": "function",
+          "value": "onMouseDown"
+        },
+        {
+          "type": "function",
+          "value": "onMouseLeave"
+        },
+        {
+          "type": "function",
+          "value": "onMouseMove"
+        },
+        {
+          "type": "function",
+          "value": "onMouseUp"
+        },
+        {
+          "type": "function",
+          "value": "onWithOptions"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Grid"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "dots"
+        },
+        {
+          "type": "function",
+          "value": "lines"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Interpolation"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "linear"
+        },
+        {
+          "type": "function",
+          "value": "monotone"
+        },
+        {
+          "type": "function",
+          "value": "stepped"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Junk"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Layers"
+        },
+        {
+          "type": "alias",
+          "value": "Transfrom"
+        },
+        {
+          "type": "function",
+          "value": "circle"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "horizontal"
+        },
+        {
+          "type": "function",
+          "value": "horizontalCustom"
+        },
+        {
+          "type": "function",
+          "value": "hover"
+        },
+        {
+          "type": "function",
+          "value": "hoverAt"
+        },
+        {
+          "type": "function",
+          "value": "hoverMany"
+        },
+        {
+          "type": "function",
+          "value": "hoverOne"
+        },
+        {
+          "type": "function",
+          "value": "label"
+        },
+        {
+          "type": "function",
+          "value": "labelAt"
+        },
+        {
+          "type": "function",
+          "value": "move"
+        },
+        {
+          "type": "function",
+          "value": "offset"
+        },
+        {
+          "type": "function",
+          "value": "placed"
+        },
+        {
+          "type": "function",
+          "value": "rectangle"
+        },
+        {
+          "type": "function",
+          "value": "transform"
+        },
+        {
+          "type": "function",
+          "value": "vertical"
+        },
+        {
+          "type": "function",
+          "value": "verticalCustom"
+        },
+        {
+          "type": "function",
+          "value": "withinChartArea"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Legends"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Legend"
+        },
+        {
+          "type": "function",
+          "value": "byBeginning"
+        },
+        {
+          "type": "function",
+          "value": "byEnding"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "grouped"
+        },
+        {
+          "type": "function",
+          "value": "groupedCustom"
+        },
+        {
+          "type": "function",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "key": [
+        "LineChart",
+        "Line"
+      ],
+      "value": [
+        {
+          "type": "alias",
+          "value": "Config"
+        },
+        {
+          "type": "alias",
+          "value": "Style"
+        },
+        {
+          "type": "function",
+          "value": "custom"
+        },
+        {
+          "type": "function",
+          "value": "default"
+        },
+        {
+          "type": "function",
+          "value": "hoverOne"
+        },
+        {
+          "type": "function",
+          "value": "style"
+        },
+        {
+          "type": "function",
+          "value": "wider"
+        }
+      ]
+    }
+  ]
+}
