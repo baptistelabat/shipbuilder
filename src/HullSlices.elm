@@ -20,6 +20,7 @@ module HullSlices exposing
     , setDepth
     , setDraught
     , setLengthOverAll
+    , setSliceArea
     , volume
     )
 
@@ -432,3 +433,8 @@ area a b curve =
         |> toXY
         |> clip a b
         |> integrate
+
+
+setSliceArea : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
+setSliceArea targetArea slice =
+    Err "Can't set slice area to such a low value given the discretization: try to increase the area."

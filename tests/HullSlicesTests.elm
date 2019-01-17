@@ -47,6 +47,15 @@ widthHeightAlpha alphaFuzzer =
     Fuzz.map3 WidthHeightAlpha positiveFloat positiveFloat alphaFuzzer
 
 
+type alias WidthHeightArea =
+    { width : Float, height : Float, area : Float }
+
+
+widthHeightArea : Fuzz.Fuzzer Float -> Fuzz.Fuzzer WidthHeightArea
+widthHeightArea areaFuzzer =
+    Fuzz.map3 WidthHeightArea positiveFloat positiveFloat areaFuzzer
+
+
 dbInput : Fuzz.Fuzzer Float -> Fuzz.Fuzzer DBInput
 dbInput alphaFuzzer =
     let
@@ -714,5 +723,12 @@ suite =
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.modifiedBreadth maxSliceBreadth alpha 0
                         |> Expect.within epsRelative 0
+            ]
+        , describe "Can set slice area to a particular value"
+            [ fuzz (widthHeightArea (Fuzz.constant 0)) "Should get an error if area is too low" <|
+                \{ width, height, area } ->
+                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
+                        |> HullSlices.setSliceArea area
+                        |> Expect.equal (Err "Can't set slice area to such a low value given the discretization: try to increase the area.")
             ]
         ]
