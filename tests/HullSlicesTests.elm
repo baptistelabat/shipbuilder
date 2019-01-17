@@ -638,14 +638,20 @@ suite =
                 \{ width, height, alpha } ->
                     { zmin = 0, zmax = width, y = [ height, height, height ] }
                         |> HullSlices.changeSliceAreaWhilePreservingSize alpha
-                        |> HullSlices.area 0 (abs width)
+                        |> HullSlices.area 0 width
                         |> Expect.within epsRelative (width * height)
             , fuzz (widthHeightAlpha negativeFloat) "Can reduce slice area using a negative parameter value" <|
                 \{ width, height, alpha } ->
                     { zmin = 0, zmax = width, y = [ height, height, height ] }
                         |> HullSlices.changeSliceAreaWhilePreservingSize alpha
                         |> HullSlices.area 0 width
-                        |> Expect.within epsRelative (width * height)
+                        |> Expect.atMost (width * height)
+            , fuzz (widthHeightAlpha positiveFloat) "Can increase slice area using a positive parameter value" <|
+                \{ width, height, alpha } ->
+                    { zmin = 0, zmax = width, y = [ height, height, height ] }
+                        |> HullSlices.changeSliceAreaWhilePreservingSize alpha
+                        |> HullSlices.area 0 width
+                        |> Expect.atLeast (width * height)
             ]
         , describe "Auxiliary function dB"
             [ fuzz (dbInput negativeFloat) "dB > 1 for alpha < 0" <|
