@@ -398,10 +398,10 @@ dB maxSliceBreadth alpha currentBreadth =
 modifiedBreadth : Float -> Float -> Float -> Float
 modifiedBreadth maxSliceBreadth alpha currentBreadth =
     if alpha < 0 then
-        dB maxSliceBreadth -alpha currentBreadth * currentBreadth
+        (1 - dB maxSliceBreadth -alpha currentBreadth) * currentBreadth
 
     else
-        dB maxSliceBreadth alpha currentBreadth * currentBreadth + (1 - dB maxSliceBreadth alpha currentBreadth) * maxSliceBreadth
+        (1 - dB maxSliceBreadth alpha currentBreadth) * currentBreadth + dB maxSliceBreadth alpha currentBreadth * maxSliceBreadth
 
 
 area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
