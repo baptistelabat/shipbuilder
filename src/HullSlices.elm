@@ -437,4 +437,23 @@ area a b curve =
 
 setSliceArea : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
 setSliceArea targetArea slice =
-    Err "Can't set slice area to such a low value given the discretization: try to increase the area."
+    let
+        minArea =
+            case slice.y of
+                [] ->
+                    0
+
+                [ _ ] ->
+                    0
+
+                [ a, b ] ->
+                    (slice.zmax - slice.zmin) * a / 2
+
+                a :: b :: _ ->
+                    (slice.zmax - slice.zmin) * a / 2
+    in
+    if targetArea < minArea then
+        Err "Can't set slice area to such a low value given the discretization: try to increase the area."
+
+    else
+        Ok slice

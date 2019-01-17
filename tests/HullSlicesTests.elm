@@ -730,5 +730,12 @@ suite =
                     { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
                         |> HullSlices.setSliceArea area
                         |> Expect.equal (Err "Can't set slice area to such a low value given the discretization: try to increase the area.")
+            , fuzz (widthHeightArea (Fuzz.constant 0)) "Should get original slice if setting to same area" <|
+                \{ width, height, area } ->
+                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
+                        |> HullSlices.setSliceArea (width * height / 2)
+                        |> Result.withDefault { zmin = 0, zmax = height, y = [] }
+                        |> .y
+                        |> Expect.equal [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ]
             ]
         ]
