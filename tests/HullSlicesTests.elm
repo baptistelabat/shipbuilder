@@ -633,23 +633,23 @@ suite =
                         |> Expect.within epsRelative (width * height)
             ]
         , describe "Auxiliary function dB"
-            [ -- fuzz (dbInput negativeFloat) "dB > 1 for alpha < 0" <|
-              --     \{ maxSliceBreadth, alpha, currentBreadth } ->
-              --         HullSlices.dB maxSliceBreadth alpha currentBreadth
-              --             |> Expect.greaterThan 1
-              -- , fuzz (dbInput <| Fuzz.constant 0) "dB -> 0 for alpha -> 0" <|
-              --     \{ maxSliceBreadth, alpha, currentBreadth } ->
-              --         HullSlices.dB maxSliceBreadth alpha currentBreadth
-              --             |> Expect.within epsRelative 0
-              -- , fuzz (dbInput positiveFloat) "dB <= 1 for alpha >= 0" <|
-              --     \{ maxSliceBreadth, alpha, currentBreadth } ->
-              --         HullSlices.dB maxSliceBreadth alpha currentBreadth
-              --             |> Expect.lessThan 1
-              -- , fuzz (dbInput nonZero) "dB = 0 for z = 0" <|
-              --     \{ maxSliceBreadth, alpha, currentBreadth } ->
-              --         HullSlices.dB maxSliceBreadth alpha 0
-              --             |> Expect.within epsRelative 0
-              fuzz (dbInput (Fuzz.constant 1.0e15)) "dB -> 1 for alpha -> infinity" <|
+            [ fuzz (dbInput negativeFloat) "dB > 1 for alpha < 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.dB maxSliceBreadth alpha currentBreadth
+                        |> Expect.greaterThan 1
+            , fuzz (dbInput <| Fuzz.constant 0) "dB -> 0 for alpha -> 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.dB maxSliceBreadth alpha currentBreadth
+                        |> Expect.within epsRelative 0
+            , fuzz (dbInput positiveFloat) "dB <= 1 for alpha >= 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.dB maxSliceBreadth alpha currentBreadth
+                        |> Expect.lessThan 1
+            , fuzz (dbInput nonZero) "dB = 0 for z = 0" <|
+                \{ maxSliceBreadth, alpha, currentBreadth } ->
+                    HullSlices.dB maxSliceBreadth alpha 0
+                        |> Expect.within epsRelative 0
+            , fuzz (dbInput (Fuzz.constant 1.0e15)) "dB -> 1 for alpha -> infinity" <|
                 \{ maxSliceBreadth, alpha, currentBreadth } ->
                     HullSlices.dB maxSliceBreadth alpha currentBreadth
                         |> Expect.within epsRelative 1
