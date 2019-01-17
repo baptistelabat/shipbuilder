@@ -736,6 +736,17 @@ suite =
                         |> HullSlices.setSliceArea (width * height / 2)
                         |> Result.withDefault { zmin = 0, zmax = height, y = [] }
                         |> .y
-                        |> Expect.equal [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ]
+                        |> List.map2 (-) [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ]
+                        |> List.map abs
+                        |> List.maximum
+                        |> Maybe.withDefault 1.0e200
+                        |> Expect.within epsAbsolute 0
+            , fuzz (widthHeightArea (Fuzz.floatRange 0.2 0.9)) "Can set slice area to a lower value" <|
+                \{ width, height, area } ->
+                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
+                        |> HullSlices.setSliceArea (width * height / 2 * area)
+                        |> Result.map (HullSlices.area 0 height)
+                        |> Result.withDefault -1
+                        |> Expect.within epsRelative (width * height / 2 * area)
             ]
         ]

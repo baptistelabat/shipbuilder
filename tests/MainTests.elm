@@ -105,10 +105,6 @@ toJS msgs msg decoder =
                     Just { tag = data.tag, data = p }
 
                 Err e ->
-                    let
-                        _ =
-                            Debug.log "In toJS, failed to parse:" e
-                    in
                     Nothing
 
 

@@ -435,6 +435,53 @@ area a b curve =
         |> integrate
 
 
+bisectArea : { c | zmin : Float, zmax : Float, y : List Float } -> Float -> Float -> Float -> Int -> Int -> Float -> { c | zmin : Float, zmax : Float, y : List Float }
+bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol =
+    let
+        lowArea =
+            area slice.zmin slice.zmax lowAreaSlice
+
+        highArea =
+            area slice.zmin slice.zmax <| changeSliceAreaWhilePreservingSize alphaHigh slice
+
+        alphaMid =
+            (alphaLow + alphaHigh) / 2
+
+        lowAreaSlice =
+            changeSliceAreaWhilePreservingSize alphaLow slice
+
+        highAreaSlice =
+            changeSliceAreaWhilePreservingSize alphaHigh slice
+
+        midAreaSlice =
+            changeSliceAreaWhilePreservingSize alphaMid slice
+
+        midArea =
+            area slice.zmin slice.zmax midAreaSlice
+
+        reachedTolerance a =
+            if targetArea == 0 then
+                abs (a - targetArea) < tol
+
+            else
+                abs (a - targetArea) / targetArea < tol
+    in
+    if reachedTolerance lowArea then
+        lowAreaSlice
+
+    else if reachedTolerance highArea then
+        highAreaSlice
+
+    else if (niter > niterMax) || reachedTolerance midArea then
+        midAreaSlice
+
+    else if midArea > targetArea then
+        bisectArea slice targetArea alphaLow alphaMid niterMax (niter + 1) tol
+
+    else
+        bisectArea slice targetArea alphaMid alphaHigh niterMax (niter + 1) tol
+
+
 setSliceArea : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
 setSliceArea targetArea slice =
     let
@@ -446,14 +493,18 @@ setSliceArea targetArea slice =
                 [ _ ] ->
                     0
 
-                [ a, b ] ->
-                    (slice.zmax - slice.zmin) * a / 2
+                a :: _ ->
+                    (slice.zmax - slice.zmin) * a / (toFloat (List.length slice.y) - 1)
 
-                a :: b :: _ ->
-                    (slice.zmax - slice.zmin) * a / 2
+        ( alphaMin, alphaMax ) =
+            if targetArea < area slice.zmin slice.zmax slice then
+                ( -100, 0 )
+
+            else
+                ( 0, 100 )
     in
     if targetArea < minArea then
         Err "Can't set slice area to such a low value given the discretization: try to increase the area."
 
     else
-        Ok slice
+        Ok <| bisectArea slice targetArea alphaMin alphaMax 20 0 1.0e-5
