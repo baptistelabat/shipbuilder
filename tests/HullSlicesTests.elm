@@ -38,6 +38,15 @@ type alias DBInput =
     { maxSliceBreadth : Float, alpha : Float, currentBreadth : Float }
 
 
+type alias WidthHeightAlpha =
+    { width : Float, height : Float, alpha : Float }
+
+
+widthHeightAlpha : Fuzz.Fuzzer Float -> Fuzz.Fuzzer WidthHeightAlpha
+widthHeightAlpha alphaFuzzer =
+    Fuzz.map3 WidthHeightAlpha positiveFloat positiveFloat alphaFuzzer
+
+
 dbInput : Fuzz.Fuzzer Float -> Fuzz.Fuzzer DBInput
 dbInput alphaFuzzer =
     let
@@ -625,11 +634,17 @@ suite =
                             (3 * a * length_ / 4 + b * length_ / 4)
             ]
         , describe "Can change slice area"
-            [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Can find original area by setting parameter to 0" <|
-                \( width, height ) ->
-                    { zmin = 0, zmax = width, y = [ abs height, abs height, abs height ] }
-                        |> HullSlices.changeSliceAreaWhilePreservingSize 0
+            [ fuzz (widthHeightAlpha (Fuzz.constant 0)) "Can find original area by setting parameter to 0" <|
+                \{ width, height, alpha } ->
+                    { zmin = 0, zmax = width, y = [ height, height, height ] }
+                        |> HullSlices.changeSliceAreaWhilePreservingSize alpha
                         |> HullSlices.area 0 (abs width)
+                        |> Expect.within epsRelative (width * height)
+            , fuzz (widthHeightAlpha negativeFloat) "Can reduce slice area using a negative parameter value" <|
+                \{ width, height, alpha } ->
+                    { zmin = 0, zmax = width, y = [ height, height, height ] }
+                        |> HullSlices.changeSliceAreaWhilePreservingSize alpha
+                        |> HullSlices.area 0 width
                         |> Expect.within epsRelative (width * height)
             ]
         , describe "Auxiliary function dB"
