@@ -636,22 +636,28 @@ suite =
         , describe "Can change slice area"
             [ fuzz (widthHeightAlpha (Fuzz.constant 0)) "Can find original area by setting parameter to 0" <|
                 \{ width, height, alpha } ->
-                    { zmin = 0, zmax = width, y = [ height, height, height ] }
+                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
                         |> HullSlices.changeSliceAreaWhilePreservingSize alpha
-                        |> HullSlices.area 0 width
-                        |> Expect.within epsRelative (width * height)
-            , fuzz (widthHeightAlpha negativeFloat) "Can reduce slice area using a negative parameter value" <|
+                        |> HullSlices.area 0 height
+                        |> Expect.within epsRelative (width * height / 2)
+            , fuzz (widthHeightAlpha (Fuzz.floatRange -100 -0.1)) "Can reduce slice area using a negative parameter value" <|
                 \{ width, height, alpha } ->
-                    { zmin = 0, zmax = width, y = [ height, height, height ] }
+                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
                         |> HullSlices.changeSliceAreaWhilePreservingSize alpha
-                        |> HullSlices.area 0 width
-                        |> Expect.atMost (width * height)
-            , fuzz (widthHeightAlpha positiveFloat) "Can increase slice area using a positive parameter value" <|
+                        |> HullSlices.area 0 height
+                        |> Expect.atMost (width * height / 2)
+            , fuzz (widthHeightAlpha (Fuzz.floatRange 0.1 100)) "Can increase slice area using a positive parameter value" <|
                 \{ width, height, alpha } ->
-                    { zmin = 0, zmax = width, y = [ height, height, height ] }
+                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
                         |> HullSlices.changeSliceAreaWhilePreservingSize alpha
-                        |> HullSlices.area 0 width
-                        |> Expect.atLeast (width * height)
+                        |> HullSlices.area 0 height
+                        |> Expect.atLeast (width * height / 2)
+            , fuzz (widthHeightAlpha (Fuzz.constant -1.0e15)) "Can reduce slice area to almost zero" <|
+                \{ width, height, alpha } ->
+                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
+                        |> HullSlices.changeSliceAreaWhilePreservingSize alpha
+                        |> HullSlices.area 0 height
+                        |> Expect.within epsRelative (width * height / 10 / 2)
             ]
         , describe "Auxiliary function dB"
             [ fuzz (dbInput negativeFloat) "dB > 1 for alpha < 0" <|

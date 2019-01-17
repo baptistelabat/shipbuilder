@@ -378,8 +378,13 @@ clip_ a b xys =
 {-| Dilates a slice while keeping its breadth & depth.
 -}
 changeSliceAreaWhilePreservingSize : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> { c | zmin : Float, zmax : Float, y : List Float }
-changeSliceAreaWhilePreservingSize _ slice =
-    slice
+changeSliceAreaWhilePreservingSize alpha slice =
+    case List.maximum slice.y of
+        Nothing ->
+            slice
+
+        Just maxSliceBreadth ->
+            { slice | y = List.map (modifiedBreadth maxSliceBreadth alpha) slice.y }
 
 
 dB : Float -> Float -> Float -> Float
