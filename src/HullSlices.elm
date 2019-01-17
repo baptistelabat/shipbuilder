@@ -435,14 +435,14 @@ area a b curve =
         |> integrate
 
 
-bisectArea : { c | zmin : Float, zmax : Float, y : List Float } -> Float -> Float -> Float -> Int -> Int -> Float -> { c | zmin : Float, zmax : Float, y : List Float }
-bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol =
+bisectArea : { c | zmin : Float, zmax : Float, y : List Float } -> Float -> Float -> Float -> Int -> Int -> Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float }
+bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol draught =
     let
         lowArea =
-            area slice.zmin slice.zmax lowAreaSlice
+            area (slice.zmax - draught) slice.zmax lowAreaSlice
 
         highArea =
-            area slice.zmin slice.zmax <| changeSliceAreaWhilePreservingSize alphaHigh slice
+            area (slice.zmax - draught) slice.zmax <| changeSliceAreaWhilePreservingSize alphaHigh slice
 
         alphaMid =
             (alphaLow + alphaHigh) / 2
@@ -457,7 +457,7 @@ bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol =
             changeSliceAreaWhilePreservingSize alphaMid slice
 
         midArea =
-            area slice.zmin slice.zmax midAreaSlice
+            area (slice.zmax - draught) slice.zmax midAreaSlice
 
         reachedTolerance a =
             if targetArea == 0 then
@@ -476,14 +476,14 @@ bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol =
         midAreaSlice
 
     else if midArea > targetArea then
-        bisectArea slice targetArea alphaLow alphaMid niterMax (niter + 1) tol
+        bisectArea slice targetArea alphaLow alphaMid niterMax (niter + 1) tol draught
 
     else
-        bisectArea slice targetArea alphaMid alphaHigh niterMax (niter + 1) tol
+        bisectArea slice targetArea alphaMid alphaHigh niterMax (niter + 1) tol draught
 
 
-setSliceArea : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
-setSliceArea targetArea slice =
+setSliceArea : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
+setSliceArea targetArea draught slice =
     let
         minArea =
             case slice.y of
@@ -497,7 +497,7 @@ setSliceArea targetArea slice =
                     (slice.zmax - slice.zmin) * a / (toFloat (List.length slice.y) - 1)
 
         ( alphaMin, alphaMax ) =
-            if targetArea < area slice.zmin slice.zmax slice then
+            if targetArea < area (slice.zmax - draught) slice.zmax slice then
                 ( -100, 0 )
 
             else
@@ -507,4 +507,4 @@ setSliceArea targetArea slice =
         Err "Can't set slice area to such a low value given the discretization: try to increase the area."
 
     else
-        Ok <| bisectArea slice targetArea alphaMin alphaMax 20 0 1.0e-5
+        Ok <| bisectArea slice targetArea alphaMin alphaMax 20 0 1.0e-5 draught
