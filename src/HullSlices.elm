@@ -392,7 +392,7 @@ dB maxSliceBreadth alpha currentBreadth =
         0
 
     else
-        z ^ alpha
+        z ^ (1 / alpha)
 
 
 modifiedBreadth : Float -> Float -> Float -> Float
