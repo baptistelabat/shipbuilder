@@ -760,5 +760,10 @@ suite =
                     { zmin = zmin, zmax = zmin + breadth, y = [ height, height, height, height ] }
                         |> HullSlices.centroidAbscissa
                         |> Expect.within epsRelative (zmin + (breadth / 2))
+            , fuzz (Fuzz.map3 (\x y z -> ( x, y, z )) Fuzz.float positiveFloat positiveFloat) "Centroid of a triangle" <|
+                \( zmin, breadth, height ) ->
+                    { zmin = zmin, zmax = zmin + breadth, y = [ 0, height / 2, height, height / 2, 0 ] }
+                        |> HullSlices.centroidAbscissa
+                        |> Expect.within epsRelative (zmin + (breadth / 2))
             ]
         ]
