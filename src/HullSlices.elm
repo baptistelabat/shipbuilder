@@ -520,6 +520,27 @@ trapezoidCentroid dx y1 y2 =
 
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
 centroidAbscissa curve =
+    let
+        n : Int
+        n =
+            List.length curve.y
+
+        dz : Float
+        dz =
+            (curve.zmax - curve.zmin) / toFloat (n - 1)
+
+        getTrapezoidCentroids : List Float -> List ( Float, Float )
+        getTrapezoidCentroids ys =
+            case ys of
+                [] ->
+                    []
+
+                [ _ ] ->
+                    []
+
+                y1 :: y2 :: rest ->
+                    trapezoidCentroid dz y1 y2 :: getTrapezoidCentroids rest
+    in
     (curve.zmin + curve.zmax) / 2
 
 
