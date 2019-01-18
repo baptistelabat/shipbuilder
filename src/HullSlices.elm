@@ -22,7 +22,7 @@ module HullSlices exposing
     , setDraught
     , setLengthOverAll
     , setSliceArea
-    , trapezeCentroid
+    , trapezoidCentroid
     , volume
     )
 
@@ -512,8 +512,8 @@ setSliceArea targetArea draught slice =
         Ok <| bisectArea slice targetArea alphaMin alphaMax 20 0 1.0e-5 draught
 
 
-trapezeCentroid : Float -> Float -> Float -> ( Float, Float )
-trapezeCentroid dx y1 y2 =
+trapezoidCentroid : Float -> Float -> Float -> ( Float, Float )
+trapezoidCentroid dx y1 y2 =
     ( (y1 + 2 * y2) / (3 * (y1 + y2)) * dx, 0.5 * (y1 + y2) * dx )
 
 
