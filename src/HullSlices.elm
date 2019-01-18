@@ -539,7 +539,7 @@ centroidAbscissa curve =
                     []
 
                 y1 :: y2 :: rest ->
-                    trapezoidCentroid dz y1 y2 :: getTrapezoidCentroids rest
+                    trapezoidCentroid dz y1 y2 :: getTrapezoidCentroids (y2 :: rest)
 
         trapezoidCentroids : List ( Float, Float )
         trapezoidCentroids =
@@ -548,8 +548,20 @@ centroidAbscissa curve =
         shiftedTrapezoidCentroids : List ( Float, Float )
         shiftedTrapezoidCentroids =
             List.map2 (\shift ( c, a ) -> ( c + shift, a )) (zminForEachTrapezoid curve) trapezoidCentroids
+
+        totalArea : Float
+        totalArea =
+            shiftedTrapezoidCentroids
+                |> List.map Tuple.second
+                |> List.sum
+
+        sumOfCentroids : Float
+        sumOfCentroids =
+            shiftedTrapezoidCentroids
+                |> List.map (\( x, y ) -> x * y)
+                |> List.sum
     in
-    (curve.zmin + curve.zmax) / 2
+    sumOfCentroids / totalArea
 
 
 zminForEachTrapezoid : { c | zmin : Float, zmax : Float, y : List Float } -> List Float

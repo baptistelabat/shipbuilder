@@ -752,7 +752,7 @@ suite =
         , describe "Longitudinal position of the centroid of an area curve"
             [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Centroid of a cube" <|
                 \( breadth, height ) ->
-                    { zmin = 0, zmax = breadth, y = [ height, height, height, height ] }
+                    { zmin = 0, zmax = breadth, y = [ height, height, height, height, height, height ] }
                         |> HullSlices.centroidAbscissa
                         |> Expect.within epsRelative (breadth / 2)
             , fuzz (Fuzz.map3 (\x y z -> ( x, y, z )) Fuzz.float positiveFloat positiveFloat) "Centroid with offset" <|
@@ -780,5 +780,15 @@ suite =
                     { zmin = -12, zmax = 3, y = [ 123, 654, 789, 951 ] }
                         |> HullSlices.zminForEachTrapezoid
                         |> Expect.equalLists [ -12, -7, -2 ]
+            , test "Can calculate the centroid of a square" <|
+                \_ ->
+                    HullSlices.trapezoidCentroid 1.0e-6 1.0e-6 1.0e-6
+                        |> Expect.all
+                            [ Tuple.first >> Expect.within epsRelative 5.0e-7, Tuple.second >> Expect.within epsRelative 1.0e-12 ]
+            , fuzz (Fuzz.map3 (\x y z -> ( x, y, z )) Fuzz.float positiveFloat positiveFloat) "Centroid of a non-symmetrical shape" <|
+                \( zmin, breadth, height ) ->
+                    { zmin = zmin, zmax = zmin + breadth, y = [ 0, height ] }
+                        |> HullSlices.centroidAbscissa
+                        |> Expect.within epsRelative (zmin + (2 * breadth / 3))
             ]
         ]
