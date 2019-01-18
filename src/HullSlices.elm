@@ -4,6 +4,7 @@ module HullSlices exposing
     , JsonHullSlices
     , area
     , calculateSliceArea
+    , centroidAbscissa
     , changeSliceAreaWhilePreservingSize
     , clip
     , dB
@@ -508,3 +509,8 @@ setSliceArea targetArea draught slice =
 
     else
         Ok <| bisectArea slice targetArea alphaMin alphaMax 20 0 1.0e-5 draught
+
+
+centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
+centroidAbscissa curve =
+    curve.zmax / 2

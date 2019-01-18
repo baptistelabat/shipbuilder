@@ -749,4 +749,11 @@ suite =
                         |> Result.withDefault -1
                         |> Expect.within epsRelative (width * height / 2 * area)
             ]
+        , describe "Longitudinal position of the centroid of an area curve"
+            [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Centroid of a cube" <|
+                \( breadth, height ) ->
+                    { zmin = 0, zmax = breadth, y = [ height, height, height, height ] }
+                        |> HullSlices.centroidAbscissa
+                        |> Expect.within epsRelative (breadth / 2)
+            ]
         ]
