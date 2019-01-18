@@ -765,5 +765,10 @@ suite =
                     { zmin = zmin, zmax = zmin + breadth, y = [ 0, height / 2, height, height / 2, 0 ] }
                         |> HullSlices.centroidAbscissa
                         |> Expect.within epsRelative (zmin + (breadth / 2))
+            , test "Can calculate the centroid of a trapeze" <|
+                \_ ->
+                    HullSlices.trapezeCentroid 30 20 40
+                        |> Expect.all
+                            [ Tuple.first >> Expect.within epsRelative (50 / 3), Tuple.second >> Expect.within epsRelative 900 ]
             ]
         ]
