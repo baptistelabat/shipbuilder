@@ -791,4 +791,10 @@ suite =
                         |> HullSlices.centroidAbscissa
                         |> Expect.within epsRelative (zmin + (2 * breadth / 3))
             ]
+        , describe "Lackenby"
+            [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Can calculate prismatic blockCoefficient" <|
+                \( length, am ) ->
+                    HullSlices.prismaticCoefficient { xmin = length - am, length = StringValueInput.floatInput length } [ 0, am, 0 ]
+                        |> Expect.within (Absolute 1.0e-3) 0.5
+            ]
         ]

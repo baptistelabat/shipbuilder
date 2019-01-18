@@ -16,6 +16,7 @@ module HullSlices exposing
     , interpolate
     , modifiedBreadth
     , plotAreaCurve
+    , prismaticCoefficient
     , scale
     , setBreadth
     , setDepth
@@ -130,6 +131,20 @@ scale json hullSlice =
 volume : { a | xmin : Float, length : StringValueInput.FloatInput } -> List Float -> Float
 volume json sliceAreas =
     area json.xmin (json.xmin + json.length.value) { zmin = json.xmin, zmax = json.xmin + json.length.value, y = sliceAreas }
+
+
+prismaticCoefficient : { a | xmin : Float, length : StringValueInput.FloatInput } -> List Float -> Float
+prismaticCoefficient xminLength areaCurve =
+    case List.maximum areaCurve of
+        Nothing ->
+            0
+
+        Just am ->
+            let
+                v =
+                    volume xminLength areaCurve
+            in
+            v / (xminLength.length.value * am)
 
 
 calculateSliceArea : JsonHullSlices a -> HullSlice -> Float
