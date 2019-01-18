@@ -516,12 +516,16 @@ trapezeCentroid : Float -> Float -> Float -> ( Float, Float )
 trapezeCentroid dx y1 y2 =
     let
         triangleArea =
-            Debug.log "triéangle" <| dx * abs (y2 - y1) / 2
+            dx * abs (y2 - y1) / 2
 
         squareArea =
-            Debug.log "square " dx * min y1 y2
+            dx * min y1 y2
     in
-    ( ((dx / 2) * squareArea + 2 / 3 * dx * triangleArea) / (squareArea + triangleArea), squareArea + triangleArea )
+    if y1 < y2 then
+        ( ((dx / 2) * squareArea + 2 / 3 * dx * triangleArea) / (squareArea + triangleArea), squareArea + triangleArea )
+
+    else
+        ( ((dx / 2) * squareArea + 1 / 3 * dx * triangleArea) / (squareArea + triangleArea), squareArea + triangleArea )
 
 
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float

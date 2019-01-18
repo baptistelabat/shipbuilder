@@ -770,5 +770,10 @@ suite =
                     HullSlices.trapezeCentroid 30 20 40
                         |> Expect.all
                             [ Tuple.first >> Expect.within epsRelative (50 / 3), Tuple.second >> Expect.within epsRelative 900 ]
+            , test "Can calculate the centroid of a trapeze with y1 > y2" <|
+                \_ ->
+                    HullSlices.trapezeCentroid 30 40 20
+                        |> Expect.all
+                            [ Tuple.first >> Expect.within epsRelative (40 / 3), Tuple.second >> Expect.within epsRelative 900 ]
             ]
         ]
