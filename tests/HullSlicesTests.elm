@@ -775,5 +775,10 @@ suite =
                     HullSlices.trapezoidCentroid 30 40 20
                         |> Expect.all
                             [ Tuple.first >> Expect.within epsRelative (40 / 3), Tuple.second >> Expect.within epsRelative 900 ]
+            , test "Can calculate zmin for each trapezoid" <|
+                \_ ->
+                    { zmin = -12, zmax = 3, y = [ 123, 654, 789, 951 ] }
+                        |> HullSlices.zminForEachTrapezoid
+                        |> Expect.equalLists [ -12, -7, -2 ]
             ]
         ]

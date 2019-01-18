@@ -24,6 +24,7 @@ module HullSlices exposing
     , setSliceArea
     , trapezoidCentroid
     , volume
+    , zminForEachTrapezoid
     )
 
 import Array
@@ -520,3 +521,14 @@ trapezoidCentroid dx y1 y2 =
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
 centroidAbscissa curve =
     (curve.zmin + curve.zmax) / 2
+
+
+zminForEachTrapezoid : { c | zmin : Float, zmax : Float, y : List Float } -> List Float
+zminForEachTrapezoid curve =
+    let
+        n : Int
+        n =
+            List.length curve.y
+    in
+    List.range 0 (n - 2)
+        |> List.map (\z -> toFloat z / (toFloat n - 1.0) * (curve.zmax - curve.zmin) + curve.zmin)
