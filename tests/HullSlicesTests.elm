@@ -755,5 +755,10 @@ suite =
                     { zmin = 0, zmax = breadth, y = [ height, height, height, height ] }
                         |> HullSlices.centroidAbscissa
                         |> Expect.within epsRelative (breadth / 2)
+            , fuzz (Fuzz.map3 (\x y z -> ( x, y, z )) Fuzz.float positiveFloat positiveFloat) "Centroid with offset" <|
+                \( zmin, breadth, height ) ->
+                    { zmin = zmin, zmax = zmin + breadth, y = [ height, height, height, height ] }
+                        |> HullSlices.centroidAbscissa
+                        |> Expect.within epsRelative (zmin + (breadth / 2))
             ]
         ]

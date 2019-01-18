@@ -513,4 +513,4 @@ setSliceArea targetArea draught slice =
 
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
 centroidAbscissa curve =
-    curve.zmax / 2
+    (curve.zmin + curve.zmax) / 2
