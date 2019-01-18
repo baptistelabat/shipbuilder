@@ -540,6 +540,14 @@ centroidAbscissa curve =
 
                 y1 :: y2 :: rest ->
                     trapezoidCentroid dz y1 y2 :: getTrapezoidCentroids rest
+
+        trapezoidCentroids : List ( Float, Float )
+        trapezoidCentroids =
+            getTrapezoidCentroids curve.y
+
+        shiftedTrapezoidCentroids : List ( Float, Float )
+        shiftedTrapezoidCentroids =
+            List.map2 (\shift ( c, a ) -> ( c + shift, a )) (zminForEachTrapezoid curve) trapezoidCentroids
     in
     (curve.zmin + curve.zmax) / 2
 
