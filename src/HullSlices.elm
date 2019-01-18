@@ -514,18 +514,7 @@ setSliceArea targetArea draught slice =
 
 trapezeCentroid : Float -> Float -> Float -> ( Float, Float )
 trapezeCentroid dx y1 y2 =
-    let
-        triangleArea =
-            dx * abs (y2 - y1) / 2
-
-        squareArea =
-            dx * min y1 y2
-    in
-    if y1 < y2 then
-        ( ((dx / 2) * squareArea + 2 / 3 * dx * triangleArea) / (squareArea + triangleArea), squareArea + triangleArea )
-
-    else
-        ( ((dx / 2) * squareArea + 1 / 3 * dx * triangleArea) / (squareArea + triangleArea), squareArea + triangleArea )
+    ( (y1 + 2 * y2) / (3 * (y1 + y2)) * dx, 0.5 * (y1 + y2) * dx )
 
 
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
