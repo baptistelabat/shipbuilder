@@ -794,7 +794,7 @@ suite =
         , describe "Lackenby"
             [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Can calculate prismatic blockCoefficient" <|
                 \( length, am ) ->
-                    HullSlices.prismaticCoefficient { xmin = length - am, length = StringValueInput.floatInput length } [ 0, am / 4, am / 2, am * 0.75, am, 0.75 * am, 0.5 * am, 0.25 * am, 0 ]
+                    HullSlices.prismaticCoefficient { xmin = length - am, length = StringValueInput.floatInput length, y = [ 0, am / 4, am / 2, am * 0.75, am, 0.75 * am, 0.5 * am, 0.25 * am, 0 ] }
                         |> Expect.within (Absolute 1.0e-2) 0.5
             ]
         ]

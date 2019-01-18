@@ -133,18 +133,18 @@ volume json sliceAreas =
     area json.xmin (json.xmin + json.length.value) { zmin = json.xmin, zmax = json.xmin + json.length.value, y = sliceAreas }
 
 
-prismaticCoefficient : { a | xmin : Float, length : StringValueInput.FloatInput } -> List Float -> Float
-prismaticCoefficient xminLength areaCurve =
-    case List.maximum areaCurve of
+prismaticCoefficient : { a | xmin : Float, length : StringValueInput.FloatInput, y : List Float } -> Float
+prismaticCoefficient areaCurve =
+    case List.maximum areaCurve.y of
         Nothing ->
             0
 
         Just am ->
             let
                 v =
-                    volume xminLength areaCurve
+                    volume areaCurve areaCurve.y
             in
-            v / (xminLength.length.value * am)
+            v / (areaCurve.length.value * am)
 
 
 calculateSliceArea : JsonHullSlices a -> HullSlice -> Float
