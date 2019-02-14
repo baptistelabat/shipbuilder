@@ -479,19 +479,73 @@ let loadHull = function (json) {
         // the STL loader returns a bufferGeometry. We can't read its vertices and faces
         // we need to convert it to an "actual" geometry to access these
         const geometry = buildHullGeometry(json);
+        const volume = calcVolume(geometry);
 
         const shipVertices = geometry.vertices;
+
+        const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
+
+        const hull1 = new THREE.Mesh(geometry, material);
+        saveSTL(hull1, "Test");
+
         // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
         geometry.vertices = shipVertices.map(vertex => {
             return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
         });
-        const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
+
         const hull = new THREE.Mesh(geometry, material);
+
+        // var vnh = new THREE.VertexNormalsHelper( hull, 1, 0xff0000 );
+        // scene.add( vnh );
+
+        var axh = new THREE.AxesHelper ( 5.0 );
+        scene.add( axh );
 
         hull.baseColor = hullColor;
         hull.sbType = "hull";
         scene.add(hull);
+
 }
+
+let hullVolume = function (json) {
+  // the STL loader returns a bufferGeometry. We can't read its vertices and faces
+  // we need to convert it to an "actual" geometry to access these
+  const geometry = buildHullGeometry(json);
+  const volume = calcVolume(geometry);
+  return volume;
+}
+
+let calcVolume = function (geom) {
+//var geom = new THREE.Geometry().fromBufferGeometry(geom_);
+var faces_ = geom.faces;
+var vertices = geom.vertices;
+var volumes = 0;
+console.log ("print before volume: " + Math.abs(volumes));
+for(var i = 0; i < faces_.length; i++){
+  var Pi = faces_[i].a;
+  var Qi = faces_[i].b;
+  var Ri = faces_[i].c;
+
+  var P = new THREE.Vector3(vertices[Pi].x, vertices[Pi].y, vertices[Pi].z);
+      var Q = new THREE.Vector3(vertices[Qi].x, vertices[Qi].y, vertices[Qi].z);
+      var R = new THREE.Vector3(vertices[Ri].x, vertices[Ri].y, vertices[Ri].z);
+
+  volumes += signedVolumeOfTriangle(P, Q, R);
+}
+console.log ("print volume: " + Math.abs(volumes));
+return Math.abs(volumes);
+}
+
+let signedVolumeOfTriangle = function (p1, p2, p3) {
+  var v321 = p3.x*p2.y*p1.z;
+  var v231 = p2.x*p3.y*p1.z;
+  var v312 = p3.x*p1.y*p2.z;
+  var v132 = p1.x*p3.y*p2.z;
+  var v213 = p2.x*p1.y*p3.z;
+  var v123 = p1.x*p2.y*p3.z;
+  return (1.0/6.0)*(-v321 + v231 + v312 - v132 - v213 + v123);
+}
+
 
 // move an object according to the changes made in Elm
 let updatePosition = function (data) {
