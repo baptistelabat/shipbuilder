@@ -12,7 +12,9 @@ module HullSlices exposing
     , dictDecoder
     , dictEncoder
     , empty
+    , encodeCSV
     , encoder
+    , exportCSV
     , interpolate
     , modifiedBreadth
     , plotAreaCurve
@@ -80,6 +82,7 @@ type alias HullSlices =
     , newVolume : Float
     , centreOfBuoyancy : Float
     , metacentre : Float
+    , denormalizedslices : List HullSlice
     }
 
 
@@ -94,6 +97,7 @@ empty =
         , zmin = 0
         , slices = []
         , draught = StringValueInput.emptyFloat
+        , denormalizedslices = []
         }
 
 
@@ -102,6 +106,12 @@ type alias HullSlice =
     , zmin : Float
     , zmax : Float
     , y : List Float
+    }
+
+
+type alias HullSliceXY =
+    { x : Float
+    , zylist : List ( Float, Float )
     }
 
 
@@ -180,11 +190,9 @@ interpolate json =
                 { length = length_, breadth = breadth_, depth = depth_, xmin = json.xmin, ymin = json.ymin, zmin = json.zmin }
                 json.slices
 
-
         -- transform draught to z value
         zAtDraught =
             json.zmin + depth_ - draught_
-
 
         -- intersect below draught
         intersectBelowSlicesZY =
@@ -199,6 +207,7 @@ interpolate json =
 
         v_ =
             HullSliceUtilities.volume lzya
+
         v2_ =
             HullSliceUtilities.hullVolume { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
 
@@ -212,6 +221,7 @@ interpolate json =
 
                 False ->
                     abs kbz_ / v2_
+
         sliceAreas : List Float
         sliceAreas =
             List.map (calculateSliceArea json) json.slices
@@ -262,6 +272,7 @@ interpolate json =
     , newVolume = StringValueInput.round_n 2 <| realVolume
     , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
     , metacentre = StringValueInput.round_n 2 <| kM
+    , denormalizedslices = denormalizedSlices
     }
 
 
@@ -753,23 +764,53 @@ zminForEachTrapezoid curve =
         |> List.map (\z -> toFloat z / (toFloat n - 1.0) * (curve.zmax - curve.zmin) + curve.zmin)
 
 
-kbForSlice : HullSlice -> Float
-kbForSlice hullSlice =
+exportCSV : { a | decks : Int, spacing : Float, z0 : Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List { xy : List ( Float, Float ), z : Float }
+exportCSV config model =
     let
-        ( u, v ) =
-            xyCentroidAbscissa hullSlice
+        -- 0
+        ff : Int -> Float -> Float -> List Float
+        ff n sp z0 =
+            List.map (\i -> config.z0 - toFloat i * sp) (List.range 0 (n - 1))
+
+        ldecks =
+            List.append (ff config.decks config.spacing config.z0) [ config.zAtDraught ]
+
+        _ =
+            Debug.log "exportCSV ldecks" ldecks
+
+        _ =
+            Debug.log "exportCSV denormalizedslices" model.denormalizedslices
+
+        ldata =
+            List.map
+                (\z ->
+                    let
+                        intersectBelowSlicesZY =
+                            HullSliceUtilities.intersectBelow { xmin = config.xmin, xmax = config.xmax } z model.denormalizedslices
+                    in
+                    HullSliceUtilities.prepareToExport z intersectBelowSlicesZY
+                )
+                ldecks
+
+        _ =
+            Debug.log "exportCSV" ldata
     in
-    v
+    ldata
 
 
-calculateKB : List HullSlice -> Float
-calculateKB slices =
-    let
-        n : Int
-        n =
-            List.length slices
+tuple2Encoder : (a -> Encode.Value) -> (b -> Encode.Value) -> ( a, b ) -> Encode.Value
+tuple2Encoder enc1 enc2 ( val1, val2 ) =
+    Encode.list identity [ enc1 val1, enc2 val2 ]
 
-        kbs =
-            List.map kbForSlice slices
-    in
-    List.sum kbs / toFloat n
+
+encodeCSVObj : { xy : List ( Float, Float ), z : Float } -> Encode.Value
+encodeCSVObj hsXY =
+    Encode.object
+        [ ( "z", Encode.float hsXY.z )
+        , ( "xy", Encode.list (tuple2Encoder Encode.float Encode.float) hsXY.xy )
+        ]
+
+
+encodeCSV : List { xy : List ( Float, Float ), z : Float } -> Encode.Value
+encodeCSV list =
+    Encode.list encodeCSVObj list
