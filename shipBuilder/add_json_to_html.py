@@ -1,6 +1,6 @@
 import json
 
-names = ['anthineas', 'DTMB_5415', 'KCS', 'OPV']
+names = ['anthineas', 'DTMB_5415', 'KCS', 'OPV', 'T0', 'T1']
 data = {}
 for name in names:
     with open(name + '.json') as f:
