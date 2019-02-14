@@ -54,6 +54,10 @@ app.ports.toJs.subscribe(function (message) {
         case "blocks-visibility":
             toggleBlocksVisibility(data);
             break;
+        case "export-csv":
+            console.log (data);
+            saveCSV("export", data);
+            break;
         case "init-three":
             initThree(data);
             break;
@@ -1471,4 +1475,30 @@ let normalizeMouseCoordinatesForView = function (mouse, view) {
     const normalizedX = (offsetX / view.clientWidth) * 2 - 1;
     const normalizedY = - (offsetY / view.clientHeight) * 2 - 1;
     return new THREE.Vector2(normalizedX, normalizedY);
+}
+
+function saveSTL( scene, name ){
+  var exporter = new THREE.STLExporter();
+  var stlString = exporter.parse( scene );
+
+  var blob = new Blob([stlString], {type: 'text/plain'});
+
+  saveAs(blob, name + '.stl');
+}
+
+function saveCSV ( name, datas ) {
+
+  var str = "";
+  for(var i=0; i< datas.length; i++)
+  {
+    var z = datas[i].z;
+    var xy = datas[i].xy;
+
+    for(var j=0; j< xy.length; j++) {
+      var l = z.toString() + ';' + xy[j][0].toString() + ';' + xy[j][1].toString() + '\n';
+      str += l;
+    }
+  }
+  var blob = new Blob([str], {type: 'text/plain'});
+  saveAs(blob, name + '.csv');
 }
