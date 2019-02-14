@@ -419,10 +419,52 @@ let buildHullGeometry = function ( json ) {
             var k3 = k1+2*ny;
             var k4 = k3 + 1;
 
-            geometry.faces.push( new THREE.Face3( k1, k3, k2 ) );
-            geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
+            // geometry.faces.push( new THREE.Face3( k1, k3, k2 ) );
+            // geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
+            geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
+            geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
         }
     }
+
+    // BEGIN close the mesh
+    var i=0;
+    for(let j=0; j<ny -1 ; j++)
+    {
+        var k1 = i*(2*ny)+j;
+        var k2 = k1+1;
+        var k3 = (i+1)*(2*ny)-1-j;
+        var k4 = k3 - 1;
+
+        geometry.faces.push( new THREE.Face3( k2, k1, k3 ) );
+        geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
+    }
+
+    i=nx-1;
+    for(let j=0; j<ny -1 ; j++)
+    {
+      var k1 = i*(2*ny)+j;
+      var k2 = k1+1;
+      var k3 = (i+1)*(2*ny)-1-j;
+      var k4 = k3 - 1;
+
+        // geometry.faces.push( new THREE.Face3( k2, k1, k3 ) );
+        // geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
+        geometry.faces.push( new THREE.Face3( k2, k3, k1 ) );
+        geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
+    }
+
+    for (let i = 0; i < nx -1 ; i++){
+      var k1 = 2*i*ny;
+      var k2 = k1+(2*ny);
+      var k3 = k2-1;
+      var k4 = k3+(2*ny);
+
+      geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
+      geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
+    }
+    // END close the mesh
+
+
     //compute Normals
     geometry.computeVertexNormals();
     geometry.computeFaceNormals();
