@@ -411,7 +411,7 @@ plotAreaCurve slices =
             , line = Line.wider 3
             , dots = Dots.custom (Dots.full 10)
             }
-            [ LineChart.line Colors.blue Dots.circle "Area curve" xys ]
+            [ LineChart.line Colors.gray Dots.circle "Area curve" xys ]
         ]
 
 

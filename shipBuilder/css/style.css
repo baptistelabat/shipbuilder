@@ -1010,6 +1010,12 @@ p.block-volume-value,
     border-top: 1px solid #ffffff88;
 }
 
+.kpi-label {
+  /* font-size: 0.6em; */
+  font-style: italic;
+  color: grey;
+}
+
 .kpi-group {
     display: flex;
     justify-content: space-between;
@@ -1053,6 +1059,9 @@ p.block-volume-value,
     margin: 0 8px;
     flex: 1 0 auto;
     text-align: right;
+    color: grey;
+    font-style: italic;
+    font-size: 0.8em;
 }
 
 .kpi-total {
@@ -1105,4 +1114,14 @@ a.download-kpis svg {
 
 .spacing-details-title svg {
     height: 22px;
+}
+
+.disclaimer {
+  font-size: 0.8em;
+  color: red;
+}
+
+.area-curve-plot {
+  color: grey;
+
 }
