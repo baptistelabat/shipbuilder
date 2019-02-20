@@ -1735,7 +1735,7 @@ type ToJsMsg
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
     | ExportCSV String
-(??)
+    | ExportSTL String
 
 
 type NoJsMsg
@@ -2252,7 +2252,9 @@ updateModelToJs msg model =
             in
             model
 
-(??)
+        ExportSTL hullReference ->
+            model
+
         OpenSaveFile ->
             model
 
@@ -2528,7 +2530,14 @@ sendCmdToJs model msg =
 msg2json : Model -> ToJsMsg -> Maybe JsData
 msg2json model action =
     case action of
-(??)
+        ExportSTL hullReference ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just { tag = "export-stl", data = encodeSTL hullReference hullSlices }
+
         ExportCSV hullReference ->
             case Dict.get hullReference model.slices of
                 Nothing ->
@@ -3185,23 +3194,23 @@ viewModeller model =
                                 , onClick <| ToJs (ExportSTL hullReference)
                                 ]
                                 [ text "export 3D (stl)" ]
-                            ]
-                        , button
-                            [ id "exportCSV"
-                            , value "exportCSV"
+                            , button
+                                [ id "exportCSV"
+                                , value "exportCSV"
 
-                            -- disabled <| bulkheads.number.value == 0
-                            , onClick <| ToJs (ExportCSV hullReference)
-                            ]
-                            [ text "exportCSV" ]
-                        , button
-                            [ id "exportCSV"
-                            , value "exportCSV"
+                                -- disabled <| bulkheads.number.value == 0
+                                , onClick <| ToJs (ExportCSV hullReference)
+                                ]
+                                [ text "exportCSV" ]
+                            , button
+                                [ id "exportCSV"
+                                , value "exportCSV"
 
-                            -- disabled <| bulkheads.number.value == 0
-                            , onClick <| ToJs (ExportCSV hullReference)
+                                -- disabled <| bulkheads.number.value == 0
+                                , onClick <| ToJs (ExportCSV hullReference)
+                                ]
+                                [ text "exportCSV" ]
                             ]
-                            [ text "exportCSV" ]
                         ]
 
             else
