@@ -1622,14 +1622,14 @@ function saveSTL( scene, name ){
 
 function saveCSV ( name, datas ) {
 
-  var str = "";
+  var str = "X;Y;Z\n";
   for(var i=0; i< datas.length; i++)
   {
     var z = datas[i].z;
     var xy = datas[i].xy;
 
     for(var j=0; j< xy.length; j++) {
-      var l = z.toString() + ';' + xy[j][0].toString() + ';' + xy[j][1].toString() + '\n';
+      var l = xy[j][0].toString() + ';' + xy[j][1].toString() + ';' + z.toString() + '\n';
       str += l;
     }
   }
