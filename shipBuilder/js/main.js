@@ -487,8 +487,9 @@ let loadHull = function (json) {
 
         const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
 
-        const hull1 = new THREE.Mesh(geometry, material);
-        saveSTL(hull1, "Test");
+        // saveSTL in debug
+        // const hull1 = new THREE.Mesh(geometry, material);
+        // saveSTL(hull1, "Test");
 
         // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
         geometry.vertices = shipVertices.map(vertex => {
