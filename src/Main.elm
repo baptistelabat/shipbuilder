@@ -1503,6 +1503,14 @@ encodeUpdateSizeCommand block =
         ]
 
 
+encodeSTL : String -> HullSlices -> Encode.Value
+encodeSTL name hullSlices =
+    Encode.object
+        [ ( "name", Encode.string name )
+        , ( "data", HullSlices.encoder hullSlices )
+        ]
+
+
 updateBlockInModel : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
 updateBlockInModel block model =
     { model | blocks = updateBlockInBlocks block model.blocks }
@@ -1727,6 +1735,7 @@ type ToJsMsg
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
     | ExportCSV String
+    | ExportSTL String
 
 
 type NoJsMsg
@@ -2243,6 +2252,9 @@ updateModelToJs msg model =
             in
             model
 
+        ExportSTL hullReference ->
+            model
+
         OpenSaveFile ->
             model
 
@@ -2518,6 +2530,14 @@ sendCmdToJs model msg =
 msg2json : Model -> ToJsMsg -> Maybe JsData
 msg2json model action =
     case action of
+        ExportSTL hullReference ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just { tag = "export-stl", data = encodeSTL hullReference hullSlices }
+
         ExportCSV hullReference ->
             case Dict.get hullReference model.slices of
                 Nothing ->
