@@ -55,8 +55,10 @@ app.ports.toJs.subscribe(function (message) {
             toggleBlocksVisibility(data);
             break;
         case "export-csv":
-            console.log (data);
             saveCSV("export", data);
+            break;
+        case "export-stl":
+            exportSTL(data);
             break;
         case "init-three":
             initThree(data);
@@ -1571,6 +1573,42 @@ let normalizeMouseCoordinatesForView = function (mouse, view) {
     const normalizedX = (offsetX / view.clientWidth) * 2 - 1;
     const normalizedY = - (offsetY / view.clientHeight) * 2 - 1;
     return new THREE.Vector2(normalizedX, normalizedY);
+}
+
+function exportSTL(json){
+  // find the hull in the scene based on the sbType attribute (evaluate to null, if there is none)
+  // const object = scene.children.find(child => child.sbType && child.sbType === "hull");
+  // if ( object != null )
+  // {
+    // var geometry = object.geometry.clone();
+    // const shipVertices = geometry.vertices;
+    // // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
+    // geometry.vertices = shipVertices.map(vertex => {
+    //     return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
+    // });
+    // const hull = new THREE.Mesh(geometry, object.material);
+    // saveSTL (hull, name );
+
+  //   saveSTL (object, name );
+  // }
+
+  const geometry = buildHullGeometry(json.data);
+  const hullColor = new THREE.Color(3/255, 146/255, 255/255); // light blue
+  const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
+
+  // conversion coordinates convention zUp
+  const shipVertices = geometry.vertices;
+  geometry.vertices = shipVertices.map(vertex => {
+      return new THREE.Vector3(vertex.x, -vertex.y, -vertex.z);
+  });
+  //compute Normals
+  geometry.computeVertexNormals();
+  geometry.computeFaceNormals();
+
+
+  const object = new THREE.Mesh(geometry, material);
+  saveSTL (object, json.name );
+
 }
 
 function saveSTL( scene, name ){
