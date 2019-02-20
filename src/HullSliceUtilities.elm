@@ -704,6 +704,7 @@ inertialMoment o =
                                 0
 
                             else
+                                -- cf architecture navale p307
                                 2 / 3 * (xmax - xmin) * sum_ / toFloat len_
                     in
                     im1
