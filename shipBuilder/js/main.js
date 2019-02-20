@@ -497,11 +497,12 @@ let loadHull = function (json) {
 
         const hull = new THREE.Mesh(geometry, material);
 
+
         // var vnh = new THREE.VertexNormalsHelper( hull, 1, 0xff0000 );
         // scene.add( vnh );
 
-        var axh = new THREE.AxesHelper ( 5.0 );
-        scene.add( axh );
+        // var axh = new THREE.AxesHelper ( 5.0 );
+        // scene.add( axh );
 
         hull.baseColor = hullColor;
         hull.sbType = "hull";
