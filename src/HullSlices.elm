@@ -253,7 +253,7 @@ interpolate json =
                     0.0
 
                 False ->
-                    inertialMoment_ / v2_
+                    inertialMoment_ / realVolume
 
         kM =
             centreOfBuoyancy + bM
