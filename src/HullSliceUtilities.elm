@@ -186,7 +186,7 @@ getInterpolateValuesAndSubList z0 list =
                                     (z - z1) / (z2 - z1)
 
                                 y =
-                                    k * y1 + (1 - k) * y2
+                                    (1 - k) * y1 + k * y2
                             in
                             ( z, y ) :: ( z2, y2 ) :: rest
 
