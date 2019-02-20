@@ -414,7 +414,7 @@ intersectBelow config z0 listHS =
     let
         -- filter HullSlice with zmax <= z0
         filterHS =
-            List.filter (\u -> u.zmax > z0 || not (List.isEmpty u.y)) listHS
+            List.filter (\u -> u.zmax > z0 && not (List.isEmpty u.y)) listHS
 
         lhsXY =
             List.map toXY filterHS
