@@ -3150,8 +3150,8 @@ viewModeller model =
                         [ id "slices-inputs" ]
                         [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSlices.setLengthOverAll hullReference
                         , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSlices.setBreadth hullReference
-                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
                         , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSlices.setDepth hullReference
+                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
                         , HullSlices.plotAreaCurve slices
                         , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
                         , viewSimpleKpi "Displacement (t)" "displacement" slices.volume
