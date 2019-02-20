@@ -3177,7 +3177,7 @@ viewModeller model =
                             , Html.br [] []
                             , HullSlices.plotAreaCurve slices
                             , viewSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
-                            , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
+                            , viewSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
 
                             -- , viewSimpleKpi "NewVolume" "NewVolume" slices.volume
                             , viewSimpleKpi "KB" "KB" slices.centreOfBuoyancy
@@ -3187,15 +3187,14 @@ viewModeller model =
                                 , value "exportCSV"
                                 , onClick <| ToJs (ExportCSV hullReference)
                                 ]
-                                [ text "exportCSV" ]
+                                [ text "export ponts (csv)" ]
                             , button
                                 [ id "exportSTL"
                                 , value "exportSTL"
                                 , onClick <| ToJs (ExportSTL hullReference)
                                 ]
-                                [ text "exportSTL" ]
+                                [ text "export 3D (stl)" ]
                             ]
-                            [ text "exportCSV" ]
                         , button
                             [ id "exportCSV"
                             , value "exportCSV"
