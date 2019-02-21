@@ -3176,12 +3176,12 @@ viewModeller model =
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "Values below are given for information only" ]
                             , Html.br [] []
                             , HullSlices.plotAreaCurve slices
-                            , viewSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
-                            , viewSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
 
-                            -- , viewSimpleKpi "NewVolume" "NewVolume" slices.volume
-                            , viewSimpleKpi "KB" "KB" slices.centreOfBuoyancy
-                            , viewSimpleKpi "KM" "KM" slices.metacentre
+                            -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
+                            , viewModellerSimpleKpi "KB" "KB" slices.centreOfBuoyancy
+                            , viewModellerSimpleKpi "KM" "KM" slices.metacentre
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"
@@ -3455,6 +3455,18 @@ viewSimpleKpi kpiTitle className totalValue =
             ]
             [ Html.h5 [ class "kpi-label" ] [ text <| kpiTitle ]
             , p [ class "kpi-value" ] [ text <| String.fromFloat totalValue ]
+            ]
+        ]
+
+
+viewModellerSimpleKpi : String -> String -> Float -> Html Msg
+viewModellerSimpleKpi kpiTitle className totalValue =
+    div [ class <| "kpi " ++ className ] <|
+        [ div
+            [ class "kpi-total kpi-group"
+            ]
+            [ Html.h5 [ class "kpi-modeller-label" ] [ text <| kpiTitle ]
+            , p [ class "kpi-modeller-value" ] [ text <| String.fromFloat totalValue ]
             ]
         ]
 
