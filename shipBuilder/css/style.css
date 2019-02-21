@@ -1010,8 +1010,7 @@ p.block-volume-value,
     border-top: 1px solid #ffffff88;
 }
 
-.kpi-label {
-  /* font-size: 0.6em; */
+.kpi-modeller-label {
   font-style: italic;
   color: grey;
 }
@@ -1056,6 +1055,12 @@ p.block-volume-value,
 }
 
 .kpi-value {
+    margin: 0 8px;
+    flex: 1 0 auto;
+    text-align: right;
+}
+
+.kpi-modeller-value {
     margin: 0 8px;
     flex: 1 0 auto;
     text-align: right;
