@@ -3187,7 +3187,7 @@ viewModeller model =
                                 , value "exportCSV"
                                 , onClick <| ToJs (ExportCSV hullReference)
                                 ]
-                                [ text "export ponts (csv)" ]
+                                [ text "export decks (csv)" ]
                             , button
                                 [ id "exportSTL"
                                 , value "exportSTL"
