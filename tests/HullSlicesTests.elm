@@ -2,6 +2,7 @@ module HullSlicesTests exposing (suite)
 
 import Expect exposing (..)
 import Fuzz
+import HullSliceUtilities
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode
@@ -183,6 +184,19 @@ makeTriplet : a -> b -> c -> ( a, b, c )
 makeTriplet x y z =
     ( x, y, z )
 
+
+hs0 =
+    { x = 0, zmin = 0.2, zmax = 0.9, y = [ 1, 0.75, 0.5 ] }
+
+
+hs_param =
+    { length = 20
+    , breadth = 4
+    , depth = 6
+    , xmin = 0
+    , ymin = -2.0
+    , zmin = -6.0
+    }
 
 suite : Test
 suite =
