@@ -3,6 +3,7 @@ module HullSliceUtilities exposing
     , blockVolume
     , demormalizedHullSlice
     , denormalizedHSList
+    , hullKBz
     , hullVolume
     , inertialMoment
     , intersectBelow
@@ -309,6 +310,21 @@ volume lo =
 
         _ ->
             0
+
+
+hullKBz : { xmin : Float, xmax : Float } -> List ObjXKzKyArea -> Float
+hullKBz config list =
+    let
+        xmin =
+            config.xmin
+
+        xmax =
+            config.xmax
+
+        newList =
+            List.concat [ [ { x = xmin, area = 0.0, kz = 0, ky = 0 } ], list, [ { x = xmax, area = 0.0, kz = 0, ky = 0 } ] ]
+    in
+    kBz newList
 
 
 kBz : List ObjXKzKyArea -> Float
