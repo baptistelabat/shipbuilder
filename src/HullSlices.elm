@@ -774,23 +774,9 @@ zminForEachTrapezoid curve =
         |> List.map (\z -> toFloat z / (toFloat n - 1.0) * (curve.zmax - curve.zmin) + curve.zmin)
 
 
-exportCSV : { a | decks : Int, spacing : Float, z0 : Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List { xy : List ( Float, Float ), z : Float }
+exportCSV : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List { xy : List ( Float, Float ), z : Float }
 exportCSV config model =
     let
-        -- 0
-        ff : Int -> Float -> Float -> List Float
-        ff n sp z0 =
-            List.map (\i -> config.z0 - toFloat i * sp) (List.range 0 (n - 1))
-
-        ldecks =
-            List.append (ff config.decks config.spacing config.z0) [ config.zAtDraught ]
-
-        _ =
-            Debug.log "exportCSV ldecks" ldecks
-
-        _ =
-            Debug.log "exportCSV denormalizedslices" model.denormalizedslices
-
         ldata =
             List.map
                 (\z ->
@@ -800,7 +786,7 @@ exportCSV config model =
                     in
                     HullSliceUtilities.prepareToExport z intersectBelowSlicesZY
                 )
-                ldecks
+                config.ldecks
 
         _ =
             Debug.log "exportCSV" ldata
