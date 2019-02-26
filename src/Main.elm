@@ -3212,7 +3212,7 @@ viewModeller model =
                         , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSlices.setDepth hullReference
                         , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
                         , div [ id "hydrocalc" ]
-                            [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "Values below are given for information only" ]
+                            [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
                             , HullSlices.plotAreaCurve slices
                             , viewModellerSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
