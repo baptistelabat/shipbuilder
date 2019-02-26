@@ -93,9 +93,9 @@ zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
 zTrapezoid ( z1, y1 ) ( z2, y2 ) =
     let
         z =
-            -- (z1 + z2) / 2.0
-            z1 + zGTrapezoid ( z1, y1 ) ( z2, y2 )
+            (z1 + z2) / 2.0
 
+        -- z1 + zGTrapezoid ( z1, y1 ) ( z2, y2 )
         area =
             areaTrapezoid ( z1, y1 ) ( z2, y2 )
     in
