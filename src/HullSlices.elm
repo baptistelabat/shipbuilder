@@ -13,6 +13,7 @@ module HullSlices exposing
     , dictEncoder
     , empty
     , encodeCSV
+    , encodeSubModel
     , encoder
     , exportCSV
     , interpolate
@@ -814,3 +815,20 @@ encodeCSVObj hsXY =
 encodeCSV : List { xy : List ( Float, Float ), z : Float } -> Encode.Value
 encodeCSV list =
     Encode.list encodeCSVObj list
+
+
+encodeHullSliceXY : HullSliceXY -> Encode.Value
+encodeHullSliceXY hsXY =
+    Encode.object
+        [ ( "x", Encode.float hsXY.x )
+        , ( "zylist", Encode.list (tuple2Encoder Encode.float Encode.float) hsXY.zylist )
+        ]
+
+
+encodeSubModel : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Encode.Value
+encodeSubModel subModel =
+    Encode.object
+        [ ( "xmin", Encode.float subModel.xmin )
+        , ( "xmax", Encode.float subModel.xmax )
+        , ( "lhs", Encode.list encodeHullSliceXY subModel.lhs )
+        ]
