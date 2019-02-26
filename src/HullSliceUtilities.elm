@@ -132,11 +132,11 @@ yTrapezoid ( z1, y1 ) ( z2, y2 ) =
     y * area
 
 
-actionForHullSliceXY : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
-actionForHullSliceXY function list =
-    case list of
+calculateTrapezoidMetricOnSlice : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
+calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
+    case denormalizedSlice of
         ( z1, y1 ) :: ( z2, y2 ) :: rest ->
-            function ( z1, y1 ) ( z2, y2 ) + actionForHullSliceXY function (( z2, y2 ) :: rest)
+            trapezoidMetric ( z1, y1 ) ( z2, y2 ) + calculateTrapezoidMetricOnSlice trapezoidMetric (( z2, y2 ) :: rest)
 
         _ ->
             0
@@ -148,7 +148,7 @@ zyaForSlice hsXY =
         -- obj =
         --     zyaForSlice_ hsXY.zylist
         area_ =
-            actionForHullSliceXY areaTrapezoid hsXY.zylist
+            calculateTrapezoidMetricOnSlice areaTrapezoid hsXY.zylist
 
         kz_ =
             case area_ == 0.0 of
@@ -156,7 +156,7 @@ zyaForSlice hsXY =
                     0
 
                 _ ->
-                    actionForHullSliceXY zTrapezoid hsXY.zylist / area_
+                    calculateTrapezoidMetricOnSlice zTrapezoid hsXY.zylist / area_
 
         ky_ =
             case area_ == 0.0 of
@@ -164,7 +164,7 @@ zyaForSlice hsXY =
                     0
 
                 _ ->
-                    actionForHullSliceXY yTrapezoid hsXY.zylist / area_
+                    calculateTrapezoidMetricOnSlice yTrapezoid hsXY.zylist / area_
     in
     { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
 
