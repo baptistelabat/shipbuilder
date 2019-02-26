@@ -1637,3 +1637,22 @@ function saveCSV ( name, datas ) {
   var blob = new Blob([str], {type: 'text/plain'});
   saveAs(blob, name + '.csv');
 }
+
+function saveCSV(name, datas) {
+  var str = "X;Y;Z\n";
+
+  for (var i = 0; i < datas.length; i++) {
+    var z = datas[i].z;
+    var xy = datas[i].xy;
+
+    for (var j = 0; j < xy.length; j++) {
+      var l = xy[j][0].toString() + ';' + xy[j][1].toString() + ';' + z.toString() + '\n';
+      str += l;
+    }
+  }
+
+  var blob = new Blob([str], {
+    type: 'text/plain'
+  });
+  saveAs(blob, name + '.csv');
+}
