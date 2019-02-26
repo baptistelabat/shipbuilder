@@ -657,6 +657,10 @@ encodeToggleBlocksVisibilityCmd blocks visible =
 -- MODEL
 
 
+type alias ShipName =
+    String
+
+
 type alias Model =
     { build : String
     , currentDate : Time.Posix
@@ -672,7 +676,7 @@ type alias Model =
     , uiState : UiState
     , tags : Tags
     , customProperties : List CustomProperty
-    , slices : Dict String HullSlices.HullSlices
+    , slices : Dict ShipName HullSlices.HullSlices
     }
 
 
