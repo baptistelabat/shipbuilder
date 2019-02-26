@@ -213,7 +213,13 @@ interpolate json =
             HullSliceUtilities.hullVolume { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
 
         kbz_ =
-            HullSliceUtilities.kBz lzya
+            HullSliceUtilities.hullKBz { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
+
+        _ =
+            Debug.log "kbz_" kbz_
+
+        _ =
+            Debug.log "v2_" v2_
 
         centreOfBuoyancy =
             case v2_ == 0.0 of
