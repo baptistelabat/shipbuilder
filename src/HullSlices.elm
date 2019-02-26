@@ -230,7 +230,7 @@ interpolate json =
                     0.0
 
                 False ->
-                    abs kbz_ / v2_
+                    json.zmin + depth_ - (kbz_ / v2_)
 
         sliceAreas : List Float
         sliceAreas =
