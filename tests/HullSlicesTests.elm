@@ -838,4 +838,110 @@ suite =
                     HullSlices.prismaticCoefficient { xmin = length - am, length = StringValueInput.floatInput length, y = [ 0, am / 4, am / 2, am * 0.75, am, 0.75 * am, 0.5 * am, 0.25 * am, 0 ] }
                         |> Expect.within (Absolute 1.0e-2) 0.5
             ]
+        , describe "HullSliceUtilities"
+            [ test "demormalizedHullSlice" <|
+                \_ ->
+                    compareHs
+                        { x = 0, zmin = -4.8, zmax = -0.6, y = [ 2, 1, 0 ] }
+                        (HullSliceUtilities.demormalizedHullSlice hs_param hs0)
+            , test "areaTrapezoid" <|
+                \_ ->
+                    HullSliceUtilities.areaTrapezoid ( 0, 0 ) ( 1, 1 )
+                        |> Expect.within epsAbsolute 0.5
+            , test "zGTrapezoid" <|
+                \_ ->
+                    HullSliceUtilities.zGTrapezoid ( 0, 0 ) ( 1, 1 )
+                        |> Expect.within epsAbsolute 0.33333333337
+            , test "zTrapezoid" <|
+                \_ ->
+                    HullSliceUtilities.zTrapezoid ( 0, 0 ) ( 1, 1 )
+                        -- |> Expect.within epsAbsolute 0.16666666667
+                        |> Expect.within epsAbsolute 0.25
+            ]
+        , test "yGTrapezoid" <|
+            \_ ->
+                HullSliceUtilities.yGTrapezoid ( 0, 0 ) ( 1, 1 )
+                    |> Expect.within epsAbsolute 0.33333333337
+        , test "zGTrapezoid" <|
+            \_ ->
+                HullSliceUtilities.zGTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
+                    |> Expect.within epsAbsolute 0.15875687266820834
+        , test "areaTrapezoid" <|
+            \_ ->
+                HullSliceUtilities.areaTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
+                    |> Expect.within epsAbsolute 1.615905646783629
+        , test "zTrapezoid2" <|
+            \_ ->
+                HullSliceUtilities.zTrapezoid ( -3.0, 5 ) ( -2.5, 5.0 )
+                    |> Expect.within epsAbsolute -6.875
+        , test "zTrapezoid3" <|
+            \_ ->
+                HullSliceUtilities.zTrapezoid ( -3.0, 5 ) ( 0.0, 5.0 )
+                    |> Expect.within epsAbsolute -22.5
+        , test "struct" <|
+            \_ ->
+                { a = 3, b = 2 }
+                    |> Expect.equal { a = 3, b = 2 }
+
+        -- , test "zyaForSlice" <|
+        --     \_ ->
+        --         HullSliceUtilities.zyaForSlice { x = 25.0, zylist = [ ( -3.0, 5.0 ), ( -2.5, 5.0 ) ] }
+        --             |> Expect.equal { x = 25.0, kz = -0.5, ky = 0.0, area = 2.5 }
+        , test "denormalizedSlicesT3" <|
+            \_ ->
+                HullSliceUtilities.denormalizedHSList { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                    [ { x = 0, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
+                    , { x = 0.25, y = [ 1, 1 ], zmax = 0.75, zmin = 0 }
+                    , { x = 0.5, y = [ 1, 1 ], zmax = 1, zmin = 0 }
+                    , { x = 0.75, y = [ 1, 1 ], zmax = 0.75, zmin = 0 }
+                    , { x = 1, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
+                    ]
+                    |> Expect.equal
+                        [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                        , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                        , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
+                        , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                        , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                        ]
+        , test "denormalizedSlicesT1" <|
+            \_ ->
+                HullSliceUtilities.denormalizedHSList { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                    [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
+                    , { x = 1, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
+                    ]
+                    |> Expect.equal
+                        [ { x = 0, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
+                        , { x = 100, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
+                        ]
+        , test "intersectBelowSlicesZY" <|
+            \_ ->
+                HullSliceUtilities.intersectBelow { xmin = 0, xmax = 100 }
+                    -3
+                    [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                    , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                    , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
+                    , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                    , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                    ]
+                    |> Expect.equal
+                        { lhs =
+                            [ { x = 25, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }
+                            , { x = 50, zylist = [ ( -3, 5 ), ( 0, 5 ) ] }
+                            , { x = 75, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }
+                            ]
+                        , xmax = 100
+                        , xmin = 0
+                        }
+        , test "hullVolume" <|
+            \_ ->
+                HullSliceUtilities.hullVolume { xmin = 0, xmax = 100 } [ { x = 50, area = 2 } ]
+                    |> Expect.within epsAbsolute 100.0
+        , test "hullVolume2" <|
+            \_ ->
+                HullSliceUtilities.hullVolume { xmin = 0, xmax = 100 } [ { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 } ]
+                    |> Expect.within epsAbsolute 1000.0
+        , test "hullKBz" <|
+            \_ ->
+                HullSliceUtilities.hullKBz { xmin = 0, xmax = 100 } [ { x = 50, area = 2, kz = 1, ky = 0 } ]
+                    |> Expect.within epsAbsolute 100.0
         ]
