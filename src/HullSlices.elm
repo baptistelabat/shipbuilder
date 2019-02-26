@@ -206,6 +206,9 @@ interpolate json =
         areas =
             List.map .area lzya
 
+        _ =
+            Debug.log "areas" areas
+
         v_ =
             HullSliceUtilities.volume lzya
 
