@@ -1740,6 +1740,7 @@ type ToJsMsg
     | UpdateDimension Dimension Block String
     | ExportCSV String
     | ExportSTL String
+    | ExportSubModel String
 
 
 type NoJsMsg
@@ -2259,6 +2260,9 @@ updateModelToJs msg model =
         ExportSTL hullReference ->
             model
 
+        ExportSubModel hullReference ->
+            model
+
         OpenSaveFile ->
             model
 
@@ -2542,6 +2546,30 @@ msg2json model action =
                 Just hullSlices ->
                     Just { tag = "export-stl", data = encodeSTL hullReference hullSlices }
 
+        ExportSubModel hullReference ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    let
+                        xmin =
+                            hullSlices.xmin
+
+                        xmax =
+                            hullSlices.xmin + hullSlices.length.value
+
+                        zAtDraught_ =
+                            hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
+
+                        intersectBelowSlicesZY =
+                            HullSliceUtilities.intersectBelow { xmin = xmin, xmax = xmax } zAtDraught_ hullSlices.denormalizedslices
+
+                        _ =
+                            Debug.log "model.partitions" model.partitions
+                    in
+                    Just { tag = "export-submodel", data = HullSlices.encodeSubModel intersectBelowSlicesZY }
+
         ExportCSV hullReference ->
             case Dict.get hullReference model.slices of
                 Nothing ->
@@ -2552,11 +2580,18 @@ msg2json model action =
                         zAtDraught_ =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
+                        computedPartitions =
+                            computeDecks model.partitions.decks
+
+                        _ =
+                            Debug.log "computedPartitions" computedPartitions
+
+                        ldecks =
+                            List.map (\u -> u.position) computedPartitions
+
                         datas =
                             HullSlices.exportCSV
-                                { decks = model.partitions.decks.number.value
-                                , spacing = model.partitions.decks.spacing.value
-                                , z0 = model.partitions.decks.zero.position.value
+                                { ldecks = ldecks
                                 , xmin = hullSlices.xmin
                                 , xmax = hullSlices.xmin + hullSlices.length.value
                                 , zAtDraught = zAtDraught_
@@ -3207,13 +3242,11 @@ viewModeller model =
                                 ]
                                 [ text "exportCSV" ]
                             , button
-                                [ id "exportCSV"
-                                , value "exportCSV"
-
-                                -- disabled <| bulkheads.number.value == 0
-                                , onClick <| ToJs (ExportCSV hullReference)
+                                [ id "exportSubModel"
+                                , value "exportSubModel"
+                                , onClick <| ToJs (ExportSubModel hullReference)
                                 ]
-                                [ text "exportCSV" ]
+                                [ text "export draught 3D" ]
                             ]
                         ]
 
