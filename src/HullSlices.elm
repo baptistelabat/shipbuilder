@@ -258,7 +258,7 @@ interpolate json =
             HullSliceUtilities.inertialMoment prepareToExport_
 
         bM =
-            case v2_ == 0.0 of
+            case realVolume == 0.0 of
                 True ->
                     0.0
 
