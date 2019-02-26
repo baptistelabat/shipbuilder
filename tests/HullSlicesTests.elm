@@ -198,6 +198,33 @@ hs_param =
     , zmin = -6.0
     }
 
+
+compare : (a -> Float) -> a -> a -> Expect.Expectation
+compare accessor left right =
+    accessor left
+        |> Expect.within epsAbsolute
+            (accessor right)
+
+
+compareList : (a -> List Float) -> a -> a -> Expect.Expectation
+compareList accessor left right =
+    List.map2 (-) (accessor left) (accessor right)
+        |> List.map abs
+        |> List.sum
+        |> Expect.within epsAbsolute 0
+
+
+compareHs : { a | x : Float, zmin : Float, zmax : Float, y : List Float } -> { a | x : Float, zmin : Float, zmax : Float, y : List Float } -> Expect.Expectation
+compareHs left right =
+    Expect.all
+        [ compare .x left
+        , compare .zmin left
+        , compare .zmax left
+        , compareList .y left
+        ]
+        right
+
+
 suite : Test
 suite =
     describe "Hull slices"
