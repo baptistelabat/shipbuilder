@@ -1,5 +1,6 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
+    , blockVolume
     , demormalizedHullSlice
     , denormalizedHSList
     , hullVolume
@@ -370,6 +371,188 @@ intersectBelow config z0 listHS =
             config.xmax
     in
     { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
+
+
+accZY : HullSliceXY -> (( Float, Float ) -> Float) -> List Float
+accZY hsXY f =
+    List.map f hsXY.zylist
+
+
+zacc : HullSliceXY -> List Float
+zacc hsXY =
+    accZY hsXY Tuple.first
+
+
+yacc : HullSliceXY -> List Float
+yacc hsXY =
+    accZY hsXY Tuple.second
+
+
+zminHS : HullSliceXY -> Maybe Float
+zminHS hsXY =
+    List.minimum <| zacc hsXY
+
+
+zmaxHS : HullSliceXY -> Maybe Float
+zmaxHS hsXY =
+    List.maximum <| zacc hsXY
+
+
+yminHS : HullSliceXY -> Maybe Float
+yminHS hsXY =
+    List.minimum <| yacc hsXY
+
+
+ymaxHS : HullSliceXY -> Maybe Float
+ymaxHS hsXY =
+    List.maximum <| yacc hsXY
+
+
+zMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
+zMinHullSliceXYList list m_zm =
+    case list of
+        [] ->
+            m_zm
+
+        el :: xs ->
+            let
+                m_x =
+                    zminHS el
+            in
+            case m_x of
+                Just x ->
+                    case m_zm of
+                        Nothing ->
+                            zMinHullSliceXYList xs (Just x)
+
+                        Just zm ->
+                            if x < zm then
+                                zMinHullSliceXYList xs (Just x)
+
+                            else
+                                zMinHullSliceXYList xs (Just zm)
+
+                Nothing ->
+                    zMinHullSliceXYList xs m_zm
+
+
+zMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
+zMaxHullSliceXYList list m_zm =
+    case list of
+        [] ->
+            m_zm
+
+        el :: xs ->
+            let
+                m_x =
+                    zmaxHS el
+            in
+            case m_x of
+                Just x ->
+                    case m_zm of
+                        Nothing ->
+                            zMaxHullSliceXYList xs (Just x)
+
+                        Just zm ->
+                            if x > zm then
+                                zMaxHullSliceXYList xs (Just x)
+
+                            else
+                                zMaxHullSliceXYList xs (Just zm)
+
+                Nothing ->
+                    zMaxHullSliceXYList xs m_zm
+
+
+yMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
+yMinHullSliceXYList list m_ym =
+    case list of
+        [] ->
+            m_ym
+
+        el :: xs ->
+            let
+                m_x =
+                    yminHS el
+            in
+            case m_x of
+                Just x ->
+                    case m_ym of
+                        Nothing ->
+                            yMinHullSliceXYList xs (Just x)
+
+                        Just ym ->
+                            if x < ym then
+                                yMinHullSliceXYList xs (Just x)
+
+                            else
+                                yMinHullSliceXYList xs (Just ym)
+
+                Nothing ->
+                    yMinHullSliceXYList xs m_ym
+
+
+yMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
+yMaxHullSliceXYList list m_ym =
+    case list of
+        [] ->
+            m_ym
+
+        el :: xs ->
+            let
+                m_x =
+                    ymaxHS el
+            in
+            case m_x of
+                Just x ->
+                    case m_ym of
+                        Nothing ->
+                            yMaxHullSliceXYList xs (Just x)
+
+                        Just ym ->
+                            if x > ym then
+                                yMaxHullSliceXYList xs (Just x)
+
+                            else
+                                yMaxHullSliceXYList xs (Just ym)
+
+                Nothing ->
+                    yMaxHullSliceXYList xs m_ym
+
+
+blockVolume : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Float
+blockVolume o =
+    -- Volume of the block
+    let
+        m_zmin =
+            zMinHullSliceXYList o.lhs Nothing
+
+        m_zmax =
+            zMaxHullSliceXYList o.lhs Nothing
+
+        m_ymin =
+            yMinHullSliceXYList o.lhs Nothing
+
+        m_ymax =
+            yMaxHullSliceXYList o.lhs Nothing
+
+        _ =
+            Debug.log "blockVolume" [ Just o.xmin, Just o.xmax, m_zmin, m_zmax, m_ymin, m_ymax ]
+
+        res =
+            case ( m_zmin, m_zmax ) of
+                ( Just zm, Just zM ) ->
+                    case ( m_ymin, m_ymax ) of
+                        ( Just ym, Just yM ) ->
+                            (o.xmax - o.xmin) * (yM - ym) * (zM - zm)
+
+                        _ ->
+                            0
+
+                _ ->
+                    0
+    in
+    res
 
 
 prismaticCoefficient : { xmin : Float, xmax : Float } -> Float -> List Float -> Float
