@@ -7,11 +7,12 @@ module HullSliceUtilities exposing
     , inertialMoment
     , intersectBelow
     ,  kBz
-
     , prepareToExport
     , prismaticCoefficient
     , volume
+    , yGTrapezoid
     , yTrapezoid
+    , zGTrapezoid
     , zTrapezoid
     , zyaForSlice
     )
@@ -64,48 +65,70 @@ areaTrapezoid ( z1, y1 ) ( z2, y2 ) =
     area
 
 
-zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-zTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    -- http://mathworld.wolfram.com/Trapezoid.html
+zGTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+zGTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    -- if b>a
+    -- zG = (a*h*h/2.0 + (b-a)*h/2.0*h/3.0) / (a+b)*h/2
+    -- zG = ((2*a+b)*h) / 3*(a+b)
+    -- if a>b
+    -- zG = ((2*b+a)*h) / 3*(a+b)
     let
         a =
-            abs y1
+            min y1 y2
 
         b =
-            abs y2
+            max y1 y2
 
         c =
             abs (z2 - z1)
 
         h =
             c
-
-        d =
-            sqrt (square c + square (y2 - y1))
     in
-    (b + 2 * a) / (3 * (a + b)) * h
+    ((b + 2 * a) * h) / (3 * (a + b))
 
 
-yTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-yTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    -- http://mathworld.wolfram.com/Trapezoid.html
+zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+zTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    let
+        z =
+            -- (z1 + z2) / 2.0
+            z1 + zGTrapezoid ( z1, y1 ) ( z2, y2 )
+
+        area =
+            areaTrapezoid ( z1, y1 ) ( z2, y2 )
+    in
+    z * area
+
+
+yGTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+yGTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    -- yG =
+    --     (a / 2 * a * h + (a + (abs (b - a) / 3)) * abs (b - a) * h / 2) / (a + b) * h / 2
+    --
+    -- yG =
+    --     (a * a + b * b + ab) / 3 * (a + b)
     let
         a =
             abs y1
 
         b =
             abs y2
-
-        c =
-            abs (z2 - z1)
-
-        d =
-            sqrt (square c + square (y2 - y1))
-
-        dz =
-            z2 - z1
     in
-    b / 2.0 + (2 * a + b) * (square c - square d) / 6 * (square b - square a)
+    (square a + square b + a * b) / 3 * (a + b)
+
+
+yTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+yTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    let
+        y =
+            -- (z1 + z2) / 2.0
+            yGTrapezoid ( z1, y1 ) ( z2, y2 )
+
+        area =
+            areaTrapezoid ( z1, y1 ) ( z2, y2 )
+    in
+    y * area
 
 
 actionForHullSliceXY : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
