@@ -98,16 +98,3 @@ yTrapezoid ( z1, y1 ) ( z2, y2 ) =
             z2 - z1
     in
     b / 2.0 + (2 * a + b) * (square c - square d) / 6 * (square b - square a)
-
-
-fromNZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
-fromNZ z curve =
-    -- convert z normalized to absolute value
-    -- z in [0,1]
-    z * (curve.zmax - curve.zmin) + curve.zmin
-
-
-toNZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
-toNZ z curve =
-    -- convert absolute z to normalized
-    (z - curve.zmin) / (curve.zmax - curve.zmin)
