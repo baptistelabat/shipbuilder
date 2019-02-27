@@ -203,7 +203,7 @@ interpolate json =
             HullSliceUtilities.hullVolume { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
 
         kbz_ =
-            HullSliceUtilities.kBz lzya / v_
+            HullSliceUtilities.kBz lzya
 
         kbx_ =
             HullSliceUtilities.kBx lzya / v_
