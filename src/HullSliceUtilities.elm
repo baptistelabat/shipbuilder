@@ -1,9 +1,10 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
-    ,  hullVolume
     , demormalizedHullSlice
     , denormalizedHSList
+    , hullVolume
     , kBx
+    ,  kBz
 
     , volume
     , yTrapezoid
@@ -132,7 +133,6 @@ zyaForSlice hsXY =
             actionForHullSliceXY yTrapezoid hsXY.zylist
     in
     { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
-
 
 
 getInterpolateValuesAndSubList : Float -> List ( Float, Float ) -> List ( Float, Float )
@@ -299,6 +299,38 @@ kBx lo =
                     ((a1 * x1 + a2 * x2) / 2.0) * (x2 - x1)
             in
             value + kBx (o2 :: rest)
+
+        _ ->
+            0
+
+
+kBz : List ObjXKzKyArea -> Float
+kBz lo =
+    case lo of
+        o1 :: o2 :: rest ->
+            let
+                x1 =
+                    o1.x
+
+                x2 =
+                    o2.x
+
+                a1 =
+                    o1.area
+
+                a2 =
+                    o2.area
+
+                z1 =
+                    o1.kz
+
+                z2 =
+                    o2.kz
+
+                value =
+                    ((a1 * z1 + a2 * z2) / 2.0) * (x2 - x1)
+            in
+            value + kBz (o2 :: rest)
 
         _ ->
             0
