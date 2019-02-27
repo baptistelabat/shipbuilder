@@ -674,6 +674,19 @@ kbForSlice hullSlice =
     v
 
 
+calculateKB : List HullSlice -> Float
+calculateKB slices =
+    let
+        n : Int
+        n =
+            List.length slices
+
+        kbs =
+            List.map kbForSlice slices
+    in
+    List.sum kbs / toFloat n
+
+
 getHullSliceAtZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> { c | zmin : Float, zmax : Float, y : List Float }
 getHullSliceAtZ z curve =
     case z > curve.zmax of
