@@ -205,9 +205,13 @@ interpolate json =
         kbz_ =
             HullSliceUtilities.kBz lzya
 
-        kbx_ =
-            HullSliceUtilities.kBx lzya / v_
+        centreOfBuoyancy =
+            case v2_ == 0.0 of
+                True ->
+                    0.0
 
+                False ->
+                    abs kbz_ / v2_
         sliceAreas : List Float
         sliceAreas =
             List.map (calculateSliceArea json) json.slices
@@ -227,7 +231,7 @@ interpolate json =
     , blockCoefficient = StringValueInput.round_n 2 <| blockCoefficient_
     , volume = StringValueInput.round_n 2 <| volume json sliceAreas
     , newVolume = StringValueInput.round_n 2 <| realVolume
-    , centreOfBuoyancy = StringValueInput.round_n 2 <| kbz_
+    , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
     , metacentre = StringValueInput.round_n 2 <| 0.0
     }
 
