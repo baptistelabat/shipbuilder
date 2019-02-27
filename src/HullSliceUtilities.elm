@@ -370,6 +370,34 @@ extractZYAtZ z0 hsXY =
     { x = hsXY.x, zylist = extractZYAtZ_ z0 hsXY.zylist }
 
 
+xMinAtZ : Float -> Float -> List HullSlice -> Float
+xMinAtZ xmin z0 listHS =
+    case listHS of
+        hs :: xs ->
+            if hs.zmax <= z0 then
+                xMinAtZ hs.x z0 xs
+
+            else
+                xmin
+
+        _ ->
+            xmin
+
+
+xMaxAtZ : Float -> Float -> List HullSlice -> Float
+xMaxAtZ xmax z0 listHS =
+    case listHS of
+        hs :: xs ->
+            if hs.zmax <= z0 then
+                xMaxAtZ hs.x z0 xs
+
+            else
+                xmax
+
+        _ ->
+            xmax
+
+
 intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, lhs : List HullSliceXY }
 intersectBelow config z0 listHS =
     -- CN List HullSlice supposed denormalized !!!
@@ -389,10 +417,10 @@ intersectBelow config z0 listHS =
             List.map (extractZYAtZ z0) lhsXY
 
         xmin =
-            config.xmin
+            xMinAtZ config.xmin z0 listHS
 
         xmax =
-            config.xmax
+            xMaxAtZ config.xmax z0 (List.reverse listHS)
     in
     { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
 
