@@ -46,13 +46,13 @@ zTrapezoid ( z1, y1 ) ( z2, y2 ) =
         c =
             abs (z2 - z1)
 
+        h =
+            c
+
         d =
             sqrt (square c + square (y2 - y1))
-
-        dz =
-            z2 - z1
     in
-    (b + 2 * a) / (3 * (a + b)) * dz
+    (b + 2 * a) / (3 * (a + b)) * h
 
 
 yTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
