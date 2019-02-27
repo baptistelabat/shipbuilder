@@ -1,6 +1,5 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
-    , trapezoidCentroid
     , yTrapezoid
     , zTrapezoid
     )
@@ -101,12 +100,6 @@ yTrapezoid ( z1, y1 ) ( z2, y2 ) =
     b / 2.0 + (2 * a + b) * (square c - square d) / 6 * (square b - square a)
 
 
-trapezoidCentroid : ( Float, Float ) -> ( Float, Float ) -> ( Float, Float, Float )
-trapezoidCentroid p1 p2 =
-    -- calculate centroid z, y, and area
-    ( zTrapezoid p1 p2, yTrapezoid p1 p2, areaTrapezoid p1 p2 )
-
-
 fromNZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
 fromNZ z curve =
     -- convert z normalized to absolute value
@@ -118,55 +111,3 @@ toNZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
 toNZ z curve =
     -- convert absolute z to normalized
     (z - curve.zmin) / (curve.zmax - curve.zmin)
-
-
-trapezoidCentroidForList : List ( Float, Float ) -> List ( Float, Float, Float )
-trapezoidCentroidForList list =
-    -- calculate (z,y,a) on a list. return a list of 3-uplet
-    case list of
-        p1 :: p2 :: xs ->
-            trapezoidCentroid p1 p2 :: trapezoidCentroidForList (p2 :: xs)
-
-        _ ->
-            []
-
-
-totalArea : List ( Float, Float, Float ) -> Float
-totalArea l =
-    l
-        |> List.map (\( z, y, a ) -> a)
-        |> List.sum
-
-
-totalProductZ : List ( Float, Float, Float ) -> Float
-totalProductZ l =
-    l
-        |> List.map (\( z, y, a ) -> z * a)
-        |> List.sum
-
-
-totalProductY : List ( Float, Float, Float ) -> Float
-totalProductY l =
-    l
-        |> List.map (\( z, y, a ) -> y * a)
-        |> List.sum
-
-
-zyaForSlice_ : List ( Float, Float ) -> { kz : Float, ky : Float, area : Float }
-zyaForSlice_ list =
-    -- return zcentroid, ycentroid, and area for the HullSlice
-    let
-        l1 =
-            trapezoidCentroidForList list
-
-        ta =
-            totalArea l1
-
-        tz =
-            totalProductZ l1
-
-        ty =
-            totalProductY l1
-    in
-    -- hull symetry => 2.0 * ta
-    { kz = tz / ta, ky = ty / ta, area = 2 * ta }
