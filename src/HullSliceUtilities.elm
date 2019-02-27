@@ -1,8 +1,9 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
+    ,  hullVolume
     , demormalizedHullSlice
     , denormalizedHSList
-    , hullVolume
+    , intersectBelow
     , kBx
     ,  kBz
 
@@ -334,3 +335,67 @@ kBz lo =
 
         _ ->
             0
+extractZYAtZ_ : Float -> List ( Float, Float ) -> List ( Float, Float )
+extractZYAtZ_ z0 list =
+    -- return sublist with z > z0 concatenate with (z0, y(z0) interpolation)
+    -- list order with z up
+    let
+        m_zmin =
+            List.minimum (List.map Tuple.first list)
+
+        m_zmax =
+            List.maximum (List.map Tuple.first list)
+    in
+    case m_zmax of
+        Nothing ->
+            []
+
+        Just zmax ->
+            case z0 > zmax of
+                True ->
+                    []
+
+                False ->
+                    case m_zmin of
+                        Nothing ->
+                            []
+
+                        Just zmin ->
+                            case z0 < zmin of
+                                True ->
+                                    list
+
+                                False ->
+                                    getInterpolateValuesAndSubList z0 list
+
+
+extractZYAtZ : Float -> HullSliceXY -> HullSliceXY
+extractZYAtZ z0 hsXY =
+    { x = hsXY.x, zylist = extractZYAtZ_ z0 hsXY.zylist }
+
+
+intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, lhs : List HullSliceXY }
+intersectBelow config z0 listHS =
+    -- CN List HullSlice supposed denormalized !!!
+    let
+        -- filter HullSlice with zmax <= z0
+        filterHS =
+            List.filter (\u -> u.zmax > z0 || not (List.isEmpty u.y)) listHS
+
+        lhsXY =
+            List.map toXY filterHS
+
+        --
+        -- extract subSlice at z0
+        -- return sublist with z > z0 concatenate with (z0, y(z0) interpolation)
+        -- lhsXY_AtZ : List HullSliceXY (dz is not constant)
+        lhsXY_AtZ =
+            List.map (extractZYAtZ z0) lhsXY
+
+        xmin =
+            config.xmin
+
+        xmax =
+            config.xmax
+    in
+    { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
