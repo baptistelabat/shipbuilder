@@ -594,6 +594,15 @@ sum2List l =
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
 centroidAbscissa curve =
     let
+        ( x, y ) =
+            xyCentroidAbscissa curve
+    in
+    x
+
+
+xyCentroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> ( Float, Float )
+xyCentroidAbscissa curve =
+    let
         n : Int
         n =
             List.length curve.y
@@ -602,7 +611,7 @@ centroidAbscissa curve =
         dz =
             (curve.zmax - curve.zmin) / toFloat (n - 1)
 
-        getTrapezoidCentroids : List Float -> List ( Float, Float )
+        getTrapezoidCentroids : List Float -> List ( Float, Float, Float )
         getTrapezoidCentroids ys =
             case ys of
                 [] ->
@@ -612,29 +621,37 @@ centroidAbscissa curve =
                     []
 
                 y1 :: y2 :: rest ->
-                    trapezoidCentroid dz y1 y2 :: getTrapezoidCentroids (y2 :: rest)
+                    trapezoidCentroid3 dz y1 y2 :: getTrapezoidCentroids (y2 :: rest)
 
-        trapezoidCentroids : List ( Float, Float )
+        trapezoidCentroids : List ( Float, Float, Float )
         trapezoidCentroids =
             getTrapezoidCentroids curve.y
 
-        shiftedTrapezoidCentroids : List ( Float, Float )
+        shiftedTrapezoidCentroids : List ( Float, Float, Float )
         shiftedTrapezoidCentroids =
-            List.map2 (\shift ( c, a ) -> ( c + shift, a )) (zminForEachTrapezoid curve) trapezoidCentroids
+            List.map2 (\shift ( c, u, a ) -> ( c + shift, u, a )) (zminForEachTrapezoid curve) trapezoidCentroids
 
         totalArea : Float
         totalArea =
             shiftedTrapezoidCentroids
-                |> List.map Tuple.second
+                |> List.map (\( x, y, a ) -> a)
                 |> List.sum
 
-        sumOfCentroids : Float
+        sumOfCentroids : ( Float, Float )
         sumOfCentroids =
             shiftedTrapezoidCentroids
-                |> List.map (\( x, y ) -> x * y)
-                |> List.sum
+                |> List.map (\( x, u, a ) -> ( x * a, u * a ))
+                |> sum2List
+
+        divTotalArea : ( Float, Float )
+        divTotalArea =
+            let
+                ( x, y ) =
+                    sumOfCentroids
+            in
+            ( x / totalArea, y / totalArea )
     in
-    sumOfCentroids / totalArea
+    divTotalArea
 
 
 zminForEachTrapezoid : { c | zmin : Float, zmax : Float, y : List Float } -> List Float
