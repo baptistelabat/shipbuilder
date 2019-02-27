@@ -576,6 +576,21 @@ trapezoidCentroid3 dx y1 y2 =
     , 0.5 * (y1 + y2) * dx
     )
 
+
+sum2List : List ( Float, Float ) -> ( Float, Float )
+sum2List l =
+    case l of
+        [] ->
+            ( 0, 0 )
+
+        ( x, y ) :: xs ->
+            let
+                ( u, v ) =
+                    sum2List xs
+            in
+            ( x + u, y + v )
+
+
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
 centroidAbscissa curve =
     let
