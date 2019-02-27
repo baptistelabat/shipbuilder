@@ -685,22 +685,3 @@ calculateKB slices =
             List.map kbForSlice slices
     in
     List.sum kbs / toFloat n
-
-
-getHullSliceAtZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> { c | zmin : Float, zmax : Float, y : List Float }
-getHullSliceAtZ z curve =
-    case z > curve.zmax of
-        True ->
-            curve
-
-        False ->
-            case z < curve.zmin of
-                True ->
-                    { curve | zmin = z, zmax = z, y = [] }
-
-                False ->
-                    let
-                        zy =
-                            toXY curve
-                    in
-                    { curve | zmin = curve.zmin, zmax = z, y = List.map Tuple.second zy }
