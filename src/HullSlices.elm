@@ -218,6 +218,35 @@ interpolate json =
 
         realVolume =
             2 * v2_
+
+        blockVolume_ =
+            HullSliceUtilities.blockVolume intersectBelowSlicesZY
+
+        -- Block Coefficient = Volume of displacement ÷ blockVolume
+        blockCoefficient_ =
+            case blockVolume_ == 0.0 of
+                True ->
+                    0.0
+
+                False ->
+                    v2_ / blockVolume_
+
+        prepareToExport_ =
+            HullSliceUtilities.prepareToExport zAtDraught intersectBelowSlicesZY
+
+        inertialMoment_ =
+            HullSliceUtilities.inertialMoment prepareToExport_
+
+        bM =
+            case v2_ == 0.0 of
+                True ->
+                    0.0
+
+                False ->
+                    inertialMoment_ / v2_
+
+        kM =
+            centreOfBuoyancy + bM
     in
     { length = json.length
     , breadth = json.breadth
@@ -232,7 +261,7 @@ interpolate json =
     , volume = StringValueInput.round_n 2 <| volume json sliceAreas
     , newVolume = StringValueInput.round_n 2 <| realVolume
     , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
-    , metacentre = StringValueInput.round_n 2 <| 0.0
+    , metacentre = StringValueInput.round_n 2 <| kM
     }
 
 
