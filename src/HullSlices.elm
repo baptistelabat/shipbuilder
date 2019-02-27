@@ -536,7 +536,24 @@ square n =
 
 trapezoidCentroid : Float -> Float -> Float -> ( Float, Float )
 trapezoidCentroid dx y1 y2 =
-    ( (y1 + 2 * y2) / (3 * (y1 + y2)) * dx, 0.5 * (y1 + y2) * dx )
+    let
+        a =
+            y1
+
+        b =
+            y2
+
+        c =
+            dx
+
+        d =
+            sqrt (square dx + square (y2 - y1))
+    in
+    -- http://mathworld.wolfram.com/Trapezoid.html
+    ( (a + 2 * b) / (3 * (a + b)) * dx
+    , 0.5 * (y1 + y2) * dx
+    )
+
 
 
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
