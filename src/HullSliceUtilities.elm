@@ -6,7 +6,7 @@ module HullSliceUtilities exposing
     , hullVolume
     , inertialMoment
     , intersectBelow
-    ,  kBz
+    , kBz
     , prepareToExport
     , prismaticCoefficient
     , volume
