@@ -5,6 +5,30 @@ module HullSliceUtilities exposing
     , zTrapezoid
     )
 
+import Array
+
+
+type alias HullSlice =
+    { x : Float
+    , zmin : Float
+    , zmax : Float
+    , y : List Float
+    }
+
+
+type alias HullSliceXY =
+    { x : Float
+    , zylist : List ( Float, Float )
+    }
+
+
+type alias ObjXKzKyArea =
+    { x : Float
+    , kz : Float
+    , ky : Float
+    , area : Float
+    }
+
 
 square : Float -> Float
 square n =
