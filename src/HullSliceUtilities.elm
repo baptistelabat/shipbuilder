@@ -134,6 +134,40 @@ zyaForSlice hsXY =
 
 
 
+getInterpolateValuesAndSubList : Float -> List ( Float, Float ) -> List ( Float, Float )
+getInterpolateValuesAndSubList z0 list =
+    -- find z(i), z(i+1) / z0 >= z(i) && z0 < z(i+1)
+    -- k = (z0-z(i)) / (z(i+1) - z(i))
+    -- y0 = k*y(i) + (1-k)*y(i+1)
+    -- subList = (z0,y0)::(z(i+1),y(i+1))::rest
+    let
+        filterL : Float -> List ( Float, Float ) -> List ( Float, Float )
+        filterL z lst =
+            case lst of
+                ( z1, y1 ) :: ( z2, y2 ) :: rest ->
+                    case z < z2 && z >= z1 of
+                        True ->
+                            let
+                                k =
+                                    (z - z1) / (z2 - z1)
+
+                                y =
+                                    k * y1 + (1 - k) * y2
+                            in
+                            ( z, y ) :: ( z2, y2 ) :: rest
+
+                        False ->
+                            filterL z (( z2, y2 ) :: rest)
+
+                _ ->
+                    []
+
+        subList =
+            filterL z0 list
+    in
+    subList
+
+
 denormalizedHSList : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> List HullSlice -> List HullSlice
 denormalizedHSList param l =
     List.map (demormalizedHullSlice param) l
