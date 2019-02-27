@@ -2,6 +2,7 @@ module HullSliceUtilities exposing
     ( areaTrapezoid
     ,  hullVolume
     , demormalizedHullSlice
+    , denormalizedHSList
 
     , volume
     , yTrapezoid
@@ -131,6 +132,11 @@ zyaForSlice hsXY =
     in
     { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
 
+
+
+denormalizedHSList : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> List HullSlice -> List HullSlice
+denormalizedHSList param l =
+    List.map (demormalizedHullSlice param) l
 
 
 demormalizedHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> HullSlice -> HullSlice
