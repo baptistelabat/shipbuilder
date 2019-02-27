@@ -7,6 +7,7 @@ module HullSliceUtilities exposing
     , intersectBelow
     ,  kBz
 
+    , prismaticCoefficient
     , volume
     , yTrapezoid
     , zTrapezoid
@@ -369,6 +370,28 @@ intersectBelow config z0 listHS =
             config.xmax
     in
     { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
+
+
+prismaticCoefficient : { xmin : Float, xmax : Float } -> Float -> List Float -> Float
+prismaticCoefficient config vol_ areas =
+    case List.maximum areas of
+        Nothing ->
+            0
+
+        Just am ->
+            let
+                v1 =
+                    am * (config.xmax - config.xmin)
+
+                res =
+                    case v1 == 0.0 of
+                        True ->
+                            0
+
+                        False ->
+                            vol_ / v1
+            in
+            res
 
 
 inertialMoment : { z : Float, xy : List ( Float, Float ) } -> Float
