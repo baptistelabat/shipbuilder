@@ -1,5 +1,6 @@
 module HullSliceUtilities exposing
     (  areaTrapezoid
+    , hullVolume
 
     , volume
     , yTrapezoid
@@ -110,6 +111,25 @@ actionForHullSliceXY function list =
 
         _ ->
             0
+
+
+hullVolume : { xmin : Float, xmax : Float } -> List { a | x : Float, area : Float } -> Float
+hullVolume config list =
+    let
+        xmin =
+            config.xmin
+
+        xmax =
+            config.xmax
+
+        toXA : List { a | x : Float, area : Float } -> List { x : Float, area : Float }
+        toXA =
+            List.map (\u -> { x = u.x, area = u.area })
+
+        newList =
+            List.concat [ [ { x = xmin, area = 0.0 } ], toXA list, [ { x = xmax, area = 0.0 } ] ]
+    in
+    volume newList
 
 
 volume : List { a | x : Float, area : Float } -> Float
