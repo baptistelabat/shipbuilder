@@ -32,6 +32,7 @@ import Array
 import Dict exposing (Dict)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id)
+import HullSliceUtilities
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
