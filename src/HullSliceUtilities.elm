@@ -150,10 +150,20 @@ zyaForSlice hsXY =
             actionForHullSliceXY areaTrapezoid hsXY.zylist
 
         kz_ =
-            actionForHullSliceXY zTrapezoid hsXY.zylist
+            case area_ == 0.0 of
+                True ->
+                    0
+
+                _ ->
+                    actionForHullSliceXY zTrapezoid hsXY.zylist / area_
 
         ky_ =
-            actionForHullSliceXY yTrapezoid hsXY.zylist
+            case area_ == 0.0 of
+                True ->
+                    0
+
+                _ ->
+                    actionForHullSliceXY yTrapezoid hsXY.zylist / area_
     in
     { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
 
