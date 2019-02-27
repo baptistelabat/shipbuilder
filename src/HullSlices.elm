@@ -589,3 +589,22 @@ zminForEachTrapezoid curve =
     in
     List.range 0 (n - 2)
         |> List.map (\z -> toFloat z / (toFloat n - 1.0) * (curve.zmax - curve.zmin) + curve.zmin)
+
+
+getHullSliceAtZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> { c | zmin : Float, zmax : Float, y : List Float }
+getHullSliceAtZ z curve =
+    case z > curve.zmax of
+        True ->
+            curve
+
+        False ->
+            case z < curve.zmin of
+                True ->
+                    { curve | zmin = z, zmax = z, y = [] }
+
+                False ->
+                    let
+                        zy =
+                            toXY curve
+                    in
+                    { curve | zmin = curve.zmin, zmax = z, y = List.map Tuple.second zy }
