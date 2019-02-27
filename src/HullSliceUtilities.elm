@@ -98,3 +98,13 @@ yTrapezoid ( z1, y1 ) ( z2, y2 ) =
             z2 - z1
     in
     b / 2.0 + (2 * a + b) * (square c - square d) / 6 * (square b - square a)
+
+
+actionForHullSliceXY : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
+actionForHullSliceXY function list =
+    case list of
+        ( z1, y1 ) :: ( z2, y2 ) :: rest ->
+            function ( z1, y1 ) ( z2, y2 ) + actionForHullSliceXY function (( z2, y2 ) :: rest)
+
+        _ ->
+            0
