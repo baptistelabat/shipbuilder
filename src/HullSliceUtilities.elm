@@ -14,7 +14,23 @@ square n =
 areaTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
 areaTrapezoid ( z1, y1 ) ( z2, y2 ) =
     -- http://mathworld.wolfram.com/Trapezoid.html
-    0.5 * (y1 + y2) * (z2 - z1)
+    let
+        a =
+            abs y1
+
+        b =
+            abs y2
+
+        c =
+            abs (z2 - z1)
+
+        area =
+            0.5 * (a + b) * c
+
+        -- _ =
+        --     Debug.log "areaTrapezoid" area
+    in
+    area
 
 
 zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
