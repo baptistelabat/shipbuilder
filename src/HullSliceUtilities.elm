@@ -4,7 +4,6 @@ module HullSliceUtilities exposing
     , denormalizedHSList
     , hullVolume
     , intersectBelow
-    , kBx
     ,  kBz
 
     , volume
@@ -270,32 +269,6 @@ volume lo =
                     abs (((a1 + a2) / 2.0) * (x2 - x1))
             in
             value + volume (o2 :: rest)
-
-        _ ->
-            0
-
-
-kBx : List ObjXKzKyArea -> Float
-kBx lo =
-    case lo of
-        o1 :: o2 :: rest ->
-            let
-                x1 =
-                    o1.x
-
-                a1 =
-                    o1.area
-
-                x2 =
-                    o2.x
-
-                a2 =
-                    o2.area
-
-                value =
-                    ((a1 * x1 + a2 * x2) / 2.0) * (x2 - x1)
-            in
-            value + kBx (o2 :: rest)
 
         _ ->
             0
