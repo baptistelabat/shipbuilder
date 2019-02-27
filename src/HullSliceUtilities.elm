@@ -5,6 +5,7 @@ module HullSliceUtilities exposing
     , volume
     , yTrapezoid
     , zTrapezoid
+    , zyaForSlice
     )
 
 import Array
@@ -111,6 +112,24 @@ actionForHullSliceXY function list =
 
         _ ->
             0
+
+
+zyaForSlice : HullSliceXY -> ObjXKzKyArea
+zyaForSlice hsXY =
+    let
+        -- obj =
+        --     zyaForSlice_ hsXY.zylist
+        area_ =
+            actionForHullSliceXY areaTrapezoid hsXY.zylist
+
+        kz_ =
+            actionForHullSliceXY zTrapezoid hsXY.zylist
+
+        ky_ =
+            actionForHullSliceXY yTrapezoid hsXY.zylist
+    in
+    { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
+
 
 
 toXY : HullSlice -> HullSliceXY
