@@ -1,8 +1,8 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
-    ,  hullVolume
     , demormalizedHullSlice
     , denormalizedHSList
+    , hullVolume
     , intersectBelow
     , kBx
     ,  kBz
