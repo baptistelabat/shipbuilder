@@ -555,6 +555,26 @@ trapezoidCentroid dx y1 y2 =
     )
 
 
+trapezoidCentroid3 : Float -> Float -> Float -> ( Float, Float, Float )
+trapezoidCentroid3 dx y1 y2 =
+    let
+        a =
+            y1
+
+        b =
+            y2
+
+        c =
+            dx
+
+        d =
+            sqrt (square dx + square (y2 - y1))
+    in
+    -- http://mathworld.wolfram.com/Trapezoid.html
+    ( (a + 2 * b) / (3 * (a + b)) * dx
+    , b / 2.0 + (2 * a + b) * (square c - square d) / 6 * (square b - square a)
+    , 0.5 * (y1 + y2) * dx
+    )
 
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
 centroidAbscissa curve =
