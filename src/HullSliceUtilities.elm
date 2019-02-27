@@ -1,6 +1,6 @@
 module HullSliceUtilities exposing
-    (  areaTrapezoid
-    , hullVolume
+    ( areaTrapezoid
+    ,  hullVolume
 
     , volume
     , yTrapezoid
@@ -111,6 +111,35 @@ actionForHullSliceXY function list =
 
         _ ->
             0
+
+
+toXY : HullSlice -> HullSliceXY
+toXY hs =
+    let
+        zmax =
+            hs.zmax
+
+        zmin =
+            hs.zmin
+
+        y =
+            hs.y
+
+        dz : Float
+        dz =
+            (zmax - zmin) / (toFloat <| max 1 <| List.length y - 1)
+
+        acc : ( Int, Float ) -> ( Float, Float )
+        acc ( idx, y_ ) =
+            ( zmin + toFloat idx * dz, y_ )
+
+        lst =
+            y
+                |> Array.fromList
+                |> Array.toIndexedList
+                |> List.map acc
+    in
+    { x = hs.x, zylist = lst }
 
 
 hullVolume : { xmin : Float, xmax : Float } -> List { a | x : Float, area : Float } -> Float
