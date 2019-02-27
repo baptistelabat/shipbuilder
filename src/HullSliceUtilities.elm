@@ -152,9 +152,9 @@ totalProductY l =
         |> List.sum
 
 
-zyaForSlice : List ( Float, Float ) -> ( Float, Float, Float )
-zyaForSlice list =
-    -- return zcentroid, ycentroid, and total area for the list
+zyaForSlice_ : List ( Float, Float ) -> { kz : Float, ky : Float, area : Float }
+zyaForSlice_ list =
+    -- return zcentroid, ycentroid, and area for the HullSlice
     let
         l1 =
             trapezoidCentroidForList list
@@ -168,4 +168,5 @@ zyaForSlice list =
         ty =
             totalProductY l1
     in
-    ( tz / ta, ty / ta, ta )
+    -- hull symetry => 2.0 * ta
+    { kz = tz / ta, ky = ty / ta, area = 2 * ta }
