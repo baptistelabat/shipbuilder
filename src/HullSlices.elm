@@ -77,6 +77,9 @@ type alias HullSlices =
     , sliceAreas : List Float
     , blockCoefficient : Float
     , volume : Float
+    , newVolume : Float
+    , centreOfBuoyancy : Float
+    , metacentre : Float
     }
 
 
@@ -159,9 +162,59 @@ calculateSliceArea json hullSlice =
 interpolate : JsonHullSlices a -> HullSlices
 interpolate json =
     let
+        length_ =
+            json.length.value
+
+        breadth_ =
+            json.breadth.value
+
+        depth_ =
+            json.depth.value
+
+        draught_ =
+            json.draught.value
+
+        -- denormalize slices
+        denormalizedSlices =
+            HullSliceUtilities.denormalizedHSList
+                { length = length_, breadth = breadth_, depth = depth_, xmin = json.xmin, ymin = json.ymin, zmin = json.zmin }
+                json.slices
+
+
+        -- transform draught to z value
+        zAtDraught =
+            json.zmin + depth_ - draught_
+
+
+        -- intersect below draught
+        intersectBelowSlicesZY =
+            HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + length_ } zAtDraught denormalizedSlices
+
+        -- calculate kz, ky and area
+        lzya =
+            List.map HullSliceUtilities.zyaForSlice intersectBelowSlicesZY.lhs
+
+        areas =
+            List.map .area lzya
+
+        v_ =
+            HullSliceUtilities.volume lzya
+
+        v2_ =
+            HullSliceUtilities.hullVolume { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
+
+        kbz_ =
+            HullSliceUtilities.kBz lzya / v_
+
+        kbx_ =
+            HullSliceUtilities.kBx lzya / v_
+
         sliceAreas : List Float
         sliceAreas =
             List.map (calculateSliceArea json) json.slices
+
+        realVolume =
+            2 * v2_
     in
     { length = json.length
     , breadth = json.breadth
@@ -174,6 +227,9 @@ interpolate json =
     , sliceAreas = sliceAreas
     , blockCoefficient = StringValueInput.round_n 2 <| (Maybe.withDefault 0 <| List.maximum sliceAreas) / (json.breadth.value * json.draught.value)
     , volume = StringValueInput.round_n 2 <| volume json sliceAreas
+    , newVolume = StringValueInput.round_n 2 <| realVolume
+    , centreOfBuoyancy = StringValueInput.round_n 2 <| kbz_
+    , metacentre = StringValueInput.round_n 2 <| 0.0
     }
 
 
