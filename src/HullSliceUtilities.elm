@@ -1,5 +1,7 @@
 module HullSliceUtilities exposing
-    ( areaTrapezoid
+    (  areaTrapezoid
+
+    , volume
     , yTrapezoid
     , zTrapezoid
     )
@@ -105,6 +107,32 @@ actionForHullSliceXY function list =
     case list of
         ( z1, y1 ) :: ( z2, y2 ) :: rest ->
             function ( z1, y1 ) ( z2, y2 ) + actionForHullSliceXY function (( z2, y2 ) :: rest)
+
+        _ ->
+            0
+
+
+volume : List { a | x : Float, area : Float } -> Float
+volume lo =
+    case lo of
+        o1 :: o2 :: rest ->
+            let
+                x1 =
+                    o1.x
+
+                a1 =
+                    o1.area
+
+                x2 =
+                    o2.x
+
+                a2 =
+                    o2.area
+
+                value =
+                    abs (((a1 + a2) / 2.0) * (x2 - x1))
+            in
+            value + volume (o2 :: rest)
 
         _ ->
             0
