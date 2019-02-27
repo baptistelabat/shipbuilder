@@ -125,7 +125,7 @@ trapezoidCentroidForList list =
     -- calculate (z,y,a) on a list. return a list of 3-uplet
     case list of
         p1 :: p2 :: xs ->
-            trapezoidCentroid p1 p2 :: trapezoidCentroidForList xs
+            trapezoidCentroid p1 p2 :: trapezoidCentroidForList (p2 :: xs)
 
         _ ->
             []
