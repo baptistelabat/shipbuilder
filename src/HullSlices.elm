@@ -665,6 +665,15 @@ zminForEachTrapezoid curve =
         |> List.map (\z -> toFloat z / (toFloat n - 1.0) * (curve.zmax - curve.zmin) + curve.zmin)
 
 
+kbForSlice : HullSlice -> Float
+kbForSlice hullSlice =
+    let
+        ( u, v ) =
+            xyCentroidAbscissa hullSlice
+    in
+    v
+
+
 getHullSliceAtZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> { c | zmin : Float, zmax : Float, y : List Float }
 getHullSliceAtZ z curve =
     case z > curve.zmax of
