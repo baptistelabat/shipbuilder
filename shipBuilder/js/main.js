@@ -54,6 +54,10 @@ app.ports.toJs.subscribe(function (message) {
         case "blocks-visibility":
             toggleBlocksVisibility(data);
             break;
+        case "export-csv":
+            console.log (data);
+            saveCSV("export", data);
+            break;
         case "init-three":
             initThree(data);
             break;
@@ -415,10 +419,52 @@ let buildHullGeometry = function ( json ) {
             var k3 = k1+2*ny;
             var k4 = k3 + 1;
 
-            geometry.faces.push( new THREE.Face3( k1, k3, k2 ) );
-            geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
+            // geometry.faces.push( new THREE.Face3( k1, k3, k2 ) );
+            // geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
+            geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
+            geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
         }
     }
+
+    // BEGIN close the mesh
+    var i=0;
+    for(let j=0; j<ny -1 ; j++)
+    {
+        var k1 = i*(2*ny)+j;
+        var k2 = k1+1;
+        var k3 = (i+1)*(2*ny)-1-j;
+        var k4 = k3 - 1;
+
+        geometry.faces.push( new THREE.Face3( k2, k1, k3 ) );
+        geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
+    }
+
+    i=nx-1;
+    for(let j=0; j<ny -1 ; j++)
+    {
+      var k1 = i*(2*ny)+j;
+      var k2 = k1+1;
+      var k3 = (i+1)*(2*ny)-1-j;
+      var k4 = k3 - 1;
+
+        // geometry.faces.push( new THREE.Face3( k2, k1, k3 ) );
+        // geometry.faces.push( new THREE.Face3( k2, k3, k4 ) );
+        geometry.faces.push( new THREE.Face3( k2, k3, k1 ) );
+        geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
+    }
+
+    for (let i = 0; i < nx -1 ; i++){
+      var k1 = 2*i*ny;
+      var k2 = k1+(2*ny);
+      var k3 = k2-1;
+      var k4 = k3+(2*ny);
+
+      geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
+      geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
+    }
+    // END close the mesh
+
+
     //compute Normals
     geometry.computeVertexNormals();
     geometry.computeFaceNormals();
@@ -1471,4 +1517,30 @@ let normalizeMouseCoordinatesForView = function (mouse, view) {
     const normalizedX = (offsetX / view.clientWidth) * 2 - 1;
     const normalizedY = - (offsetY / view.clientHeight) * 2 - 1;
     return new THREE.Vector2(normalizedX, normalizedY);
+}
+
+function saveSTL( scene, name ){
+  var exporter = new THREE.STLExporter();
+  var stlString = exporter.parse( scene );
+
+  var blob = new Blob([stlString], {type: 'text/plain'});
+
+  saveAs(blob, name + '.stl');
+}
+
+function saveCSV ( name, datas ) {
+
+  var str = "";
+  for(var i=0; i< datas.length; i++)
+  {
+    var z = datas[i].z;
+    var xy = datas[i].xy;
+
+    for(var j=0; j< xy.length; j++) {
+      var l = z.toString() + ';' + xy[j][0].toString() + ';' + xy[j][1].toString() + '\n';
+      str += l;
+    }
+  }
+  var blob = new Blob([str], {type: 'text/plain'});
+  saveAs(blob, name + '.csv');
 }
