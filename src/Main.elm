@@ -3120,6 +3120,8 @@ viewModeller model =
                         , HullSlices.plotAreaCurve slices
                         , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
                         , viewSimpleKpi "Displacement (t)" "displacement" slices.volume
+                        , viewSimpleKpi "KB" "KB" slices.centreOfBuoyancy
+                        , viewSimpleKpi "KM" "KM" slices.metacentre
                         ]
 
             else

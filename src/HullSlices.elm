@@ -32,6 +32,7 @@ import Array
 import Dict exposing (Dict)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id)
+import HullSliceUtilities
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -528,13 +529,79 @@ setSliceArea targetArea draught slice =
         Ok <| bisectArea slice targetArea alphaMin alphaMax 20 0 1.0e-5 draught
 
 
+square : Float -> Float
+square n =
+    n ^ 2
+
+
 trapezoidCentroid : Float -> Float -> Float -> ( Float, Float )
 trapezoidCentroid dx y1 y2 =
-    ( (y1 + 2 * y2) / (3 * (y1 + y2)) * dx, 0.5 * (y1 + y2) * dx )
+    let
+        a =
+            y1
+
+        b =
+            y2
+
+        c =
+            dx
+
+        d =
+            sqrt (square dx + square (y2 - y1))
+    in
+    -- http://mathworld.wolfram.com/Trapezoid.html
+    ( (a + 2 * b) / (3 * (a + b)) * dx
+    , 0.5 * (y1 + y2) * dx
+    )
+
+
+trapezoidCentroid3 : Float -> Float -> Float -> ( Float, Float, Float )
+trapezoidCentroid3 dx y1 y2 =
+    let
+        a =
+            y1
+
+        b =
+            y2
+
+        c =
+            dx
+
+        d =
+            sqrt (square dx + square (y2 - y1))
+    in
+    -- http://mathworld.wolfram.com/Trapezoid.html
+    ( (a + 2 * b) / (3 * (a + b)) * dx
+    , b / 2.0 + (2 * a + b) * (square c - square d) / 6 * (square b - square a)
+    , 0.5 * (y1 + y2) * dx
+    )
+
+
+sum2List : List ( Float, Float ) -> ( Float, Float )
+sum2List l =
+    case l of
+        [] ->
+            ( 0, 0 )
+
+        ( x, y ) :: xs ->
+            let
+                ( u, v ) =
+                    sum2List xs
+            in
+            ( x + u, y + v )
 
 
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
 centroidAbscissa curve =
+    let
+        ( x, y ) =
+            xyCentroidAbscissa curve
+    in
+    x
+
+
+xyCentroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> ( Float, Float )
+xyCentroidAbscissa curve =
     let
         n : Int
         n =
@@ -544,7 +611,7 @@ centroidAbscissa curve =
         dz =
             (curve.zmax - curve.zmin) / toFloat (n - 1)
 
-        getTrapezoidCentroids : List Float -> List ( Float, Float )
+        getTrapezoidCentroids : List Float -> List ( Float, Float, Float )
         getTrapezoidCentroids ys =
             case ys of
                 [] ->
@@ -554,29 +621,37 @@ centroidAbscissa curve =
                     []
 
                 y1 :: y2 :: rest ->
-                    trapezoidCentroid dz y1 y2 :: getTrapezoidCentroids (y2 :: rest)
+                    trapezoidCentroid3 dz y1 y2 :: getTrapezoidCentroids (y2 :: rest)
 
-        trapezoidCentroids : List ( Float, Float )
+        trapezoidCentroids : List ( Float, Float, Float )
         trapezoidCentroids =
             getTrapezoidCentroids curve.y
 
-        shiftedTrapezoidCentroids : List ( Float, Float )
+        shiftedTrapezoidCentroids : List ( Float, Float, Float )
         shiftedTrapezoidCentroids =
-            List.map2 (\shift ( c, a ) -> ( c + shift, a )) (zminForEachTrapezoid curve) trapezoidCentroids
+            List.map2 (\shift ( c, u, a ) -> ( c + shift, u, a )) (zminForEachTrapezoid curve) trapezoidCentroids
 
         totalArea : Float
         totalArea =
             shiftedTrapezoidCentroids
-                |> List.map Tuple.second
+                |> List.map (\( x, y, a ) -> a)
                 |> List.sum
 
-        sumOfCentroids : Float
+        sumOfCentroids : ( Float, Float )
         sumOfCentroids =
             shiftedTrapezoidCentroids
-                |> List.map (\( x, y ) -> x * y)
-                |> List.sum
+                |> List.map (\( x, u, a ) -> ( x * a, u * a ))
+                |> sum2List
+
+        divTotalArea : ( Float, Float )
+        divTotalArea =
+            let
+                ( x, y ) =
+                    sumOfCentroids
+            in
+            ( x / totalArea, y / totalArea )
     in
-    sumOfCentroids / totalArea
+    divTotalArea
 
 
 zminForEachTrapezoid : { c | zmin : Float, zmax : Float, y : List Float } -> List Float
@@ -588,3 +663,44 @@ zminForEachTrapezoid curve =
     in
     List.range 0 (n - 2)
         |> List.map (\z -> toFloat z / (toFloat n - 1.0) * (curve.zmax - curve.zmin) + curve.zmin)
+
+
+kbForSlice : HullSlice -> Float
+kbForSlice hullSlice =
+    let
+        ( u, v ) =
+            xyCentroidAbscissa hullSlice
+    in
+    v
+
+
+calculateKB : List HullSlice -> Float
+calculateKB slices =
+    let
+        n : Int
+        n =
+            List.length slices
+
+        kbs =
+            List.map kbForSlice slices
+    in
+    List.sum kbs / toFloat n
+
+
+getHullSliceAtZ : Float -> { c | zmin : Float, zmax : Float, y : List Float } -> { c | zmin : Float, zmax : Float, y : List Float }
+getHullSliceAtZ z curve =
+    case z > curve.zmax of
+        True ->
+            curve
+
+        False ->
+            case z < curve.zmin of
+                True ->
+                    { curve | zmin = z, zmax = z, y = [] }
+
+                False ->
+                    let
+                        zy =
+                            toXY curve
+                    in
+                    { curve | zmin = curve.zmin, zmax = z, y = List.map Tuple.second zy }
