@@ -1,14 +1,18 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
+    , blockVolume
     , demormalizedHullSlice
     , denormalizedHSList
     , hullVolume
+    , inertialMoment
     , intersectBelow
-    , kBx
-    ,  kBz
-
+    , kBz
+    , prepareToExport
+    , prismaticCoefficient
     , volume
+    , yGTrapezoid
     , yTrapezoid
+    , zGTrapezoid
     , zTrapezoid
     , zyaForSlice
     )
@@ -45,7 +49,6 @@ square n =
 
 areaTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
 areaTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    -- http://mathworld.wolfram.com/Trapezoid.html
     let
         a =
             abs y1
@@ -58,55 +61,74 @@ areaTrapezoid ( z1, y1 ) ( z2, y2 ) =
 
         area =
             0.5 * (a + b) * c
-
-        -- _ =
-        --     Debug.log "areaTrapezoid" area
     in
     area
 
 
-zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-zTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    -- http://mathworld.wolfram.com/Trapezoid.html
+zGTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+zGTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    -- if b>a
+    -- zG = (a*h*h/2.0 + (b-a)*h/2.0*h/3.0) / (a+b)*h/2
+    -- zG = ((2*a+b)*h) / 3*(a+b)
+    -- if a>b
+    -- zG = ((2*b+a)*h) / 3*(a+b)
     let
         a =
-            abs y1
+            min y1 y2
 
         b =
-            abs y2
+            max y1 y2
 
         c =
             abs (z2 - z1)
 
         h =
             c
-
-        d =
-            sqrt (square c + square (y2 - y1))
     in
-    (b + 2 * a) / (3 * (a + b)) * h
+    ((b + 2 * a) * h) / (3 * (a + b))
 
 
-yTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-yTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    -- http://mathworld.wolfram.com/Trapezoid.html
+zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+zTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    let
+        z =
+            -- (z1 + z2) / 2.0
+            z1 + zGTrapezoid ( z1, y1 ) ( z2, y2 )
+
+        area =
+            areaTrapezoid ( z1, y1 ) ( z2, y2 )
+    in
+    z * area
+
+
+yGTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+yGTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    -- yG =
+    --     (a / 2 * a * h + (a + (abs (b - a) / 3)) * abs (b - a) * h / 2) / (a + b) * h / 2
+    --
+    -- yG =
+    --     (a * a + b * b + ab) / 3 * (a + b)
     let
         a =
             abs y1
 
         b =
             abs y2
-
-        c =
-            abs (z2 - z1)
-
-        d =
-            sqrt (square c + square (y2 - y1))
-
-        dz =
-            z2 - z1
     in
-    b / 2.0 + (2 * a + b) * (square c - square d) / 6 * (square b - square a)
+    (square a + square b + a * b) / 3 * (a + b)
+
+
+yTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+yTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    let
+        y =
+            -- (z1 + z2) / 2.0
+            yGTrapezoid ( z1, y1 ) ( z2, y2 )
+
+        area =
+            areaTrapezoid ( z1, y1 ) ( z2, y2 )
+    in
+    y * area
 
 
 actionForHullSliceXY : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
@@ -128,10 +150,20 @@ zyaForSlice hsXY =
             actionForHullSliceXY areaTrapezoid hsXY.zylist
 
         kz_ =
-            actionForHullSliceXY zTrapezoid hsXY.zylist
+            case area_ == 0.0 of
+                True ->
+                    0
+
+                _ ->
+                    actionForHullSliceXY zTrapezoid hsXY.zylist / area_
 
         ky_ =
-            actionForHullSliceXY yTrapezoid hsXY.zylist
+            case area_ == 0.0 of
+                True ->
+                    0
+
+                _ ->
+                    actionForHullSliceXY yTrapezoid hsXY.zylist / area_
     in
     { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
 
@@ -279,32 +311,6 @@ volume lo =
             0
 
 
-kBx : List ObjXKzKyArea -> Float
-kBx lo =
-    case lo of
-        o1 :: o2 :: rest ->
-            let
-                x1 =
-                    o1.x
-
-                a1 =
-                    o1.area
-
-                x2 =
-                    o2.x
-
-                a2 =
-                    o2.area
-
-                value =
-                    ((a1 * x1 + a2 * x2) / 2.0) * (x2 - x1)
-            in
-            value + kBx (o2 :: rest)
-
-        _ ->
-            0
-
-
 kBz : List ObjXKzKyArea -> Float
 kBz lo =
     case lo of
@@ -374,6 +380,34 @@ extractZYAtZ z0 hsXY =
     { x = hsXY.x, zylist = extractZYAtZ_ z0 hsXY.zylist }
 
 
+xMinAtZ : Float -> Float -> List HullSlice -> Float
+xMinAtZ xmin z0 listHS =
+    case listHS of
+        hs :: xs ->
+            if hs.zmax <= z0 then
+                xMinAtZ hs.x z0 xs
+
+            else
+                xmin
+
+        _ ->
+            xmin
+
+
+xMaxAtZ : Float -> Float -> List HullSlice -> Float
+xMaxAtZ xmax z0 listHS =
+    case listHS of
+        hs :: xs ->
+            if hs.zmax <= z0 then
+                xMaxAtZ hs.x z0 xs
+
+            else
+                xmax
+
+        _ ->
+            xmax
+
+
 intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, lhs : List HullSliceXY }
 intersectBelow config z0 listHS =
     -- CN List HullSlice supposed denormalized !!!
@@ -393,9 +427,288 @@ intersectBelow config z0 listHS =
             List.map (extractZYAtZ z0) lhsXY
 
         xmin =
-            config.xmin
+            xMinAtZ config.xmin z0 listHS
 
         xmax =
-            config.xmax
+            xMaxAtZ config.xmax z0 (List.reverse listHS)
     in
     { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
+
+
+accZY : HullSliceXY -> (( Float, Float ) -> Float) -> List Float
+accZY hsXY f =
+    List.map f hsXY.zylist
+
+
+zacc : HullSliceXY -> List Float
+zacc hsXY =
+    accZY hsXY Tuple.first
+
+
+yacc : HullSliceXY -> List Float
+yacc hsXY =
+    accZY hsXY Tuple.second
+
+
+zminHS : HullSliceXY -> Maybe Float
+zminHS hsXY =
+    List.minimum <| zacc hsXY
+
+
+zmaxHS : HullSliceXY -> Maybe Float
+zmaxHS hsXY =
+    List.maximum <| zacc hsXY
+
+
+yminHS : HullSliceXY -> Maybe Float
+yminHS hsXY =
+    List.minimum <| yacc hsXY
+
+
+ymaxHS : HullSliceXY -> Maybe Float
+ymaxHS hsXY =
+    List.maximum <| yacc hsXY
+
+
+zMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
+zMinHullSliceXYList list m_zm =
+    case list of
+        [] ->
+            m_zm
+
+        el :: xs ->
+            let
+                m_x =
+                    zminHS el
+            in
+            case m_x of
+                Just x ->
+                    case m_zm of
+                        Nothing ->
+                            zMinHullSliceXYList xs (Just x)
+
+                        Just zm ->
+                            if x < zm then
+                                zMinHullSliceXYList xs (Just x)
+
+                            else
+                                zMinHullSliceXYList xs (Just zm)
+
+                Nothing ->
+                    zMinHullSliceXYList xs m_zm
+
+
+zMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
+zMaxHullSliceXYList list m_zm =
+    case list of
+        [] ->
+            m_zm
+
+        el :: xs ->
+            let
+                m_x =
+                    zmaxHS el
+            in
+            case m_x of
+                Just x ->
+                    case m_zm of
+                        Nothing ->
+                            zMaxHullSliceXYList xs (Just x)
+
+                        Just zm ->
+                            if x > zm then
+                                zMaxHullSliceXYList xs (Just x)
+
+                            else
+                                zMaxHullSliceXYList xs (Just zm)
+
+                Nothing ->
+                    zMaxHullSliceXYList xs m_zm
+
+
+yMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
+yMinHullSliceXYList list m_ym =
+    case list of
+        [] ->
+            m_ym
+
+        el :: xs ->
+            let
+                m_x =
+                    yminHS el
+            in
+            case m_x of
+                Just x ->
+                    case m_ym of
+                        Nothing ->
+                            yMinHullSliceXYList xs (Just x)
+
+                        Just ym ->
+                            if x < ym then
+                                yMinHullSliceXYList xs (Just x)
+
+                            else
+                                yMinHullSliceXYList xs (Just ym)
+
+                Nothing ->
+                    yMinHullSliceXYList xs m_ym
+
+
+yMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
+yMaxHullSliceXYList list m_ym =
+    case list of
+        [] ->
+            m_ym
+
+        el :: xs ->
+            let
+                m_x =
+                    ymaxHS el
+            in
+            case m_x of
+                Just x ->
+                    case m_ym of
+                        Nothing ->
+                            yMaxHullSliceXYList xs (Just x)
+
+                        Just ym ->
+                            if x > ym then
+                                yMaxHullSliceXYList xs (Just x)
+
+                            else
+                                yMaxHullSliceXYList xs (Just ym)
+
+                Nothing ->
+                    yMaxHullSliceXYList xs m_ym
+
+
+blockVolume : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Float
+blockVolume o =
+    -- Volume of the block
+    let
+        m_zmin =
+            zMinHullSliceXYList o.lhs Nothing
+
+        m_zmax =
+            zMaxHullSliceXYList o.lhs Nothing
+
+        m_ymin =
+            yMinHullSliceXYList o.lhs Nothing
+
+        m_ymax =
+            yMaxHullSliceXYList o.lhs Nothing
+
+        _ =
+            Debug.log "blockVolume" [ Just o.xmin, Just o.xmax, m_zmin, m_zmax, m_ymin, m_ymax ]
+
+        res =
+            case ( m_zmin, m_zmax ) of
+                ( Just zm, Just zM ) ->
+                    case ( m_ymin, m_ymax ) of
+                        ( Just ym, Just yM ) ->
+                            (o.xmax - o.xmin) * (yM - ym) * (zM - zm)
+
+                        _ ->
+                            0
+
+                _ ->
+                    0
+    in
+    res
+
+
+prismaticCoefficient : { xmin : Float, xmax : Float } -> Float -> List Float -> Float
+prismaticCoefficient config vol_ areas =
+    case List.maximum areas of
+        Nothing ->
+            0
+
+        Just am ->
+            let
+                v1 =
+                    am * (config.xmax - config.xmin)
+
+                res =
+                    case v1 == 0.0 of
+                        True ->
+                            0
+
+                        False ->
+                            vol_ / v1
+            in
+            res
+
+
+prepareToExport : Float -> { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> { z : Float, xy : List ( Float, Float ) }
+prepareToExport z0 o =
+    let
+        f : HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
+        f hsXY list =
+            let
+                m_ym =
+                    List.head (yacc hsXY)
+
+                res =
+                    case m_ym of
+                        Nothing ->
+                            -- list
+                            List.concat [ list, [ ( hsXY.x, 0 ) ] ]
+
+                        Just y0 ->
+                            List.concat [ list, [ ( hsXY.x, y0 ) ] ]
+            in
+            res
+
+        fl : List HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
+        fl lxy l =
+            case lxy of
+                [] ->
+                    l
+
+                x :: xs ->
+                    fl xs (f x l)
+
+        l1 =
+            fl o.lhs []
+    in
+    { z = z0, xy = l1 }
+
+
+inertialMoment : { z : Float, xy : List ( Float, Float ) } -> Float
+inertialMoment o =
+    let
+        xl =
+            List.map Tuple.first o.xy
+
+        yl =
+            List.map Tuple.second o.xy
+
+        len_ =
+            List.length yl
+
+        m_xmin =
+            List.minimum xl
+
+        m_xmax =
+            List.maximum xl
+
+        im =
+            case ( m_xmin, m_xmax ) of
+                ( Just xmin, Just xmax ) ->
+                    let
+                        sum_ =
+                            List.foldr (+) 0.0 <| List.map (\u -> u * u * u) yl
+
+                        im1 =
+                            if len_ == 0 then
+                                0
+
+                            else
+                                2 / 3 * (xmax - xmin) * sum_ / toFloat len_
+                    in
+                    im1
+
+                _ ->
+                    0
+    in
+    im

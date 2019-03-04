@@ -52,6 +52,7 @@ import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p
 import Html.Attributes exposing (accept, class, disabled, download, for, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
+import HullSliceUtilities
 import HullSlices exposing (HullSlices)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -1725,6 +1726,7 @@ type ToJsMsg
     | UpdatePartitionZeroPosition PartitionType String
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
+    | ExportCSV String
 
 
 type NoJsMsg
@@ -2234,6 +2236,13 @@ updateFromJs jsmsg model =
 updateModelToJs : ToJsMsg -> Model -> Model
 updateModelToJs msg model =
     case msg of
+        ExportCSV hullReference ->
+            let
+                _ =
+                    Debug.log "ExportCSV for " hullReference
+            in
+            model
+
         OpenSaveFile ->
             model
 
@@ -2509,6 +2518,34 @@ sendCmdToJs model msg =
 msg2json : Model -> ToJsMsg -> Maybe JsData
 msg2json model action =
     case action of
+        ExportCSV hullReference ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    let
+                        zAtDraught_ =
+                            hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
+
+                        datas =
+                            HullSlices.exportCSV
+                                { decks = model.partitions.decks.number.value
+                                , spacing = model.partitions.decks.spacing.value
+                                , z0 = model.partitions.decks.zero.position.value
+                                , xmin = hullSlices.xmin
+                                , xmax = hullSlices.xmin + hullSlices.length.value
+                                , zAtDraught = zAtDraught_
+                                }
+                                hullSlices
+                    in
+                    Just
+                        { tag = "export-csv"
+                        , data = HullSlices.encodeCSV datas
+
+                        -- , data = Encode.string "datas"
+                        }
+
         ChangeBlockColor block newColor ->
             Maybe.map
                 (\_ ->
@@ -3120,8 +3157,17 @@ viewModeller model =
                         , HullSlices.plotAreaCurve slices
                         , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
                         , viewSimpleKpi "Displacement (t)" "displacement" slices.volume
+                        , viewSimpleKpi "NewVolume" "NewVolume" slices.newVolume
                         , viewSimpleKpi "KB" "KB" slices.centreOfBuoyancy
                         , viewSimpleKpi "KM" "KM" slices.metacentre
+                        , button
+                            [ id "exportCSV"
+                            , value "exportCSV"
+
+                            -- disabled <| bulkheads.number.value == 0
+                            , onClick <| ToJs (ExportCSV hullReference)
+                            ]
+                            [ text "exportCSV" ]
                         ]
 
             else
