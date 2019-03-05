@@ -1488,6 +1488,150 @@ suite =
                                 |> Dict.get "anthineas"
                                 |> Maybe.map (.depth >> .value)
                             )
+                , test "select mpov. set draught to 1.0 and verify displacement" <|
+                    \_ ->
+                        Expect.equal (Just 48.96)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 1.0 and verify KB" <|
+                    \_ ->
+                        Expect.equal (Just 0.63)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .centreOfBuoyancy
+                            )
+                , test "select mpov. set draught to 1.0 and verify KM" <|
+                    \_ ->
+                        Expect.equal (Just 3.92)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .metacentre
+                            )
+                , test "select mpov. set draught to 2.0 and verify displacement" <|
+                    \_ ->
+                        Expect.equal (Just 303.52)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 2.0 and verify KB" <|
+                    \_ ->
+                        Expect.equal (Just 1.39)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .centreOfBuoyancy
+                            )
+                , test "select mpov. set draught to 2.0 and verify KM" <|
+                    \_ ->
+                        Expect.equal (Just 7.19)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .metacentre
+                            )
+                , test "select mpov. set draught to 3.0 and verify displacement" <|
+                    \_ ->
+                        Expect.equal (Just 797.16)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 3.0 and verify KB" <|
+                    \_ ->
+                        Expect.equal (Just 2.09)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .centreOfBuoyancy
+                            )
+                , test "select mpov. set draught to 3.0 and verify KM" <|
+                    \_ ->
+                        Expect.equal (Just 7.6)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .metacentre
+                            )
+                , test "select mpov. set draught to 4.0 and verify displacement" <|
+                    \_ ->
+                        Expect.equal (Just 1425.02)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 4.0 and verify KB" <|
+                    \_ ->
+                        Expect.equal (Just 2.71)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .centreOfBuoyancy
+                            )
+                , test "select mpov. set draught to 4.0 and verify KM" <|
+                    \_ ->
+                        Expect.equal (Just 6.7)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .metacentre
+                            )
+                , test "select mpov. set draught to 5.0 and verify displacement" <|
+                    \_ ->
+                        Expect.equal (Just 2099.53)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 5.0 and verify KB" <|
+                    \_ ->
+                        Expect.equal (Just 3.29)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .centreOfBuoyancy
+                            )
+                , test "select mpov. set draught to 5.0 and verify KM" <|
+                    \_ ->
+                        Expect.equal (Just 6.38)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .metacentre
+                            )
+                , test "select mpov. set draught to 6.0 and verify displacement" <|
+                    \_ ->
+                        Expect.equal (Just 2813.7)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 6.0 and verify KB" <|
+                    \_ ->
+                        Expect.equal (Just 3.85)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .centreOfBuoyancy
+                            )
+                , test "select mpov. set draught to 6.0 and verify KM" <|
+                    \_ ->
+                        Expect.equal (Just 6.48)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .metacentre
+                            )
                 ]
             ]
         , describe "Slice area curve"
