@@ -1496,6 +1496,14 @@ suite =
                                 |> Dict.get "mpov"
                                 |> Maybe.map .newVolume
                             )
+                , test "select mpov. set draught to 1.0 and verify block coefficient" <|
+                    \_ ->
+                        Expect.equal (Just 0.15)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .blockCoefficient
+                            )
                 , test "select mpov. set draught to 1.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 0.63)
@@ -1519,6 +1527,14 @@ suite =
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 2.0 and verify block coefficient" <|
+                    \_ ->
+                        Expect.equal (Just 0.18)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .blockCoefficient
                             )
                 , test "select mpov. set draught to 2.0 and verify KB" <|
                     \_ ->
@@ -1544,6 +1560,14 @@ suite =
                                 |> Dict.get "mpov"
                                 |> Maybe.map .newVolume
                             )
+                , test "select mpov. set draught to 3.0 and verify block coefficient" <|
+                    \_ ->
+                        Expect.equal (Just 0.28)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .blockCoefficient
+                            )
                 , test "select mpov. set draught to 3.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 2.09)
@@ -1567,6 +1591,14 @@ suite =
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 4.0 and verify block coefficient" <|
+                    \_ ->
+                        Expect.equal (Just 0.36)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .blockCoefficient
                             )
                 , test "select mpov. set draught to 4.0 and verify KB" <|
                     \_ ->
@@ -1592,6 +1624,14 @@ suite =
                                 |> Dict.get "mpov"
                                 |> Maybe.map .newVolume
                             )
+                , test "select mpov. set draught to 5.0 and verify block coefficient" <|
+                    \_ ->
+                        Expect.equal (Just 0.41)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .blockCoefficient
+                            )
                 , test "select mpov. set draught to 5.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 3.29)
@@ -1615,6 +1655,14 @@ suite =
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map .newVolume
+                            )
+                , test "select mpov. set draught to 6.0 and verify block coefficient" <|
+                    \_ ->
+                        Expect.equal (Just 0.44)
+                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .blockCoefficient
                             )
                 , test "select mpov. set draught to 6.0 and verify KB" <|
                     \_ ->
