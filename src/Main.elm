@@ -1503,6 +1503,14 @@ encodeUpdateSizeCommand block =
         ]
 
 
+encodeSTL : String -> HullSlices -> Encode.Value
+encodeSTL name hullSlices =
+    Encode.object
+        [ ( "name", Encode.string name )
+        , ( "data", HullSlices.encoder hullSlices )
+        ]
+
+
 updateBlockInModel : Block -> { a | blocks : Blocks } -> { a | blocks : Blocks }
 updateBlockInModel block model =
     { model | blocks = updateBlockInBlocks block model.blocks }
@@ -1727,6 +1735,7 @@ type ToJsMsg
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
     | ExportCSV String
+    | ExportSTL String
 
 
 type NoJsMsg
@@ -2243,6 +2252,9 @@ updateModelToJs msg model =
             in
             model
 
+        ExportSTL hullReference ->
+            model
+
         OpenSaveFile ->
             model
 
@@ -2518,6 +2530,14 @@ sendCmdToJs model msg =
 msg2json : Model -> ToJsMsg -> Maybe JsData
 msg2json model action =
     case action of
+        ExportSTL hullReference ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just { tag = "export-stl", data = encodeSTL hullReference hullSlices }
+
         ExportCSV hullReference ->
             case Dict.get hullReference model.slices of
                 Nothing ->
@@ -3150,14 +3170,31 @@ viewModeller model =
                         [ id "slices-inputs" ]
                         [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSlices.setLengthOverAll hullReference
                         , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSlices.setBreadth hullReference
-                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
                         , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSlices.setDepth hullReference
-                        , HullSlices.plotAreaCurve slices
-                        , viewSimpleKpi "Block coefficient Cb" "block-coefficient" slices.blockCoefficient
-                        , viewSimpleKpi "Displacement (t)" "displacement" slices.volume
-                        , viewSimpleKpi "NewVolume" "NewVolume" slices.newVolume
-                        , viewSimpleKpi "KB" "KB" slices.centreOfBuoyancy
-                        , viewSimpleKpi "KM" "KM" slices.metacentre
+                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
+                        , div [ id "hydrocalc" ]
+                            [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "Values below are given for information only" ]
+                            , Html.br [] []
+                            , HullSlices.plotAreaCurve slices
+                            , viewSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
+                            , viewSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
+
+                            -- , viewSimpleKpi "NewVolume" "NewVolume" slices.volume
+                            , viewSimpleKpi "KB" "KB" slices.centreOfBuoyancy
+                            , viewSimpleKpi "KM" "KM" slices.metacentre
+                            , button
+                                [ id "exportCSV"
+                                , value "exportCSV"
+                                , onClick <| ToJs (ExportCSV hullReference)
+                                ]
+                                [ text "export ponts (csv)" ]
+                            , button
+                                [ id "exportSTL"
+                                , value "exportSTL"
+                                , onClick <| ToJs (ExportSTL hullReference)
+                                ]
+                                [ text "export 3D (stl)" ]
+                            ]
                         , button
                             [ id "exportCSV"
                             , value "exportCSV"
@@ -3408,7 +3445,7 @@ viewSimpleKpi kpiTitle className totalValue =
         [ div
             [ class "kpi-total kpi-group"
             ]
-            [ h3 [ class "kpi-label" ] [ text <| kpiTitle ]
+            [ Html.h5 [ class "kpi-label" ] [ text <| kpiTitle ]
             , p [ class "kpi-value" ] [ text <| String.fromFloat totalValue ]
             ]
         ]

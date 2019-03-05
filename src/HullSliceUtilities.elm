@@ -186,7 +186,7 @@ getInterpolateValuesAndSubList z0 list =
                                     (z - z1) / (z2 - z1)
 
                                 y =
-                                    k * y1 + (1 - k) * y2
+                                    (1 - k) * y1 + k * y2
                             in
                             ( z, y ) :: ( z2, y2 ) :: rest
 
@@ -414,7 +414,7 @@ intersectBelow config z0 listHS =
     let
         -- filter HullSlice with zmax <= z0
         filterHS =
-            List.filter (\u -> u.zmax > z0 || not (List.isEmpty u.y)) listHS
+            List.filter (\u -> u.zmax > z0 && not (List.isEmpty u.y)) listHS
 
         lhsXY =
             List.map toXY filterHS
@@ -704,6 +704,7 @@ inertialMoment o =
                                 0
 
                             else
+                                -- cf architecture navale p307
                                 2 / 3 * (xmax - xmin) * sum_ / toFloat len_
                     in
                     im1

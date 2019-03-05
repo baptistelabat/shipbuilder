@@ -253,7 +253,7 @@ interpolate json =
                     0.0
 
                 False ->
-                    inertialMoment_ / v2_
+                    inertialMoment_ / realVolume
 
         kM =
             centreOfBuoyancy + bM
@@ -411,7 +411,7 @@ plotAreaCurve slices =
             , line = Line.wider 3
             , dots = Dots.custom (Dots.full 10)
             }
-            [ LineChart.line Colors.blue Dots.circle "Area curve" xys ]
+            [ LineChart.line Colors.gray Dots.circle "Area curve" xys ]
         ]
 
 
