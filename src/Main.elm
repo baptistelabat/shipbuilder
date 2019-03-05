@@ -3503,7 +3503,7 @@ viewModellerSimpleKpi kpiTitle className totalValue =
             [ class "kpi-total kpi-group"
             ]
             [ Html.h5 [ class "kpi-modeller-label" ] [ text <| kpiTitle ]
-            , p [ class "kpi-modeller-value" ] [ text <| String.fromFloat totalValue ]
+            , p [ class "kpi-modeller-value", id className ] [ text <| String.fromFloat totalValue ]
             ]
         ]
 
