@@ -1,12 +1,12 @@
-module TestData exposing (..)
+module TestData exposing (blockA, blockB, blockC, flags, hullSliceJson, initialModel, initialView, valueToIndentedString, viewport, viewportJsonString, viewports, viewportsJsonString)
 
-import Main exposing (..)
-import Viewports exposing (..)
-import Math.Vector3 exposing (..)
-import Html exposing (Html)
 import Color
+import Html exposing (Html)
 import Json.Encode as Encode
+import Main exposing (..)
+import Math.Vector3 exposing (..)
 import StringValueInput
+import Viewports exposing (..)
 
 
 valueToIndentedString : Encode.Value -> String
