@@ -3,6 +3,7 @@ module HullSliceUtilities exposing
     , blockVolume
     , demormalizedHullSlice
     , denormalizedHSList
+    , hullKBz
     , hullVolume
     , inertialMoment
     , intersectBelow
@@ -92,9 +93,9 @@ zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
 zTrapezoid ( z1, y1 ) ( z2, y2 ) =
     let
         z =
-            -- (z1 + z2) / 2.0
-            z1 + zGTrapezoid ( z1, y1 ) ( z2, y2 )
+            (z1 + z2) / 2.0
 
+        -- z1 + zGTrapezoid ( z1, y1 ) ( z2, y2 )
         area =
             areaTrapezoid ( z1, y1 ) ( z2, y2 )
     in
@@ -131,11 +132,11 @@ yTrapezoid ( z1, y1 ) ( z2, y2 ) =
     y * area
 
 
-actionForHullSliceXY : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
-actionForHullSliceXY function list =
-    case list of
+calculateTrapezoidMetricOnSlice : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
+calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
+    case denormalizedSlice of
         ( z1, y1 ) :: ( z2, y2 ) :: rest ->
-            function ( z1, y1 ) ( z2, y2 ) + actionForHullSliceXY function (( z2, y2 ) :: rest)
+            trapezoidMetric ( z1, y1 ) ( z2, y2 ) + calculateTrapezoidMetricOnSlice trapezoidMetric (( z2, y2 ) :: rest)
 
         _ ->
             0
@@ -147,7 +148,7 @@ zyaForSlice hsXY =
         -- obj =
         --     zyaForSlice_ hsXY.zylist
         area_ =
-            actionForHullSliceXY areaTrapezoid hsXY.zylist
+            calculateTrapezoidMetricOnSlice areaTrapezoid hsXY.zylist
 
         kz_ =
             case area_ == 0.0 of
@@ -155,7 +156,7 @@ zyaForSlice hsXY =
                     0
 
                 _ ->
-                    actionForHullSliceXY zTrapezoid hsXY.zylist / area_
+                    calculateTrapezoidMetricOnSlice zTrapezoid hsXY.zylist / area_
 
         ky_ =
             case area_ == 0.0 of
@@ -163,7 +164,7 @@ zyaForSlice hsXY =
                     0
 
                 _ ->
-                    actionForHullSliceXY yTrapezoid hsXY.zylist / area_
+                    calculateTrapezoidMetricOnSlice yTrapezoid hsXY.zylist / area_
     in
     { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
 
@@ -311,6 +312,21 @@ volume lo =
             0
 
 
+hullKBz : { xmin : Float, xmax : Float } -> List ObjXKzKyArea -> Float
+hullKBz config list =
+    let
+        xmin =
+            config.xmin
+
+        xmax =
+            config.xmax
+
+        newList =
+            List.concat [ [ { x = xmin, area = 0.0, kz = 0, ky = 0 } ], list, [ { x = xmax, area = 0.0, kz = 0, ky = 0 } ] ]
+    in
+    kBz newList
+
+
 kBz : List ObjXKzKyArea -> Float
 kBz lo =
     case lo of
@@ -406,6 +422,81 @@ xMaxAtZ xmax z0 listHS =
 
         _ ->
             xmax
+
+
+
+-- normalize : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Maybe { xmin : Float, ymin : Float, zmin : Float, slices : List HullSlice, length : Float, depth : Float, breadth : Float }
+-- normalize o =
+--     let
+--         m_zmin =
+--             zMinHullSliceXYList o.lhs Nothing
+--
+--         m_zmax =
+--             zMaxHullSliceXYList o.lhs Nothing
+--
+--         m_ymin =
+--             yMinHullSliceXYList o.lhs Nothing
+--
+--         m_ymax =
+--             yMaxHullSliceXYList o.lhs Nothing
+--
+--         normOneHS : Float -> Float -> Float -> Float -> Float -> HullSliceXY -> HullSlice
+--         normOneHS xn zmin ymin breadth depth lzy =
+--           let
+--             y_ =
+--                 (List.map (\u -> (u -ymin)/breadth ) (yacc lzy))
+--             m_zm = zminHS lzy
+--             m_ym = yminHS lzy
+--
+--             res =
+--               case (m_zm, m_ym) of
+--                 (Just zm_, Just ym_) ->
+--
+--           in
+--             {x = xn
+--             , zmin = (zm - zmin) / depth,
+--             , ymin =
+--             }
+--
+--         normalize_ : Float -> Float -> Float -> Float -> List HullSliceXY -> List HullSlice
+--         normalize_ zmin ymin depth breadth list =
+--             []
+--
+--         res =
+--             case ( m_zmin, m_zmax ) of
+--                 ( Just zm, Just zM ) ->
+--                     case ( m_ymin, m_ymax ) of
+--                         ( Just ym, Just yM ) ->
+--                             let
+--                                 length_ =
+--                                     o.xmax - o.xmin
+--
+--                                 breadth_ =
+--                                     yM - ym
+--
+--                                 depth_ =
+--                                     zM - zm
+--
+--                                 slices_ =
+--                                     normalize_ zm ym depth_ breadth_ o.lhs
+--                             in
+--                             Just
+--                                 { xmin = o.xmin
+--                                 , ymin = ym
+--                                 , zmin = zm
+--                                 , length = length_
+--                                 , breadth = breadth_
+--                                 , depth = depth_
+--                                 , slices = slices_
+--                                 }
+--
+--                         _ ->
+--                             Nothing
+--
+--                 _ ->
+--                     Nothing
+--     in
+--     res
 
 
 intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, lhs : List HullSliceXY }

@@ -13,6 +13,7 @@ module HullSlices exposing
     , dictEncoder
     , empty
     , encodeCSV
+    , encodeSubModel
     , encoder
     , exportCSV
     , interpolate
@@ -205,6 +206,9 @@ interpolate json =
         areas =
             List.map .area lzya
 
+        _ =
+            Debug.log "areas" areas
+
         v_ =
             HullSliceUtilities.volume lzya
 
@@ -212,7 +216,13 @@ interpolate json =
             HullSliceUtilities.hullVolume { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
 
         kbz_ =
-            HullSliceUtilities.kBz lzya
+            HullSliceUtilities.hullKBz { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
+
+        _ =
+            Debug.log "kbz_" kbz_
+
+        _ =
+            Debug.log "v2_" v2_
 
         centreOfBuoyancy =
             case v2_ == 0.0 of
@@ -220,7 +230,7 @@ interpolate json =
                     0.0
 
                 False ->
-                    abs kbz_ / v2_
+                    json.zmin + depth_ - (kbz_ / v2_)
 
         sliceAreas : List Float
         sliceAreas =
@@ -248,7 +258,7 @@ interpolate json =
             HullSliceUtilities.inertialMoment prepareToExport_
 
         bM =
-            case v2_ == 0.0 of
+            case realVolume == 0.0 of
                 True ->
                     0.0
 
@@ -764,23 +774,9 @@ zminForEachTrapezoid curve =
         |> List.map (\z -> toFloat z / (toFloat n - 1.0) * (curve.zmax - curve.zmin) + curve.zmin)
 
 
-exportCSV : { a | decks : Int, spacing : Float, z0 : Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List { xy : List ( Float, Float ), z : Float }
+exportCSV : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List { xy : List ( Float, Float ), z : Float }
 exportCSV config model =
     let
-        -- 0
-        ff : Int -> Float -> Float -> List Float
-        ff n sp z0 =
-            List.map (\i -> config.z0 - toFloat i * sp) (List.range 0 (n - 1))
-
-        ldecks =
-            List.append (ff config.decks config.spacing config.z0) [ config.zAtDraught ]
-
-        _ =
-            Debug.log "exportCSV ldecks" ldecks
-
-        _ =
-            Debug.log "exportCSV denormalizedslices" model.denormalizedslices
-
         ldata =
             List.map
                 (\z ->
@@ -790,7 +786,7 @@ exportCSV config model =
                     in
                     HullSliceUtilities.prepareToExport z intersectBelowSlicesZY
                 )
-                ldecks
+                config.ldecks
 
         _ =
             Debug.log "exportCSV" ldata
@@ -814,3 +810,20 @@ encodeCSVObj hsXY =
 encodeCSV : List { xy : List ( Float, Float ), z : Float } -> Encode.Value
 encodeCSV list =
     Encode.list encodeCSVObj list
+
+
+encodeHullSliceXY : HullSliceXY -> Encode.Value
+encodeHullSliceXY hsXY =
+    Encode.object
+        [ ( "x", Encode.float hsXY.x )
+        , ( "zylist", Encode.list (tuple2Encoder Encode.float Encode.float) hsXY.zylist )
+        ]
+
+
+encodeSubModel : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Encode.Value
+encodeSubModel subModel =
+    Encode.object
+        [ ( "xmin", Encode.float subModel.xmin )
+        , ( "xmax", Encode.float subModel.xmax )
+        , ( "lhs", Encode.list encodeHullSliceXY subModel.lhs )
+        ]

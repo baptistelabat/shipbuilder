@@ -487,8 +487,9 @@ let loadHull = function (json) {
 
         const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
 
-        const hull1 = new THREE.Mesh(geometry, material);
-        saveSTL(hull1, "Test");
+        // saveSTL in debug
+        // const hull1 = new THREE.Mesh(geometry, material);
+        // saveSTL(hull1, "Test");
 
         // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
         geometry.vertices = shipVertices.map(vertex => {
@@ -497,11 +498,12 @@ let loadHull = function (json) {
 
         const hull = new THREE.Mesh(geometry, material);
 
+
         // var vnh = new THREE.VertexNormalsHelper( hull, 1, 0xff0000 );
         // scene.add( vnh );
 
-        var axh = new THREE.AxesHelper ( 5.0 );
-        scene.add( axh );
+        // var axh = new THREE.AxesHelper ( 5.0 );
+        // scene.add( axh );
 
         hull.baseColor = hullColor;
         hull.sbType = "hull";
@@ -1622,17 +1624,36 @@ function saveSTL( scene, name ){
 
 function saveCSV ( name, datas ) {
 
-  var str = "";
+  var str = "X;Y;Z\n";
   for(var i=0; i< datas.length; i++)
   {
     var z = datas[i].z;
     var xy = datas[i].xy;
 
     for(var j=0; j< xy.length; j++) {
-      var l = z.toString() + ';' + xy[j][0].toString() + ';' + xy[j][1].toString() + '\n';
+      var l = xy[j][0].toString() + ';' + xy[j][1].toString() + ';' + z.toString() + '\n';
       str += l;
     }
   }
   var blob = new Blob([str], {type: 'text/plain'});
+  saveAs(blob, name + '.csv');
+}
+
+function saveCSV(name, datas) {
+  var str = "X;Y;Z\n";
+
+  for (var i = 0; i < datas.length; i++) {
+    var z = datas[i].z;
+    var xy = datas[i].xy;
+
+    for (var j = 0; j < xy.length; j++) {
+      var l = xy[j][0].toString() + ';' + xy[j][1].toString() + ';' + z.toString() + '\n';
+      str += l;
+    }
+  }
+
+  var blob = new Blob([str], {
+    type: 'text/plain'
+  });
   saveAs(blob, name + '.csv');
 }

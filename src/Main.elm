@@ -657,6 +657,10 @@ encodeToggleBlocksVisibilityCmd blocks visible =
 -- MODEL
 
 
+type alias ShipName =
+    String
+
+
 type alias Model =
     { build : String
     , currentDate : Time.Posix
@@ -672,7 +676,7 @@ type alias Model =
     , uiState : UiState
     , tags : Tags
     , customProperties : List CustomProperty
-    , slices : Dict String HullSlices.HullSlices
+    , slices : Dict ShipName HullSlices.HullSlices
     }
 
 
@@ -1736,6 +1740,7 @@ type ToJsMsg
     | UpdateDimension Dimension Block String
     | ExportCSV String
     | ExportSTL String
+    | ExportSubModel String
 
 
 type NoJsMsg
@@ -2255,6 +2260,9 @@ updateModelToJs msg model =
         ExportSTL hullReference ->
             model
 
+        ExportSubModel hullReference ->
+            model
+
         OpenSaveFile ->
             model
 
@@ -2538,6 +2546,30 @@ msg2json model action =
                 Just hullSlices ->
                     Just { tag = "export-stl", data = encodeSTL hullReference hullSlices }
 
+        ExportSubModel hullReference ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    let
+                        xmin =
+                            hullSlices.xmin
+
+                        xmax =
+                            hullSlices.xmin + hullSlices.length.value
+
+                        zAtDraught_ =
+                            hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
+
+                        intersectBelowSlicesZY =
+                            HullSliceUtilities.intersectBelow { xmin = xmin, xmax = xmax } zAtDraught_ hullSlices.denormalizedslices
+
+                        _ =
+                            Debug.log "model.partitions" model.partitions
+                    in
+                    Just { tag = "export-submodel", data = HullSlices.encodeSubModel intersectBelowSlicesZY }
+
         ExportCSV hullReference ->
             case Dict.get hullReference model.slices of
                 Nothing ->
@@ -2548,11 +2580,18 @@ msg2json model action =
                         zAtDraught_ =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
+                        computedPartitions =
+                            computeDecks model.partitions.decks
+
+                        _ =
+                            Debug.log "computedPartitions" computedPartitions
+
+                        ldecks =
+                            List.map (\u -> u.position) computedPartitions
+
                         datas =
                             HullSlices.exportCSV
-                                { decks = model.partitions.decks.number.value
-                                , spacing = model.partitions.decks.spacing.value
-                                , z0 = model.partitions.decks.zero.position.value
+                                { ldecks = ldecks
                                 , xmin = hullSlices.xmin
                                 , xmax = hullSlices.xmin + hullSlices.length.value
                                 , zAtDraught = zAtDraught_
@@ -3173,36 +3212,42 @@ viewModeller model =
                         , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSlices.setDepth hullReference
                         , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
                         , div [ id "hydrocalc" ]
-                            [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "Values below are given for information only" ]
+                            [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
                             , HullSlices.plotAreaCurve slices
-                            , viewSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
-                            , viewSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
 
-                            -- , viewSimpleKpi "NewVolume" "NewVolume" slices.volume
-                            , viewSimpleKpi "KB" "KB" slices.centreOfBuoyancy
-                            , viewSimpleKpi "KM" "KM" slices.metacentre
+                            -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
+                            , viewModellerSimpleKpi "KB" "KB" slices.centreOfBuoyancy
+                            , viewModellerSimpleKpi "KM" "KM" slices.metacentre
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"
                                 , onClick <| ToJs (ExportCSV hullReference)
                                 ]
-                                [ text "export ponts (csv)" ]
+                                [ text "export decks (csv)" ]
                             , button
                                 [ id "exportSTL"
                                 , value "exportSTL"
                                 , onClick <| ToJs (ExportSTL hullReference)
                                 ]
                                 [ text "export 3D (stl)" ]
-                            ]
-                        , button
-                            [ id "exportCSV"
-                            , value "exportCSV"
+                            , button
+                                [ id "exportCSV"
+                                , value "exportCSV"
 
-                            -- disabled <| bulkheads.number.value == 0
-                            , onClick <| ToJs (ExportCSV hullReference)
+                                -- disabled <| bulkheads.number.value == 0
+                                , onClick <| ToJs (ExportCSV hullReference)
+                                ]
+                                [ text "exportCSV" ]
+                            , button
+                                [ id "exportSubModel"
+                                , value "exportSubModel"
+                                , onClick <| ToJs (ExportSubModel hullReference)
+                                ]
+                                [ text "export draught 3D" ]
                             ]
-                            [ text "exportCSV" ]
                         ]
 
             else
@@ -3447,6 +3492,18 @@ viewSimpleKpi kpiTitle className totalValue =
             ]
             [ Html.h5 [ class "kpi-label" ] [ text <| kpiTitle ]
             , p [ class "kpi-value" ] [ text <| String.fromFloat totalValue ]
+            ]
+        ]
+
+
+viewModellerSimpleKpi : String -> String -> Float -> Html Msg
+viewModellerSimpleKpi kpiTitle className totalValue =
+    div [ class <| "kpi " ++ className ] <|
+        [ div
+            [ class "kpi-total kpi-group"
+            ]
+            [ Html.h5 [ class "kpi-modeller-label" ] [ text <| kpiTitle ]
+            , p [ class "kpi-modeller-value" ] [ text <| String.fromFloat totalValue ]
             ]
         ]
 
