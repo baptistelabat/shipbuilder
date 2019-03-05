@@ -913,6 +913,14 @@ suite =
                         [ { x = 0, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
                         , { x = 100, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
                         ]
+        , test "denormalizedSlicesT4" <|
+            \_ ->
+                HullSliceUtilities.denormalizedHSList { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                    [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 0.8, zmin = 0.4 }
+                    ]
+                    |> Expect.equal
+                        [ { x = 0, y = [ 5, 5, 0 ], zmax = -2, zmin = -6 }
+                        ]
         , test "intersectBelowSlicesZY" <|
             \_ ->
                 HullSliceUtilities.intersectBelow { xmin = 0, xmax = 100 }
