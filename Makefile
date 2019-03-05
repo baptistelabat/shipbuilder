@@ -65,3 +65,9 @@ babel:
 selenium: shipBuilder/index.html shipBuilder/js/elm.min.js
 	cd selenium && make
 	docker run -t -v $(shell pwd)/shipBuilder:/work -w /work python-selenium-firefox:firefox38
+
+FILENAME := ../shipBuilderForTest_$(shell date +_%Y%m%d_%Hh%M).tar.gz
+BINARIES = shipBuilder/js/* shipBuilder/css/*.css shipBuilder/assets/* shipBuilder/index-not-optimized.html shipBuilder/*.json
+
+binaries:
+	tar -cvzf $(FILENAME) $(BINARIES)
