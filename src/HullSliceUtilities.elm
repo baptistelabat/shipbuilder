@@ -581,9 +581,6 @@ blockVolume o =
         m_ymax =
             yMaxHullSliceXYList o.lhs Nothing
 
-        _ =
-            Debug.log "blockVolume" [ Just o.xmin, Just o.xmax, m_zmin, m_zmax, m_ymin, m_ymax ]
-
         res =
             case ( m_zmin, m_zmax ) of
                 ( Just zm, Just zM ) ->

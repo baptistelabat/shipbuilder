@@ -2251,10 +2251,6 @@ updateModelToJs : ToJsMsg -> Model -> Model
 updateModelToJs msg model =
     case msg of
         ExportCSV hullReference ->
-            let
-                _ =
-                    Debug.log "ExportCSV for " hullReference
-            in
             model
 
         ExportSTL hullReference ->
@@ -2564,9 +2560,6 @@ msg2json model action =
 
                         intersectBelowSlicesZY =
                             HullSliceUtilities.intersectBelow { xmin = xmin, xmax = xmax } zAtDraught_ hullSlices.denormalizedslices
-
-                        _ =
-                            Debug.log "model.partitions" model.partitions
                     in
                     Just { tag = "export-submodel", data = HullSlices.encodeSubModel intersectBelowSlicesZY }
 
@@ -2582,9 +2575,6 @@ msg2json model action =
 
                         computedPartitions =
                             computeDecks model.partitions.decks
-
-                        _ =
-                            Debug.log "computedPartitions" computedPartitions
 
                         ldecks =
                             List.map (\u -> u.position) computedPartitions
