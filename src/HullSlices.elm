@@ -242,7 +242,7 @@ interpolate json =
             2 * v2_
 
         blockVolume_ =
-            HullSliceUtilities.blockVolume intersectBelowSlicesZY
+            blockVolume intersectBelowSlicesZY
 
         -- Block Coefficient = Volume of displacement ÷ blockVolume
         blockCoefficient_ =
@@ -928,3 +928,85 @@ prepareToExport z0 o =
             fl o.lhs []
     in
     { z = z0, xy = l1 }
+
+
+blockVolume : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Float
+blockVolume o =
+    -- Volume of the block
+    let
+        extractZ : HullSliceXY -> List Float
+        extractZ hsXY =
+            hsXY
+                |> .zylist
+                |> List.map Tuple.first
+
+        zMinAllSlices : List HullSliceXY -> Maybe Float
+        zMinAllSlices list =
+            let
+                zminHullSlice : HullSliceXY -> Maybe Float
+                zminHullSlice hsXY =
+                    List.minimum <| extractZ hsXY
+            in
+            List.map zminHullSlice list
+                |> List.filterMap identity
+                |> List.minimum
+
+        zMaxAllSlices : List HullSliceXY -> Maybe Float
+        zMaxAllSlices list =
+            let
+                zmaxHullSlice : HullSliceXY -> Maybe Float
+                zmaxHullSlice hsXY =
+                    List.maximum <| extractZ hsXY
+            in
+            List.map zmaxHullSlice list
+                |> List.filterMap identity
+                |> List.maximum
+
+        yMinAllSlices : List HullSliceXY -> Maybe Float
+        yMinAllSlices list =
+            let
+                yminHullSlice : HullSliceXY -> Maybe Float
+                yminHullSlice hsXY =
+                    List.minimum <| extractY hsXY
+            in
+            List.map yminHullSlice list
+                |> List.filterMap identity
+                |> List.minimum
+
+        yMaxAllSlices : List HullSliceXY -> Maybe Float
+        yMaxAllSlices list =
+            let
+                ymaxHullSlice : HullSliceXY -> Maybe Float
+                ymaxHullSlice hsXY =
+                    List.maximum <| extractY hsXY
+            in
+            List.map ymaxHullSlice list
+                |> List.filterMap identity
+                |> List.maximum
+
+        maybeZmin =
+            zMinAllSlices o.lhs
+
+        maybeZmax =
+            zMaxAllSlices o.lhs
+
+        maybeYmin =
+            yMinAllSlices o.lhs
+
+        maybeYmax =
+            yMaxAllSlices o.lhs
+
+        res =
+            case ( maybeZmin, maybeZmax ) of
+                ( Just zm, Just zM ) ->
+                    case ( maybeYmin, maybeYmax ) of
+                        ( Just ym, Just yM ) ->
+                            (o.xmax - o.xmin) * (yM - ym) * (zM - zm)
+
+                        _ ->
+                            0
+
+                _ ->
+                    0
+    in
+    res
