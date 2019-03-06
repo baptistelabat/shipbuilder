@@ -514,34 +514,13 @@ yMinHullSliceXYList list =
 yMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
 yMaxHullSliceXYList list maybeYm =
     let
-        ymaxHS : HullSliceXY -> Maybe Float
-        ymaxHS hsXY =
+        ymaxHullSlice : HullSliceXY -> Maybe Float
+        ymaxHullSlice hsXY =
             List.maximum <| extractY hsXY
     in
-    case list of
-        [] ->
-            maybeYm
-
-        el :: xs ->
-            let
-                maybeX =
-                    ymaxHS el
-            in
-            case maybeX of
-                Just x ->
-                    case maybeYm of
-                        Nothing ->
-                            yMaxHullSliceXYList xs (Just x)
-
-                        Just ym ->
-                            if x > ym then
-                                yMaxHullSliceXYList xs (Just x)
-
-                            else
-                                yMaxHullSliceXYList xs (Just ym)
-
-                Nothing ->
-                    yMaxHullSliceXYList xs maybeYm
+    List.map ymaxHullSlice list
+        |> List.filterMap identity
+        |> List.maximum
 
 
 blockVolume : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Float
