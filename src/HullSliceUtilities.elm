@@ -419,19 +419,18 @@ intersectBelow config z0 listHS =
     { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
 
 
-applyFunctionToZYlist : HullSliceXY -> (( Float, Float ) -> Float) -> List Float
-applyFunctionToZYlist hsXY f =
-    List.map f hsXY.zylist
-
-
 zacc : HullSliceXY -> List Float
 zacc hsXY =
-    applyFunctionToZYlist hsXY Tuple.first
+    hsXY
+        |> .zylist
+        |> List.map Tuple.first
 
 
 yacc : HullSliceXY -> List Float
 yacc hsXY =
-    applyFunctionToZYlist hsXY Tuple.second
+    hsXY
+        |> .zylist
+        |> List.map Tuple.second
 
 
 zMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
