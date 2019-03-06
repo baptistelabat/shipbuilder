@@ -433,58 +433,54 @@ extractY hsXY =
         |> List.map Tuple.second
 
 
-zMinAllSlices : List HullSliceXY -> Maybe Float
-zMinAllSlices list =
-    let
-        zminHullSlice : HullSliceXY -> Maybe Float
-        zminHullSlice hsXY =
-            List.minimum <| extractZ hsXY
-    in
-    List.map zminHullSlice list
-        |> List.filterMap identity
-        |> List.minimum
-
-
-zMaxAllSlices : List HullSliceXY -> Maybe Float
-zMaxAllSlices list =
-    let
-        zmaxHullSlice : HullSliceXY -> Maybe Float
-        zmaxHullSlice hsXY =
-            List.maximum <| extractZ hsXY
-    in
-    List.map zmaxHullSlice list
-        |> List.filterMap identity
-        |> List.maximum
-
-
-yMinAllSlices : List HullSliceXY -> Maybe Float
-yMinAllSlices list =
-    let
-        yminHullSlice : HullSliceXY -> Maybe Float
-        yminHullSlice hsXY =
-            List.minimum <| extractY hsXY
-    in
-    List.map yminHullSlice list
-        |> List.filterMap identity
-        |> List.minimum
-
-
-yMaxAllSlices : List HullSliceXY -> Maybe Float
-yMaxAllSlices list =
-    let
-        ymaxHullSlice : HullSliceXY -> Maybe Float
-        ymaxHullSlice hsXY =
-            List.maximum <| extractY hsXY
-    in
-    List.map ymaxHullSlice list
-        |> List.filterMap identity
-        |> List.maximum
-
-
 blockVolume : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Float
 blockVolume o =
     -- Volume of the block
     let
+        zMinAllSlices : List HullSliceXY -> Maybe Float
+        zMinAllSlices list =
+            let
+                zminHullSlice : HullSliceXY -> Maybe Float
+                zminHullSlice hsXY =
+                    List.minimum <| extractZ hsXY
+            in
+            List.map zminHullSlice list
+                |> List.filterMap identity
+                |> List.minimum
+
+        zMaxAllSlices : List HullSliceXY -> Maybe Float
+        zMaxAllSlices list =
+            let
+                zmaxHullSlice : HullSliceXY -> Maybe Float
+                zmaxHullSlice hsXY =
+                    List.maximum <| extractZ hsXY
+            in
+            List.map zmaxHullSlice list
+                |> List.filterMap identity
+                |> List.maximum
+
+        yMinAllSlices : List HullSliceXY -> Maybe Float
+        yMinAllSlices list =
+            let
+                yminHullSlice : HullSliceXY -> Maybe Float
+                yminHullSlice hsXY =
+                    List.minimum <| extractY hsXY
+            in
+            List.map yminHullSlice list
+                |> List.filterMap identity
+                |> List.minimum
+
+        yMaxAllSlices : List HullSliceXY -> Maybe Float
+        yMaxAllSlices list =
+            let
+                ymaxHullSlice : HullSliceXY -> Maybe Float
+                ymaxHullSlice hsXY =
+                    List.maximum <| extractY hsXY
+            in
+            List.map ymaxHullSlice list
+                |> List.filterMap identity
+                |> List.maximum
+
         maybeZmin =
             zMinAllSlices o.lhs
 
