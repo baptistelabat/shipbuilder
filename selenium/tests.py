@@ -5,6 +5,22 @@ from selenium.webdriver.common.keys import Keys
 
 class ShipBuilderIntegrationTests(unittest.TestCase):
 
+    def click_on_hull_studio(self):
+        self.driver.find_element_by_xpath(
+            ".//p[contains(text(),'Hull')]").click()
+
+    def click_on_modeller(self):
+        self.driver.find_element_by_xpath(
+            ".//p[contains(text(),'Modeller')]").click()
+
+    def click_on_hull(self, hull_name):
+        self.driver.find_element_by_xpath(
+            ".//p[contains(text(),'" + hull_name + "')]").click()
+
+    def get_block_coefficient(self):
+        return self.driver.find_element_by_xpath(
+            ".//*[@class='kpi block-coefficient']//*[@class='kpi-modeller-value']").text
+
     def setUp(self):
         print("Starting webdriver...")
         self.driver = webdriver.Firefox()
@@ -20,16 +36,13 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
         self.assertIsNotNone(self.driver.find_element_by_class_name("panel-menu"))
 
     def test_block_coefficient_changes_with_draught(self):
-        self.driver.find_element_by_xpath(
-            "(.//*[normalize-space(text()) and normalize-space(.)='Hull Studio'])[1]/following::p[6]").click()
-        self.driver.find_element_by_xpath(
-            "(.//*[normalize-space(text()) and normalize-space(.)='ShipBuilder'])[2]/following::div[12]").click()
-        self.assertEqual("0.65", self.driver.find_element_by_xpath(
-            ".//*[@class='kpi block-coefficient']//*[@class='kpi-modeller-value']").text)
+        self.click_on_hull_studio()
+        self.click_on_hull('anthineas')
+        self.click_on_modeller()
+        self.assertEqual("0.14", self.get_block_coefficient())
         self.driver.find_element_by_id("draught").send_keys(Keys.UP)
         self.driver.find_element_by_id("draught").send_keys(Keys.UP)
-        self.assertEqual("0.59", self.driver.find_element_by_xpath(
-            ".//*[@class='kpi block-coefficient']//*[@class='kpi-modeller-value']").text)
+        self.assertEqual("0.4", self.get_block_coefficient())
 
     def tearDown(self):
         self.driver.close()
