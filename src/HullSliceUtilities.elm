@@ -145,8 +145,6 @@ calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
 zyaForSlice : HullSliceXY -> ObjXKzKyArea
 zyaForSlice hsXY =
     let
-        -- obj =
-        --     zyaForSlice_ hsXY.zylist
         area_ =
             calculateTrapezoidMetricOnSlice areaTrapezoid hsXY.zylist
 
@@ -744,7 +742,6 @@ prepareToExport z0 o =
                 res =
                     case m_ym of
                         Nothing ->
-                            -- list
                             list ++ [ ( hsXY.x, 0 ) ]
 
                         Just y0 ->
