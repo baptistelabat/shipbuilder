@@ -418,13 +418,6 @@ intersectBelow config z0 listHS =
     { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
 
 
-extractY : HullSliceXY -> List Float
-extractY hsXY =
-    hsXY
-        |> .zylist
-        |> List.map Tuple.second
-
-
 prismaticCoefficient : { xmin : Float, xmax : Float } -> Float -> List Float -> Float
 prismaticCoefficient config vol_ areas =
     case List.maximum areas of
