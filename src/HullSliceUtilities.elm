@@ -13,7 +13,6 @@ module HullSliceUtilities exposing
     , volume
     , yGTrapezoid
     , yTrapezoid
-    , zGTrapezoid
     , zTrapezoid
     , zyaForSlice
     )
@@ -64,29 +63,6 @@ areaTrapezoid ( z1, y1 ) ( z2, y2 ) =
             0.5 * (a + b) * c
     in
     area
-
-
-zGTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-zGTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    -- if b>a
-    -- zG = (a*h*h/2.0 + (b-a)*h/2.0*h/3.0) / (a+b)*h/2
-    -- zG = ((2*a+b)*h) / 3*(a+b)
-    -- if a>b
-    -- zG = ((2*b+a)*h) / 3*(a+b)
-    let
-        a =
-            min y1 y2
-
-        b =
-            max y1 y2
-
-        c =
-            abs (z2 - z1)
-
-        h =
-            c
-    in
-    ((b + 2 * a) * h) / (3 * (a + b))
 
 
 zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float

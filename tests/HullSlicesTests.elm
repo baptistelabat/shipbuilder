@@ -850,7 +850,7 @@ suite =
                         |> Expect.within epsAbsolute 0.5
             , test "zGTrapezoid" <|
                 \_ ->
-                    HullSliceUtilities.zGTrapezoid ( 0, 0 ) ( 1, 1 )
+                    HullSlices.zGTrapezoid ( 0, 0 ) ( 1, 1 )
                         |> Expect.within epsAbsolute 0.33333333337
             , test "zTrapezoid" <|
                 \_ ->
@@ -864,7 +864,7 @@ suite =
                     |> Expect.within epsAbsolute 0.33333333337
         , test "zGTrapezoid" <|
             \_ ->
-                HullSliceUtilities.zGTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
+                HullSlices.zGTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
                     |> Expect.within epsAbsolute 0.15875687266820834
         , test "areaTrapezoid" <|
             \_ ->
