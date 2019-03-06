@@ -469,34 +469,13 @@ zMinHullSliceXYList list maybeZmin =
 zMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
 zMaxHullSliceXYList list maybeZmin =
     let
-        zmaxHS : HullSliceXY -> Maybe Float
-        zmaxHS hsXY =
+        zmaxHullSlice : HullSliceXY -> Maybe Float
+        zmaxHullSlice hsXY =
             List.maximum <| extractZ hsXY
     in
-    case list of
-        [] ->
-            maybeZmin
-
-        el :: xs ->
-            let
-                maybeX =
-                    zmaxHS el
-            in
-            case maybeX of
-                Just x ->
-                    case maybeZmin of
-                        Nothing ->
-                            zMaxHullSliceXYList xs (Just x)
-
-                        Just zm ->
-                            if x > zm then
-                                zMaxHullSliceXYList xs (Just x)
-
-                            else
-                                zMaxHullSliceXYList xs (Just zm)
-
-                Nothing ->
-                    zMaxHullSliceXYList xs maybeZmin
+    List.map zmaxHullSlice list
+        |> List.filterMap identity
+        |> List.maximum
 
 
 yMinHullSliceXYList : List HullSliceXY -> Maybe Float
