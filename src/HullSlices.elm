@@ -904,14 +904,11 @@ inertialMoment o =
     im
 
 
-accZY : HullSliceXY -> (( Float, Float ) -> Float) -> List Float
-accZY hsXY f_ =
-    List.map f_ hsXY.zylist
-
-
-yacc : HullSliceXY -> List Float
-yacc hsXY =
-    accZY hsXY Tuple.second
+extractY : HullSliceXY -> List Float
+extractY hsXY =
+    hsXY
+        |> .zylist
+        |> List.map Tuple.second
 
 
 prepareToExport : Float -> { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> { z : Float, xy : List ( Float, Float ) }
@@ -921,7 +918,7 @@ prepareToExport z0 o =
         f_ hsXY list =
             let
                 m_ym =
-                    List.head (yacc hsXY)
+                    List.head (extractY hsXY)
 
                 res =
                     case m_ym of

@@ -426,8 +426,8 @@ extractZ hsXY =
         |> List.map Tuple.first
 
 
-yacc : HullSliceXY -> List Float
-yacc hsXY =
+extractY : HullSliceXY -> List Float
+extractY hsXY =
     hsXY
         |> .zylist
         |> List.map Tuple.second
@@ -504,7 +504,7 @@ yMinHullSliceXYList list m_ym =
     let
         yminHS : HullSliceXY -> Maybe Float
         yminHS hsXY =
-            List.minimum <| yacc hsXY
+            List.minimum <| extractY hsXY
     in
     case list of
         [] ->
@@ -537,7 +537,7 @@ yMaxHullSliceXYList list m_ym =
     let
         ymaxHS : HullSliceXY -> Maybe Float
         ymaxHS hsXY =
-            List.maximum <| yacc hsXY
+            List.maximum <| extractY hsXY
     in
     case list of
         [] ->
