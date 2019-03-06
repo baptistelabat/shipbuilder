@@ -265,20 +265,6 @@ kBz lo =
             0
 
 
-xMinAtZ : Float -> Float -> List HullSlice -> Float
-xMinAtZ xmin z0 listHS =
-    case listHS of
-        hs :: xs ->
-            if hs.zmax <= z0 then
-                xMinAtZ hs.x z0 xs
-
-            else
-                xmin
-
-        _ ->
-            xmin
-
-
 xMaxAtZ : Float -> Float -> List HullSlice -> Float
 xMaxAtZ xmax z0 listHS =
     case listHS of
@@ -409,8 +395,21 @@ intersectBelow config z0 listHS =
         lhsXY_AtZ =
             List.map extractZYAtZ lhsXY
 
+        xMinAtZ : Float -> List HullSlice -> Float
+        xMinAtZ xmin_ listHS_ =
+            case listHS_ of
+                hs :: xs ->
+                    if hs.zmax <= z0 then
+                        xMinAtZ hs.x xs
+
+                    else
+                        xmin_
+
+                _ ->
+                    xmin_
+
         xmin =
-            xMinAtZ config.xmin z0 listHS
+            xMinAtZ config.xmin listHS
 
         xmax =
             xMaxAtZ config.xmax z0 (List.reverse listHS)
