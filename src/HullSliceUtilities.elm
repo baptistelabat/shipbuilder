@@ -1,7 +1,5 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
-    , demormalizedHullSlice
-    , denormalizedHSList
     , hullVolume
     , intersectBelow
     , prismaticCoefficient
@@ -134,41 +132,6 @@ zyaForSlice hsXY =
                     calculateTrapezoidMetricOnSlice yTrapezoid hsXY.zylist / area_
     in
     { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
-
-
-denormalizedHSList : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> List HullSlice -> List HullSlice
-denormalizedHSList param l =
-    List.map (demormalizedHullSlice param) l
-
-
-demormalizedHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> HullSlice -> HullSlice
-demormalizedHullSlice param hs =
-    -- y denormalisé dans intervalle [0,breadth/2]
-    let
-        denormalizedY : Float -> Float -> Float -> Float
-        denormalizedY ymin br y =
-            y * br + ymin
-
-        denormalizedZ : Float -> Float -> Float -> Float
-        denormalizedZ zmin depth z =
-            z * depth + zmin
-
-        x =
-            hs.x * param.length + param.xmin
-
-        hs_zmin =
-            denormalizedZ param.zmin param.depth hs.zmin
-
-        hs_zmax =
-            denormalizedZ param.zmin param.depth hs.zmax
-
-        hs_y =
-            List.map (denormalizedY param.ymin param.breadth) hs.y
-
-        res =
-            { x = x, zmin = hs_zmin, zmax = hs_zmax, y = hs_y }
-    in
-    res
 
 
 hullVolume : { xmin : Float, xmax : Float } -> List { a | x : Float, area : Float } -> Float
