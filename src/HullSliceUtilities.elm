@@ -433,8 +433,8 @@ extractY hsXY =
         |> List.map Tuple.second
 
 
-zMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
-zMinHullSliceXYList list maybeZmin =
+zMinHullSliceXYList : List HullSliceXY -> Maybe Float
+zMinHullSliceXYList list =
     let
         zminHullSlice : HullSliceXY -> Maybe Float
         zminHullSlice hsXY =
@@ -486,7 +486,7 @@ blockVolume o =
     -- Volume of the block
     let
         maybeZmin =
-            zMinHullSliceXYList o.lhs Nothing
+            zMinHullSliceXYList o.lhs
 
         maybeZmax =
             zMaxHullSliceXYList o.lhs
