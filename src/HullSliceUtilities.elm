@@ -371,13 +371,13 @@ intersectBelow config z0 listHS =
             -- return sublist with z > z0 concatenate with (z0, y(z0) interpolation)
             -- list order with z up
             let
-                m_zmin =
+                maybeZmin =
                     List.minimum (List.map Tuple.first list)
 
-                m_zmax =
+                maybeZmax =
                     List.maximum (List.map Tuple.first list)
             in
-            case m_zmax of
+            case maybeZmax of
                 Nothing ->
                     []
 
@@ -387,7 +387,7 @@ intersectBelow config z0 listHS =
                             []
 
                         False ->
-                            case m_zmin of
+                            case maybeZmin of
                                 Nothing ->
                                     []
 
