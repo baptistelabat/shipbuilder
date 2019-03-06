@@ -918,7 +918,7 @@ prepareToExport z0 o =
         f_ hsXY list =
             let
                 m_ym =
-                    List.head (extractY hsXY)
+                    List.head <| extractY hsXY
 
                 res =
                     case m_ym of
