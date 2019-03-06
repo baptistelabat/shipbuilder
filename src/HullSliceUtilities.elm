@@ -7,7 +7,6 @@ module HullSliceUtilities exposing
     , hullVolume
     , intersectBelow
     , kBz
-    , prepareToExport
     , prismaticCoefficient
     , volume
     , yGTrapezoid
@@ -703,37 +702,3 @@ prismaticCoefficient config vol_ areas =
                             vol_ / v1
             in
             res
-
-
-prepareToExport : Float -> { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> { z : Float, xy : List ( Float, Float ) }
-prepareToExport z0 o =
-    let
-        f : HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
-        f hsXY list =
-            let
-                m_ym =
-                    List.head (yacc hsXY)
-
-                res =
-                    case m_ym of
-                        Nothing ->
-                            list ++ [ ( hsXY.x, 0 ) ]
-
-                        Just y0 ->
-                            list ++ [ ( hsXY.x, y0 ) ]
-            in
-            res
-
-        fl : List HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
-        fl lxy l =
-            case lxy of
-                [] ->
-                    l
-
-                x :: xs ->
-                    fl xs (f x l)
-
-        l1 =
-            fl o.lhs []
-    in
-    { z = z0, xy = l1 }

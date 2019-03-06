@@ -20,6 +20,7 @@ module HullSlices exposing
     , interpolate
     , modifiedBreadth
     , plotAreaCurve
+    , prepareToExport
     , prismaticCoefficient
     , scale
     , setBreadth
@@ -262,7 +263,7 @@ interpolate json =
                     v2_ / blockVolume_
 
         prepareToExport_ =
-            HullSliceUtilities.prepareToExport zAtDraught intersectBelowSlicesZY
+            prepareToExport zAtDraught intersectBelowSlicesZY
 
         inertialMoment_ =
             inertialMoment prepareToExport_
@@ -794,7 +795,7 @@ exportCSV config model =
                         intersectBelowSlicesZY =
                             HullSliceUtilities.intersectBelow { xmin = config.xmin, xmax = config.xmax } z model.denormalizedslices
                     in
-                    HullSliceUtilities.prepareToExport z intersectBelowSlicesZY
+                    prepareToExport z intersectBelowSlicesZY
                 )
                 config.ldecks
 
@@ -901,3 +902,47 @@ inertialMoment o =
                     0
     in
     im
+
+
+accZY : HullSliceXY -> (( Float, Float ) -> Float) -> List Float
+accZY hsXY f_ =
+    List.map f_ hsXY.zylist
+
+
+yacc : HullSliceXY -> List Float
+yacc hsXY =
+    accZY hsXY Tuple.second
+
+
+prepareToExport : Float -> { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> { z : Float, xy : List ( Float, Float ) }
+prepareToExport z0 o =
+    let
+        f_ : HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
+        f_ hsXY list =
+            let
+                m_ym =
+                    List.head (yacc hsXY)
+
+                res =
+                    case m_ym of
+                        Nothing ->
+                            list ++ [ ( hsXY.x, 0 ) ]
+
+                        Just y0 ->
+                            list ++ [ ( hsXY.x, y0 ) ]
+            in
+            res
+
+        fl : List HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
+        fl lxy l =
+            case lxy of
+                [] ->
+                    l
+
+                x :: xs ->
+                    fl xs (f_ x l)
+
+        l1 =
+            fl o.lhs []
+    in
+    { z = z0, xy = l1 }
