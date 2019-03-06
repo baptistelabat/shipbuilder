@@ -433,8 +433,8 @@ extractY hsXY =
         |> List.map Tuple.second
 
 
-zMinHullSliceXYList : List HullSliceXY -> Maybe Float
-zMinHullSliceXYList list =
+zMinAllSlices : List HullSliceXY -> Maybe Float
+zMinAllSlices list =
     let
         zminHullSlice : HullSliceXY -> Maybe Float
         zminHullSlice hsXY =
@@ -445,8 +445,8 @@ zMinHullSliceXYList list =
         |> List.minimum
 
 
-zMaxHullSliceXYList : List HullSliceXY -> Maybe Float
-zMaxHullSliceXYList list =
+zMaxAllSlices : List HullSliceXY -> Maybe Float
+zMaxAllSlices list =
     let
         zmaxHullSlice : HullSliceXY -> Maybe Float
         zmaxHullSlice hsXY =
@@ -457,8 +457,8 @@ zMaxHullSliceXYList list =
         |> List.maximum
 
 
-yMinHullSliceXYList : List HullSliceXY -> Maybe Float
-yMinHullSliceXYList list =
+yMinAllSlices : List HullSliceXY -> Maybe Float
+yMinAllSlices list =
     let
         yminHullSlice : HullSliceXY -> Maybe Float
         yminHullSlice hsXY =
@@ -469,8 +469,8 @@ yMinHullSliceXYList list =
         |> List.minimum
 
 
-yMaxHullSliceXYList : List HullSliceXY -> Maybe Float
-yMaxHullSliceXYList list =
+yMaxAllSlices : List HullSliceXY -> Maybe Float
+yMaxAllSlices list =
     let
         ymaxHullSlice : HullSliceXY -> Maybe Float
         ymaxHullSlice hsXY =
@@ -486,16 +486,16 @@ blockVolume o =
     -- Volume of the block
     let
         maybeZmin =
-            zMinHullSliceXYList o.lhs
+            zMinAllSlices o.lhs
 
         maybeZmax =
-            zMaxHullSliceXYList o.lhs
+            zMaxAllSlices o.lhs
 
         maybeYmin =
-            yMinHullSliceXYList o.lhs
+            yMinAllSlices o.lhs
 
         maybeYmax =
-            yMaxHullSliceXYList o.lhs
+            yMaxAllSlices o.lhs
 
         res =
             case ( maybeZmin, maybeZmax ) of
