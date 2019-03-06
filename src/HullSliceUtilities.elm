@@ -265,20 +265,6 @@ kBz lo =
             0
 
 
-xMaxAtZ : Float -> Float -> List HullSlice -> Float
-xMaxAtZ xmax z0 listHS =
-    case listHS of
-        hs :: xs ->
-            if hs.zmax <= z0 then
-                xMaxAtZ hs.x z0 xs
-
-            else
-                xmax
-
-        _ ->
-            xmax
-
-
 intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, lhs : List HullSliceXY }
 intersectBelow config z0 listHS =
     -- CN List HullSlice supposed denormalized !!!
@@ -411,8 +397,21 @@ intersectBelow config z0 listHS =
         xmin =
             xMinAtZ config.xmin listHS
 
+        xMaxAtZ : Float -> List HullSlice -> Float
+        xMaxAtZ xmax_ listHS_ =
+            case listHS_ of
+                hs :: xs ->
+                    if hs.zmax <= z0 then
+                        xMaxAtZ hs.x xs
+
+                    else
+                        xmax_
+
+                _ ->
+                    xmax_
+
         xmax =
-            xMaxAtZ config.xmax z0 (List.reverse listHS)
+            xMaxAtZ config.xmax (List.reverse listHS)
     in
     { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
 
