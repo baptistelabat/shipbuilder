@@ -10,7 +10,6 @@ module HullSliceUtilities exposing
     , prismaticCoefficient
     , volume
     , yGTrapezoid
-    , yTrapezoid
     , zTrapezoid
     , zyaForSlice
     )
@@ -93,19 +92,6 @@ yGTrapezoid ( z1, y1 ) ( z2, y2 ) =
     (square a + square b + a * b) / 3 * (a + b)
 
 
-yTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-yTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    let
-        y =
-            -- (z1 + z2) / 2.0
-            yGTrapezoid ( z1, y1 ) ( z2, y2 )
-
-        area =
-            areaTrapezoid ( z1, y1 ) ( z2, y2 )
-    in
-    y * area
-
-
 calculateTrapezoidMetricOnSlice : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
 calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
     case denormalizedSlice of
@@ -130,6 +116,18 @@ zyaForSlice hsXY =
                 _ ->
                     calculateTrapezoidMetricOnSlice zTrapezoid hsXY.zylist / area_
 
+        yTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+        yTrapezoid ( z1, y1 ) ( z2, y2 ) =
+            let
+                y =
+                    -- (z1 + z2) / 2.0
+                    yGTrapezoid ( z1, y1 ) ( z2, y2 )
+
+                area =
+                    areaTrapezoid ( z1, y1 ) ( z2, y2 )
+            in
+            y * area
+
         ky_ =
             case area_ == 0.0 of
                 True ->
@@ -139,40 +137,6 @@ zyaForSlice hsXY =
                     calculateTrapezoidMetricOnSlice yTrapezoid hsXY.zylist / area_
     in
     { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
-
-
-getInterpolateValuesAndSubList : Float -> List ( Float, Float ) -> List ( Float, Float )
-getInterpolateValuesAndSubList z0 list =
-    -- find z(i), z(i+1) / z0 >= z(i) && z0 < z(i+1)
-    -- k = (z0-z(i)) / (z(i+1) - z(i))
-    -- y0 = k*y(i) + (1-k)*y(i+1)
-    -- subList = (z0,y0)::(z(i+1),y(i+1))::rest
-    let
-        filterL : Float -> List ( Float, Float ) -> List ( Float, Float )
-        filterL z lst =
-            case lst of
-                ( z1, y1 ) :: ( z2, y2 ) :: rest ->
-                    case z < z2 && z >= z1 of
-                        True ->
-                            let
-                                k =
-                                    (z - z1) / (z2 - z1)
-
-                                y =
-                                    (1 - k) * y1 + k * y2
-                            in
-                            ( z, y ) :: ( z2, y2 ) :: rest
-
-                        False ->
-                            filterL z (( z2, y2 ) :: rest)
-
-                _ ->
-                    []
-
-        subList =
-            filterL z0 list
-    in
-    subList
 
 
 denormalizedHSList : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> List HullSlice -> List HullSlice
@@ -208,35 +172,6 @@ demormalizedHullSlice param hs =
             { x = x, zmin = hs_zmin, zmax = hs_zmax, y = hs_y }
     in
     res
-
-
-toXY : HullSlice -> HullSliceXY
-toXY hs =
-    let
-        zmax =
-            hs.zmax
-
-        zmin =
-            hs.zmin
-
-        y =
-            hs.y
-
-        dz : Float
-        dz =
-            (zmax - zmin) / (toFloat <| max 1 <| List.length y - 1)
-
-        acc : ( Int, Float ) -> ( Float, Float )
-        acc ( idx, y_ ) =
-            ( zmin + toFloat idx * dz, y_ )
-
-        lst =
-            y
-                |> Array.fromList
-                |> Array.toIndexedList
-                |> List.map acc
-    in
-    { x = hs.x, zylist = lst }
 
 
 hullVolume : { xmin : Float, xmax : Float } -> List { a | x : Float, area : Float } -> Float
@@ -329,45 +264,6 @@ kBz lo =
 
         _ ->
             0
-
-
-extractZYAtZ_ : Float -> List ( Float, Float ) -> List ( Float, Float )
-extractZYAtZ_ z0 list =
-    -- return sublist with z > z0 concatenate with (z0, y(z0) interpolation)
-    -- list order with z up
-    let
-        m_zmin =
-            List.minimum (List.map Tuple.first list)
-
-        m_zmax =
-            List.maximum (List.map Tuple.first list)
-    in
-    case m_zmax of
-        Nothing ->
-            []
-
-        Just zmax ->
-            case z0 > zmax of
-                True ->
-                    []
-
-                False ->
-                    case m_zmin of
-                        Nothing ->
-                            []
-
-                        Just zmin ->
-                            case z0 < zmin of
-                                True ->
-                                    list
-
-                                False ->
-                                    getInterpolateValuesAndSubList z0 list
-
-
-extractZYAtZ : Float -> HullSliceXY -> HullSliceXY
-extractZYAtZ z0 hsXY =
-    { x = hsXY.x, zylist = extractZYAtZ_ z0 hsXY.zylist }
 
 
 xMinAtZ : Float -> Float -> List HullSlice -> Float
@@ -481,15 +377,113 @@ intersectBelow config z0 listHS =
         filterHS =
             List.filter (\u -> u.zmax > z0 && not (List.isEmpty u.y)) listHS
 
+        toXY : HullSlice -> HullSliceXY
+        toXY hs =
+            let
+                zmax =
+                    hs.zmax
+
+                zmin =
+                    hs.zmin
+
+                y =
+                    hs.y
+
+                dz : Float
+                dz =
+                    (zmax - zmin) / (toFloat <| max 1 <| List.length y - 1)
+
+                acc : ( Int, Float ) -> ( Float, Float )
+                acc ( idx, y_ ) =
+                    ( zmin + toFloat idx * dz, y_ )
+
+                lst =
+                    y
+                        |> Array.fromList
+                        |> Array.toIndexedList
+                        |> List.map acc
+            in
+            { x = hs.x, zylist = lst }
+
         lhsXY =
             List.map toXY filterHS
+
+        getInterpolateValuesAndSubList : List ( Float, Float ) -> List ( Float, Float )
+        getInterpolateValuesAndSubList list =
+            -- find z(i), z(i+1) / z0 >= z(i) && z0 < z(i+1)
+            -- k = (z0-z(i)) / (z(i+1) - z(i))
+            -- y0 = k*y(i) + (1-k)*y(i+1)
+            -- subList = (z0,y0)::(z(i+1),y(i+1))::rest
+            let
+                filterL : Float -> List ( Float, Float ) -> List ( Float, Float )
+                filterL z lst =
+                    case lst of
+                        ( z1, y1 ) :: ( z2, y2 ) :: rest ->
+                            case z < z2 && z >= z1 of
+                                True ->
+                                    let
+                                        k =
+                                            (z - z1) / (z2 - z1)
+
+                                        y =
+                                            (1 - k) * y1 + k * y2
+                                    in
+                                    ( z, y ) :: ( z2, y2 ) :: rest
+
+                                False ->
+                                    filterL z (( z2, y2 ) :: rest)
+
+                        _ ->
+                            []
+
+                subList =
+                    filterL z0 list
+            in
+            subList
+
+        extractZYAtZ_ : List ( Float, Float ) -> List ( Float, Float )
+        extractZYAtZ_ list =
+            -- return sublist with z > z0 concatenate with (z0, y(z0) interpolation)
+            -- list order with z up
+            let
+                m_zmin =
+                    List.minimum (List.map Tuple.first list)
+
+                m_zmax =
+                    List.maximum (List.map Tuple.first list)
+            in
+            case m_zmax of
+                Nothing ->
+                    []
+
+                Just zmax ->
+                    case z0 > zmax of
+                        True ->
+                            []
+
+                        False ->
+                            case m_zmin of
+                                Nothing ->
+                                    []
+
+                                Just zmin ->
+                                    case z0 < zmin of
+                                        True ->
+                                            list
+
+                                        False ->
+                                            getInterpolateValuesAndSubList list
+
+        extractZYAtZ : HullSliceXY -> HullSliceXY
+        extractZYAtZ hsXY =
+            { x = hsXY.x, zylist = extractZYAtZ_ hsXY.zylist }
 
         --
         -- extract subSlice at z0
         -- return sublist with z > z0 concatenate with (z0, y(z0) interpolation)
         -- lhsXY_AtZ : List HullSliceXY (dz is not constant)
         lhsXY_AtZ =
-            List.map (extractZYAtZ z0) lhsXY
+            List.map extractZYAtZ lhsXY
 
         xmin =
             xMinAtZ config.xmin z0 listHS
@@ -515,28 +509,13 @@ yacc hsXY =
     accZY hsXY Tuple.second
 
 
-zminHS : HullSliceXY -> Maybe Float
-zminHS hsXY =
-    List.minimum <| zacc hsXY
-
-
-zmaxHS : HullSliceXY -> Maybe Float
-zmaxHS hsXY =
-    List.maximum <| zacc hsXY
-
-
-yminHS : HullSliceXY -> Maybe Float
-yminHS hsXY =
-    List.minimum <| yacc hsXY
-
-
-ymaxHS : HullSliceXY -> Maybe Float
-ymaxHS hsXY =
-    List.maximum <| yacc hsXY
-
-
 zMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
 zMinHullSliceXYList list m_zm =
+    let
+        zminHS : HullSliceXY -> Maybe Float
+        zminHS hsXY =
+            List.minimum <| zacc hsXY
+    in
     case list of
         [] ->
             m_zm
@@ -565,6 +544,11 @@ zMinHullSliceXYList list m_zm =
 
 zMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
 zMaxHullSliceXYList list m_zm =
+    let
+        zmaxHS : HullSliceXY -> Maybe Float
+        zmaxHS hsXY =
+            List.maximum <| zacc hsXY
+    in
     case list of
         [] ->
             m_zm
@@ -593,6 +577,11 @@ zMaxHullSliceXYList list m_zm =
 
 yMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
 yMinHullSliceXYList list m_ym =
+    let
+        yminHS : HullSliceXY -> Maybe Float
+        yminHS hsXY =
+            List.minimum <| yacc hsXY
+    in
     case list of
         [] ->
             m_ym
@@ -621,6 +610,11 @@ yMinHullSliceXYList list m_ym =
 
 yMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
 yMaxHullSliceXYList list m_ym =
+    let
+        ymaxHS : HullSliceXY -> Maybe Float
+        ymaxHS hsXY =
+            List.maximum <| yacc hsXY
+    in
     case list of
         [] ->
             m_ym
