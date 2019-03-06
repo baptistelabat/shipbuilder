@@ -419,8 +419,8 @@ intersectBelow config z0 listHS =
     { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
 
 
-zacc : HullSliceXY -> List Float
-zacc hsXY =
+extractZ : HullSliceXY -> List Float
+extractZ hsXY =
     hsXY
         |> .zylist
         |> List.map Tuple.first
@@ -438,7 +438,7 @@ zMinHullSliceXYList list m_zm =
     let
         zminHS : HullSliceXY -> Maybe Float
         zminHS hsXY =
-            List.minimum <| zacc hsXY
+            List.minimum <| extractZ hsXY
     in
     case list of
         [] ->
@@ -471,7 +471,7 @@ zMaxHullSliceXYList list m_zm =
     let
         zmaxHS : HullSliceXY -> Maybe Float
         zmaxHS hsXY =
-            List.maximum <| zacc hsXY
+            List.maximum <| extractZ hsXY
     in
     case list of
         [] ->
