@@ -434,7 +434,7 @@ extractY hsXY =
 
 
 zMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
-zMinHullSliceXYList list m_zm =
+zMinHullSliceXYList list maybeZmin =
     let
         zminHS : HullSliceXY -> Maybe Float
         zminHS hsXY =
@@ -442,16 +442,16 @@ zMinHullSliceXYList list m_zm =
     in
     case list of
         [] ->
-            m_zm
+            maybeZmin
 
         el :: xs ->
             let
-                m_x =
+                maybeX =
                     zminHS el
             in
-            case m_x of
+            case maybeX of
                 Just x ->
-                    case m_zm of
+                    case maybeZmin of
                         Nothing ->
                             zMinHullSliceXYList xs (Just x)
 
@@ -463,11 +463,11 @@ zMinHullSliceXYList list m_zm =
                                 zMinHullSliceXYList xs (Just zm)
 
                 Nothing ->
-                    zMinHullSliceXYList xs m_zm
+                    zMinHullSliceXYList xs maybeZmin
 
 
 zMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
-zMaxHullSliceXYList list m_zm =
+zMaxHullSliceXYList list maybeZmin =
     let
         zmaxHS : HullSliceXY -> Maybe Float
         zmaxHS hsXY =
@@ -475,16 +475,16 @@ zMaxHullSliceXYList list m_zm =
     in
     case list of
         [] ->
-            m_zm
+            maybeZmin
 
         el :: xs ->
             let
-                m_x =
+                maybeX =
                     zmaxHS el
             in
-            case m_x of
+            case maybeX of
                 Just x ->
-                    case m_zm of
+                    case maybeZmin of
                         Nothing ->
                             zMaxHullSliceXYList xs (Just x)
 
@@ -496,11 +496,11 @@ zMaxHullSliceXYList list m_zm =
                                 zMaxHullSliceXYList xs (Just zm)
 
                 Nothing ->
-                    zMaxHullSliceXYList xs m_zm
+                    zMaxHullSliceXYList xs maybeZmin
 
 
 yMinHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
-yMinHullSliceXYList list m_ym =
+yMinHullSliceXYList list maybeYm =
     let
         yminHS : HullSliceXY -> Maybe Float
         yminHS hsXY =
@@ -508,16 +508,16 @@ yMinHullSliceXYList list m_ym =
     in
     case list of
         [] ->
-            m_ym
+            maybeYm
 
         el :: xs ->
             let
-                m_x =
+                maybeX =
                     yminHS el
             in
-            case m_x of
+            case maybeX of
                 Just x ->
-                    case m_ym of
+                    case maybeYm of
                         Nothing ->
                             yMinHullSliceXYList xs (Just x)
 
@@ -529,11 +529,11 @@ yMinHullSliceXYList list m_ym =
                                 yMinHullSliceXYList xs (Just ym)
 
                 Nothing ->
-                    yMinHullSliceXYList xs m_ym
+                    yMinHullSliceXYList xs maybeYm
 
 
 yMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
-yMaxHullSliceXYList list m_ym =
+yMaxHullSliceXYList list maybeYm =
     let
         ymaxHS : HullSliceXY -> Maybe Float
         ymaxHS hsXY =
@@ -541,16 +541,16 @@ yMaxHullSliceXYList list m_ym =
     in
     case list of
         [] ->
-            m_ym
+            maybeYm
 
         el :: xs ->
             let
-                m_x =
+                maybeX =
                     ymaxHS el
             in
-            case m_x of
+            case maybeX of
                 Just x ->
-                    case m_ym of
+                    case maybeYm of
                         Nothing ->
                             yMaxHullSliceXYList xs (Just x)
 
@@ -562,29 +562,29 @@ yMaxHullSliceXYList list m_ym =
                                 yMaxHullSliceXYList xs (Just ym)
 
                 Nothing ->
-                    yMaxHullSliceXYList xs m_ym
+                    yMaxHullSliceXYList xs maybeYm
 
 
 blockVolume : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Float
 blockVolume o =
     -- Volume of the block
     let
-        m_zmin =
+        maybeZmin =
             zMinHullSliceXYList o.lhs Nothing
 
-        m_zmax =
+        maybeZmax =
             zMaxHullSliceXYList o.lhs Nothing
 
-        m_ymin =
+        maybeYmin =
             yMinHullSliceXYList o.lhs Nothing
 
-        m_ymax =
+        maybeYmax =
             yMaxHullSliceXYList o.lhs Nothing
 
         res =
-            case ( m_zmin, m_zmax ) of
+            case ( maybeZmin, maybeZmax ) of
                 ( Just zm, Just zM ) ->
-                    case ( m_ymin, m_ymax ) of
+                    case ( maybeYmin, maybeYmax ) of
                         ( Just ym, Just yM ) ->
                             (o.xmax - o.xmin) * (yM - ym) * (zM - zm)
 
