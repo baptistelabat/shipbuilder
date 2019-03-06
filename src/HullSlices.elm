@@ -919,16 +919,13 @@ prepareToExport z0 o =
             let
                 maybeFirstYValue =
                     List.head <| extractY hsXY
-
-                res =
-                    case maybeFirstYValue of
-                        Nothing ->
-                            list ++ [ ( hsXY.x, 0 ) ]
-
-                        Just firstYValue ->
-                            list ++ [ ( hsXY.x, firstYValue ) ]
             in
-            res
+            case maybeFirstYValue of
+                Nothing ->
+                    list ++ [ ( hsXY.x, 0 ) ]
+
+                Just firstYValue ->
+                    list ++ [ ( hsXY.x, firstYValue ) ]
 
         fl : List HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
         fl lxy l =
