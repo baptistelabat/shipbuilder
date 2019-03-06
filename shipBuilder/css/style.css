@@ -239,6 +239,7 @@ header .header-menu-item+.header-menu-item {
     background-color: var(--secondary-color);
     border-right: 1px solid var(--secondary-color__contrast);
     color: var(--on-secondary-color);
+    overflow-y: auto;
 }
 
 .panel .panel-header {
