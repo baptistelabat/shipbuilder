@@ -116,6 +116,14 @@ type alias HullSliceXY =
     }
 
 
+type alias ObjXKzKyArea =
+    { x : Float
+    , kz : Float
+    , ky : Float
+    , area : Float
+    }
+
+
 hullSliceDecoder : Decode.Decoder HullSlice
 hullSliceDecoder =
     Decode.succeed HullSlice
