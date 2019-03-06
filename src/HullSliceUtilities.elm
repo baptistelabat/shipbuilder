@@ -357,6 +357,8 @@ kBz lo =
 
         _ ->
             0
+
+
 extractZYAtZ_ : Float -> List ( Float, Float ) -> List ( Float, Float )
 extractZYAtZ_ z0 list =
     -- return sublist with z > z0 concatenate with (z0, y(z0) interpolation)
@@ -743,10 +745,10 @@ prepareToExport z0 o =
                     case m_ym of
                         Nothing ->
                             -- list
-                            List.concat [ list, [ ( hsXY.x, 0 ) ] ]
+                            list ++ [ ( hsXY.x, 0 ) ]
 
                         Just y0 ->
-                            List.concat [ list, [ ( hsXY.x, y0 ) ] ]
+                            list ++ [ ( hsXY.x, y0 ) ]
             in
             res
 
