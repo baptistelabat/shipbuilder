@@ -466,8 +466,8 @@ zMinHullSliceXYList list maybeZmin =
                     zMinHullSliceXYList xs maybeZmin
 
 
-zMaxHullSliceXYList : List HullSliceXY -> Maybe Float -> Maybe Float
-zMaxHullSliceXYList list maybeZmin =
+zMaxHullSliceXYList : List HullSliceXY -> Maybe Float
+zMaxHullSliceXYList list =
     let
         zmaxHullSlice : HullSliceXY -> Maybe Float
         zmaxHullSlice hsXY =
@@ -510,7 +510,7 @@ blockVolume o =
             zMinHullSliceXYList o.lhs Nothing
 
         maybeZmax =
-            zMaxHullSliceXYList o.lhs Nothing
+            zMaxHullSliceXYList o.lhs
 
         maybeYmin =
             yMinHullSliceXYList o.lhs
