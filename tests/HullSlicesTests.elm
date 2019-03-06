@@ -950,6 +950,6 @@ suite =
                     |> Expect.within epsAbsolute 1000.0
         , test "hullKBz" <|
             \_ ->
-                HullSliceUtilities.hullKBz { xmin = 0, xmax = 100 } [ { x = 50, area = 2, kz = 1, ky = 0 } ]
+                HullSlices.hullKBz { xmin = 0, xmax = 100 } [ { x = 50, area = 2, kz = 1, ky = 0 } ]
                     |> Expect.within epsAbsolute 100.0
         ]

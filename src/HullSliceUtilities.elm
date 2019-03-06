@@ -2,10 +2,8 @@ module HullSliceUtilities exposing
     ( areaTrapezoid
     , demormalizedHullSlice
     , denormalizedHSList
-    , hullKBz
     , hullVolume
     , intersectBelow
-    , kBz
     , prismaticCoefficient
     , volume
     , yGTrapezoid
@@ -213,53 +211,6 @@ volume lo =
                     abs (((a1 + a2) / 2.0) * (x2 - x1))
             in
             value + volume (o2 :: rest)
-
-        _ ->
-            0
-
-
-hullKBz : { xmin : Float, xmax : Float } -> List ObjXKzKyArea -> Float
-hullKBz config list =
-    let
-        xmin =
-            config.xmin
-
-        xmax =
-            config.xmax
-
-        newList =
-            List.concat [ [ { x = xmin, area = 0.0, kz = 0, ky = 0 } ], list, [ { x = xmax, area = 0.0, kz = 0, ky = 0 } ] ]
-    in
-    kBz newList
-
-
-kBz : List ObjXKzKyArea -> Float
-kBz lo =
-    case lo of
-        o1 :: o2 :: rest ->
-            let
-                x1 =
-                    o1.x
-
-                x2 =
-                    o2.x
-
-                a1 =
-                    o1.area
-
-                a2 =
-                    o2.area
-
-                z1 =
-                    o1.kz
-
-                z2 =
-                    o2.kz
-
-                value =
-                    ((a1 * z1 + a2 * z2) / 2.0) * (x2 - x1)
-            in
-            value + kBz (o2 :: rest)
 
         _ ->
             0
