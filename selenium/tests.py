@@ -25,6 +25,14 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
         return self.driver.find_element_by_xpath(
             ".//*[@class='kpi displacement']//*[@class='kpi-modeller-value']").text
 
+    def get_block_kb(self):
+        return self.driver.find_element_by_xpath(
+            ".//*[@class='kpi KB']//*[@class='kpi-modeller-value']").text
+
+    def get_block_km(self):
+        return self.driver.find_element_by_xpath(
+            ".//*[@class='kpi KM']//*[@class='kpi-modeller-value']").text
+
     def setUp(self):
         print("Starting webdriver...")
         self.driver = webdriver.Firefox()
@@ -53,9 +61,16 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
         self.click_on_hull('MPOV')
         self.click_on_modeller()
         self.assertEqual("146.37", self.get_block_displacement())
+        self.assertEqual("1.02", self.get_block_kb())
+        self.assertEqual("6.15", self.get_block_km())
         self.driver.find_element_by_id("draught").send_keys(Keys.UP)
         self.driver.find_element_by_id("draught").send_keys(Keys.UP)
         self.assertEqual("1104.24", self.get_block_displacement())
+        self.assertEqual("2.41", self.get_block_kb())
+        self.assertEqual("7.21", self.get_block_km())
+
+
+
 
     def tearDown(self):
         self.driver.close()
