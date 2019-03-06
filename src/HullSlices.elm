@@ -16,6 +16,7 @@ module HullSlices exposing
     , encodeSubModel
     , encoder
     , exportCSV
+    , inertialMoment
     , interpolate
     , modifiedBreadth
     , plotAreaCurve
@@ -264,7 +265,7 @@ interpolate json =
             HullSliceUtilities.prepareToExport zAtDraught intersectBelowSlicesZY
 
         inertialMoment_ =
-            HullSliceUtilities.inertialMoment prepareToExport_
+            inertialMoment prepareToExport_
 
         bM =
             case realVolume == 0.0 of
@@ -859,3 +860,44 @@ zGTrapezoid ( z1, y1 ) ( z2, y2 ) =
             c
     in
     ((b + 2 * a) * h) / (3 * (a + b))
+
+
+inertialMoment : { z : Float, xy : List ( Float, Float ) } -> Float
+inertialMoment o =
+    let
+        xl =
+            List.map Tuple.first o.xy
+
+        yl =
+            List.map Tuple.second o.xy
+
+        len_ =
+            List.length yl
+
+        m_xmin =
+            List.minimum xl
+
+        m_xmax =
+            List.maximum xl
+
+        im =
+            case ( m_xmin, m_xmax ) of
+                ( Just xmin, Just xmax ) ->
+                    let
+                        sum_ =
+                            List.foldr (+) 0.0 <| List.map (\u -> u * u * u) yl
+
+                        im1 =
+                            if len_ == 0 then
+                                0
+
+                            else
+                                -- cf architecture navale p307
+                                2 / 3 * (xmax - xmin) * sum_ / toFloat len_
+                    in
+                    im1
+
+                _ ->
+                    0
+    in
+    im

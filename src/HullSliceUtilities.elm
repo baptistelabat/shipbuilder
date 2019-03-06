@@ -5,7 +5,6 @@ module HullSliceUtilities exposing
     , denormalizedHSList
     , hullKBz
     , hullVolume
-    , inertialMoment
     , intersectBelow
     , kBz
     , prepareToExport
@@ -738,44 +737,3 @@ prepareToExport z0 o =
             fl o.lhs []
     in
     { z = z0, xy = l1 }
-
-
-inertialMoment : { z : Float, xy : List ( Float, Float ) } -> Float
-inertialMoment o =
-    let
-        xl =
-            List.map Tuple.first o.xy
-
-        yl =
-            List.map Tuple.second o.xy
-
-        len_ =
-            List.length yl
-
-        m_xmin =
-            List.minimum xl
-
-        m_xmax =
-            List.maximum xl
-
-        im =
-            case ( m_xmin, m_xmax ) of
-                ( Just xmin, Just xmax ) ->
-                    let
-                        sum_ =
-                            List.foldr (+) 0.0 <| List.map (\u -> u * u * u) yl
-
-                        im1 =
-                            if len_ == 0 then
-                                0
-
-                            else
-                                -- cf architecture navale p307
-                                2 / 3 * (xmax - xmin) * sum_ / toFloat len_
-                    in
-                    im1
-
-                _ ->
-                    0
-    in
-    im
