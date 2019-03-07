@@ -88,7 +88,7 @@ type alias HullSlices =
     , displacement : Float
     , centreOfBuoyancy : Float
     , metacentre : Float
-    , denormalizedslices : List HullSlice
+    , denormalizedSlices : List HullSlice
     }
 
 
@@ -279,7 +279,7 @@ interpolate json =
     , displacement = StringValueInput.round_n 2 <| displacement
     , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
     , metacentre = StringValueInput.round_n 2 <| kM
-    , denormalizedslices = denormalizedSlices
+    , denormalizedSlices = denormalizedSlices
     }
 
 
@@ -779,7 +779,7 @@ exportCSV config model =
                 (\z ->
                     let
                         intersectBelowSlicesZY =
-                            HullSliceUtilities.intersectBelow { xmin = config.xmin, xmax = config.xmax } z model.denormalizedslices
+                            HullSliceUtilities.intersectBelow { xmin = config.xmin, xmax = config.xmax } z model.denormalizedSlices
                     in
                     prepareToExport z intersectBelowSlicesZY
                 )
