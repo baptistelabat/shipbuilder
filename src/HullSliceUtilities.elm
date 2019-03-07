@@ -20,7 +20,7 @@ type alias HullSlice =
     }
 
 
-type alias HullSliceXY =
+type alias HullSliceAsZYList =
     { x : Float
     , zylist : List ( Float, Float )
     }
@@ -96,7 +96,7 @@ calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
             0
 
 
-calculateKzKyArea : HullSliceXY -> HullSliceKzArea
+calculateKzKyArea : HullSliceAsZYList -> HullSliceKzArea
 calculateKzKyArea hsXY =
     let
         area_ =
@@ -158,7 +158,7 @@ volume lo =
             0
 
 
-intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, hullSlices : List HullSliceXY }
+intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
 intersectBelow config z0 listHS =
     -- CN List HullSlice supposed denormalized !!!
     let
@@ -166,7 +166,7 @@ intersectBelow config z0 listHS =
         filterHS =
             List.filter (\u -> u.zmax > z0 && not (List.isEmpty u.y)) listHS
 
-        toXY : HullSlice -> HullSliceXY
+        toXY : HullSlice -> HullSliceAsZYList
         toXY hs =
             let
                 zmax =
@@ -263,14 +263,14 @@ intersectBelow config z0 listHS =
                                         False ->
                                             getInterpolateValuesAndSubList list
 
-        extractZYAtZ : HullSliceXY -> HullSliceXY
+        extractZYAtZ : HullSliceAsZYList -> HullSliceAsZYList
         extractZYAtZ hsXY =
             { x = hsXY.x, zylist = extractZYAtZ_ hsXY.zylist }
 
         --
         -- extract subSlice at z0
         -- return sublist with z > z0 concatenate with (z0, y(z0) interpolation)
-        -- lhsXY_AtZ : List HullSliceXY (dz is not constant)
+        -- lhsXY_AtZ : List HullSliceAsZYList (dz is not constant)
         lhsXY_AtZ =
             List.map extractZYAtZ lhsXY
 

@@ -115,7 +115,7 @@ type alias HullSlice =
     }
 
 
-type alias HullSliceXY =
+type alias HullSliceAsZYList =
     { x : Float
     , zylist : List ( Float, Float )
     }
@@ -198,7 +198,7 @@ interpolate json =
             json.zmin + json.depth.value - json.draught.value
 
         -- intersect below draught
-        hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceXY }
+        hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
         hullSlicesBeneathFreeSurface =
             HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + json.length.value } zAtDraught denormalizedSlices
 
@@ -806,20 +806,20 @@ encodeCSV list =
     Encode.list encodeCSVObj list
 
 
-encodeHullSliceXY : HullSliceXY -> Encode.Value
-encodeHullSliceXY hsXY =
+encodeHullSliceAsZYList : HullSliceAsZYList -> Encode.Value
+encodeHullSliceAsZYList hsXY =
     Encode.object
         [ ( "x", Encode.float hsXY.x )
         , ( "zylist", Encode.list (tuple2Encoder Encode.float Encode.float) hsXY.zylist )
         ]
 
 
-encodeSubModel : { xmin : Float, xmax : Float, hullSlices : List HullSliceXY } -> Encode.Value
+encodeSubModel : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> Encode.Value
 encodeSubModel subModel =
     Encode.object
         [ ( "xmin", Encode.float subModel.xmin )
         , ( "xmax", Encode.float subModel.xmax )
-        , ( "hullSlices", Encode.list encodeHullSliceXY subModel.hullSlices )
+        , ( "hullSlices", Encode.list encodeHullSliceAsZYList subModel.hullSlices )
         ]
 
 
@@ -887,17 +887,17 @@ inertialMoment o =
     im
 
 
-extractY : HullSliceXY -> List Float
+extractY : HullSliceAsZYList -> List Float
 extractY hsXY =
     hsXY
         |> .zylist
         |> List.map Tuple.second
 
 
-prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullSliceXY } -> { z : Float, xy : List ( Float, Float ) }
+prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> { z : Float, xy : List ( Float, Float ) }
 prepareToExport z0 o =
     let
-        f_ : HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
+        f_ : HullSliceAsZYList -> List ( Float, Float ) -> List ( Float, Float )
         f_ hsXY list =
             let
                 maybeFirstYValue =
@@ -910,7 +910,7 @@ prepareToExport z0 o =
                 Just firstYValue ->
                     list ++ [ ( hsXY.x, firstYValue ) ]
 
-        fl : List HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
+        fl : List HullSliceAsZYList -> List ( Float, Float ) -> List ( Float, Float )
         fl lxy l =
             case lxy of
                 [] ->
@@ -925,20 +925,20 @@ prepareToExport z0 o =
     { z = z0, xy = l1 }
 
 
-blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceXY } -> Float
+blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> Float
 blockVolume o =
     -- Volume of the block
     let
-        extractZ : HullSliceXY -> List Float
+        extractZ : HullSliceAsZYList -> List Float
         extractZ hsXY =
             hsXY
                 |> .zylist
                 |> List.map Tuple.first
 
-        zMinAllSlices : List HullSliceXY -> Maybe Float
+        zMinAllSlices : List HullSliceAsZYList -> Maybe Float
         zMinAllSlices list =
             let
-                zminHullSlice : HullSliceXY -> Maybe Float
+                zminHullSlice : HullSliceAsZYList -> Maybe Float
                 zminHullSlice hsXY =
                     List.minimum <| extractZ hsXY
             in
@@ -946,10 +946,10 @@ blockVolume o =
                 |> List.filterMap identity
                 |> List.minimum
 
-        zMaxAllSlices : List HullSliceXY -> Maybe Float
+        zMaxAllSlices : List HullSliceAsZYList -> Maybe Float
         zMaxAllSlices list =
             let
-                zmaxHullSlice : HullSliceXY -> Maybe Float
+                zmaxHullSlice : HullSliceAsZYList -> Maybe Float
                 zmaxHullSlice hsXY =
                     List.maximum <| extractZ hsXY
             in
@@ -957,10 +957,10 @@ blockVolume o =
                 |> List.filterMap identity
                 |> List.maximum
 
-        yMinAllSlices : List HullSliceXY -> Maybe Float
+        yMinAllSlices : List HullSliceAsZYList -> Maybe Float
         yMinAllSlices list =
             let
-                yminHullSlice : HullSliceXY -> Maybe Float
+                yminHullSlice : HullSliceAsZYList -> Maybe Float
                 yminHullSlice hsXY =
                     List.minimum <| extractY hsXY
             in
@@ -968,10 +968,10 @@ blockVolume o =
                 |> List.filterMap identity
                 |> List.minimum
 
-        yMaxAllSlices : List HullSliceXY -> Maybe Float
+        yMaxAllSlices : List HullSliceAsZYList -> Maybe Float
         yMaxAllSlices list =
             let
-                ymaxHullSlice : HullSliceXY -> Maybe Float
+                ymaxHullSlice : HullSliceAsZYList -> Maybe Float
                 ymaxHullSlice hsXY =
                     List.maximum <| extractY hsXY
             in
