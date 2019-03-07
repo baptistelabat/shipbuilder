@@ -109,18 +109,6 @@ calculateKzKyArea hsXY =
 
                 _ ->
                     calculateTrapezoidMetricOnSlice zTrapezoid hsXY.zylist / area_
-
-        yTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-        yTrapezoid ( z1, y1 ) ( z2, y2 ) =
-            let
-                y =
-                    -- (z1 + z2) / 2.0
-                    yGTrapezoid ( z1, y1 ) ( z2, y2 )
-
-                area =
-                    areaTrapezoid ( z1, y1 ) ( z2, y2 )
-            in
-            y * area
     in
     { x = hsXY.x, kz = kz_, area = area_ }
 
