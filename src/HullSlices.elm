@@ -212,14 +212,14 @@ interpolate json =
             HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + length_ } zAtDraught denormalizedSlices
 
         -- calculate kz, ky and area
-        kzKyAreaForEachSlice =
+        kzAreaForEachSlice =
             List.map HullSliceUtilities.calculateKzKyArea hullSlicesBeneathFreeSurface.lhs
 
         halfDisplacement =
-            HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzKyAreaForEachSlice
+            HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachSlice
 
         kbz_ =
-            hullKBz { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzKyAreaForEachSlice
+            hullKBz { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachSlice
 
         centreOfBuoyancy =
             case halfDisplacement == 0.0 of
