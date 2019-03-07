@@ -75,6 +75,7 @@ type alias HullSlices =
     , centreOfBuoyancy : Float
     , metacentre : Float
     , denormalizedSlices : List HullSlice
+    , hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
     }
 
 
@@ -95,6 +96,7 @@ empty =
         , displacement = 0
         , metacentre = 0
         , sliceAreas = []
+        , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
         }
 
 
@@ -271,6 +273,7 @@ interpolate json =
     , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
     , metacentre = StringValueInput.round_n 2 <| kM
     , denormalizedSlices = denormalizedSlices
+    , hullSlicesBeneathFreeSurface = hullSlicesBeneathFreeSurface
     }
 
 
