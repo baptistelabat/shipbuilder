@@ -3,7 +3,6 @@ module HullSliceUtilities exposing
     , calculateTrapezoidMetricOnSlice
     , hullVolume
     , intersectBelow
-    , prismaticCoefficient
     , volume
     , zTrapezoid
     )
@@ -265,25 +264,3 @@ intersectBelow config z0 listHS =
             xMaxAtZ config.xmax (List.reverse listHS)
     in
     { xmin = xmin, xmax = xmax, hullSlices = lhsXY_AtZ }
-
-
-prismaticCoefficient : { xmin : Float, xmax : Float } -> Float -> List Float -> Float
-prismaticCoefficient config vol_ areas =
-    case List.maximum areas of
-        Nothing ->
-            0
-
-        Just am ->
-            let
-                v1 =
-                    am * (config.xmax - config.xmin)
-
-                res =
-                    case v1 == 0.0 of
-                        True ->
-                            0
-
-                        False ->
-                            vol_ / v1
-            in
-            res
