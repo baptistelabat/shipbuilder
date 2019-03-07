@@ -6,7 +6,7 @@ module HullReferences exposing
     )
 
 import Html exposing (Html, div, h2, li, p, text, ul)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 
 
@@ -78,8 +78,11 @@ viewHullReference : (String -> msg) -> String -> Html msg
 viewHullReference referenceSelectionMsg ref =
     li [ class "hull-reference", onClick <| referenceSelectionMsg ref ]
         [ div [ class "hull-info-wrapper" ]
-            [ p [ class "hull-label" ] [ text ref ]
+            [ p [ class "hull-label", id (String.append "id-hull-panel-" ref) ] [ text ref ]
             ]
+
+        -- [ p [ class "hull-label", id "id-hull-panel-TOTO" ] [ text ref ]
+        -- ]
         ]
 
 

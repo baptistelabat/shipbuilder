@@ -60,7 +60,7 @@ babel:
 	docker run -t --rm -v $(shell pwd):/work -w /work -u $(shell id -u):$(shell id -g) babel
 	mv shipBuilder/js/main.babel.js shipBuilder/js/main.js
 	mv shipBuilder/js/lib/TransformControls.babel.js shipBuilder/js/lib/TransformControls.js
-	mv buildHull/*.json shipBuilder/assets
+	cp buildHull/*.json shipBuilder/assets
 
 selenium: shipBuilder/index.html shipBuilder/js/elm.min.js
 	cd selenium && make
