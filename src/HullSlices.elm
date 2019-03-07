@@ -219,26 +219,26 @@ interpolate json =
         areas =
             List.map .area lzya
 
-        v2_ =
+        halfDisplacement =
             HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } lzya
 
         kbz_ =
             hullKBz { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } lzya
 
         centreOfBuoyancy =
-            case v2_ == 0.0 of
+            case halfDisplacement == 0.0 of
                 True ->
                     0.0
 
                 False ->
-                    json.zmin + depth_ - (kbz_ / v2_)
+                    json.zmin + depth_ - (kbz_ / halfDisplacement)
 
         sliceAreas : List Float
         sliceAreas =
             List.map (calculateSliceArea json) json.slices
 
         realVolume =
-            2 * v2_
+            2 * halfDisplacement
 
         blockVolume_ =
             blockVolume hullSlicesBeneathFreeSurface
@@ -250,7 +250,7 @@ interpolate json =
                     0.0
 
                 False ->
-                    v2_ / blockVolume_
+                    halfDisplacement / blockVolume_
 
         prepareToExport_ =
             prepareToExport zAtDraught hullSlicesBeneathFreeSurface
