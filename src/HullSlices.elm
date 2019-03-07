@@ -233,7 +233,7 @@ interpolate json =
         fullSliceAreas =
             List.map (calculateSliceArea json) json.slices
 
-        realVolume =
+        displacement =
             2 * halfDisplacement
 
         blockVolume_ =
@@ -255,12 +255,12 @@ interpolate json =
             inertialMoment prepareToExport_
 
         bM =
-            case realVolume == 0.0 of
+            case displacement == 0.0 of
                 True ->
                     0.0
 
                 False ->
-                    inertialMoment_ / realVolume
+                    inertialMoment_ / displacement
 
         kM =
             centreOfBuoyancy + bM
@@ -275,7 +275,7 @@ interpolate json =
     , draught = json.draught
     , sliceAreas = fullSliceAreas
     , blockCoefficient = StringValueInput.round_n 2 <| blockCoefficient_
-    , volume = StringValueInput.round_n 2 <| realVolume
+    , volume = StringValueInput.round_n 2 <| displacement
     , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
     , metacentre = StringValueInput.round_n 2 <| kM
     , denormalizedslices = denormalizedSlices
