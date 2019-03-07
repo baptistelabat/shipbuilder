@@ -85,7 +85,7 @@ type alias HullSlices =
     , draught : StringValueInput.FloatInput
     , sliceAreas : List Float
     , blockCoefficient : Float
-    , volume : Float
+    , displacement : Float
     , centreOfBuoyancy : Float
     , metacentre : Float
     , denormalizedslices : List HullSlice
@@ -275,7 +275,7 @@ interpolate json =
     , draught = json.draught
     , sliceAreas = fullSliceAreas
     , blockCoefficient = StringValueInput.round_n 2 <| blockCoefficient_
-    , volume = StringValueInput.round_n 2 <| displacement
+    , displacement = StringValueInput.round_n 2 <| displacement
     , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
     , metacentre = StringValueInput.round_n 2 <| kM
     , denormalizedslices = denormalizedSlices
