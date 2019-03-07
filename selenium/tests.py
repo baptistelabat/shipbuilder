@@ -69,9 +69,6 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
         self.assertEqual("2.41", self.get_block_kb())
         self.assertEqual("7.21", self.get_block_km())
 
-
-
-
     def tearDown(self):
         self.driver.close()
         print("Webdriver successfully closed.")
