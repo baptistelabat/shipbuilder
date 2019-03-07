@@ -185,31 +185,19 @@ calculateSliceArea json hullSlice =
 interpolate : JsonHullSlices a -> HullSlices
 interpolate json =
     let
-        length_ =
-            json.length.value
-
-        breadth_ =
-            json.breadth.value
-
-        depth_ =
-            json.depth.value
-
-        draught_ =
-            json.draught.value
-
         -- denormalize slices
         denormalizedSlices =
             denormalizedHSList
-                { length = length_, breadth = breadth_, depth = depth_, xmin = json.xmin, ymin = json.ymin, zmin = json.zmin }
+                { length = json.length.value, breadth = json.breadth.value, depth = json.depth.value, xmin = json.xmin, ymin = json.ymin, zmin = json.zmin }
                 json.slices
 
         -- transform draught to z value
         zAtDraught =
-            json.zmin + depth_ - draught_
+            json.zmin + json.depth.value - json.draught.value
 
         -- intersect below draught
         hullSlicesBeneathFreeSurface =
-            HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + length_ } zAtDraught denormalizedSlices
+            HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + json.length.value } zAtDraught denormalizedSlices
 
         -- calculate kz, ky and area
         kzAreaForEachImmersedSlice =
@@ -227,7 +215,7 @@ interpolate json =
                     0.0
 
                 False ->
-                    json.zmin + depth_ - (kbz_ / halfDisplacement)
+                    json.zmin + json.depth.value - (kbz_ / halfDisplacement)
 
         fullSliceAreas : List Float
         fullSliceAreas =
