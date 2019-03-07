@@ -186,29 +186,36 @@ interpolate : JsonHullSlices a -> HullSlices
 interpolate json =
     let
         -- denormalize slices
+        denormalizedSlices : List HullSlice
         denormalizedSlices =
             denormalizeHullSlices
                 { length = json.length.value, breadth = json.breadth.value, depth = json.depth.value, xmin = json.xmin, ymin = json.ymin, zmin = json.zmin }
                 json.slices
 
         -- transform draught to z value
+        zAtDraught : Float
         zAtDraught =
             json.zmin + json.depth.value - json.draught.value
 
         -- intersect below draught
+        hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceXY }
         hullSlicesBeneathFreeSurface =
             HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + json.length.value } zAtDraught denormalizedSlices
 
         -- calculate kz, ky and area
+        kzAreaForEachImmersedSlice : List HullSliceKzArea
         kzAreaForEachImmersedSlice =
             List.map HullSliceUtilities.calculateKzKyArea hullSlicesBeneathFreeSurface.lhs
 
+        halfDisplacement : Float
         halfDisplacement =
             HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachImmersedSlice
 
+        kbz_ : Float
         kbz_ =
             hullKBz { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachImmersedSlice
 
+        centreOfBuoyancy : Float
         centreOfBuoyancy =
             case halfDisplacement == 0.0 of
                 True ->
@@ -221,13 +228,16 @@ interpolate json =
         fullSliceAreas =
             List.map (calculateSliceArea json) json.slices
 
+        displacement : Float
         displacement =
             2 * halfDisplacement
 
+        blockVolume_ : Float
         blockVolume_ =
             blockVolume hullSlicesBeneathFreeSurface
 
         -- Block Coefficient = Volume of displacement ÷ blockVolume
+        blockCoefficient_ : Float
         blockCoefficient_ =
             case blockVolume_ == 0.0 of
                 True ->
@@ -239,9 +249,11 @@ interpolate json =
         prepareToExport_ =
             prepareToExport zAtDraught hullSlicesBeneathFreeSurface
 
+        inertialMoment_ : Float
         inertialMoment_ =
             inertialMoment prepareToExport_
 
+        bM : Float
         bM =
             case displacement == 0.0 of
                 True ->
@@ -250,6 +262,7 @@ interpolate json =
                 False ->
                     inertialMoment_ / displacement
 
+        kM : Float
         kM =
             centreOfBuoyancy + bM
     in
