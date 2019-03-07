@@ -212,14 +212,14 @@ interpolate json =
             HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + length_ } zAtDraught denormalizedSlices
 
         -- calculate kz, ky and area
-        kzAreaForEachSlice =
+        kzAreaForEachImmersedSlice =
             List.map HullSliceUtilities.calculateKzKyArea hullSlicesBeneathFreeSurface.lhs
 
         halfDisplacement =
-            HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachSlice
+            HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachImmersedSlice
 
         kbz_ =
-            hullKBz { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachSlice
+            hullKBz { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachImmersedSlice
 
         centreOfBuoyancy =
             case halfDisplacement == 0.0 of
@@ -229,8 +229,8 @@ interpolate json =
                 False ->
                     json.zmin + depth_ - (kbz_ / halfDisplacement)
 
-        sliceAreas : List Float
-        sliceAreas =
+        fullSliceAreas : List Float
+        fullSliceAreas =
             List.map (calculateSliceArea json) json.slices
 
         realVolume =
@@ -273,7 +273,7 @@ interpolate json =
     , zmin = json.zmin
     , slices = json.slices
     , draught = json.draught
-    , sliceAreas = sliceAreas
+    , sliceAreas = fullSliceAreas
     , blockCoefficient = StringValueInput.round_n 2 <| blockCoefficient_
     , volume = StringValueInput.round_n 2 <| realVolume
     , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
