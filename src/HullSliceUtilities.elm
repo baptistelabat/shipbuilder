@@ -5,7 +5,6 @@ module HullSliceUtilities exposing
     , intersectBelow
     , prismaticCoefficient
     , volume
-    , yGTrapezoid
     , zTrapezoid
     )
 
@@ -60,23 +59,6 @@ zTrapezoid ( z1, y1 ) ( z2, y2 ) =
             areaTrapezoid ( z1, y1 ) ( z2, y2 )
     in
     z * area
-
-
-yGTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-yGTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    -- yG =
-    --     (a / 2 * a * h + (a + (abs (b - a) / 3)) * abs (b - a) * h / 2) / (a + b) * h / 2
-    --
-    -- yG =
-    --     (a * a + b * b + ab) / 3 * (a + b)
-    let
-        a =
-            abs y1
-
-        b =
-            abs y2
-    in
-    (square a + square b + a * b) / 3 * (a + b)
 
 
 calculateTrapezoidMetricOnSlice : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float

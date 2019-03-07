@@ -867,10 +867,6 @@ suite =
                         -- |> Expect.within epsAbsolute 0.16666666667
                         |> Expect.within epsAbsolute 0.25
             ]
-        , test "yGTrapezoid" <|
-            \_ ->
-                HullSliceUtilities.yGTrapezoid ( 0, 0 ) ( 1, 1 )
-                    |> Expect.within epsAbsolute 0.33333333337
         , test "zGTrapezoid" <|
             \_ ->
                 HullSlices.zGTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
