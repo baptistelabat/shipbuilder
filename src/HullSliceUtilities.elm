@@ -1,12 +1,12 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
+    , calculateKzKyArea
     , hullVolume
     , intersectBelow
     , prismaticCoefficient
     , volume
     , yGTrapezoid
     , zTrapezoid
-    , zyaForSlice
     )
 
 import Array
@@ -97,8 +97,8 @@ calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
             0
 
 
-zyaForSlice : HullSliceXY -> ObjXKzKyArea
-zyaForSlice hsXY =
+calculateKzKyArea : HullSliceXY -> ObjXKzKyArea
+calculateKzKyArea hsXY =
     let
         area_ =
             calculateTrapezoidMetricOnSlice areaTrapezoid hsXY.zylist

@@ -214,7 +214,7 @@ interpolate json =
 
         -- calculate kz, ky and area
         lzya =
-            List.map HullSliceUtilities.zyaForSlice hullSlicesBeneathFreeSurface.lhs
+            List.map HullSliceUtilities.calculateKzKyArea hullSlicesBeneathFreeSurface.lhs
 
         areas =
             List.map .area lzya
