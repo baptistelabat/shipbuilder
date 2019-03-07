@@ -3217,14 +3217,6 @@ viewModeller model =
                                 ]
                                 [ text "export 3D (stl)" ]
                             , button
-                                [ id "exportCSV"
-                                , value "exportCSV"
-
-                                -- disabled <| bulkheads.number.value == 0
-                                , onClick <| ToJs (ExportCSV hullReference)
-                                ]
-                                [ text "exportCSV" ]
-                            , button
                                 [ id "exportSubModel"
                                 , value "exportSubModel"
                                 , onClick <| ToJs (ExportSubModel hullReference)
