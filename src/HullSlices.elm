@@ -329,16 +329,6 @@ addFullSliceAreas hullSlices =
     { hullSlices | sliceAreas = List.map (calculateSliceArea hullSlices) hullSlices.slices }
 
 
-round : HullSlices -> HullSlices
-round hullSlices =
-    { hullSlices
-        | centreOfBuoyancy = StringValueInput.round_n 2 <| hullSlices.centreOfBuoyancy
-        , displacement = StringValueInput.round_n 2 <| hullSlices.displacement
-        , blockCoefficient = StringValueInput.round_n 2 <| hullSlices.blockCoefficient
-        , metacentre = StringValueInput.round_n 2 <| hullSlices.metacentre
-    }
-
-
 interpolate : HullSlices -> HullSlices
 interpolate hullSlices =
     HullSlicesWithoutComputations hullSlices
@@ -350,7 +340,6 @@ interpolate hullSlices =
         |> addBlockCoefficient
         |> addMetacentre
         |> addFullSliceAreas
-        |> round
 
 
 f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> HullSlices

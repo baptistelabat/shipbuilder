@@ -3205,12 +3205,12 @@ viewModeller model =
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
                             , HullSlices.plotAreaCurve slices
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" slices.displacement
-                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n 2 <| slices.displacement)
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 <| slices.blockCoefficient)
 
                             -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
-                            , viewModellerSimpleKpi "KB" "KB" slices.centreOfBuoyancy
-                            , viewModellerSimpleKpi "KM" "KM" slices.metacentre
+                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 2 <| slices.centreOfBuoyancy)
+                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 2 <| slices.metacentre)
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"

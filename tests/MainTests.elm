@@ -1494,7 +1494,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .displacement
+                                |> Maybe.map (.displacement >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 1.0 and verify block coefficient" <|
                     \_ ->
@@ -1502,7 +1502,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .blockCoefficient
+                                |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 1.0 and verify KB" <|
                     \_ ->
@@ -1510,7 +1510,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .centreOfBuoyancy
+                                |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 1.0 and verify KM" <|
                     \_ ->
@@ -1518,7 +1518,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .metacentre
+                                |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 2.0 and verify displacement" <|
                     \_ ->
@@ -1526,7 +1526,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .displacement
+                                |> Maybe.map (.displacement >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 2.0 and verify block coefficient" <|
                     \_ ->
@@ -1534,7 +1534,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .blockCoefficient
+                                |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 2.0 and verify KB" <|
                     \_ ->
@@ -1542,7 +1542,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .centreOfBuoyancy
+                                |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 2.0 and verify KM" <|
                     \_ ->
@@ -1550,7 +1550,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .metacentre
+                                |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 3.0 and verify displacement" <|
                     \_ ->
@@ -1558,7 +1558,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .displacement
+                                |> Maybe.map (.displacement >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 3.0 and verify block coefficient" <|
                     \_ ->
@@ -1566,7 +1566,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .blockCoefficient
+                                |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 3.0 and verify KB" <|
                     \_ ->
@@ -1574,7 +1574,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .centreOfBuoyancy
+                                |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 3.0 and verify KM" <|
                     \_ ->
@@ -1582,7 +1582,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .metacentre
+                                |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 4.0 and verify displacement" <|
                     \_ ->
@@ -1590,7 +1590,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .displacement
+                                |> Maybe.map (.displacement >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 4.0 and verify block coefficient" <|
                     \_ ->
@@ -1598,7 +1598,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .blockCoefficient
+                                |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 4.0 and verify KB" <|
                     \_ ->
@@ -1606,7 +1606,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .centreOfBuoyancy
+                                |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 4.0 and verify KM" <|
                     \_ ->
@@ -1614,7 +1614,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .metacentre
+                                |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 5.0 and verify displacement" <|
                     \_ ->
@@ -1622,7 +1622,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .displacement
+                                |> Maybe.map (.displacement >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 5.0 and verify block coefficient" <|
                     \_ ->
@@ -1630,7 +1630,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .blockCoefficient
+                                |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 5.0 and verify KB" <|
                     \_ ->
@@ -1638,7 +1638,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .centreOfBuoyancy
+                                |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 5.0 and verify KM" <|
                     \_ ->
@@ -1646,7 +1646,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .metacentre
+                                |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 6.0 and verify displacement" <|
                     \_ ->
@@ -1654,7 +1654,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .displacement
+                                |> Maybe.map (.displacement >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 6.0 and verify block coefficient" <|
                     \_ ->
@@ -1662,7 +1662,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .blockCoefficient
+                                |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 6.0 and verify KB" <|
                     \_ ->
@@ -1670,7 +1670,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .centreOfBuoyancy
+                                |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
                             )
                 , test "select mpov. set draught to 6.0 and verify KM" <|
                     \_ ->
@@ -1678,7 +1678,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .metacentre
+                                |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
                             )
                 ]
             ]
