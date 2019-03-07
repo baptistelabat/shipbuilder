@@ -121,7 +121,7 @@ type alias HullSliceXY =
     }
 
 
-type alias ObjXKzArea =
+type alias HullSliceKzArea =
     { x : Float
     , kz : Float
     , area : Float
@@ -1006,7 +1006,7 @@ blockVolume o =
     res
 
 
-hullKBz : { xmin : Float, xmax : Float } -> List ObjXKzArea -> Float
+hullKBz : { xmin : Float, xmax : Float } -> List HullSliceKzArea -> Float
 hullKBz config list =
     let
         xmin =
@@ -1021,7 +1021,7 @@ hullKBz config list =
     kBz newList
 
 
-kBz : List ObjXKzArea -> Float
+kBz : List HullSliceKzArea -> Float
 kBz lo =
     case lo of
         o1 :: o2 :: rest ->

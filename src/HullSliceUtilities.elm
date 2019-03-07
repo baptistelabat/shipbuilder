@@ -26,7 +26,7 @@ type alias HullSliceXY =
     }
 
 
-type alias ObjXKzArea =
+type alias HullSliceKzArea =
     { x : Float
     , kz : Float
     , area : Float
@@ -96,7 +96,7 @@ calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
             0
 
 
-calculateKzKyArea : HullSliceXY -> ObjXKzArea
+calculateKzKyArea : HullSliceXY -> HullSliceKzArea
 calculateKzKyArea hsXY =
     let
         area_ =
