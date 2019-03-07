@@ -76,7 +76,7 @@ type alias HullSlices =
     , metacentre : Float
     , denormalizedSlices : List HullSlice
     , hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
-    , kzAreaForEachImmersedSlice : List HullSliceKzArea
+    , kzAreaForEachImmersedSlice : List HullSliceCentroidAndArea
     }
 
 
@@ -116,9 +116,9 @@ type alias HullSliceAsZYList =
     }
 
 
-type alias HullSliceKzArea =
+type alias HullSliceCentroidAndArea =
     { x : Float
-    , kz : Float
+    , centroid : Float
     , area : Float
     }
 
@@ -238,13 +238,13 @@ addHullSlicesBeneathFreeSurface previousStep =
 addKzAreaForEachImmersedSlice : HullSlicesWithSlicesBeneathFreeSurface -> HullSlicesWithKzAreaForEachImmersedSlice
 addKzAreaForEachImmersedSlice previousStep =
     let
-        calculateKzKyArea : HullSliceAsZYList -> HullSliceKzArea
+        calculateKzKyArea : HullSliceAsZYList -> HullSliceCentroidAndArea
         calculateKzKyArea hsXY =
             let
                 area_ =
                     HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.areaTrapezoid hsXY.zylist
 
-                kz_ =
+                centroid_ =
                     case area_ == 0.0 of
                         True ->
                             0
@@ -252,7 +252,7 @@ addKzAreaForEachImmersedSlice previousStep =
                         _ ->
                             HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.zTrapezoid hsXY.zylist / area_
             in
-            { x = hsXY.x, kz = kz_, area = area_ }
+            { x = hsXY.x, centroid = centroid_, area = area_ }
     in
     case previousStep of
         HullSlicesWithSlicesBeneathFreeSurface hullSlices ->
@@ -1084,7 +1084,7 @@ blockVolume o =
     res
 
 
-hullKBz : { xmin : Float, xmax : Float } -> List HullSliceKzArea -> Float
+hullKBz : { xmin : Float, xmax : Float } -> List HullSliceCentroidAndArea -> Float
 hullKBz config list =
     let
         xmin =
@@ -1094,12 +1094,12 @@ hullKBz config list =
             config.xmax
 
         newList =
-            List.concat [ [ { x = xmin, area = 0.0, kz = 0 } ], list, [ { x = xmax, area = 0.0, kz = 0 } ] ]
+            List.concat [ [ { x = xmin, area = 0.0, centroid = 0 } ], list, [ { x = xmax, area = 0.0, centroid = 0 } ] ]
     in
     kBz newList
 
 
-kBz : List HullSliceKzArea -> Float
+kBz : List HullSliceCentroidAndArea -> Float
 kBz lo =
     case lo of
         o1 :: o2 :: rest ->
@@ -1117,10 +1117,10 @@ kBz lo =
                     o2.area
 
                 z1 =
-                    o1.kz
+                    o1.centroid
 
                 z2 =
-                    o2.kz
+                    o2.centroid
 
                 value =
                     ((a1 * z1 + a2 * z2) / 2.0) * (x2 - x1)
