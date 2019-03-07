@@ -76,6 +76,7 @@ type alias HullSlices =
     , metacentre : Float
     , denormalizedSlices : List HullSlice
     , hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
+    , kzAreaForEachImmersedSlice : List HullSliceKzArea
     }
 
 
@@ -97,6 +98,7 @@ empty =
         , metacentre = 0
         , sliceAreas = []
         , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
+        , kzAreaForEachImmersedSlice = []
         }
 
 
@@ -175,106 +177,180 @@ calculateSliceArea json hullSlice =
         |> (*) 2
 
 
-interpolate : HullSlices -> HullSlices
-interpolate json =
-    let
-        -- denormalize slices
-        denormalizedSlices : List HullSlice
-        denormalizedSlices =
-            denormalizeHullSlices
-                { length = json.length.value, breadth = json.breadth.value, depth = json.depth.value, xmin = json.xmin, ymin = json.ymin, zmin = json.zmin }
-                json.slices
+type HullSlicesWithoutComputations
+    = HullSlicesWithoutComputations HullSlices
 
-        -- transform draught to z value
-        zAtDraught : Float
-        zAtDraught =
-            json.zmin + json.depth.value - json.draught.value
 
-        -- intersect below draught
-        hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
-        hullSlicesBeneathFreeSurface =
-            HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + json.length.value } zAtDraught denormalizedSlices
+type HullSlicesWithDenormalizedSlices
+    = HullSlicesWithDenormalizedSlices HullSlices
 
-        -- calculate kz, ky and area
-        kzAreaForEachImmersedSlice : List HullSliceKzArea
-        kzAreaForEachImmersedSlice =
-            List.map HullSliceUtilities.calculateKzKyArea hullSlicesBeneathFreeSurface.hullSlices
 
-        halfDisplacement : Float
-        halfDisplacement =
-            HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachImmersedSlice
+type HullSlicesWithSlicesBeneathFreeSurface
+    = HullSlicesWithSlicesBeneathFreeSurface HullSlices
 
-        kbz_ : Float
-        kbz_ =
-            hullKBz { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzAreaForEachImmersedSlice
 
-        centreOfBuoyancy : Float
-        centreOfBuoyancy =
-            case halfDisplacement == 0.0 of
-                True ->
-                    0.0
+type HullSlicesWithKzAreaForEachImmersedSlice
+    = HullSlicesWithKzAreaForEachImmersedSlice HullSlices
 
-                False ->
-                    json.zmin + json.depth.value - (kbz_ / halfDisplacement)
 
-        fullSliceAreas : List Float
-        fullSliceAreas =
-            List.map (calculateSliceArea json) json.slices
+type HullSlicesWithDisplacement
+    = HullSlicesWithDisplacement HullSlices
 
-        displacement : Float
-        displacement =
-            2 * halfDisplacement
 
-        blockVolume_ : Float
-        blockVolume_ =
-            blockVolume hullSlicesBeneathFreeSurface
+type HullSlicesWithCentreOfBuoyancy
+    = HullSlicesWithCentreOfBuoyancy HullSlices
 
-        -- Block Coefficient = Volume of displacement ÷ blockVolume
-        blockCoefficient_ : Float
-        blockCoefficient_ =
-            case blockVolume_ == 0.0 of
-                True ->
-                    0.0
 
-                False ->
-                    halfDisplacement / blockVolume_
+type HullSlicesWithBlockCoefficient
+    = HullSlicesWithBlockCoefficient HullSlices
 
-        prepareToExport_ =
-            prepareToExport zAtDraught hullSlicesBeneathFreeSurface
 
-        inertialMoment_ : Float
-        inertialMoment_ =
-            inertialMoment prepareToExport_
+addDenormalizedSlices : HullSlicesWithoutComputations -> HullSlicesWithDenormalizedSlices
+addDenormalizedSlices previousStep =
+    case previousStep of
+        HullSlicesWithoutComputations hullSlices ->
+            let
+                denormalizedSlices : List HullSlice
+                denormalizedSlices =
+                    denormalizeHullSlices
+                        { length = hullSlices.length.value, breadth = hullSlices.breadth.value, depth = hullSlices.depth.value, xmin = hullSlices.xmin, ymin = hullSlices.ymin, zmin = hullSlices.zmin }
+                        hullSlices.slices
+            in
+            HullSlicesWithDenormalizedSlices { hullSlices | denormalizedSlices = denormalizedSlices }
 
-        bM : Float
-        bM =
-            case displacement == 0.0 of
-                True ->
-                    0.0
 
-                False ->
-                    inertialMoment_ / displacement
+addHullSlicesBeneathFreeSurface : HullSlicesWithDenormalizedSlices -> HullSlicesWithSlicesBeneathFreeSurface
+addHullSlicesBeneathFreeSurface previousStep =
+    case previousStep of
+        HullSlicesWithDenormalizedSlices hullSlices ->
+            let
+                zAtDraught : Float
+                zAtDraught =
+                    hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
-        kM : Float
-        kM =
-            centreOfBuoyancy + bM
-    in
-    { length = json.length
-    , breadth = json.breadth
-    , depth = json.depth
-    , xmin = json.xmin
-    , ymin = json.ymin
-    , zmin = json.zmin
-    , slices = json.slices
-    , draught = json.draught
-    , sliceAreas = fullSliceAreas
-    , blockCoefficient = StringValueInput.round_n 2 <| blockCoefficient_
-    , displacement = StringValueInput.round_n 2 <| displacement
-    , centreOfBuoyancy = StringValueInput.round_n 2 <| centreOfBuoyancy
-    , metacentre = StringValueInput.round_n 2 <| kM
-    , denormalizedSlices = denormalizedSlices
-    , hullSlicesBeneathFreeSurface = hullSlicesBeneathFreeSurface
+                hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
+                hullSlicesBeneathFreeSurface =
+                    HullSliceUtilities.intersectBelow { xmin = hullSlices.xmin, xmax = hullSlices.xmin + hullSlices.length.value } zAtDraught hullSlices.denormalizedSlices
+            in
+            HullSlicesWithSlicesBeneathFreeSurface { hullSlices | hullSlicesBeneathFreeSurface = hullSlicesBeneathFreeSurface }
+
+
+addKzAreaForEachImmersedSlice : HullSlicesWithSlicesBeneathFreeSurface -> HullSlicesWithKzAreaForEachImmersedSlice
+addKzAreaForEachImmersedSlice previousStep =
+    case previousStep of
+        HullSlicesWithSlicesBeneathFreeSurface hullSlices ->
+            HullSlicesWithKzAreaForEachImmersedSlice { hullSlices | kzAreaForEachImmersedSlice = List.map HullSliceUtilities.calculateKzKyArea hullSlices.hullSlicesBeneathFreeSurface.hullSlices }
+
+
+addDisplacement : HullSlicesWithKzAreaForEachImmersedSlice -> HullSlicesWithDisplacement
+addDisplacement previousStep =
+    case previousStep of
+        HullSlicesWithKzAreaForEachImmersedSlice hullSlices ->
+            HullSlicesWithDisplacement { hullSlices | displacement = 2 * HullSliceUtilities.hullVolume { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.kzAreaForEachImmersedSlice }
+
+
+addCentreOfBuoyancy : HullSlicesWithDisplacement -> HullSlicesWithCentreOfBuoyancy
+addCentreOfBuoyancy previousStep =
+    case previousStep of
+        HullSlicesWithDisplacement hullSlices ->
+            let
+                kbz_ : Float
+                kbz_ =
+                    hullKBz { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.kzAreaForEachImmersedSlice
+
+                centreOfBuoyancy : Float
+                centreOfBuoyancy =
+                    case hullSlices.displacement == 0.0 of
+                        True ->
+                            0.0
+
+                        False ->
+                            hullSlices.zmin + hullSlices.depth.value - (kbz_ / (hullSlices.displacement / 2))
+            in
+            HullSlicesWithCentreOfBuoyancy { hullSlices | centreOfBuoyancy = centreOfBuoyancy }
+
+
+addBlockCoefficient : HullSlicesWithCentreOfBuoyancy -> HullSlicesWithBlockCoefficient
+addBlockCoefficient previousStep =
+    case previousStep of
+        HullSlicesWithCentreOfBuoyancy hullSlices ->
+            let
+                blockVolume_ : Float
+                blockVolume_ =
+                    blockVolume hullSlices.hullSlicesBeneathFreeSurface
+
+                -- Block Coefficient = Volume of displacement ÷ blockVolume
+                blockCoefficient : Float
+                blockCoefficient =
+                    case blockVolume_ == 0.0 of
+                        True ->
+                            0.0
+
+                        False ->
+                            (hullSlices.displacement / 2) / blockVolume_
+            in
+            HullSlicesWithBlockCoefficient { hullSlices | blockCoefficient = blockCoefficient }
+
+
+addMetacentre : HullSlicesWithBlockCoefficient -> HullSlices
+addMetacentre previousStep =
+    case previousStep of
+        HullSlicesWithBlockCoefficient hullSlices ->
+            let
+                zAtDraught : Float
+                zAtDraught =
+                    hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
+
+                prepareToExport_ =
+                    prepareToExport zAtDraught hullSlices.hullSlicesBeneathFreeSurface
+
+                inertialMoment_ : Float
+                inertialMoment_ =
+                    inertialMoment prepareToExport_
+
+                bM : Float
+                bM =
+                    case hullSlices.displacement == 0.0 of
+                        True ->
+                            0.0
+
+                        False ->
+                            inertialMoment_ / hullSlices.displacement
+
+                metacentre : Float
+                metacentre =
+                    hullSlices.centreOfBuoyancy + bM
+            in
+            { hullSlices | metacentre = metacentre }
+
+
+addFullSliceAreas : HullSlices -> HullSlices
+addFullSliceAreas hullSlices =
+    { hullSlices | sliceAreas = List.map (calculateSliceArea hullSlices) hullSlices.slices }
+
+
+round : HullSlices -> HullSlices
+round hullSlices =
+    { hullSlices
+        | centreOfBuoyancy = StringValueInput.round_n 2 <| hullSlices.centreOfBuoyancy
+        , displacement = StringValueInput.round_n 2 <| hullSlices.displacement
+        , blockCoefficient = StringValueInput.round_n 2 <| hullSlices.blockCoefficient
+        , metacentre = StringValueInput.round_n 2 <| hullSlices.metacentre
     }
+
+
+interpolate : HullSlices -> HullSlices
+interpolate hullSlices =
+    HullSlicesWithoutComputations hullSlices
+        |> addDenormalizedSlices
+        |> addHullSlicesBeneathFreeSurface
+        |> addKzAreaForEachImmersedSlice
+        |> addDisplacement
+        |> addCentreOfBuoyancy
+        |> addBlockCoefficient
+        |> addMetacentre
+        |> addFullSliceAreas
+        |> round
 
 
 f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> HullSlices
