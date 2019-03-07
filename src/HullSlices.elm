@@ -219,9 +219,6 @@ interpolate json =
         areas =
             List.map .area lzya
 
-        v_ =
-            HullSliceUtilities.volume lzya
-
         v2_ =
             HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } lzya
 
