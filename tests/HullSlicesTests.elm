@@ -932,7 +932,7 @@ suite =
                     , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
                     ]
                     |> Expect.equal
-                        { lhs =
+                        { hullSlices =
                             [ { x = 25, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }
                             , { x = 50, zylist = [ ( -3, 5 ), ( 0, 5 ) ] }
                             , { x = 75, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }

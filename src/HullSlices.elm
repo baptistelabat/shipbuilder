@@ -205,7 +205,7 @@ interpolate json =
         -- calculate kz, ky and area
         kzAreaForEachImmersedSlice : List HullSliceKzArea
         kzAreaForEachImmersedSlice =
-            List.map HullSliceUtilities.calculateKzKyArea hullSlicesBeneathFreeSurface.lhs
+            List.map HullSliceUtilities.calculateKzKyArea hullSlicesBeneathFreeSurface.hullSlices
 
         halfDisplacement : Float
         halfDisplacement =
@@ -814,12 +814,12 @@ encodeHullSliceXY hsXY =
         ]
 
 
-encodeSubModel : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Encode.Value
+encodeSubModel : { xmin : Float, xmax : Float, hullSlices : List HullSliceXY } -> Encode.Value
 encodeSubModel subModel =
     Encode.object
         [ ( "xmin", Encode.float subModel.xmin )
         , ( "xmax", Encode.float subModel.xmax )
-        , ( "lhs", Encode.list encodeHullSliceXY subModel.lhs )
+        , ( "hullSlices", Encode.list encodeHullSliceXY subModel.hullSlices )
         ]
 
 
@@ -894,7 +894,7 @@ extractY hsXY =
         |> List.map Tuple.second
 
 
-prepareToExport : Float -> { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> { z : Float, xy : List ( Float, Float ) }
+prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullSliceXY } -> { z : Float, xy : List ( Float, Float ) }
 prepareToExport z0 o =
     let
         f_ : HullSliceXY -> List ( Float, Float ) -> List ( Float, Float )
@@ -920,12 +920,12 @@ prepareToExport z0 o =
                     fl xs (f_ x l)
 
         l1 =
-            fl o.lhs []
+            fl o.hullSlices []
     in
     { z = z0, xy = l1 }
 
 
-blockVolume : { xmin : Float, xmax : Float, lhs : List HullSliceXY } -> Float
+blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceXY } -> Float
 blockVolume o =
     -- Volume of the block
     let
@@ -980,16 +980,16 @@ blockVolume o =
                 |> List.maximum
 
         maybeZmin =
-            zMinAllSlices o.lhs
+            zMinAllSlices o.hullSlices
 
         maybeZmax =
-            zMaxAllSlices o.lhs
+            zMaxAllSlices o.hullSlices
 
         maybeYmin =
-            yMinAllSlices o.lhs
+            yMinAllSlices o.hullSlices
 
         maybeYmax =
-            yMaxAllSlices o.lhs
+            yMaxAllSlices o.hullSlices
 
         res =
             case ( maybeZmin, maybeZmax ) of

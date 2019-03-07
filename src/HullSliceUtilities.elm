@@ -158,7 +158,7 @@ volume lo =
             0
 
 
-intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, lhs : List HullSliceXY }
+intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, hullSlices : List HullSliceXY }
 intersectBelow config z0 listHS =
     -- CN List HullSlice supposed denormalized !!!
     let
@@ -306,7 +306,7 @@ intersectBelow config z0 listHS =
         xmax =
             xMaxAtZ config.xmax (List.reverse listHS)
     in
-    { xmin = xmin, xmax = xmax, lhs = lhsXY_AtZ }
+    { xmin = xmin, xmax = xmax, hullSlices = lhsXY_AtZ }
 
 
 prismaticCoefficient : { xmin : Float, xmax : Float } -> Float -> List Float -> Float
