@@ -1,7 +1,6 @@
 module HullSlices exposing
     ( HullSlice
     , HullSlices
-    , JsonHullSlices
     , area
     , calculateSliceArea
     , centroidAbscissa
@@ -61,19 +60,6 @@ import LineChart.Line as Line
 import StringValueInput
 
 
-type alias JsonHullSlices a =
-    { a
-        | length : StringValueInput.FloatInput
-        , breadth : StringValueInput.FloatInput
-        , depth : StringValueInput.FloatInput
-        , xmin : Float
-        , ymin : Float
-        , zmin : Float
-        , slices : List HullSlice
-        , draught : StringValueInput.FloatInput
-    }
-
-
 type alias HullSlices =
     { length : StringValueInput.FloatInput
     , breadth : StringValueInput.FloatInput
@@ -103,7 +89,12 @@ empty =
         , zmin = 0
         , slices = []
         , draught = StringValueInput.emptyFloat
-        , denormalizedslices = []
+        , denormalizedSlices = []
+        , blockCoefficient = 0
+        , centreOfBuoyancy = 0
+        , displacement = 0
+        , metacentre = 0
+        , sliceAreas = []
         }
 
 
@@ -137,7 +128,7 @@ hullSliceDecoder =
         |> Pipeline.required "y" (Decode.list Decode.float)
 
 
-scale : JsonHullSlices a -> HullSlice -> HullSlice
+scale : HullSlices -> HullSlice -> HullSlice
 scale json hullSlice =
     let
         scaleY : Float -> Float
@@ -174,7 +165,7 @@ prismaticCoefficient areaCurve =
             v / (areaCurve.length.value * am)
 
 
-calculateSliceArea : JsonHullSlices a -> HullSlice -> Float
+calculateSliceArea : HullSlices -> HullSlice -> Float
 calculateSliceArea json hullSlice =
     -- Multiply by 2 to account for both sides of the hull: otherwise the area is just for the y>0 half-plane
     scale json hullSlice
@@ -182,7 +173,7 @@ calculateSliceArea json hullSlice =
         |> (*) 2
 
 
-interpolate : JsonHullSlices a -> HullSlices
+interpolate : HullSlices -> HullSlices
 interpolate json =
     let
         -- denormalize slices
@@ -283,23 +274,24 @@ interpolate json =
     }
 
 
-f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> JsonHullSlices {}
+f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> HullSlices
 f length breadth depth xmin ymin zmin slices draught =
-    { length = length
-    , breadth = breadth
-    , depth = depth
-    , xmin = xmin
-    , ymin = ymin
-    , zmin = zmin
-    , slices = slices
-    , draught = draught
+    { empty
+        | length = length
+        , breadth = breadth
+        , depth = depth
+        , xmin = xmin
+        , ymin = ymin
+        , zmin = zmin
+        , slices = slices
+        , draught = draught
     }
 
 
 decoder : Decode.Decoder HullSlices
 decoder =
     let
-        helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder (JsonHullSlices {})
+        helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
         helper ( depth, maybeDraught ) =
             Decode.succeed f
                 |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)

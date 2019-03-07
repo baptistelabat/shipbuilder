@@ -117,66 +117,73 @@ testSpline x y =
     \_ -> Expect.equal y <| Interpolate.Cubic.valueAt x s
 
 
+empty : HullSlices
+empty =
+    HullSlices.empty
+
+
 hullSlices : HullSlices
 hullSlices =
-    Result.withDefault HullSlices.empty (Decode.decodeString HullSlices.decoder TestData.hullSliceJson)
+    Result.withDefault empty (Decode.decodeString HullSlices.decoder TestData.hullSliceJson)
 
 
-cube : HullSlices.JsonHullSlices {}
+cube : HullSlices.HullSlices
 cube =
-    { length = StringValueInput.floatInput 200
-    , breadth = StringValueInput.floatInput 20
-    , depth = StringValueInput.floatInput 10
-    , xmin = -1
-    , ymin = -10
-    , zmin = 3
-    , slices =
-        [ { x = 0
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 1, 1, 1 ]
-          }
-        , { x = 0.5
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 1, 1, 1 ]
-          }
-        , { x = 1
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 1, 1, 1 ]
-          }
-        ]
-    , draught = StringValueInput.floatInput 2
+    { empty
+        | length = StringValueInput.floatInput 200
+        , breadth = StringValueInput.floatInput 20
+        , depth = StringValueInput.floatInput 10
+        , xmin = -1
+        , ymin = -10
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 2
     }
 
 
-toblerone : Float -> Float -> HullSlices.JsonHullSlices {}
+toblerone : Float -> Float -> HullSlices.HullSlices
 toblerone breadth depth =
-    { length = StringValueInput.floatInput 200
-    , breadth = StringValueInput.floatInput breadth
-    , depth = StringValueInput.floatInput depth
-    , xmin = -1
-    , ymin = -breadth / 2
-    , zmin = 3
-    , slices =
-        [ { x = 0
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 0.75, 0.5 ]
-          }
-        , { x = 0.5
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 0.75, 0.5 ]
-          }
-        , { x = 1
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 0.75, 0.5 ]
-          }
-        ]
-    , draught = StringValueInput.floatInput 2
+    { empty
+        | length = StringValueInput.floatInput 200
+        , breadth = StringValueInput.floatInput breadth
+        , depth = StringValueInput.floatInput depth
+        , xmin = -1
+        , ymin = -breadth / 2
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 2
     }
 
 
@@ -615,14 +622,15 @@ suite =
             [ test "zmin should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.floatInput
-                        , depth = 5 |> StringValueInput.floatInput
-                        , draught = 4 |> StringValueInput.floatInput
-                        , xmin = -5
-                        , ymin = -89
-                        , zmin = 88
-                        , length = 456 |> StringValueInput.floatInput
-                        , slices = []
+                        { empty
+                            | breadth = 10 |> StringValueInput.floatInput
+                            , depth = 5 |> StringValueInput.floatInput
+                            , draught = 4 |> StringValueInput.floatInput
+                            , xmin = -5
+                            , ymin = -89
+                            , zmin = 88
+                            , length = 456 |> StringValueInput.floatInput
+                            , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .zmin
@@ -631,14 +639,15 @@ suite =
             , test "zmax should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.floatInput
-                        , depth = 5 |> StringValueInput.floatInput
-                        , draught = 4 |> StringValueInput.floatInput
-                        , xmin = -5
-                        , ymin = -89
-                        , zmin = 88
-                        , length = 456 |> StringValueInput.floatInput
-                        , slices = []
+                        { empty
+                            | breadth = 10 |> StringValueInput.floatInput
+                            , depth = 5 |> StringValueInput.floatInput
+                            , draught = 4 |> StringValueInput.floatInput
+                            , xmin = -5
+                            , ymin = -89
+                            , zmin = 88
+                            , length = 456 |> StringValueInput.floatInput
+                            , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .zmax
@@ -647,14 +656,14 @@ suite =
             , test "y should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.floatInput
-                        , depth = 5 |> StringValueInput.floatInput
-                        , draught = 4 |> StringValueInput.floatInput
-                        , xmin = -5
-                        , ymin = -89
-                        , zmin = 88
-                        , length = 456 |> StringValueInput.floatInput
-                        , slices = []
+                        { empty
+                            | breadth = 10 |> StringValueInput.floatInput
+                            , depth = 5 |> StringValueInput.floatInput
+                            , draught = 4 |> StringValueInput.floatInput
+                            , xmin = -5
+                            , ymin = -89
+                            , zmin = 88
+                            , length = 456 |> StringValueInput.floatInput
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .y
