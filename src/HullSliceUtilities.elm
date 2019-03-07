@@ -1,6 +1,6 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
-    , calculateKzKyArea
+    , calculateTrapezoidMetricOnSlice
     , hullVolume
     , intersectBelow
     , prismaticCoefficient
@@ -23,13 +23,6 @@ type alias HullSlice =
 type alias HullSliceAsZYList =
     { x : Float
     , zylist : List ( Float, Float )
-    }
-
-
-type alias HullSliceKzArea =
-    { x : Float
-    , kz : Float
-    , area : Float
     }
 
 
@@ -94,23 +87,6 @@ calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
 
         _ ->
             0
-
-
-calculateKzKyArea : HullSliceAsZYList -> HullSliceKzArea
-calculateKzKyArea hsXY =
-    let
-        area_ =
-            calculateTrapezoidMetricOnSlice areaTrapezoid hsXY.zylist
-
-        kz_ =
-            case area_ == 0.0 of
-                True ->
-                    0
-
-                _ ->
-                    calculateTrapezoidMetricOnSlice zTrapezoid hsXY.zylist / area_
-    in
-    { x = hsXY.x, kz = kz_, area = area_ }
 
 
 hullVolume : { xmin : Float, xmax : Float } -> List { a | x : Float, area : Float } -> Float

@@ -237,9 +237,26 @@ addHullSlicesBeneathFreeSurface previousStep =
 
 addKzAreaForEachImmersedSlice : HullSlicesWithSlicesBeneathFreeSurface -> HullSlicesWithKzAreaForEachImmersedSlice
 addKzAreaForEachImmersedSlice previousStep =
+    let
+        calculateKzKyArea : HullSliceAsZYList -> HullSliceKzArea
+        calculateKzKyArea hsXY =
+            let
+                area_ =
+                    HullSliceUtilities.calculateTrapezoidMetricOnSlice HullSliceUtilities.areaTrapezoid hsXY.zylist
+
+                kz_ =
+                    case area_ == 0.0 of
+                        True ->
+                            0
+
+                        _ ->
+                            HullSliceUtilities.calculateTrapezoidMetricOnSlice HullSliceUtilities.zTrapezoid hsXY.zylist / area_
+            in
+            { x = hsXY.x, kz = kz_, area = area_ }
+    in
     case previousStep of
         HullSlicesWithSlicesBeneathFreeSurface hullSlices ->
-            HullSlicesWithKzAreaForEachImmersedSlice { hullSlices | kzAreaForEachImmersedSlice = List.map HullSliceUtilities.calculateKzKyArea hullSlices.hullSlicesBeneathFreeSurface.hullSlices }
+            HullSlicesWithKzAreaForEachImmersedSlice { hullSlices | kzAreaForEachImmersedSlice = List.map calculateKzKyArea hullSlices.hullSlicesBeneathFreeSurface.hullSlices }
 
 
 addDisplacement : HullSlicesWithKzAreaForEachImmersedSlice -> HullSlicesWithDisplacement
