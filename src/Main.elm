@@ -1810,6 +1810,16 @@ updateNoJs msg model =
 
         FreeCenterOfGravity block ->
             let
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | centerOfGravity = initPosition
+                    }
+            in
+            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
+
+        LockCenterOfGravityToCenterOfVolume block ->
+            let
                 centerOfVolume : Point
                 centerOfVolume =
                     getCenterOfVolume block
@@ -1822,16 +1832,6 @@ updateNoJs msg model =
                             , y = StringValueInput.fromNumber "m" "y" 1 centerOfVolume.y
                             , z = StringValueInput.fromNumber "m" "z" 1 centerOfVolume.z
                             }
-                    }
-            in
-            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
-
-        LockCenterOfGravityToCenterOfVolume block ->
-            let
-                updatedBlock : Block
-                updatedBlock =
-                    { block
-                        | centerOfGravity = initPosition
                     }
             in
             ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
