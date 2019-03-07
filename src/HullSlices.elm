@@ -242,7 +242,7 @@ addKzAreaForEachImmersedSlice previousStep =
         calculateKzKyArea hsXY =
             let
                 area_ =
-                    HullSliceUtilities.calculateTrapezoidMetricOnSlice HullSliceUtilities.areaTrapezoid hsXY.zylist
+                    HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.areaTrapezoid hsXY.zylist
 
                 kz_ =
                     case area_ == 0.0 of
@@ -250,7 +250,7 @@ addKzAreaForEachImmersedSlice previousStep =
                             0
 
                         _ ->
-                            HullSliceUtilities.calculateTrapezoidMetricOnSlice HullSliceUtilities.zTrapezoid hsXY.zylist / area_
+                            HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.zTrapezoid hsXY.zylist / area_
             in
             { x = hsXY.x, kz = kz_, area = area_ }
     in

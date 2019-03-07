@@ -1,7 +1,7 @@
 module HullSliceUtilities exposing
     ( areaTrapezoid
-    , calculateTrapezoidMetricOnSlice
     , hullVolume
+    , integrateTrapezoidMetricOnSlices
     , intersectBelow
     , volume
     , zTrapezoid
@@ -60,11 +60,11 @@ zTrapezoid ( z1, y1 ) ( z2, y2 ) =
     z * area
 
 
-calculateTrapezoidMetricOnSlice : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
-calculateTrapezoidMetricOnSlice trapezoidMetric denormalizedSlice =
-    case denormalizedSlice of
+integrateTrapezoidMetricOnSlices : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
+integrateTrapezoidMetricOnSlices trapezoidMetric denormalizedSlices =
+    case denormalizedSlices of
         ( z1, y1 ) :: ( z2, y2 ) :: rest ->
-            trapezoidMetric ( z1, y1 ) ( z2, y2 ) + calculateTrapezoidMetricOnSlice trapezoidMetric (( z2, y2 ) :: rest)
+            trapezoidMetric ( z1, y1 ) ( z2, y2 ) + integrateTrapezoidMetricOnSlices trapezoidMetric (( z2, y2 ) :: rest)
 
         _ ->
             0
