@@ -10,7 +10,7 @@ module HullSlices exposing
     , dB
     , decoder
     , demormalizedHullSlice
-    , denormalizedHSList
+    , denormalizeHullSlices
     , dictDecoder
     , dictEncoder
     , empty
@@ -187,7 +187,7 @@ interpolate json =
     let
         -- denormalize slices
         denormalizedSlices =
-            denormalizedHSList
+            denormalizeHullSlices
                 { length = json.length.value, breadth = json.breadth.value, depth = json.depth.value, xmin = json.xmin, ymin = json.ymin, zmin = json.zmin }
                 json.slices
 
@@ -1041,8 +1041,8 @@ kBz lo =
             0
 
 
-denormalizedHSList : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> List HullSlice -> List HullSlice
-denormalizedHSList param l =
+denormalizeHullSlices : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> List HullSlice -> List HullSlice
+denormalizeHullSlices param l =
     List.map (demormalizedHullSlice param) l
 
 
