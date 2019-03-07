@@ -3205,7 +3205,7 @@ viewModeller model =
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
                             , HullSlices.plotAreaCurve slices
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" slices.volume
                             , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
 
                             -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume

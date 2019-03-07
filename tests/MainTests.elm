@@ -1494,7 +1494,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .newVolume
+                                |> Maybe.map .volume
                             )
                 , test "select mpov. set draught to 1.0 and verify block coefficient" <|
                     \_ ->
@@ -1526,7 +1526,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .newVolume
+                                |> Maybe.map .volume
                             )
                 , test "select mpov. set draught to 2.0 and verify block coefficient" <|
                     \_ ->
@@ -1558,7 +1558,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .newVolume
+                                |> Maybe.map .volume
                             )
                 , test "select mpov. set draught to 3.0 and verify block coefficient" <|
                     \_ ->
@@ -1590,7 +1590,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .newVolume
+                                |> Maybe.map .volume
                             )
                 , test "select mpov. set draught to 4.0 and verify block coefficient" <|
                     \_ ->
@@ -1622,7 +1622,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .newVolume
+                                |> Maybe.map .volume
                             )
                 , test "select mpov. set draught to 5.0 and verify block coefficient" <|
                     \_ ->
@@ -1654,7 +1654,7 @@ suite =
                             (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
-                                |> Maybe.map .newVolume
+                                |> Maybe.map .volume
                             )
                 , test "select mpov. set draught to 6.0 and verify block coefficient" <|
                     \_ ->
