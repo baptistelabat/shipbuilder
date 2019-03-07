@@ -209,12 +209,12 @@ interpolate json =
             json.zmin + depth_ - draught_
 
         -- intersect below draught
-        intersectBelowSlicesZY =
+        hullSlicesBeneathFreeSurface =
             HullSliceUtilities.intersectBelow { xmin = json.xmin, xmax = json.xmin + length_ } zAtDraught denormalizedSlices
 
         -- calculate kz, ky and area
         lzya =
-            List.map HullSliceUtilities.zyaForSlice intersectBelowSlicesZY.lhs
+            List.map HullSliceUtilities.zyaForSlice hullSlicesBeneathFreeSurface.lhs
 
         areas =
             List.map .area lzya
@@ -223,10 +223,10 @@ interpolate json =
             HullSliceUtilities.volume lzya
 
         v2_ =
-            HullSliceUtilities.hullVolume { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
+            HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } lzya
 
         kbz_ =
-            hullKBz { xmin = intersectBelowSlicesZY.xmin, xmax = intersectBelowSlicesZY.xmax } lzya
+            hullKBz { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } lzya
 
         centreOfBuoyancy =
             case v2_ == 0.0 of
@@ -244,7 +244,7 @@ interpolate json =
             2 * v2_
 
         blockVolume_ =
-            blockVolume intersectBelowSlicesZY
+            blockVolume hullSlicesBeneathFreeSurface
 
         -- Block Coefficient = Volume of displacement ÷ blockVolume
         blockCoefficient_ =
@@ -256,7 +256,7 @@ interpolate json =
                     v2_ / blockVolume_
 
         prepareToExport_ =
-            prepareToExport zAtDraught intersectBelowSlicesZY
+            prepareToExport zAtDraught hullSlicesBeneathFreeSurface
 
         inertialMoment_ =
             inertialMoment prepareToExport_
