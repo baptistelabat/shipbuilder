@@ -29,7 +29,6 @@ type alias HullSliceXY =
 type alias ObjXKzKyArea =
     { x : Float
     , kz : Float
-    , ky : Float
     , area : Float
     }
 
@@ -122,16 +121,8 @@ calculateKzKyArea hsXY =
                     areaTrapezoid ( z1, y1 ) ( z2, y2 )
             in
             y * area
-
-        ky_ =
-            case area_ == 0.0 of
-                True ->
-                    0
-
-                _ ->
-                    calculateTrapezoidMetricOnSlice yTrapezoid hsXY.zylist / area_
     in
-    { x = hsXY.x, kz = kz_, ky = ky_, area = area_ }
+    { x = hsXY.x, kz = kz_, area = area_ }
 
 
 hullVolume : { xmin : Float, xmax : Float } -> List { a | x : Float, area : Float } -> Float

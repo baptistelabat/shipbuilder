@@ -124,7 +124,6 @@ type alias HullSliceXY =
 type alias ObjXKzKyArea =
     { x : Float
     , kz : Float
-    , ky : Float
     , area : Float
     }
 
@@ -1017,7 +1016,7 @@ hullKBz config list =
             config.xmax
 
         newList =
-            List.concat [ [ { x = xmin, area = 0.0, kz = 0, ky = 0 } ], list, [ { x = xmax, area = 0.0, kz = 0, ky = 0 } ] ]
+            List.concat [ [ { x = xmin, area = 0.0, kz = 0 } ], list, [ { x = xmax, area = 0.0, kz = 0 } ] ]
     in
     kBz newList
 
