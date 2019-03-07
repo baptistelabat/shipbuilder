@@ -839,11 +839,11 @@ suite =
                         |> Expect.within (Absolute 1.0e-2) 0.5
             ]
         , describe "HullSliceUtilities"
-            [ test "demormalizedHullSlice" <|
+            [ test "denormalizeHullSlice" <|
                 \_ ->
                     compareHs
                         { x = 0, zmin = -4.8, zmax = -0.6, y = [ 2, 1, 0 ] }
-                        (HullSlices.demormalizedHullSlice hs_param hs0)
+                        (HullSlices.denormalizeHullSlice hs_param hs0)
             , test "areaTrapezoid" <|
                 \_ ->
                     HullSliceUtilities.areaTrapezoid ( 0, 0 ) ( 1, 1 )

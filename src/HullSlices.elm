@@ -9,7 +9,7 @@ module HullSlices exposing
     , clip
     , dB
     , decoder
-    , demormalizedHullSlice
+    , denormalizeHullSlice
     , denormalizeHullSlices
     , dictDecoder
     , dictEncoder
@@ -1043,11 +1043,11 @@ kBz lo =
 
 denormalizeHullSlices : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> List HullSlice -> List HullSlice
 denormalizeHullSlices param l =
-    List.map (demormalizedHullSlice param) l
+    List.map (denormalizeHullSlice param) l
 
 
-demormalizedHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> HullSlice -> HullSlice
-demormalizedHullSlice param hs =
+denormalizeHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> HullSlice -> HullSlice
+denormalizeHullSlice param hs =
     -- y denormalisé dans intervalle [0,breadth/2]
     let
         denormalizedY : Float -> Float -> Float -> Float
