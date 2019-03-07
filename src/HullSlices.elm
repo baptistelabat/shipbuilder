@@ -216,9 +216,6 @@ interpolate json =
         kzKyAreaForEachSlice =
             List.map HullSliceUtilities.calculateKzKyArea hullSlicesBeneathFreeSurface.lhs
 
-        areas =
-            List.map .area kzKyAreaForEachSlice
-
         halfDisplacement =
             HullSliceUtilities.hullVolume { xmin = hullSlicesBeneathFreeSurface.xmin, xmax = hullSlicesBeneathFreeSurface.xmax } kzKyAreaForEachSlice
 
