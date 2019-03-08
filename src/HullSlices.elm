@@ -958,7 +958,7 @@ extractY hsXY =
 
 
 prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> HullSliceAsXYList
-prepareToExport z0 o =
+prepareToExport z0 hull =
     let
         extractFirstXY : HullSliceAsZYList -> ( Float, Float )
         extractFirstXY hullSliceAsZYList =
@@ -969,7 +969,7 @@ prepareToExport z0 o =
                 Just firstYValue ->
                     ( hullSliceAsZYList.x, firstYValue )
     in
-    { z = z0, xy = List.map extractFirstXY o.hullSlices }
+    { z = z0, xy = List.map extractFirstXY hull.hullSlices }
 
 
 blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> Float
