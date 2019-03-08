@@ -187,8 +187,8 @@ type HullSlicesWithSlicesBeneathFreeSurface
     = HullSlicesWithSlicesBeneathFreeSurface HullSlices
 
 
-type HullSlicesWithKzAreaForEachImmersedSlice
-    = HullSlicesWithKzAreaForEachImmersedSlice HullSlices
+type HullSlicesWithCentroidAreaForEachImmersedSlice
+    = HullSlicesWithCentroidAreaForEachImmersedSlice HullSlices
 
 
 type HullSlicesWithDisplacement
@@ -233,14 +233,14 @@ addHullSlicesBeneathFreeSurface previousStep =
             HullSlicesWithSlicesBeneathFreeSurface { hullSlices | hullSlicesBeneathFreeSurface = hullSlicesBeneathFreeSurface }
 
 
-addKzAreaForEachImmersedSlice : HullSlicesWithSlicesBeneathFreeSurface -> HullSlicesWithKzAreaForEachImmersedSlice
-addKzAreaForEachImmersedSlice previousStep =
+addCentroidAreaForEachImmersedSlice : HullSlicesWithSlicesBeneathFreeSurface -> HullSlicesWithCentroidAreaForEachImmersedSlice
+addCentroidAreaForEachImmersedSlice previousStep =
     let
-        calculateKzKyArea : HullSliceAsZYList -> HullSliceCentroidAndArea
-        calculateKzKyArea hsXY =
+        calculateCentroidArea : HullSliceAsZYList -> HullSliceCentroidAndArea
+        calculateCentroidArea hullSliceAsZYList =
             let
                 area_ =
-                    HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.areaTrapezoid hsXY.zylist
+                    HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.areaTrapezoid hullSliceAsZYList.zylist
 
                 centroid_ =
                     case area_ == 0.0 of
@@ -248,19 +248,19 @@ addKzAreaForEachImmersedSlice previousStep =
                             0
 
                         _ ->
-                            HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.zTrapezoid hsXY.zylist / area_
+                            HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.zTrapezoid hullSliceAsZYList.zylist / area_
             in
-            { x = hsXY.x, centroid = centroid_, area = area_ }
+            { x = hullSliceAsZYList.x, centroid = centroid_, area = area_ }
     in
     case previousStep of
         HullSlicesWithSlicesBeneathFreeSurface hullSlices ->
-            HullSlicesWithKzAreaForEachImmersedSlice { hullSlices | centroidAreaForEachImmersedSlice = List.map calculateKzKyArea hullSlices.hullSlicesBeneathFreeSurface.hullSlices }
+            HullSlicesWithCentroidAreaForEachImmersedSlice { hullSlices | centroidAreaForEachImmersedSlice = List.map calculateCentroidArea hullSlices.hullSlicesBeneathFreeSurface.hullSlices }
 
 
-addDisplacement : HullSlicesWithKzAreaForEachImmersedSlice -> HullSlicesWithDisplacement
+addDisplacement : HullSlicesWithCentroidAreaForEachImmersedSlice -> HullSlicesWithDisplacement
 addDisplacement previousStep =
     case previousStep of
-        HullSlicesWithKzAreaForEachImmersedSlice hullSlices ->
+        HullSlicesWithCentroidAreaForEachImmersedSlice hullSlices ->
             HullSlicesWithDisplacement { hullSlices | displacement = 2 * HullSliceUtilities.hullVolume { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice }
 
 
@@ -344,7 +344,7 @@ interpolate hullSlices =
     HullSlicesWithoutComputations hullSlices
         |> addDenormalizedSlices
         |> addHullSlicesBeneathFreeSurface
-        |> addKzAreaForEachImmersedSlice
+        |> addCentroidAreaForEachImmersedSlice
         |> addDisplacement
         |> addCentreOfBuoyancy
         |> addBlockCoefficient
