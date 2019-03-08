@@ -69,7 +69,6 @@ type alias HullSlices =
     , zmin : Float
     , slices : List HullSlice
     , draught : StringValueInput.FloatInput
-    , sliceAreas : List Float
     , blockCoefficient : Float
     , displacement : Float
     , centreOfBuoyancy : Float
@@ -96,7 +95,6 @@ empty =
         , centreOfBuoyancy = 0
         , displacement = 0
         , metacentre = 0
-        , sliceAreas = []
         , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
         , kzAreaForEachImmersedSlice = []
         }
@@ -341,11 +339,6 @@ addMetacentre previousStep =
             { hullSlices | metacentre = metacentre }
 
 
-addFullSliceAreas : HullSlices -> HullSlices
-addFullSliceAreas hullSlices =
-    { hullSlices | sliceAreas = List.map (calculateSliceArea hullSlices) hullSlices.slices }
-
-
 interpolate : HullSlices -> HullSlices
 interpolate hullSlices =
     HullSlicesWithoutComputations hullSlices
@@ -356,7 +349,6 @@ interpolate hullSlices =
         |> addCentreOfBuoyancy
         |> addBlockCoefficient
         |> addMetacentre
-        |> addFullSliceAreas
 
 
 f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> HullSlices
