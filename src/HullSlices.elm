@@ -75,7 +75,7 @@ type alias HullSlices =
     , metacentre : Float
     , denormalizedSlices : List HullSlice
     , hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
-    , kzAreaForEachImmersedSlice : List HullSliceCentroidAndArea
+    , centroidAreaForEachImmersedSlice : List HullSliceCentroidAndArea
     }
 
 
@@ -96,7 +96,7 @@ empty =
         , displacement = 0
         , metacentre = 0
         , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
-        , kzAreaForEachImmersedSlice = []
+        , centroidAreaForEachImmersedSlice = []
         }
 
 
@@ -254,14 +254,14 @@ addKzAreaForEachImmersedSlice previousStep =
     in
     case previousStep of
         HullSlicesWithSlicesBeneathFreeSurface hullSlices ->
-            HullSlicesWithKzAreaForEachImmersedSlice { hullSlices | kzAreaForEachImmersedSlice = List.map calculateKzKyArea hullSlices.hullSlicesBeneathFreeSurface.hullSlices }
+            HullSlicesWithKzAreaForEachImmersedSlice { hullSlices | centroidAreaForEachImmersedSlice = List.map calculateKzKyArea hullSlices.hullSlicesBeneathFreeSurface.hullSlices }
 
 
 addDisplacement : HullSlicesWithKzAreaForEachImmersedSlice -> HullSlicesWithDisplacement
 addDisplacement previousStep =
     case previousStep of
         HullSlicesWithKzAreaForEachImmersedSlice hullSlices ->
-            HullSlicesWithDisplacement { hullSlices | displacement = 2 * HullSliceUtilities.hullVolume { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.kzAreaForEachImmersedSlice }
+            HullSlicesWithDisplacement { hullSlices | displacement = 2 * HullSliceUtilities.hullVolume { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice }
 
 
 addCentreOfBuoyancy : HullSlicesWithDisplacement -> HullSlicesWithCentreOfBuoyancy
@@ -271,7 +271,7 @@ addCentreOfBuoyancy previousStep =
             let
                 kbz_ : Float
                 kbz_ =
-                    hullKBz { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.kzAreaForEachImmersedSlice
+                    hullKBz { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice
 
                 centreOfBuoyancy : Float
                 centreOfBuoyancy =
@@ -455,7 +455,7 @@ plotAreaCurve slices =
     let
         xys : List ( Float, Float )
         xys =
-            List.map (\c -> ( c.x, c.area )) slices.kzAreaForEachImmersedSlice
+            List.map (\c -> ( c.x, c.area )) slices.centroidAreaForEachImmersedSlice
     in
     div [ id "area-curve-plot-container" ]
         [ LineChart.viewCustom

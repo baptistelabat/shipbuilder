@@ -284,7 +284,7 @@ suite =
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
-                    Expect.equal [ 0.06183408481917592 ] (hullSlices |> HullSlices.setBreadth "10" |> .kzAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
+                    Expect.equal [ 0.06183408481917592 ] (hullSlices |> HullSlices.setBreadth "10" |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
             , describe "Clipper" <|
                 [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->
