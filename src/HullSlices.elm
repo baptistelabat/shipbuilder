@@ -113,6 +113,12 @@ type alias HullSliceAsZYList =
     }
 
 
+type alias HullSliceAsXYList =
+    { z : Float
+    , xy : List ( Float, Float )
+    }
+
+
 type alias HullSliceCentroidAndArea =
     { x : Float
     , centroid : Float
@@ -315,6 +321,7 @@ addMetacentre previousStep =
                 zAtDraught =
                     hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
+                prepareToExport_ : HullSliceAsXYList
                 prepareToExport_ =
                     prepareToExport zAtDraught hullSlices.hullSlicesBeneathFreeSurface
 
@@ -831,7 +838,7 @@ zminForEachTrapezoid curve =
         |> List.map (\z -> toFloat z / (toFloat n - 1.0) * (curve.zmax - curve.zmin) + curve.zmin)
 
 
-exportCSV : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List { xy : List ( Float, Float ), z : Float }
+exportCSV : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List HullSliceAsXYList
 exportCSV config model =
     let
         ldata =
@@ -906,7 +913,7 @@ zGTrapezoid ( z1, y1 ) ( z2, y2 ) =
     ((b + 2 * a) * h) / (3 * (a + b))
 
 
-inertialMoment : { z : Float, xy : List ( Float, Float ) } -> Float
+inertialMoment : HullSliceAsXYList -> Float
 inertialMoment o =
     let
         xl =
@@ -954,7 +961,7 @@ extractY hsXY =
         |> List.map Tuple.second
 
 
-prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> { z : Float, xy : List ( Float, Float ) }
+prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> HullSliceAsXYList
 prepareToExport z0 o =
     let
         f_ : HullSliceAsZYList -> List ( Float, Float ) -> List ( Float, Float )
