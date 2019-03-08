@@ -965,17 +965,17 @@ prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullS
 prepareToExport z0 o =
     let
         f_ : HullSliceAsZYList -> List ( Float, Float ) -> List ( Float, Float )
-        f_ hsXY list =
+        f_ hullSliceAsZYList list =
             let
                 maybeFirstYValue =
-                    List.head <| extractY hsXY
+                    List.head <| extractY hullSliceAsZYList
             in
             case maybeFirstYValue of
                 Nothing ->
-                    list ++ [ ( hsXY.x, 0 ) ]
+                    list ++ [ ( hullSliceAsZYList.x, 0 ) ]
 
                 Just firstYValue ->
-                    list ++ [ ( hsXY.x, firstYValue ) ]
+                    list ++ [ ( hullSliceAsZYList.x, firstYValue ) ]
 
         fl : List HullSliceAsZYList -> List ( Float, Float ) -> List ( Float, Float )
         fl lxy l =
