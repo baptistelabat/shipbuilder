@@ -18,7 +18,6 @@ module HullSlices exposing
     , encoder
     , exportCSV
     , hullKBz
-    , inertialMoment
     , interpolate
     , modifiedBreadth
     , plotAreaCurve
