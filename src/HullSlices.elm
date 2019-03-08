@@ -17,7 +17,7 @@ module HullSlices exposing
     , encodeSubModel
     , encoder
     , exportCSV
-    , hullKBz
+    , getHullCentroid
     , interpolate
     , modifiedBreadth
     , plotAreaCurve
@@ -275,7 +275,7 @@ addCentreOfBuoyancy previousStep =
             let
                 kbz_ : Float
                 kbz_ =
-                    hullKBz { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice
+                    getHullCentroid { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice
 
                 centreOfBuoyancy : Float
                 centreOfBuoyancy =
@@ -1070,8 +1070,8 @@ blockVolume o =
     res
 
 
-hullKBz : { xmin : Float, xmax : Float } -> List HullSliceCentroidAndArea -> Float
-hullKBz config list =
+getHullCentroid : { xmin : Float, xmax : Float } -> List HullSliceCentroidAndArea -> Float
+getHullCentroid config list =
     let
         xmin =
             config.xmin

@@ -953,8 +953,8 @@ suite =
             \_ ->
                 HullSliceUtilities.hullVolume { xmin = 0, xmax = 100 } [ { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 } ]
                     |> Expect.within epsAbsolute 1000.0
-        , test "hullKBz" <|
+        , test "getHullCentroid" <|
             \_ ->
-                HullSlices.hullKBz { xmin = 0, xmax = 100 } [ { x = 50, area = 2, centroid = 1 } ]
+                HullSlices.getHullCentroid { xmin = 0, xmax = 100 } [ { x = 50, area = 2, centroid = 1 } ]
                     |> Expect.within epsAbsolute 100.0
         ]
