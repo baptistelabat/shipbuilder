@@ -273,8 +273,8 @@ addCentreOfBuoyancy previousStep =
     case previousStep of
         HullSlicesWithDisplacement hullSlices ->
             let
-                kbz_ : Float
-                kbz_ =
+                hullCentroid : Float
+                hullCentroid =
                     getHullCentroid { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice
 
                 centreOfBuoyancy : Float
@@ -284,7 +284,7 @@ addCentreOfBuoyancy previousStep =
                             0.0
 
                         False ->
-                            hullSlices.zmin + hullSlices.depth.value - (kbz_ / (hullSlices.displacement / 2))
+                            hullSlices.zmin + hullSlices.depth.value - (hullCentroid / (hullSlices.displacement / 2))
             in
             HullSlicesWithCentreOfBuoyancy { hullSlices | centreOfBuoyancy = centreOfBuoyancy }
 
