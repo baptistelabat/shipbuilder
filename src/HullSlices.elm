@@ -22,7 +22,6 @@ module HullSlices exposing
     , interpolate
     , modifiedBreadth
     , plotAreaCurve
-    , prepareToExport
     , prismaticCoefficient
     , scale
     , setBreadth
