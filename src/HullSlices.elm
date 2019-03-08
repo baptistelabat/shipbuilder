@@ -915,42 +915,39 @@ zGTrapezoid ( z1, y1 ) ( z2, y2 ) =
 getInertialMoment : HullSliceAsXYList -> Float
 getInertialMoment o =
     let
-        xl =
+        xs =
             List.map Tuple.first o.xy
 
-        yl =
+        ys =
             List.map Tuple.second o.xy
 
-        len_ =
-            List.length yl
+        listLength =
+            List.length ys
 
-        m_xmin =
-            List.minimum xl
+        maybeXmin =
+            List.minimum xs
 
-        m_xmax =
-            List.maximum xl
+        maybeXmax =
+            List.maximum xs
 
-        im =
-            case ( m_xmin, m_xmax ) of
+        inertialMoment =
+            case ( maybeXmin, maybeXmax ) of
                 ( Just xmin, Just xmax ) ->
                     let
-                        sum_ =
-                            List.foldr (+) 0.0 <| List.map (\u -> u * u * u) yl
-
-                        im1 =
-                            if len_ == 0 then
-                                0
-
-                            else
-                                -- cf architecture navale p307
-                                2 / 3 * (xmax - xmin) * sum_ / toFloat len_
+                        sumOfCubes =
+                            List.foldr (+) 0.0 <| List.map (\u -> u * u * u) ys
                     in
-                    im1
+                    if listLength == 0 then
+                        0
+
+                    else
+                        -- cf architecture navale p307
+                        2 / 3 * (xmax - xmin) * sumOfCubes / toFloat listLength
 
                 _ ->
                     0
     in
-    im
+    inertialMoment
 
 
 extractY : HullSliceAsZYList -> List Float
