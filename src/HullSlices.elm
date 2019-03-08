@@ -1096,11 +1096,11 @@ hullKBz config list =
         newList =
             List.concat [ [ { x = xmin, area = 0.0, centroid = 0 } ], list, [ { x = xmax, area = 0.0, centroid = 0 } ] ]
     in
-    kBz newList
+    calculateCentroid newList
 
 
-kBz : List HullSliceCentroidAndArea -> Float
-kBz lo =
+calculateCentroid : List HullSliceCentroidAndArea -> Float
+calculateCentroid lo =
     case lo of
         o1 :: o2 :: rest ->
             let
@@ -1125,7 +1125,7 @@ kBz lo =
                 value =
                     ((a1 * z1 + a2 * z2) / 2.0) * (x2 - x1)
             in
-            value + kBz (o2 :: rest)
+            value + calculateCentroid (o2 :: rest)
 
         _ ->
             0
