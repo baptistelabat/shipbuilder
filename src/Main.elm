@@ -2559,7 +2559,7 @@ msg2json model action =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
                         intersectBelowSlicesZY =
-                            HullSliceUtilities.intersectBelow { xmin = xmin, xmax = xmax } zAtDraught_ hullSlices.denormalizedSlices
+                            HullSlices.intersectBelow { xmin = xmin, xmax = xmax } zAtDraught_ hullSlices.denormalizedSlices
                     in
                     Just { tag = "export-submodel", data = HullSlices.encodeSubModel intersectBelowSlicesZY }
 

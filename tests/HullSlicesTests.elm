@@ -928,7 +928,7 @@ suite =
                         ]
         , test "intersectBelowSlicesZY" <|
             \_ ->
-                HullSliceUtilities.intersectBelow { xmin = 0, xmax = 100 }
+                HullSlices.intersectBelow { xmin = 0, xmax = 100 }
                     -3
                     [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
                     , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
