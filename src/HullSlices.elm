@@ -960,32 +960,16 @@ extractY hsXY =
 prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> HullSliceAsXYList
 prepareToExport z0 o =
     let
-        f_ : HullSliceAsZYList -> List ( Float, Float ) -> List ( Float, Float )
-        f_ hullSliceAsZYList list =
-            let
-                maybeFirstYValue =
-                    List.head <| extractY hullSliceAsZYList
-            in
-            case maybeFirstYValue of
+        extractFirstXY : HullSliceAsZYList -> ( Float, Float )
+        extractFirstXY hullSliceAsZYList =
+            case List.head <| extractY hullSliceAsZYList of
                 Nothing ->
-                    list ++ [ ( hullSliceAsZYList.x, 0 ) ]
+                    ( hullSliceAsZYList.x, 0 )
 
                 Just firstYValue ->
-                    list ++ [ ( hullSliceAsZYList.x, firstYValue ) ]
-
-        fl : List HullSliceAsZYList -> List ( Float, Float ) -> List ( Float, Float )
-        fl hullSlices l =
-            case hullSlices of
-                [] ->
-                    l
-
-                firstSlice :: otherSlices ->
-                    fl otherSlices (f_ firstSlice l)
-
-        l1 =
-            fl o.hullSlices []
+                    ( hullSliceAsZYList.x, firstYValue )
     in
-    { z = z0, xy = l1 }
+    { z = z0, xy = List.map extractFirstXY o.hullSlices }
 
 
 blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> Float
