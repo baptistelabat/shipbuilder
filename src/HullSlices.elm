@@ -326,7 +326,7 @@ addMetacentre previousStep =
 
                 inertialMoment_ : Float
                 inertialMoment_ =
-                    inertialMoment prepareToExport_
+                    getInertialMoment prepareToExport_
 
                 bM : Float
                 bM =
@@ -912,8 +912,8 @@ zGTrapezoid ( z1, y1 ) ( z2, y2 ) =
     ((b + 2 * a) * h) / (3 * (a + b))
 
 
-inertialMoment : HullSliceAsXYList -> Float
-inertialMoment o =
+getInertialMoment : HullSliceAsXYList -> Float
+getInertialMoment o =
     let
         xl =
             List.map Tuple.first o.xy
