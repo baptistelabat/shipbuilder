@@ -323,7 +323,7 @@ addMetacentre previousStep =
 
                 horizontalHullSliceAtDraught : HullSliceAsXYList
                 horizontalHullSliceAtDraught =
-                    prepareToExport zAtDraught hullSlices.hullSlicesBeneathFreeSurface
+                    extractHorizontalSliceAtZ zAtDraught hullSlices
 
                 inertialMoment_ : Float
                 inertialMoment_ =
@@ -839,16 +839,12 @@ zminForEachTrapezoid curve =
 
 
 exportCSV : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List HullSliceAsXYList
-exportCSV config model =
+exportCSV config hullSlices =
     let
         horizontalSlices =
             List.map
                 (\z ->
-                    let
-                        intersectBelowSlicesZY =
-                            intersectBelow z model
-                    in
-                    prepareToExport z intersectBelowSlicesZY
+                    extractHorizontalSliceAtZ z hullSlices
                 )
                 config.ldecks
     in
@@ -958,9 +954,12 @@ extractY hsXY =
         |> List.map Tuple.second
 
 
-prepareToExport : Float -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> HullSliceAsXYList
-prepareToExport z0 hull =
+extractHorizontalSliceAtZ : Float -> HullSlices -> HullSliceAsXYList
+extractHorizontalSliceAtZ z0 hullSlices =
     let
+        hullSlicesBelowZ0 =
+            intersectBelow z0 hullSlices
+
         extractFirstXY : HullSliceAsZYList -> ( Float, Float )
         extractFirstXY hullSliceAsZYList =
             case List.head <| extractY hullSliceAsZYList of
@@ -970,7 +969,7 @@ prepareToExport z0 hull =
                 Just firstYValue ->
                     ( hullSliceAsZYList.x, firstYValue )
     in
-    { z = z0, xy = List.map extractFirstXY hull.hullSlices }
+    { z = z0, xy = List.map extractFirstXY hullSlicesBelowZ0.hullSlices }
 
 
 blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> Float
