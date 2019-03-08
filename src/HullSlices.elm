@@ -461,17 +461,9 @@ setDepth depth hullSlices =
 plotAreaCurve : HullSlices -> Html msg
 plotAreaCurve slices =
     let
-        n : Int
-        n =
-            List.length slices.sliceAreas
-
-        xs : List Float
-        xs =
-            List.map (\idx -> slices.xmin + slices.length.value * toFloat idx / (toFloat n - 1.0)) <| List.range 0 (n - 1)
-
         xys : List ( Float, Float )
         xys =
-            List.map2 Tuple.pair xs slices.sliceAreas
+            List.map (\c -> ( c.x, c.area )) slices.kzAreaForEachImmersedSlice
     in
     div [ id "area-curve-plot-container" ]
         [ LineChart.viewCustom
