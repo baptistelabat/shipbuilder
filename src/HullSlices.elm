@@ -840,7 +840,7 @@ zminForEachTrapezoid curve =
 exportCSV : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List HullSliceAsXYList
 exportCSV config model =
     let
-        ldata =
+        horizontalSlices =
             List.map
                 (\z ->
                     let
@@ -851,7 +851,7 @@ exportCSV config model =
                 )
                 config.ldecks
     in
-    ldata
+    horizontalSlices
 
 
 tuple2Encoder : (a -> Encode.Value) -> (b -> Encode.Value) -> ( a, b ) -> Encode.Value
