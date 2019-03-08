@@ -320,13 +320,13 @@ addMetacentre previousStep =
                 zAtDraught =
                     hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
-                prepareToExport_ : HullSliceAsXYList
-                prepareToExport_ =
+                horizontalHullSliceAtDraught : HullSliceAsXYList
+                horizontalHullSliceAtDraught =
                     prepareToExport zAtDraught hullSlices.hullSlicesBeneathFreeSurface
 
                 inertialMoment_ : Float
                 inertialMoment_ =
-                    getInertialMoment prepareToExport_
+                    getInertialMoment horizontalHullSliceAtDraught
 
                 bM : Float
                 bM =
