@@ -928,14 +928,21 @@ suite =
                         ]
         , test "intersectBelowSlicesZY" <|
             \_ ->
-                HullSlices.intersectBelow { xmin = 0, xmax = 100 }
-                    -3
-                    [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
-                    , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
-                    , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
-                    , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
-                    , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
-                    ]
+                let
+                    hull =
+                        { empty
+                            | xmin = 0
+                            , length = 100 |> StringValueInput.asValueIn StringValueInput.emptyFloat
+                            , denormalizedSlices =
+                                [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                                , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                                , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
+                                , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                                , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                                ]
+                        }
+                in
+                HullSlices.intersectBelow -3 hull
                     |> Expect.equal
                         { hullSlices =
                             [ { x = 25, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }

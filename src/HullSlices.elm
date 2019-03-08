@@ -233,7 +233,7 @@ addHullSlicesBeneathFreeSurface previousStep =
 
                 hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
                 hullSlicesBeneathFreeSurface =
-                    intersectBelow { xmin = hullSlices.xmin, xmax = hullSlices.xmin + hullSlices.length.value } zAtDraught hullSlices.denormalizedSlices
+                    intersectBelow zAtDraught hullSlices
             in
             HullSlicesWithSlicesBeneathFreeSurface { hullSlices | hullSlicesBeneathFreeSurface = hullSlicesBeneathFreeSurface }
 
@@ -846,7 +846,7 @@ exportCSV config model =
                 (\z ->
                     let
                         intersectBelowSlicesZY =
-                            intersectBelow { xmin = config.xmin, xmax = config.xmax } z model.denormalizedSlices
+                            intersectBelow z model
                     in
                     prepareToExport z intersectBelowSlicesZY
                 )
@@ -1137,13 +1137,13 @@ denormalizeHullSlice param hs =
     res
 
 
-intersectBelow : { xmin : Float, xmax : Float } -> Float -> List HullSlice -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
-intersectBelow config z0 listHS =
+intersectBelow : Float -> HullSlices -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
+intersectBelow z0 hullSlices =
     -- CN List HullSlice supposed denormalized !!!
     let
         -- filter HullSlice with zmax <= z0
         filterHS =
-            List.filter (\u -> u.zmax > z0 && not (List.isEmpty u.y)) listHS
+            List.filter (\u -> u.zmax > z0 && not (List.isEmpty u.y)) hullSlices.denormalizedSlices
 
         toXY_ : HullSlice -> HullSliceAsZYList
         toXY_ hs =
@@ -1267,7 +1267,7 @@ intersectBelow config z0 listHS =
                     xmin_
 
         xmin =
-            xMinAtZ config.xmin listHS
+            xMinAtZ hullSlices.xmin hullSlices.denormalizedSlices
 
         xMaxAtZ : Float -> List HullSlice -> Float
         xMaxAtZ xmax_ listHS_ =
@@ -1283,6 +1283,6 @@ intersectBelow config z0 listHS =
                     xmax_
 
         xmax =
-            xMaxAtZ config.xmax (List.reverse listHS)
+            xMaxAtZ (hullSlices.xmin + hullSlices.length.value) (List.reverse hullSlices.denormalizedSlices)
     in
     { xmin = xmin, xmax = xmax, hullSlices = lhsXY_AtZ }

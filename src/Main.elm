@@ -2549,17 +2549,11 @@ msg2json model action =
 
                 Just hullSlices ->
                     let
-                        xmin =
-                            hullSlices.xmin
-
-                        xmax =
-                            hullSlices.xmin + hullSlices.length.value
-
                         zAtDraught_ =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
                         intersectBelowSlicesZY =
-                            HullSlices.intersectBelow { xmin = xmin, xmax = xmax } zAtDraught_ hullSlices.denormalizedSlices
+                            HullSlices.intersectBelow zAtDraught_ hullSlices
                     in
                     Just { tag = "export-submodel", data = HullSlices.encodeSubModel intersectBelowSlicesZY }
 
