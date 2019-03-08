@@ -974,13 +974,13 @@ prepareToExport z0 o =
                     list ++ [ ( hullSliceAsZYList.x, firstYValue ) ]
 
         fl : List HullSliceAsZYList -> List ( Float, Float ) -> List ( Float, Float )
-        fl lxy l =
-            case lxy of
+        fl hullSlices l =
+            case hullSlices of
                 [] ->
                     l
 
-                x :: xs ->
-                    fl xs (f_ x l)
+                firstSlice :: otherSlices ->
+                    fl otherSlices (f_ firstSlice l)
 
         l1 =
             fl o.hullSlices []
