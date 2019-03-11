@@ -1,12 +1,95 @@
-module TestData exposing (blockA, blockB, blockC, flags, hullSliceJson, initialModel, initialView, valueToIndentedString, viewport, viewportJsonString, viewports, viewportsJsonString)
+module TestData exposing
+    ( blockA
+    , blockB
+    , blockC
+    , cube
+    , flags
+    , hullSliceJson
+    , initialModel
+    , initialView
+    , toblerone
+    , valueToIndentedString
+    , viewport
+    , viewportJsonString
+    , viewports
+    , viewportsJsonString
+    )
 
 import Color
 import Html exposing (Html)
+import HullSlices exposing (HullSlices)
 import Json.Encode as Encode
 import Main exposing (..)
 import Math.Vector3 exposing (..)
 import StringValueInput
 import Viewports exposing (..)
+
+
+empty : HullSlices
+empty =
+    HullSlices.empty
+
+
+cube : HullSlices.HullSlices
+cube =
+    { empty
+        | length = StringValueInput.floatInput 200
+        , breadth = StringValueInput.floatInput 20
+        , depth = StringValueInput.floatInput 10
+        , xmin = -1
+        , ymin = -10
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 2
+    }
+        |> HullSlices.fillHullSliceMetrics
+
+
+toblerone : Float -> Float -> HullSlices.HullSlices
+toblerone breadth depth =
+    { empty
+        | length = StringValueInput.floatInput 200
+        , breadth = StringValueInput.floatInput breadth
+        , depth = StringValueInput.floatInput depth
+        , xmin = -1
+        , ymin = -breadth / 2
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 2
+    }
+        |> HullSlices.fillHullSliceMetrics
 
 
 valueToIndentedString : Encode.Value -> String

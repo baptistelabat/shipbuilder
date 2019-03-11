@@ -67,68 +67,6 @@ hullSlices =
     Result.withDefault empty (Decode.decodeString EncodersDecoders.decoder TestData.hullSliceJson)
 
 
-cube : HullSlices.HullSlices
-cube =
-    { empty
-        | length = StringValueInput.floatInput 200
-        , breadth = StringValueInput.floatInput 20
-        , depth = StringValueInput.floatInput 10
-        , xmin = -1
-        , ymin = -10
-        , zmin = 3
-        , slices =
-            [ { x = 0
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            , { x = 0.5
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            , { x = 1
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            ]
-        , draught = StringValueInput.floatInput 2
-    }
-        |> HullSlices.fillHullSliceMetrics
-
-
-toblerone : Float -> Float -> HullSlices.HullSlices
-toblerone breadth depth =
-    { empty
-        | length = StringValueInput.floatInput 200
-        , breadth = StringValueInput.floatInput breadth
-        , depth = StringValueInput.floatInput depth
-        , xmin = -1
-        , ymin = -breadth / 2
-        , zmin = 3
-        , slices =
-            [ { x = 0
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 0.75, 0.5 ]
-              }
-            , { x = 0.5
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 0.75, 0.5 ]
-              }
-            , { x = 1
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 0.75, 0.5 ]
-              }
-            ]
-        , draught = StringValueInput.floatInput 2
-    }
-        |> HullSlices.fillHullSliceMetrics
-
-
 makeTriplet : a -> b -> c -> ( a, b, c )
 makeTriplet x y z =
     ( x, y, z )
@@ -498,19 +436,19 @@ suite =
                                     0.20027049633242555
                     , test "Cube" <|
                         \_ ->
-                            List.map (HullSlices.calculateSliceArea cube) cube.slices
+                            List.map (HullSlices.calculateSliceArea TestData.cube) TestData.cube.slices
                                 |> Expect.equal
-                                    [ cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value ]
+                                    [ TestData.cube.breadth.value * TestData.cube.draught.value, TestData.cube.breadth.value * TestData.cube.draught.value, TestData.cube.breadth.value * TestData.cube.draught.value ]
                     , test "Cube after changing breadth" <|
                         \_ ->
-                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.fillHullSliceMetrics cube) cube.slices
+                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.fillHullSliceMetrics TestData.cube) TestData.cube.slices
                                 |> Expect.equal
-                                    [ 10 * cube.draught.value, 10 * cube.draught.value, 10 * cube.draught.value ]
+                                    [ 10 * TestData.cube.draught.value, 10 * TestData.cube.draught.value, 10 * TestData.cube.draught.value ]
                     , fuzz (Fuzz.map3 makeTriplet positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|
                         \( breadth, depth, draughtDividedByDepth ) ->
                             let
                                 t =
-                                    toblerone breadth depth
+                                    TestData.toblerone breadth depth
                                         |> setDraught (draughtDividedByDepth * depth)
 
                                 expectedArea =
@@ -540,7 +478,7 @@ suite =
                                     0.00005983669402257387
 
                                 t =
-                                    toblerone breadth depth
+                                    TestData.toblerone breadth depth
                                         |> setDraught (draughtDividedByDepth * depth)
 
                                 expectedArea =
