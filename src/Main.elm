@@ -37,6 +37,7 @@ port module Main exposing
     , view
     )
 
+import AreaCurve
 import Browser
 import Browser.Dom
 import Browser.Events
@@ -45,6 +46,7 @@ import CoordinatesTransform exposing (CoordinatesTransform)
 import DateFormat
 import Dict exposing (Dict)
 import DictList
+import EncodersDecoders
 import ExtraEvents exposing (onKeyDown)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
@@ -52,7 +54,6 @@ import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p
 import Html.Attributes exposing (accept, class, disabled, download, for, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
-import HullSliceUtilities
 import HullSlices exposing (HullSlices)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -594,7 +595,7 @@ restoreSaveInModel model saveFile =
         cleanModel =
             initModel
                 { buildSHA = model.build
-                , hullsJSON = Encode.encode 0 <| HullSlices.dictEncoder model.slices
+                , hullsJSON = Encode.encode 0 <| EncodersDecoders.dictEncoder model.slices
                 }
     in
     case maybeCoordinatesTransform of
@@ -1364,7 +1365,7 @@ initModel flag =
     , slices =
         let
             cuts =
-                case Decode.decodeString HullSlices.dictDecoder flag.hullsJSON of
+                case Decode.decodeString EncodersDecoders.dictDecoder flag.hullsJSON of
                     Ok c ->
                         c
 
@@ -1511,7 +1512,7 @@ encodeSTL : String -> HullSlices -> Encode.Value
 encodeSTL name hullSlices =
     Encode.object
         [ ( "name", Encode.string name )
-        , ( "data", HullSlices.encoder hullSlices )
+        , ( "data", EncodersDecoders.encoder hullSlices )
         ]
 
 
@@ -2250,17 +2251,13 @@ updateFromJs jsmsg model =
 updateModelToJs : ToJsMsg -> Model -> Model
 updateModelToJs msg model =
     case msg of
-        ExportCSV hullReference ->
-            let
-                _ =
-                    Debug.log "ExportCSV for " hullReference
-            in
+        ExportCSV _ ->
             model
 
-        ExportSTL hullReference ->
+        ExportSTL _ ->
             model
 
-        ExportSubModel hullReference ->
+        ExportSubModel _ ->
             model
 
         OpenSaveFile ->
@@ -2553,22 +2550,13 @@ msg2json model action =
 
                 Just hullSlices ->
                     let
-                        xmin =
-                            hullSlices.xmin
-
-                        xmax =
-                            hullSlices.xmin + hullSlices.length.value
-
                         zAtDraught_ =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
                         intersectBelowSlicesZY =
-                            HullSliceUtilities.intersectBelow { xmin = xmin, xmax = xmax } zAtDraught_ hullSlices.denormalizedslices
-
-                        _ =
-                            Debug.log "model.partitions" model.partitions
+                            HullSlices.intersectBelow zAtDraught_ hullSlices
                     in
-                    Just { tag = "export-submodel", data = HullSlices.encodeSubModel intersectBelowSlicesZY }
+                    Just { tag = "export-submodel", data = EncodersDecoders.encodeSubModel intersectBelowSlicesZY }
 
         ExportCSV hullReference ->
             case Dict.get hullReference model.slices of
@@ -2583,14 +2571,11 @@ msg2json model action =
                         computedPartitions =
                             computeDecks model.partitions.decks
 
-                        _ =
-                            Debug.log "computedPartitions" computedPartitions
-
                         ldecks =
                             List.map (\u -> u.position) computedPartitions
 
-                        datas =
-                            HullSlices.exportCSV
+                        hullSlicesAsXYList =
+                            EncodersDecoders.exportHullSlicesAsXYList
                                 { ldecks = ldecks
                                 , xmin = hullSlices.xmin
                                 , xmax = hullSlices.xmin + hullSlices.length.value
@@ -2600,9 +2585,7 @@ msg2json model action =
                     in
                     Just
                         { tag = "export-csv"
-                        , data = HullSlices.encodeCSV datas
-
-                        -- , data = Encode.string "datas"
+                        , data = Encode.list EncodersDecoders.hullSliceAsXYListEncoder hullSlicesAsXYList
                         }
 
         ChangeBlockColor block newColor ->
@@ -2650,7 +2633,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
 
         ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
@@ -2658,7 +2641,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3214,13 +3197,13 @@ viewModeller model =
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
-                            , HullSlices.plotAreaCurve slices
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" slices.newVolume
-                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" slices.blockCoefficient
+                            , AreaCurve.view slices
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n 2 <| slices.displacement)
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 <| slices.blockCoefficient)
 
                             -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
-                            , viewModellerSimpleKpi "KB" "KB" slices.centreOfBuoyancy
-                            , viewModellerSimpleKpi "KM" "KM" slices.metacentre
+                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 2 <| slices.centreOfBuoyancy)
+                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 2 <| slices.metacentre)
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"

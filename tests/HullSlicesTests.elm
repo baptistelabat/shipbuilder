@@ -1,70 +1,15 @@
 module HullSlicesTests exposing (suite)
 
+import CustomFuzzers exposing (..)
+import EncodersDecoders
 import Expect exposing (..)
 import Fuzz
-import HullSliceUtilities
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode
 import StringValueInput
 import Test exposing (..)
 import TestData
-
-
-positiveFloat : Fuzz.Fuzzer Float
-positiveFloat =
-    Fuzz.floatRange 1.0e-6 1.0e8
-
-
-negativeFloat : Fuzz.Fuzzer Float
-negativeFloat =
-    Fuzz.map (\x -> -x) positiveFloat
-
-
-nonZero : Fuzz.Fuzzer Float
-nonZero =
-    let
-        chooseFuzzer : Bool -> Float -> Float -> Float
-        chooseFuzzer choosePositive positive negative =
-            if choosePositive then
-                positive
-
-            else
-                negative
-    in
-    Fuzz.map3 chooseFuzzer Fuzz.bool positiveFloat negativeFloat
-
-
-type alias DBInput =
-    { maxSliceBreadth : Float, alpha : Float, currentBreadth : Float }
-
-
-type alias WidthHeightAlpha =
-    { width : Float, height : Float, alpha : Float }
-
-
-widthHeightAlpha : Fuzz.Fuzzer Float -> Fuzz.Fuzzer WidthHeightAlpha
-widthHeightAlpha alphaFuzzer =
-    Fuzz.map3 WidthHeightAlpha positiveFloat positiveFloat alphaFuzzer
-
-
-type alias WidthHeightArea =
-    { width : Float, height : Float, area : Float }
-
-
-widthHeightArea : Fuzz.Fuzzer Float -> Fuzz.Fuzzer WidthHeightArea
-widthHeightArea areaFuzzer =
-    Fuzz.map3 WidthHeightArea positiveFloat positiveFloat areaFuzzer
-
-
-dbInput : Fuzz.Fuzzer Float -> Fuzz.Fuzzer DBInput
-dbInput alphaFuzzer =
-    let
-        f : Float -> Float -> Float -> DBInput
-        f currentBreadth delta alpha =
-            { maxSliceBreadth = currentBreadth + delta, alpha = alpha, currentBreadth = currentBreadth }
-    in
-    Fuzz.map3 f positiveFloat positiveFloat alphaFuzzer
 
 
 twoIncreasingFloats : Fuzz.Fuzzer ( Float, Float )
@@ -102,11 +47,6 @@ epsAbsolute =
     Absolute 1.0e-5
 
 
-epsRelative : FloatingPointTolerance
-epsRelative =
-    Relative 1.0e-5
-
-
 s : Interpolate.Cubic.Spline
 s =
     Interpolate.Cubic.withRange 10 16 [ 12, 23, 34, 45, 56, 67, 78 ]
@@ -117,66 +57,73 @@ testSpline x y =
     \_ -> Expect.equal y <| Interpolate.Cubic.valueAt x s
 
 
+empty : HullSlices
+empty =
+    HullSlices.empty
+
+
 hullSlices : HullSlices
 hullSlices =
-    Result.withDefault HullSlices.empty (Decode.decodeString HullSlices.decoder TestData.hullSliceJson)
+    Result.withDefault empty (Decode.decodeString EncodersDecoders.decoder TestData.hullSliceJson)
 
 
-cube : HullSlices.JsonHullSlices {}
+cube : HullSlices.HullSlices
 cube =
-    { length = StringValueInput.floatInput 200
-    , breadth = StringValueInput.floatInput 20
-    , depth = StringValueInput.floatInput 10
-    , xmin = -1
-    , ymin = -10
-    , zmin = 3
-    , slices =
-        [ { x = 0
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 1, 1, 1 ]
-          }
-        , { x = 0.5
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 1, 1, 1 ]
-          }
-        , { x = 1
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 1, 1, 1 ]
-          }
-        ]
-    , draught = StringValueInput.floatInput 2
+    { empty
+        | length = StringValueInput.floatInput 200
+        , breadth = StringValueInput.floatInput 20
+        , depth = StringValueInput.floatInput 10
+        , xmin = -1
+        , ymin = -10
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 2
     }
 
 
-toblerone : Float -> Float -> HullSlices.JsonHullSlices {}
+toblerone : Float -> Float -> HullSlices.HullSlices
 toblerone breadth depth =
-    { length = StringValueInput.floatInput 200
-    , breadth = StringValueInput.floatInput breadth
-    , depth = StringValueInput.floatInput depth
-    , xmin = -1
-    , ymin = -breadth / 2
-    , zmin = 3
-    , slices =
-        [ { x = 0
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 0.75, 0.5 ]
-          }
-        , { x = 0.5
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 0.75, 0.5 ]
-          }
-        , { x = 1
-          , zmin = 0
-          , zmax = 1
-          , y = [ 1, 0.75, 0.5 ]
-          }
-        ]
-    , draught = StringValueInput.floatInput 2
+    { empty
+        | length = StringValueInput.floatInput 200
+        , breadth = StringValueInput.floatInput breadth
+        , depth = StringValueInput.floatInput depth
+        , xmin = -1
+        , ymin = -breadth / 2
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 2
     }
 
 
@@ -277,7 +224,7 @@ suite =
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
-                    Expect.equal [ 0, 0.06183408481917592 ] (hullSlices |> HullSlices.setBreadth "10" |> .sliceAreas)
+                    Expect.equal [ 0.06183408481917592 ] (hullSlices |> HullSlices.setBreadth "10" |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
             , describe "Clipper" <|
                 [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->
@@ -554,7 +501,7 @@ suite =
                                     [ cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value ]
                     , test "Cube after changing breadth" <|
                         \_ ->
-                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.interpolate cube) cube.slices
+                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.fillHullSliceMetrics cube) cube.slices
                                 |> Expect.equal
                                     [ 10 * cube.draught.value, 10 * cube.draught.value, 10 * cube.draught.value ]
                     , fuzz (Fuzz.map3 makeTriplet positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|
@@ -615,14 +562,15 @@ suite =
             [ test "zmin should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.floatInput
-                        , depth = 5 |> StringValueInput.floatInput
-                        , draught = 4 |> StringValueInput.floatInput
-                        , xmin = -5
-                        , ymin = -89
-                        , zmin = 88
-                        , length = 456 |> StringValueInput.floatInput
-                        , slices = []
+                        { empty
+                            | breadth = 10 |> StringValueInput.floatInput
+                            , depth = 5 |> StringValueInput.floatInput
+                            , draught = 4 |> StringValueInput.floatInput
+                            , xmin = -5
+                            , ymin = -89
+                            , zmin = 88
+                            , length = 456 |> StringValueInput.floatInput
+                            , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .zmin
@@ -631,14 +579,15 @@ suite =
             , test "zmax should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.floatInput
-                        , depth = 5 |> StringValueInput.floatInput
-                        , draught = 4 |> StringValueInput.floatInput
-                        , xmin = -5
-                        , ymin = -89
-                        , zmin = 88
-                        , length = 456 |> StringValueInput.floatInput
-                        , slices = []
+                        { empty
+                            | breadth = 10 |> StringValueInput.floatInput
+                            , depth = 5 |> StringValueInput.floatInput
+                            , draught = 4 |> StringValueInput.floatInput
+                            , xmin = -5
+                            , ymin = -89
+                            , zmin = 88
+                            , length = 456 |> StringValueInput.floatInput
+                            , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .zmax
@@ -647,14 +596,14 @@ suite =
             , test "y should be scaled properly" <|
                 \_ ->
                     HullSlices.scale
-                        { breadth = 10 |> StringValueInput.floatInput
-                        , depth = 5 |> StringValueInput.floatInput
-                        , draught = 4 |> StringValueInput.floatInput
-                        , xmin = -5
-                        , ymin = -89
-                        , zmin = 88
-                        , length = 456 |> StringValueInput.floatInput
-                        , slices = []
+                        { empty
+                            | breadth = 10 |> StringValueInput.floatInput
+                            , depth = 5 |> StringValueInput.floatInput
+                            , draught = 4 |> StringValueInput.floatInput
+                            , xmin = -5
+                            , ymin = -89
+                            , zmin = 88
+                            , length = 456 |> StringValueInput.floatInput
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .y
@@ -662,133 +611,23 @@ suite =
                             [ -89 + 10 * 0.1, -89 + 10 * 0.2, -89 + 10 * 0.5 ]
             ]
         , describe "Volume"
-            [ fuzz
-                (Fuzz.map2 Tuple.pair Fuzz.float Fuzz.float)
+            [ test
                 "Triangular area curve"
               <|
-                \( xmin_, length_ ) ->
+                \_ ->
                     HullSlices.volume
-                        { xmin = xmin_, length = StringValueInput.floatInput length_ }
-                        [ 0, 1, 2, 3, 2, 1, 0 ]
+                        (List.map2 (\x area -> { x = x, area = area }) [ -1, 0, 1, 2, 3, 4, 5 ] [ 0, 1, 2, 3, 2, 1, 0 ])
                         |> Expect.within epsAbsolute
-                            (max 0 (3 * length_ / 2))
+                            9
             , fuzz
                 (Fuzz.map3 (\length_ a b -> { length_ = length_, a = a, b = b }) positiveFloat positiveFloat positiveFloat)
                 "Four-part area curve"
               <|
                 \{ length_, a, b } ->
                     HullSlices.volume
-                        { xmin = 0, length = StringValueInput.floatInput length_ }
-                        [ 0, a, a + b, a, 0 ]
+                        (List.map2 (\x area -> { x = x, area = area }) [ 0, length_ / 4, length_ / 2, 0.75 * length_, length_ ] [ 0, a, a + b, a, 0 ])
                         |> Expect.within epsRelative
                             (3 * a * length_ / 4 + b * length_ / 4)
-            ]
-        , describe "Can change slice area"
-            [ fuzz (widthHeightAlpha (Fuzz.constant 0)) "Can find original area by setting parameter to 0" <|
-                \{ width, height, alpha } ->
-                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
-                        |> HullSlices.changeSliceAreaWhilePreservingSize alpha
-                        |> HullSlices.area 0 height
-                        |> Expect.within epsRelative (width * height / 2)
-            , fuzz (widthHeightAlpha (Fuzz.floatRange -100 -0.1)) "Can reduce slice area using a negative parameter value" <|
-                \{ width, height, alpha } ->
-                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
-                        |> HullSlices.changeSliceAreaWhilePreservingSize alpha
-                        |> HullSlices.area 0 height
-                        |> Expect.atMost (width * height / 2)
-            , fuzz (widthHeightAlpha (Fuzz.floatRange 0.1 100)) "Can increase slice area using a positive parameter value" <|
-                \{ width, height, alpha } ->
-                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
-                        |> HullSlices.changeSliceAreaWhilePreservingSize alpha
-                        |> HullSlices.area 0 height
-                        |> Expect.atLeast (width * height / 2)
-            , fuzz (widthHeightAlpha (Fuzz.constant -1.0e15)) "Can reduce slice area to almost zero" <|
-                \{ width, height, alpha } ->
-                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
-                        |> HullSlices.changeSliceAreaWhilePreservingSize alpha
-                        |> HullSlices.area 0 height
-                        |> Expect.within epsRelative (width * height / 10 / 2)
-            ]
-        , describe "Auxiliary function dB"
-            [ fuzz (dbInput negativeFloat) "dB > 1 for alpha < 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.dB maxSliceBreadth alpha currentBreadth
-                        |> Expect.greaterThan 1
-            , fuzz (dbInput <| Fuzz.constant 0) "dB -> 0 for alpha -> 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.dB maxSliceBreadth alpha currentBreadth
-                        |> Expect.within epsRelative 0
-            , fuzz (dbInput positiveFloat) "dB <= 1 for alpha >= 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.dB maxSliceBreadth alpha currentBreadth
-                        |> Expect.lessThan 1
-            , fuzz (dbInput nonZero) "dB = 0 for z = 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.dB maxSliceBreadth alpha 0
-                        |> Expect.within epsRelative 0
-            , fuzz (dbInput (Fuzz.constant 1.0e15)) "dB -> 1 for alpha -> infinity" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.dB maxSliceBreadth alpha currentBreadth
-                        |> Expect.within epsRelative 1
-            , test "dB should not be NaN" <|
-                \_ ->
-                    HullSlices.dB
-                        0.000002
-                        -512.0000000102057
-                        0.000001
-                        |> isNaN
-                        |> Expect.false "should not be NaN"
-            ]
-        , describe "modifiedBreadth"
-            [ fuzz (dbInput <| Fuzz.constant 0) "modifiedBreadth = currentBreadth for alpha = 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
-                        |> Expect.within epsRelative currentBreadth
-            , fuzz (dbInput negativeFloat) "modifiedBreadth < currentBreadth for alpha < 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
-                        |> Expect.atMost currentBreadth
-            , fuzz (dbInput positiveFloat) "modifiedBreadth > currentBreadth for alpha > 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
-                        |> Expect.atLeast currentBreadth
-            , fuzz (dbInput (Fuzz.constant 1.0e15)) "modifiedBreadth -> maxSliceBreadth when alpha >> 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
-                        |> Expect.within epsRelative maxSliceBreadth
-            , fuzz (dbInput (Fuzz.constant -1.0e15)) "modifiedBreadth -> 0 when alpha << 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.modifiedBreadth maxSliceBreadth alpha currentBreadth
-                        |> Expect.within epsAbsolute 0
-            , fuzz (dbInput Fuzz.float) "modifiedBreadth = 0 when currentBreadth = 0" <|
-                \{ maxSliceBreadth, alpha, currentBreadth } ->
-                    HullSlices.modifiedBreadth maxSliceBreadth alpha 0
-                        |> Expect.within epsRelative 0
-            ]
-        , describe "Can set slice area to a particular value"
-            [ fuzz (widthHeightArea (Fuzz.constant 0)) "Should get an error if area is too low" <|
-                \{ width, height, area } ->
-                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
-                        |> HullSlices.setSliceArea area height
-                        |> Expect.equal (Err "Can't set slice area to such a low value given the discretization: try to increase the area.")
-            , fuzz (widthHeightArea (Fuzz.constant 0)) "Should get original slice if setting to same area" <|
-                \{ width, height, area } ->
-                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
-                        |> HullSlices.setSliceArea (width * height / 2) height
-                        |> Result.withDefault { zmin = 0, zmax = height, y = [] }
-                        |> .y
-                        |> List.map2 (-) [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ]
-                        |> List.map abs
-                        |> List.maximum
-                        |> Maybe.withDefault 1.0e200
-                        |> Expect.within epsAbsolute 0
-            , fuzz (widthHeightArea (Fuzz.floatRange 0.2 0.9)) "Can set slice area to a lower value" <|
-                \{ width, height, area } ->
-                    { zmin = 0, zmax = height, y = [ width, 0.9 * width, 0.8 * width, 0.7 * width, 0.6 * width, 0.5 * width, 0.4 * width, 0.3 * width, 0.2 * width, 0.1 * width, 0 ] }
-                        |> HullSlices.setSliceArea (width * height / 2 * area) height
-                        |> Result.map (HullSlices.area 0 height)
-                        |> Result.withDefault -1
-                        |> Expect.within epsRelative (width * height / 2 * area)
             ]
         , describe "Longitudinal position of the centroid of an area curve"
             [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Centroid of a cube" <|
@@ -815,7 +654,7 @@ suite =
                 \_ ->
                     HullSlices.trapezoidCentroid 30 40 20
                         |> Expect.all
-                            [ Tuple.first >> Expect.within epsRelative (40 / 3), Tuple.second >> Expect.within epsRelative 900 ]
+                            [ Tuple.first >> Expect.within CustomFuzzers.epsRelative (40 / 3), Tuple.second >> Expect.within CustomFuzzers.epsRelative 900 ]
             , test "Can calculate zmin for each trapezoid" <|
                 \_ ->
                     { zmin = -12, zmax = 3, y = [ 123, 654, 789, 951 ] }
@@ -825,58 +664,48 @@ suite =
                 \_ ->
                     HullSlices.trapezoidCentroid 1.0e-6 1.0e-6 1.0e-6
                         |> Expect.all
-                            [ Tuple.first >> Expect.within epsRelative 5.0e-7, Tuple.second >> Expect.within epsRelative 1.0e-12 ]
+                            [ Tuple.first >> Expect.within CustomFuzzers.epsRelative 5.0e-7, Tuple.second >> Expect.within CustomFuzzers.epsRelative 1.0e-12 ]
             , fuzz (Fuzz.map3 (\x y z -> ( x, y, z )) Fuzz.float positiveFloat positiveFloat) "Centroid of a non-symmetrical shape" <|
                 \( zmin, breadth, height ) ->
                     { zmin = zmin, zmax = zmin + breadth, y = [ 0, height ] }
                         |> HullSlices.centroidAbscissa
-                        |> Expect.within epsRelative (zmin + (2 * breadth / 3))
-            ]
-        , describe "Lackenby"
-            [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Can calculate prismatic blockCoefficient" <|
-                \( length, am ) ->
-                    HullSlices.prismaticCoefficient { xmin = length - am, length = StringValueInput.floatInput length, y = [ 0, am / 4, am / 2, am * 0.75, am, 0.75 * am, 0.5 * am, 0.25 * am, 0 ] }
-                        |> Expect.within (Absolute 1.0e-2) 0.5
+                        |> Expect.within CustomFuzzers.epsRelative (zmin + (2 * breadth / 3))
             ]
         , describe "HullSliceUtilities"
-            [ test "demormalizedHullSlice" <|
+            [ test "denormalizeHullSlice" <|
                 \_ ->
                     compareHs
                         { x = 0, zmin = -4.8, zmax = -0.6, y = [ 2, 1, 0 ] }
-                        (HullSliceUtilities.demormalizedHullSlice hs_param hs0)
+                        (HullSlices.denormalizeHullSlice hs_param hs0)
             , test "areaTrapezoid" <|
                 \_ ->
-                    HullSliceUtilities.areaTrapezoid ( 0, 0 ) ( 1, 1 )
+                    HullSlices.areaTrapezoid ( 0, 0 ) ( 1, 1 )
                         |> Expect.within epsAbsolute 0.5
             , test "zGTrapezoid" <|
                 \_ ->
-                    HullSliceUtilities.zGTrapezoid ( 0, 0 ) ( 1, 1 )
+                    HullSlices.zGTrapezoid ( 0, 0 ) ( 1, 1 )
                         |> Expect.within epsAbsolute 0.33333333337
             , test "zTrapezoid" <|
                 \_ ->
-                    HullSliceUtilities.zTrapezoid ( 0, 0 ) ( 1, 1 )
+                    HullSlices.zTrapezoid ( 0, 0 ) ( 1, 1 )
                         -- |> Expect.within epsAbsolute 0.16666666667
                         |> Expect.within epsAbsolute 0.25
             ]
-        , test "yGTrapezoid" <|
-            \_ ->
-                HullSliceUtilities.yGTrapezoid ( 0, 0 ) ( 1, 1 )
-                    |> Expect.within epsAbsolute 0.33333333337
         , test "zGTrapezoid" <|
             \_ ->
-                HullSliceUtilities.zGTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
+                HullSlices.zGTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
                     |> Expect.within epsAbsolute 0.15875687266820834
         , test "areaTrapezoid" <|
             \_ ->
-                HullSliceUtilities.areaTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
+                HullSlices.areaTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
                     |> Expect.within epsAbsolute 1.615905646783629
         , test "zTrapezoid2" <|
             \_ ->
-                HullSliceUtilities.zTrapezoid ( -3.0, 5 ) ( -2.5, 5.0 )
+                HullSlices.zTrapezoid ( -3.0, 5 ) ( -2.5, 5.0 )
                     |> Expect.within epsAbsolute -6.875
         , test "zTrapezoid3" <|
             \_ ->
-                HullSliceUtilities.zTrapezoid ( -3.0, 5 ) ( 0.0, 5.0 )
+                HullSlices.zTrapezoid ( -3.0, 5 ) ( 0.0, 5.0 )
                     |> Expect.within epsAbsolute -22.5
         , test "struct" <|
             \_ ->
@@ -889,7 +718,7 @@ suite =
         --             |> Expect.equal { x = 25.0, kz = -0.5, ky = 0.0, area = 2.5 }
         , test "denormalizedSlicesT3" <|
             \_ ->
-                HullSliceUtilities.denormalizedHSList { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                HullSlices.denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
                     [ { x = 0, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
                     , { x = 0.25, y = [ 1, 1 ], zmax = 0.75, zmin = 0 }
                     , { x = 0.5, y = [ 1, 1 ], zmax = 1, zmin = 0 }
@@ -905,7 +734,7 @@ suite =
                         ]
         , test "denormalizedSlicesT1" <|
             \_ ->
-                HullSliceUtilities.denormalizedHSList { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                HullSlices.denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
                     [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
                     , { x = 1, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
                     ]
@@ -915,7 +744,7 @@ suite =
                         ]
         , test "denormalizedSlicesT4" <|
             \_ ->
-                HullSliceUtilities.denormalizedHSList { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                HullSlices.denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
                     [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 0.8, zmin = 0.4 }
                     ]
                     |> Expect.equal
@@ -923,16 +752,23 @@ suite =
                         ]
         , test "intersectBelowSlicesZY" <|
             \_ ->
-                HullSliceUtilities.intersectBelow { xmin = 0, xmax = 100 }
-                    -3
-                    [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
-                    , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
-                    , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
-                    , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
-                    , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
-                    ]
+                let
+                    hull =
+                        { empty
+                            | xmin = 0
+                            , length = 100 |> StringValueInput.asValueIn StringValueInput.emptyFloat
+                            , denormalizedSlices =
+                                [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                                , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                                , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
+                                , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                                , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                                ]
+                        }
+                in
+                HullSlices.intersectBelow -3 hull
                     |> Expect.equal
-                        { lhs =
+                        { hullSlices =
                             [ { x = 25, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }
                             , { x = 50, zylist = [ ( -3, 5 ), ( 0, 5 ) ] }
                             , { x = 75, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }
@@ -942,14 +778,22 @@ suite =
                         }
         , test "hullVolume" <|
             \_ ->
-                HullSliceUtilities.hullVolume { xmin = 0, xmax = 100 } [ { x = 50, area = 2 } ]
+                HullSlices.hullVolume { xmin = 0, xmax = 100 } [ { x = 50, area = 2 } ]
                     |> Expect.within epsAbsolute 100.0
         , test "hullVolume2" <|
             \_ ->
-                HullSliceUtilities.hullVolume { xmin = 0, xmax = 100 } [ { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 } ]
+                HullSlices.hullVolume { xmin = 0, xmax = 100 } [ { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 } ]
                     |> Expect.within epsAbsolute 1000.0
-        , test "hullKBz" <|
+        , test "getHullCentroid" <|
             \_ ->
-                HullSliceUtilities.hullKBz { xmin = 0, xmax = 100 } [ { x = 50, area = 2, kz = 1, ky = 0 } ]
+                let
+                    hull =
+                        { empty
+                            | hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 100, hullSlices = [] }
+                            , centroidAreaForEachImmersedSlice =
+                                [ { x = 50, area = 2, centroid = 1 } ]
+                        }
+                in
+                HullSlices.getHullCentroid hull
                     |> Expect.within epsAbsolute 100.0
         ]
