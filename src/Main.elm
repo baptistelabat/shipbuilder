@@ -2250,13 +2250,13 @@ updateFromJs jsmsg model =
 updateModelToJs : ToJsMsg -> Model -> Model
 updateModelToJs msg model =
     case msg of
-        ExportCSV hullReference ->
+        ExportCSV _ ->
             model
 
-        ExportSTL hullReference ->
+        ExportSTL _ ->
             model
 
-        ExportSubModel hullReference ->
+        ExportSubModel _ ->
             model
 
         OpenSaveFile ->

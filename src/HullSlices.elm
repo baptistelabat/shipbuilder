@@ -35,7 +35,6 @@ module HullSlices exposing
     )
 
 import Array
-import Dict exposing (Dict)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id)
 import LineChart
@@ -68,7 +67,11 @@ type alias HullSlices =
     , centreOfBuoyancy : Float
     , metacentre : Float
     , denormalizedSlices : List HullSlice
-    , hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
+    , hullSlicesBeneathFreeSurface :
+        { xmin : Float
+        , xmax : Float
+        , hullSlices : List HullSliceAsZYList
+        }
     , centroidAreaForEachImmersedSlice : List HullSliceCentroidAndArea
     }
 
@@ -286,12 +289,11 @@ addCentroidAreaForEachImmersedSlice previousStep =
                     integrateTrapezoidMetricOnSlices areaTrapezoid hullSliceAsZYList.zylist
 
                 centroid_ =
-                    case area_ == 0.0 of
-                        True ->
-                            0
+                    if area_ == 0.0 then
+                        0
 
-                        _ ->
-                            integrateTrapezoidMetricOnSlices zTrapezoid hullSliceAsZYList.zylist / area_
+                    else
+                        integrateTrapezoidMetricOnSlices zTrapezoid hullSliceAsZYList.zylist / area_
             in
             { x = hullSliceAsZYList.x, centroid = centroid_, area = area_ }
     in
@@ -363,12 +365,11 @@ addCentreOfBuoyancy previousStep =
 
                 centreOfBuoyancy : Float
                 centreOfBuoyancy =
-                    case hullSlices.displacement == 0.0 of
-                        True ->
-                            0.0
+                    if hullSlices.displacement == 0.0 then
+                        0.0
 
-                        False ->
-                            hullSlices.zmin + hullSlices.depth.value - (hullCentroid / (hullSlices.displacement / 2))
+                    else
+                        hullSlices.zmin + hullSlices.depth.value - (hullCentroid / (hullSlices.displacement / 2))
             in
             HullSlicesWithCentreOfBuoyancy { hullSlices | centreOfBuoyancy = centreOfBuoyancy }
 
@@ -385,12 +386,11 @@ addBlockCoefficient previousStep =
                 -- Block Coefficient = Volume of displacement ÷ blockVolume
                 blockCoefficient : Float
                 blockCoefficient =
-                    case blockVolume_ == 0.0 of
-                        True ->
-                            0.0
+                    if blockVolume_ == 0.0 then
+                        0.0
 
-                        False ->
-                            (hullSlices.displacement / 2) / blockVolume_
+                    else
+                        (hullSlices.displacement / 2) / blockVolume_
             in
             HullSlicesWithBlockCoefficient { hullSlices | blockCoefficient = blockCoefficient }
 
@@ -414,12 +414,11 @@ addMetacentre previousStep =
 
                 bM : Float
                 bM =
-                    case hullSlices.displacement == 0.0 of
-                        True ->
-                            0.0
+                    if hullSlices.displacement == 0.0 then
+                        0.0
 
-                        False ->
-                            inertialMoment_ / hullSlices.displacement
+                    else
+                        inertialMoment_ / hullSlices.displacement
 
                 metacentre : Float
                 metacentre =
@@ -721,12 +720,6 @@ trapezoidCentroid dx y1 y2 =
 
         b =
             y2
-
-        c =
-            dx
-
-        d =
-            sqrt (square dx + square (y2 - y1))
     in
     -- http://mathworld.wolfram.com/Trapezoid.html
     ( (a + 2 * b) / (3 * (a + b)) * dx
@@ -773,7 +766,7 @@ sum2List l =
 centroidAbscissa : { c | zmin : Float, zmax : Float, y : List Float } -> Float
 centroidAbscissa curve =
     let
-        ( x, y ) =
+        ( x, _ ) =
             xyCentroidAbscissa curve
     in
     x
@@ -813,7 +806,7 @@ xyCentroidAbscissa curve =
         totalArea : Float
         totalArea =
             shiftedTrapezoidCentroids
-                |> List.map (\( x, y, a ) -> a)
+                |> List.map (\( _, _, a ) -> a)
                 |> List.sum
 
         sumOfCentroids : ( Float, Float )
@@ -1139,19 +1132,18 @@ intersectBelow z0 hullSlices =
                 filterL z lst =
                     case lst of
                         ( z1, y1 ) :: ( z2, y2 ) :: rest ->
-                            case z < z2 && z >= z1 of
-                                True ->
-                                    let
-                                        k =
-                                            (z - z1) / (z2 - z1)
+                            if z < z2 && z >= z1 then
+                                let
+                                    k =
+                                        (z - z1) / (z2 - z1)
 
-                                        y =
-                                            (1 - k) * y1 + k * y2
-                                    in
-                                    ( z, y ) :: ( z2, y2 ) :: rest
+                                    y =
+                                        (1 - k) * y1 + k * y2
+                                in
+                                ( z, y ) :: ( z2, y2 ) :: rest
 
-                                False ->
-                                    filterL z (( z2, y2 ) :: rest)
+                            else
+                                filterL z (( z2, y2 ) :: rest)
 
                         _ ->
                             []
@@ -1177,22 +1169,20 @@ intersectBelow z0 hullSlices =
                     []
 
                 Just zmax ->
-                    case z0 > zmax of
-                        True ->
-                            []
+                    if z0 > zmax then
+                        []
 
-                        False ->
-                            case maybeZmin of
-                                Nothing ->
-                                    []
+                    else
+                        case maybeZmin of
+                            Nothing ->
+                                []
 
-                                Just zmin ->
-                                    case z0 < zmin of
-                                        True ->
-                                            list
+                            Just zmin ->
+                                if z0 < zmin then
+                                    list
 
-                                        False ->
-                                            getInterpolateValuesAndSubList list
+                                else
+                                    getInterpolateValuesAndSubList list
 
         extractZYAtZ : HullSliceAsZYList -> HullSliceAsZYList
         extractZYAtZ hsXY =
