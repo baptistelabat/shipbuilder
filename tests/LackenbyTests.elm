@@ -44,10 +44,10 @@ dbInput alphaFuzzer =
 suite : Test
 suite =
     describe "Lackenby"
-        [ fuzz (Fuzz.map2 Tuple.pair positiveFloat positiveFloat) "Can calculate prismatic coefficient" <|
-            \( length, am ) ->
-                Lackenby.prismaticCoefficient { xmin = length - am, length = StringValueInput.floatInput length, y = [ 0, am / 4, am / 2, am * 0.75, am, 0.75 * am, 0.5 * am, 0.25 * am, 0 ] }
-                    |> Expect.within (Absolute 1.0e-2) 0.5
+        [ test "Can calculate prismatic coefficient" <|
+            \_ ->
+                Lackenby.prismaticCoefficient 3 2 1
+                    |> Expect.within (Absolute 1.0e-2) 1.5
         , describe "Can change slice area"
             [ fuzz (widthHeightAlpha (Fuzz.constant 0)) "Can find original area by setting parameter to 0" <|
                 \{ width, height, alpha } ->

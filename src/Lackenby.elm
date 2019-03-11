@@ -112,38 +112,9 @@ bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol draught =
         bisectArea slice targetArea alphaMid alphaHigh niterMax (niter + 1) tol draught
 
 
-prismaticCoefficient : { a | xmin : Float, length : StringValueInput.FloatInput, y : List Float } -> Float
-prismaticCoefficient areaCurve =
-    case List.maximum areaCurve.y of
-        Nothing ->
-            0
-
-        Just am ->
-            let
-                n : Int
-                n =
-                    List.length areaCurve.y
-
-                to01 : Int -> Float
-                to01 x =
-                    toFloat x / toFloat (n - 1)
-
-                toMinMax : Float -> Float
-                toMinMax x =
-                    areaCurve.xmin + x * areaCurve.length.value
-
-                xs =
-                    List.range 0 (n - 1)
-                        |> List.map (to01 >> toMinMax)
-
-                xAreaPairs : List { x : Float, area : Float }
-                xAreaPairs =
-                    List.map2 (\x a -> { x = x, area = a }) xs areaCurve.y
-
-                v =
-                    HullSlices.volume xAreaPairs
-            in
-            v / (areaCurve.length.value * am)
+prismaticCoefficient : Float -> Float -> Float -> Float
+prismaticCoefficient displacement length masterCrossSectionArea =
+    displacement / (length * masterCrossSectionArea)
 
 
 setSliceArea : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
