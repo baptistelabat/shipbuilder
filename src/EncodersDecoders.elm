@@ -119,7 +119,7 @@ tuple2Encoder enc1 enc2 ( val1, val2 ) =
     Encode.list identity [ enc1 val1, enc2 val2 ]
 
 
-encodeCSVObj : { xy : List ( Float, Float ), z : Float } -> Encode.Value
+encodeCSVObj : HullSliceAsXYList -> Encode.Value
 encodeCSVObj hsXY =
     Encode.object
         [ ( "z", Encode.float hsXY.z )
@@ -127,7 +127,7 @@ encodeCSVObj hsXY =
         ]
 
 
-encodeCSV : List { xy : List ( Float, Float ), z : Float } -> Encode.Value
+encodeCSV : List HullSliceAsXYList -> Encode.Value
 encodeCSV list =
     Encode.list encodeCSVObj list
 
