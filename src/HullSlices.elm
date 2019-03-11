@@ -357,26 +357,25 @@ interpolate hullSlices =
         |> addMetacentre
 
 
-f : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> HullSlices
-f length breadth depth xmin ymin zmin slices draught =
-    { empty
-        | length = length
-        , breadth = breadth
-        , depth = depth
-        , xmin = xmin
-        , ymin = ymin
-        , zmin = zmin
-        , slices = slices
-        , draught = draught
-    }
-
-
 decoder : Decode.Decoder HullSlices
 decoder =
     let
+        hullSlicesConstructor : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> HullSlices
+        hullSlicesConstructor length breadth depth xmin ymin zmin slices draught =
+            { empty
+                | length = length
+                , breadth = breadth
+                , depth = depth
+                , xmin = xmin
+                , ymin = ymin
+                , zmin = zmin
+                , slices = slices
+                , draught = draught
+            }
+
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
         helper ( depth, maybeDraught ) =
-            Decode.succeed f
+            Decode.succeed hullSlicesConstructor
                 |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)
                 |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth") Decode.float)
                 |> Pipeline.hardcoded depth
