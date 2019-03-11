@@ -2,7 +2,6 @@ module HullSlicesTests exposing (suite)
 
 import Expect exposing (..)
 import Fuzz
-import HullSliceUtilities
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode

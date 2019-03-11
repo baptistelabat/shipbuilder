@@ -42,7 +42,6 @@ import Array
 import Dict exposing (Dict)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id)
-import HullSliceUtilities
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -287,11 +286,20 @@ zTrapezoid ( z1, y1 ) ( z2, y2 ) =
 addCentroidAreaForEachImmersedSlice : HullSlicesWithSlicesBeneathFreeSurface -> HullSlicesWithCentroidAreaForEachImmersedSlice
 addCentroidAreaForEachImmersedSlice previousStep =
     let
+        integrateTrapezoidMetricOnSlices : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
+        integrateTrapezoidMetricOnSlices trapezoidMetric denormalizedSlices =
+            case denormalizedSlices of
+                ( z1, y1 ) :: ( z2, y2 ) :: rest ->
+                    trapezoidMetric ( z1, y1 ) ( z2, y2 ) + integrateTrapezoidMetricOnSlices trapezoidMetric (( z2, y2 ) :: rest)
+
+                _ ->
+                    0
+
         calculateCentroidArea : HullSliceAsZYList -> HullSliceCentroidAndArea
         calculateCentroidArea hullSliceAsZYList =
             let
                 area_ =
-                    HullSliceUtilities.integrateTrapezoidMetricOnSlices areaTrapezoid hullSliceAsZYList.zylist
+                    integrateTrapezoidMetricOnSlices areaTrapezoid hullSliceAsZYList.zylist
 
                 centroid_ =
                     case area_ == 0.0 of
@@ -299,7 +307,7 @@ addCentroidAreaForEachImmersedSlice previousStep =
                             0
 
                         _ ->
-                            HullSliceUtilities.integrateTrapezoidMetricOnSlices zTrapezoid hullSliceAsZYList.zylist / area_
+                            integrateTrapezoidMetricOnSlices zTrapezoid hullSliceAsZYList.zylist / area_
             in
             { x = hullSliceAsZYList.x, centroid = centroid_, area = area_ }
     in

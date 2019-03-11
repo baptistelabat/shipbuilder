@@ -52,7 +52,6 @@ import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p
 import Html.Attributes exposing (accept, class, disabled, download, for, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
-import HullSliceUtilities
 import HullSlices exposing (HullSlices)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
