@@ -37,6 +37,7 @@ port module Main exposing
     , view
     )
 
+import AreaCurve
 import Browser
 import Browser.Dom
 import Browser.Events
@@ -3196,7 +3197,7 @@ viewModeller model =
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
-                            , HullSlices.plotAreaCurve slices
+                            , AreaCurve.view slices
                             , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n 2 <| slices.displacement)
                             , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 <| slices.blockCoefficient)
 
