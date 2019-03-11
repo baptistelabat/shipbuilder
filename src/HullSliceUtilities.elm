@@ -2,7 +2,6 @@ module HullSliceUtilities exposing
     ( areaTrapezoid
     , hullVolume
     , integrateTrapezoidMetricOnSlices
-    , volume
     )
 
 import Array
