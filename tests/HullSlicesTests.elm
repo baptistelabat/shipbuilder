@@ -95,6 +95,7 @@ cube =
             ]
         , draught = StringValueInput.floatInput 2
     }
+        |> HullSlices.fillHullSliceMetrics
 
 
 toblerone : Float -> Float -> HullSlices.HullSlices
@@ -125,6 +126,7 @@ toblerone breadth depth =
             ]
         , draught = StringValueInput.floatInput 2
     }
+        |> HullSlices.fillHullSliceMetrics
 
 
 makeTriplet : a -> b -> c -> ( a, b, c )
