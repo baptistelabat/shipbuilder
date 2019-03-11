@@ -675,6 +675,7 @@ type alias Model =
     , multipleSelect : Bool
     , selectedHullReference : Maybe String
     , blocks : Blocks
+    , globalCenterOfGravity : Point
     , toasts : Toasts
     , partitions : PartitionsData
     , uiState : UiState
@@ -1084,6 +1085,13 @@ encodePosition position =
         , ( "z", Encode.float position.z.value )
         ]
 
+encodePoint : Point -> Encode.Value
+encodePoint point =
+    Encode.object
+        [ ( "x", Encode.float point.x )
+        , ( "y", Encode.float point.y )
+        , ( "z", Encode.float point.z )
+        ]
 
 encodeSize : Size -> Encode.Value
 encodeSize size =
@@ -1373,6 +1381,7 @@ initModel flag =
     , multipleSelect = False
     , selectedHullReference = Nothing
     , blocks = DictList.empty
+    , globalCenterOfGravity = {x=0, y=0, z=0}
     , toasts = emptyToasts
     , partitions = initPartitions
     , uiState =
@@ -1726,9 +1735,22 @@ type Msg
     | ToJs ToJsMsg
 
 
+-- run : msg -> Cmd msg
+-- run m =
+--   Task.perform (always m) (Task.succeed ())
+
+updateCentreOfGravity :  ( Model, Cmd Msg ) ->  ( Model, Cmd Msg )
+updateCentreOfGravity (model, cmd) =
+    let
+      (updatedModel, cmdUpdateCog) = updateToJs UpdateGlobalCenterOfGravity model
+    in
+    (updatedModel, Cmd.batch [ cmd, cmdUpdateCog ])
+      --(model, Cmd.batch [cmd,updateToJs UpdateGlobalCenterOfGravity model ])
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
+    (case msg of
         FromJs fromJsMsg ->
             updateFromJs fromJsMsg model
 
@@ -1736,7 +1758,8 @@ update msg model =
             updateNoJs noJsMsg model
 
         ToJs toJsMsg ->
-            updateToJs toJsMsg model
+            updateToJs toJsMsg model)
+      |> updateCentreOfGravity
 
 
 type ToJsMsg
@@ -1758,6 +1781,7 @@ type ToJsMsg
     | UpdatePartitionZeroPosition PartitionType String
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
+    | UpdateGlobalCenterOfGravity
     | ExportCSV String
     | ExportSTL String
     | ExportSubModel String
@@ -2577,6 +2601,13 @@ updateModelToJs msg model =
                         |> asSizeInBlock blockInModel
                         |> flip updateBlockInModel model
 
+        UpdateGlobalCenterOfGravity ->
+            let
+              updatedCoG : Point
+              updatedCoG =
+                  getCentroidOfBlocks model.blocks
+            in
+            { model | globalCenterOfGravity = updatedCoG }
 
 sendCmdToJs : Model -> ToJsMsg -> Cmd msg
 sendCmdToJs model msg =
@@ -2880,7 +2911,11 @@ msg2json model action =
             <|
                 String.toFloat input
 
-
+        UpdateGlobalCenterOfGravity ->
+            let
+                updatedCoG = model.globalCenterOfGravity
+            in
+            Just { tag = "show-center-of-gravity", data =  encodePoint updatedCoG}
 
 -- VIEW
 
@@ -4192,6 +4227,7 @@ viewBlockCenterOfGravityUserInput block cog =
             [ class "form-group-action"
             , title "Reset the center of gravity to the center of the volume"
             , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
+            --, onClick <| ToJs <| UpdateGlobalCenterOfGravity
             ]
             [ FASolid.crosshairs [] ]
         ]
