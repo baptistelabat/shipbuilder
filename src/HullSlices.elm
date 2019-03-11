@@ -32,6 +32,7 @@ module HullSlices exposing
     , trapezoidCentroid
     , volume
     , zGTrapezoid
+    , zTrapezoid
     , zminForEachTrapezoid
     )
 
@@ -238,6 +239,19 @@ addHullSlicesBeneathFreeSurface previousStep =
             HullSlicesWithSlicesBeneathFreeSurface { hullSlices | hullSlicesBeneathFreeSurface = hullSlicesBeneathFreeSurface }
 
 
+zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+zTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    let
+        z =
+            (z1 + z2) / 2.0
+
+        -- z1 + zGTrapezoid ( z1, y1 ) ( z2, y2 )
+        area_ =
+            HullSliceUtilities.areaTrapezoid ( z1, y1 ) ( z2, y2 )
+    in
+    z * area_
+
+
 addCentroidAreaForEachImmersedSlice : HullSlicesWithSlicesBeneathFreeSurface -> HullSlicesWithCentroidAreaForEachImmersedSlice
 addCentroidAreaForEachImmersedSlice previousStep =
     let
@@ -253,7 +267,7 @@ addCentroidAreaForEachImmersedSlice previousStep =
                             0
 
                         _ ->
-                            HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.zTrapezoid hullSliceAsZYList.zylist / area_
+                            HullSliceUtilities.integrateTrapezoidMetricOnSlices zTrapezoid hullSliceAsZYList.zylist / area_
             in
             { x = hullSliceAsZYList.x, centroid = centroid_, area = area_ }
     in
