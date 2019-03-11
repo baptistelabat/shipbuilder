@@ -14,9 +14,9 @@ module HullSlices exposing
     , denormalizeHullSlices
     , empty
     , extractHorizontalSliceAtZ
+    , fillHullSliceMetrics
     , getHullCentroid
     , hullVolume
-    , interpolate
     , intersectBelow
     , modifiedBreadth
     , plotAreaCurve
@@ -78,7 +78,7 @@ type alias HullSlices =
 
 empty : HullSlices
 empty =
-    interpolate
+    fillHullSliceMetrics
         { length = StringValueInput.emptyFloat
         , breadth = StringValueInput.emptyFloat
         , depth = StringValueInput.emptyFloat
@@ -427,8 +427,8 @@ addMetacentre previousStep =
             { hullSlices | metacentre = metacentre }
 
 
-interpolate : HullSlices -> HullSlices
-interpolate hullSlices =
+fillHullSliceMetrics : HullSlices -> HullSlices
+fillHullSliceMetrics hullSlices =
     HullSlicesWithoutComputations hullSlices
         |> addDenormalizedSlices
         |> addHullSlicesBeneathFreeSurface
@@ -441,24 +441,24 @@ interpolate hullSlices =
 
 setLengthOverAll : String -> HullSlices -> HullSlices
 setLengthOverAll loa hullSlices =
-    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa } |> interpolate
+    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa } |> fillHullSliceMetrics
 
 
 setBreadth : String -> HullSlices -> HullSlices
 setBreadth breadth hullSlices =
     { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth }
         |> (\slices -> { slices | ymin = -slices.breadth.value / 2 })
-        |> interpolate
+        |> fillHullSliceMetrics
 
 
 setDraught : String -> HullSlices -> HullSlices
 setDraught draught hullSlices =
-    { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught } |> interpolate
+    { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught } |> fillHullSliceMetrics
 
 
 setDepth : String -> HullSlices -> HullSlices
 setDepth depth hullSlices =
-    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth } |> interpolate
+    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth } |> fillHullSliceMetrics
 
 
 plotAreaCurve : HullSlices -> Html msg

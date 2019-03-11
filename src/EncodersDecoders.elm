@@ -77,7 +77,7 @@ decoder =
         |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth") Decode.float)
         |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught") Decode.float) Nothing
         |> Decode.andThen helper
-        |> Decode.map HullSlices.interpolate
+        |> Decode.map HullSlices.fillHullSliceMetrics
 
 
 dictDecoder : Decode.Decoder (Dict String HullSlices)

@@ -561,7 +561,7 @@ suite =
                                     [ cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value ]
                     , test "Cube after changing breadth" <|
                         \_ ->
-                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.interpolate cube) cube.slices
+                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.fillHullSliceMetrics cube) cube.slices
                                 |> Expect.equal
                                     [ 10 * cube.draught.value, 10 * cube.draught.value, 10 * cube.draught.value ]
                     , fuzz (Fuzz.map3 makeTriplet positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|
