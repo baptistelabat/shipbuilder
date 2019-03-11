@@ -276,7 +276,7 @@ addCentreOfBuoyancy previousStep =
             let
                 hullCentroid : Float
                 hullCentroid =
-                    getHullCentroid { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice
+                    getHullCentroid hullSlices
 
                 centreOfBuoyancy : Float
                 centreOfBuoyancy =
@@ -1049,19 +1049,19 @@ blockVolume o =
     res
 
 
-getHullCentroid : { xmin : Float, xmax : Float } -> List HullSliceCentroidAndArea -> Float
-getHullCentroid config list =
+getHullCentroid : HullSlices -> Float
+getHullCentroid hullSlices =
     let
         xmin =
-            config.xmin
+            hullSlices.hullSlicesBeneathFreeSurface.xmin
 
         xmax =
-            config.xmax
+            hullSlices.hullSlicesBeneathFreeSurface.xmax
 
-        newList =
-            List.concat [ [ { x = xmin, area = 0.0, centroid = 0 } ], list, [ { x = xmax, area = 0.0, centroid = 0 } ] ]
+        centroidAndAreaWithEndpointsAtZero =
+            List.concat [ [ { x = xmin, area = 0.0, centroid = 0 } ], hullSlices.centroidAreaForEachImmersedSlice, [ { x = xmax, area = 0.0, centroid = 0 } ] ]
     in
-    calculateCentroid newList
+    calculateCentroid centroidAndAreaWithEndpointsAtZero
 
 
 calculateCentroid : List HullSliceCentroidAndArea -> Float

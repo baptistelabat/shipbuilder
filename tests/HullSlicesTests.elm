@@ -962,6 +962,14 @@ suite =
                     |> Expect.within epsAbsolute 1000.0
         , test "getHullCentroid" <|
             \_ ->
-                HullSlices.getHullCentroid { xmin = 0, xmax = 100 } [ { x = 50, area = 2, centroid = 1 } ]
+                let
+                    hull =
+                        { empty
+                            | hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 100, hullSlices = [] }
+                            , centroidAreaForEachImmersedSlice =
+                                [ { x = 50, area = 2, centroid = 1 } ]
+                        }
+                in
+                HullSlices.getHullCentroid hull
                     |> Expect.within epsAbsolute 100.0
         ]
