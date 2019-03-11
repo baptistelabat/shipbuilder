@@ -1,28 +1,9 @@
 module HullSliceUtilities exposing
-    ( areaTrapezoid
-    , hullVolume
+    ( hullVolume
     , integrateTrapezoidMetricOnSlices
     )
 
 import Array
-
-
-areaTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
-areaTrapezoid ( z1, y1 ) ( z2, y2 ) =
-    let
-        a =
-            abs y1
-
-        b =
-            abs y2
-
-        c =
-            abs (z2 - z1)
-
-        area =
-            0.5 * (a + b) * c
-    in
-    area
 
 
 integrateTrapezoidMetricOnSlices : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float

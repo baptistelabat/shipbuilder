@@ -855,7 +855,7 @@ suite =
                         (HullSlices.denormalizeHullSlice hs_param hs0)
             , test "areaTrapezoid" <|
                 \_ ->
-                    HullSliceUtilities.areaTrapezoid ( 0, 0 ) ( 1, 1 )
+                    HullSlices.areaTrapezoid ( 0, 0 ) ( 1, 1 )
                         |> Expect.within epsAbsolute 0.5
             , test "zGTrapezoid" <|
                 \_ ->
@@ -873,7 +873,7 @@ suite =
                     |> Expect.within epsAbsolute 0.15875687266820834
         , test "areaTrapezoid" <|
             \_ ->
-                HullSliceUtilities.areaTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
+                HullSlices.areaTrapezoid ( -2.5, 5.111831578947369 ) ( -2.181777777777777, 5.0440000000000005 )
                     |> Expect.within epsAbsolute 1.615905646783629
         , test "zTrapezoid2" <|
             \_ ->

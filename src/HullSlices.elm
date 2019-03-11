@@ -2,6 +2,7 @@ module HullSlices exposing
     ( HullSlice
     , HullSlices
     , area
+    , areaTrapezoid
     , calculateSliceArea
     , centroidAbscissa
     , changeSliceAreaWhilePreservingSize
@@ -239,6 +240,21 @@ addHullSlicesBeneathFreeSurface previousStep =
             HullSlicesWithSlicesBeneathFreeSurface { hullSlices | hullSlicesBeneathFreeSurface = hullSlicesBeneathFreeSurface }
 
 
+areaTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
+areaTrapezoid ( z1, y1 ) ( z2, y2 ) =
+    let
+        a =
+            abs y1
+
+        b =
+            abs y2
+
+        c =
+            abs (z2 - z1)
+    in
+    0.5 * (a + b) * c
+
+
 zTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
 zTrapezoid ( z1, y1 ) ( z2, y2 ) =
     let
@@ -247,7 +263,7 @@ zTrapezoid ( z1, y1 ) ( z2, y2 ) =
 
         -- z1 + zGTrapezoid ( z1, y1 ) ( z2, y2 )
         area_ =
-            HullSliceUtilities.areaTrapezoid ( z1, y1 ) ( z2, y2 )
+            areaTrapezoid ( z1, y1 ) ( z2, y2 )
     in
     z * area_
 
@@ -259,7 +275,7 @@ addCentroidAreaForEachImmersedSlice previousStep =
         calculateCentroidArea hullSliceAsZYList =
             let
                 area_ =
-                    HullSliceUtilities.integrateTrapezoidMetricOnSlices HullSliceUtilities.areaTrapezoid hullSliceAsZYList.zylist
+                    HullSliceUtilities.integrateTrapezoidMetricOnSlices areaTrapezoid hullSliceAsZYList.zylist
 
                 centroid_ =
                     case area_ == 0.0 of
