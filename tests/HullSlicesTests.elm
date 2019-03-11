@@ -1,5 +1,6 @@
 module HullSlicesTests exposing (suite)
 
+import EncodersDecoders
 import Expect exposing (..)
 import Fuzz
 import HullSlices exposing (HullSlices)
@@ -123,7 +124,7 @@ empty =
 
 hullSlices : HullSlices
 hullSlices =
-    Result.withDefault empty (Decode.decodeString HullSlices.decoder TestData.hullSliceJson)
+    Result.withDefault empty (Decode.decodeString EncodersDecoders.decoder TestData.hullSliceJson)
 
 
 cube : HullSlices.HullSlices

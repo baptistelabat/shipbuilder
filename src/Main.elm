@@ -45,6 +45,7 @@ import CoordinatesTransform exposing (CoordinatesTransform)
 import DateFormat
 import Dict exposing (Dict)
 import DictList
+import EncodersDecoders
 import ExtraEvents exposing (onKeyDown)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
@@ -593,7 +594,7 @@ restoreSaveInModel model saveFile =
         cleanModel =
             initModel
                 { buildSHA = model.build
-                , hullsJSON = Encode.encode 0 <| HullSlices.dictEncoder model.slices
+                , hullsJSON = Encode.encode 0 <| EncodersDecoders.dictEncoder model.slices
                 }
     in
     case maybeCoordinatesTransform of
@@ -1363,7 +1364,7 @@ initModel flag =
     , slices =
         let
             cuts =
-                case Decode.decodeString HullSlices.dictDecoder flag.hullsJSON of
+                case Decode.decodeString EncodersDecoders.dictDecoder flag.hullsJSON of
                     Ok c ->
                         c
 
@@ -1510,7 +1511,7 @@ encodeSTL : String -> HullSlices -> Encode.Value
 encodeSTL name hullSlices =
     Encode.object
         [ ( "name", Encode.string name )
-        , ( "data", HullSlices.encoder hullSlices )
+        , ( "data", EncodersDecoders.encoder hullSlices )
         ]
 
 
@@ -2554,7 +2555,7 @@ msg2json model action =
                         intersectBelowSlicesZY =
                             HullSlices.intersectBelow zAtDraught_ hullSlices
                     in
-                    Just { tag = "export-submodel", data = HullSlices.encodeSubModel intersectBelowSlicesZY }
+                    Just { tag = "export-submodel", data = EncodersDecoders.encodeSubModel intersectBelowSlicesZY }
 
         ExportCSV hullReference ->
             case Dict.get hullReference model.slices of
@@ -2573,7 +2574,7 @@ msg2json model action =
                             List.map (\u -> u.position) computedPartitions
 
                         datas =
-                            HullSlices.exportCSV
+                            EncodersDecoders.exportCSV
                                 { ldecks = ldecks
                                 , xmin = hullSlices.xmin
                                 , xmax = hullSlices.xmin + hullSlices.length.value
@@ -2583,7 +2584,7 @@ msg2json model action =
                     in
                     Just
                         { tag = "export-csv"
-                        , data = HullSlices.encodeCSV datas
+                        , data = EncodersDecoders.encodeCSV datas
 
                         -- , data = Encode.string "datas"
                         }
@@ -2633,7 +2634,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
 
         ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
@@ -2641,7 +2642,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = HullSlices.encoder hullSlices }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
