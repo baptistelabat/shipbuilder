@@ -2573,7 +2573,7 @@ msg2json model action =
                         ldecks =
                             List.map (\u -> u.position) computedPartitions
 
-                        datas =
+                        data =
                             EncodersDecoders.exportHullSlicesAsXYList
                                 { ldecks = ldecks
                                 , xmin = hullSlices.xmin
@@ -2584,9 +2584,7 @@ msg2json model action =
                     in
                     Just
                         { tag = "export-csv"
-                        , data = EncodersDecoders.encodeCSV datas
-
-                        -- , data = Encode.string "datas"
+                        , data = EncodersDecoders.encodeCSV data
                         }
 
         ChangeBlockColor block newColor ->
