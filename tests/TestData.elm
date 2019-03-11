@@ -1,5 +1,6 @@
 module TestData exposing
-    ( blockA
+    ( anthineas
+    , blockA
     , blockB
     , blockC
     , cube
@@ -16,6 +17,7 @@ module TestData exposing
     )
 
 import Color
+import Dict
 import Html exposing (Html)
 import HullSlices exposing (HullSlices)
 import Json.Encode as Encode
@@ -28,6 +30,14 @@ import Viewports exposing (..)
 empty : HullSlices
 empty =
     HullSlices.empty
+
+
+anthineas : HullSlices
+anthineas =
+    initialModel
+        |> .slices
+        |> Dict.get "anthineas"
+        |> Maybe.withDefault empty
 
 
 cube : HullSlices.HullSlices

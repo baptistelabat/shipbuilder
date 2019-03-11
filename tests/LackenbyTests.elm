@@ -7,6 +7,7 @@ import HullSlices exposing (HullSlices)
 import Lackenby
 import StringValueInput
 import Test exposing (..)
+import TestData
 
 
 type alias WidthHeightAlpha =
@@ -155,4 +156,10 @@ suite =
                         |> Result.withDefault -1
                         |> Expect.within epsRelative (width * height / 2 * area)
             ]
+        , test "Can get master cross section of Anthineas" <|
+            \_ ->
+                Lackenby.getMasterCrossSection TestData.anthineas
+                    |> Maybe.map .x
+                    |> Maybe.withDefault 999999
+                    |> Expect.within epsAbsolute 11.666666
         ]

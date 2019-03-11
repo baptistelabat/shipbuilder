@@ -1,6 +1,7 @@
 module Lackenby exposing
     ( changeSliceAreaWhilePreservingSize
     , dB
+    ,  getMasterCrossSection
     , modifiedBreadth
     , prismaticCoefficient
     , setSliceArea
@@ -61,7 +62,8 @@ B_{\alpha}(z) \underset{def}{=} (1-\delta B_{\alpha})\cdot B(z), \alpha<=0
 
 -}
 
-import HullSlices
+import HullSlices exposing (HullSlice, HullSliceCentroidAndArea, HullSlices)
+import List.Extra
 import StringValueInput
 
 
@@ -115,6 +117,25 @@ bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol draught =
 prismaticCoefficient : Float -> Float -> Float -> Float
 prismaticCoefficient displacement length masterCrossSectionArea =
     displacement / (length * masterCrossSectionArea)
+
+
+getMasterCrossSection : HullSlices -> Maybe HullSliceCentroidAndArea
+getMasterCrossSection hullSlices =
+    let
+        sliceAndArea : List ( HullSlices.HullSliceAsZYList, HullSliceCentroidAndArea )
+        sliceAndArea =
+            List.map2 Tuple.pair hullSlices.hullSlicesBeneathFreeSurface.hullSlices hullSlices.centroidAreaForEachImmersedSlice
+
+        sliceBreadth : HullSlices.HullSliceAsZYList -> Float
+        sliceBreadth slice =
+            slice
+                |> .zylist
+                |> List.map Tuple.second
+                |> List.maximum
+                |> Maybe.withDefault 0
+    in
+    List.Extra.maximumBy (\( slice, _ ) -> sliceBreadth slice) sliceAndArea
+        |> Maybe.map Tuple.second
 
 
 setSliceArea : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
