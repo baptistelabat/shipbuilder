@@ -2,10 +2,10 @@ module EncodersDecoders exposing
     ( decoder
     , dictDecoder
     , dictEncoder
-    , encodeCSV
     , encodeSubModel
     , encoder
     , exportHullSlicesAsXYList
+    , hullSliceAsXYListEncoder
     )
 
 import Dict exposing (Dict)
@@ -119,17 +119,12 @@ tuple2Encoder enc1 enc2 ( val1, val2 ) =
     Encode.list identity [ enc1 val1, enc2 val2 ]
 
 
-encodeCSVObj : HullSliceAsXYList -> Encode.Value
-encodeCSVObj hsXY =
+hullSliceAsXYListEncoder : HullSliceAsXYList -> Encode.Value
+hullSliceAsXYListEncoder hsXY =
     Encode.object
         [ ( "z", Encode.float hsXY.z )
         , ( "xy", Encode.list (tuple2Encoder Encode.float Encode.float) hsXY.xy )
         ]
-
-
-encodeCSV : List HullSliceAsXYList -> Encode.Value
-encodeCSV list =
-    Encode.list encodeCSVObj list
 
 
 encodeHullSliceAsZYList : HullSliceAsZYList -> Encode.Value
