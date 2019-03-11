@@ -962,12 +962,7 @@ extractHorizontalSliceAtZ z0 hullSlices =
 
         extractFirstXY : HullSliceAsZYList -> ( Float, Float )
         extractFirstXY hullSliceAsZYList =
-            case List.head <| extractY hullSliceAsZYList of
-                Nothing ->
-                    ( hullSliceAsZYList.x, 0 )
-
-                Just firstYValue ->
-                    ( hullSliceAsZYList.x, firstYValue )
+            ( hullSliceAsZYList.x, Maybe.withDefault 0 <| List.head <| extractY hullSliceAsZYList )
     in
     { z = z0, xy = List.map extractFirstXY hullSlicesBelowZ0.hullSlices }
 
