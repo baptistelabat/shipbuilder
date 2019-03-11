@@ -16,7 +16,6 @@ module HullSlices exposing
     , getHullCentroid
     , hullVolume
     , intersectBelow
-    , prismaticCoefficient
     , scale
     , setBreadth
     , setDepth
@@ -121,40 +120,6 @@ scale json hullSlice =
     , zmax = scaleZ hullSlice.zmax
     , y = List.map scaleY hullSlice.y
     }
-
-
-prismaticCoefficient : { a | xmin : Float, length : StringValueInput.FloatInput, y : List Float } -> Float
-prismaticCoefficient areaCurve =
-    case List.maximum areaCurve.y of
-        Nothing ->
-            0
-
-        Just am ->
-            let
-                n : Int
-                n =
-                    List.length areaCurve.y
-
-                to01 : Int -> Float
-                to01 x =
-                    toFloat x / toFloat (n - 1)
-
-                toMinMax : Float -> Float
-                toMinMax x =
-                    areaCurve.xmin + x * areaCurve.length.value
-
-                xs =
-                    List.range 0 (n - 1)
-                        |> List.map (to01 >> toMinMax)
-
-                xAreaPairs : List { x : Float, area : Float }
-                xAreaPairs =
-                    List.map2 (\x a -> { x = x, area = a }) xs areaCurve.y
-
-                v =
-                    volume xAreaPairs
-            in
-            v / (areaCurve.length.value * am)
 
 
 calculateSliceArea : HullSlices -> HullSlice -> Float

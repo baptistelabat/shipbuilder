@@ -2,6 +2,7 @@ module Lackenby exposing
     ( changeSliceAreaWhilePreservingSize
     , dB
     , modifiedBreadth
+    , prismaticCoefficient
     , setSliceArea
     )
 
@@ -61,6 +62,7 @@ B_{\alpha}(z) \underset{def}{=} (1-\delta B_{\alpha})\cdot B(z), \alpha<=0
 -}
 
 import HullSlices
+import StringValueInput
 
 
 bisectArea : { c | zmin : Float, zmax : Float, y : List Float } -> Float -> Float -> Float -> Int -> Int -> Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float }
@@ -108,6 +110,40 @@ bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol draught =
 
     else
         bisectArea slice targetArea alphaMid alphaHigh niterMax (niter + 1) tol draught
+
+
+prismaticCoefficient : { a | xmin : Float, length : StringValueInput.FloatInput, y : List Float } -> Float
+prismaticCoefficient areaCurve =
+    case List.maximum areaCurve.y of
+        Nothing ->
+            0
+
+        Just am ->
+            let
+                n : Int
+                n =
+                    List.length areaCurve.y
+
+                to01 : Int -> Float
+                to01 x =
+                    toFloat x / toFloat (n - 1)
+
+                toMinMax : Float -> Float
+                toMinMax x =
+                    areaCurve.xmin + x * areaCurve.length.value
+
+                xs =
+                    List.range 0 (n - 1)
+                        |> List.map (to01 >> toMinMax)
+
+                xAreaPairs : List { x : Float, area : Float }
+                xAreaPairs =
+                    List.map2 (\x a -> { x = x, area = a }) xs areaCurve.y
+
+                v =
+                    HullSlices.volume xAreaPairs
+            in
+            v / (areaCurve.length.value * am)
 
 
 setSliceArea : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
