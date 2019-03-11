@@ -19,6 +19,7 @@ module HullSlices exposing
     , encoder
     , exportCSV
     , getHullCentroid
+    , hullVolume
     , interpolate
     , intersectBelow
     , modifiedBreadth
@@ -155,11 +156,6 @@ scale json hullSlice =
     }
 
 
-volume : { a | xmin : Float, length : StringValueInput.FloatInput } -> List Float -> Float
-volume json sliceAreas =
-    area json.xmin (json.xmin + json.length.value) { zmin = json.xmin, zmax = json.xmin + json.length.value, y = sliceAreas }
-
-
 prismaticCoefficient : { a | xmin : Float, length : StringValueInput.FloatInput, y : List Float } -> Float
 prismaticCoefficient areaCurve =
     case List.maximum areaCurve.y of
@@ -168,8 +164,28 @@ prismaticCoefficient areaCurve =
 
         Just am ->
             let
+                n : Int
+                n =
+                    List.length areaCurve.y
+
+                to01 : Int -> Float
+                to01 x =
+                    toFloat x / toFloat (n - 1)
+
+                toMinMax : Float -> Float
+                toMinMax x =
+                    areaCurve.xmin + x * areaCurve.length.value
+
+                xs =
+                    List.range 0 (n - 1)
+                        |> List.map (to01 >> toMinMax)
+
+                xAreaPairs : List { x : Float, area : Float }
+                xAreaPairs =
+                    List.map2 (\x a -> { x = x, area = a }) xs areaCurve.y
+
                 v =
-                    volume areaCurve areaCurve.y
+                    volume xAreaPairs
             in
             v / (areaCurve.length.value * am)
 
@@ -292,11 +308,56 @@ addCentroidAreaForEachImmersedSlice previousStep =
             HullSlicesWithCentroidAreaForEachImmersedSlice { hullSlices | centroidAreaForEachImmersedSlice = List.map calculateCentroidArea hullSlices.hullSlicesBeneathFreeSurface.hullSlices }
 
 
+volume : List { a | x : Float, area : Float } -> Float
+volume lo =
+    case lo of
+        o1 :: o2 :: rest ->
+            let
+                x1 =
+                    o1.x
+
+                a1 =
+                    o1.area
+
+                x2 =
+                    o2.x
+
+                a2 =
+                    o2.area
+
+                value =
+                    abs (((a1 + a2) / 2.0) * (x2 - x1))
+            in
+            value + volume (o2 :: rest)
+
+        _ ->
+            0
+
+
+hullVolume : { xmin : Float, xmax : Float } -> List { a | x : Float, area : Float } -> Float
+hullVolume config list =
+    let
+        xmin =
+            config.xmin
+
+        xmax =
+            config.xmax
+
+        toXA : List { a | x : Float, area : Float } -> List { x : Float, area : Float }
+        toXA =
+            List.map (\u -> { x = u.x, area = u.area })
+
+        newList =
+            List.concat [ [ { x = xmin, area = 0.0 } ], toXA list, [ { x = xmax, area = 0.0 } ] ]
+    in
+    volume newList
+
+
 addDisplacement : HullSlicesWithCentroidAreaForEachImmersedSlice -> HullSlicesWithDisplacement
 addDisplacement previousStep =
     case previousStep of
         HullSlicesWithCentroidAreaForEachImmersedSlice hullSlices ->
-            HullSlicesWithDisplacement { hullSlices | displacement = 2 * HullSliceUtilities.hullVolume { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice }
+            HullSlicesWithDisplacement { hullSlices | displacement = 2 * hullVolume { xmin = hullSlices.hullSlicesBeneathFreeSurface.xmin, xmax = hullSlices.hullSlicesBeneathFreeSurface.xmax } hullSlices.centroidAreaForEachImmersedSlice }
 
 
 addCentreOfBuoyancy : HullSlicesWithDisplacement -> HullSlicesWithCentreOfBuoyancy

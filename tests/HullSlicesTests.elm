@@ -671,24 +671,21 @@ suite =
                             [ -89 + 10 * 0.1, -89 + 10 * 0.2, -89 + 10 * 0.5 ]
             ]
         , describe "Volume"
-            [ fuzz
-                (Fuzz.map2 Tuple.pair Fuzz.float Fuzz.float)
+            [ test
                 "Triangular area curve"
               <|
-                \( xmin_, length_ ) ->
+                \_ ->
                     HullSlices.volume
-                        { xmin = xmin_, length = StringValueInput.floatInput length_ }
-                        [ 0, 1, 2, 3, 2, 1, 0 ]
+                        (List.map2 (\x area -> { x = x, area = area }) [ -1, 0, 1, 2, 3, 4, 5 ] [ 0, 1, 2, 3, 2, 1, 0 ])
                         |> Expect.within epsAbsolute
-                            (max 0 (3 * length_ / 2))
+                            9
             , fuzz
                 (Fuzz.map3 (\length_ a b -> { length_ = length_, a = a, b = b }) positiveFloat positiveFloat positiveFloat)
                 "Four-part area curve"
               <|
                 \{ length_, a, b } ->
                     HullSlices.volume
-                        { xmin = 0, length = StringValueInput.floatInput length_ }
-                        [ 0, a, a + b, a, 0 ]
+                        (List.map2 (\x area -> { x = x, area = area }) [ 0, length_ / 4, length_ / 2, 0.75 * length_, length_ ] [ 0, a, a + b, a, 0 ])
                         |> Expect.within epsRelative
                             (3 * a * length_ / 4 + b * length_ / 4)
             ]
@@ -954,11 +951,11 @@ suite =
                         }
         , test "hullVolume" <|
             \_ ->
-                HullSliceUtilities.hullVolume { xmin = 0, xmax = 100 } [ { x = 50, area = 2 } ]
+                HullSlices.hullVolume { xmin = 0, xmax = 100 } [ { x = 50, area = 2 } ]
                     |> Expect.within epsAbsolute 100.0
         , test "hullVolume2" <|
             \_ ->
-                HullSliceUtilities.hullVolume { xmin = 0, xmax = 100 } [ { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 } ]
+                HullSlices.hullVolume { xmin = 0, xmax = 100 } [ { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 } ]
                     |> Expect.within epsAbsolute 1000.0
         , test "getHullCentroid" <|
             \_ ->
