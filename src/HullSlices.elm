@@ -505,8 +505,8 @@ toXY { zmin, zmax, y } =
         |> List.map acc
 
 
-removeDuplicates : List ( Float, Float ) -> List ( Float, Float )
-removeDuplicates l =
+removeIdenticalConsecutiveXYPairs : List ( Float, Float ) -> List ( Float, Float )
+removeIdenticalConsecutiveXYPairs l =
     case l of
         [] ->
             []
@@ -516,16 +516,16 @@ removeDuplicates l =
 
         ( x1, y1 ) :: ( x2, y2 ) :: rest ->
             if x1 == x2 then
-                removeDuplicates (( x2, y2 ) :: rest)
+                removeIdenticalConsecutiveXYPairs (( x2, y2 ) :: rest)
 
             else
-                ( x1, y1 ) :: removeDuplicates (( x2, y2 ) :: rest)
+                ( x1, y1 ) :: removeIdenticalConsecutiveXYPairs (( x2, y2 ) :: rest)
 
 
 clip : Float -> Float -> List ( Float, Float ) -> List ( Float, Float )
 clip a b xys =
     clip_ a b xys
-        |> removeDuplicates
+        |> removeIdenticalConsecutiveXYPairs
 
 
 clip_ : Float -> Float -> List ( Float, Float ) -> List ( Float, Float )
