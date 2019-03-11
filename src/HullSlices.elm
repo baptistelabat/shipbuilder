@@ -520,21 +520,21 @@ clip_ a b xys =
                     [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ clip a b (( x2, y2 ) :: rest)
 
 
+integrate : List ( Float, Float ) -> Float
+integrate l =
+    case l of
+        [] ->
+            0
+
+        [ _ ] ->
+            0
+
+        ( x1, y1 ) :: ( x2, y2 ) :: rest ->
+            ((x2 - x1) * (y1 + y2) / 2) + integrate (( x2, y2 ) :: rest)
+
+
 area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
 area a b curve =
-    let
-        integrate : List ( Float, Float ) -> Float
-        integrate l =
-            case l of
-                [] ->
-                    0
-
-                [ _ ] ->
-                    0
-
-                ( x1, y1 ) :: ( x2, y2 ) :: rest ->
-                    ((x2 - x1) * (y1 + y2) / 2) + integrate (( x2, y2 ) :: rest)
-    in
     curve
         |> toXY
         |> clip a b
