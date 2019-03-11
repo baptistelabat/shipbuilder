@@ -8,25 +8,6 @@ module HullSliceUtilities exposing
 import Array
 
 
-type alias HullSlice =
-    { x : Float
-    , zmin : Float
-    , zmax : Float
-    , y : List Float
-    }
-
-
-type alias HullSliceAsZYList =
-    { x : Float
-    , zylist : List ( Float, Float )
-    }
-
-
-square : Float -> Float
-square n =
-    n ^ 2
-
-
 areaTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float
 areaTrapezoid ( z1, y1 ) ( z2, y2 ) =
     let
