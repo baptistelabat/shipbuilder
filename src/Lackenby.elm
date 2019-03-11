@@ -5,7 +5,7 @@ module Lackenby exposing
     , setSliceArea
     )
 
-import HullSlices exposing (HullSlices)
+import HullSlices
 
 
 bisectArea : { c | zmin : Float, zmax : Float, y : List Float } -> Float -> Float -> Float -> Int -> Int -> Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float }
