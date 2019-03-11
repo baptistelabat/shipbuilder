@@ -5,6 +5,61 @@ module Lackenby exposing
     , setSliceArea
     )
 
+{-| What we wish to do is modify the hull slice so it has a given area while maintaining its breadth and depth.
+To do this, we use the fact that the function $`f_{\alpha}:x\mapsto (x\cdot(1-x))^{\alpha}`$ is always between $`\left[0,1\right]`$ for $`x\in\left[0,1\right]`$ and $`\forall\alpha\geq 0`$ and that we always have $`\forall\alpha>0,f_{\alpha}(0)=f_{\alpha}(1)=0`$.
+
+If we denote $`T`$ the depth of the slice and $`B:z\mapsto B(z)`$ the breadth function, giving the half-breadth of the hull at a given immersion $`z`$ (with axis $`z`$ pointing downwards), we define:
+
+```math
+\delta B_{\alpha}(z) \underset{def}{=} \left(\frac{B(T)-B(z)}{B(T)}\cdot\frac{B(z)}{B(T)}\right)^{\frac{1}{\alpha}}
+```
+
+we get the following properties:
+
+```math
+\forall \alpha<0, \forall z\in\left[0,1\right], \delta B_{\alpha}(z) > 1
+```
+
+```math
+\forall z\in\left[0,1\right], \delta B_{\alpha}(z)\underset{\alpha 0}{\longrightarrow} 0
+```
+
+```math
+\forall \alpha\geq 0, \forall z\in\left[0,1\right], \delta B_{\alpha}(z) \geq 1
+```
+
+```math
+\forall \alpha\neq 0, \delta B_{\alpha}(0) = 0
+```
+
+```math
+\forall \alpha\neq 0, \delta B_{\alpha}(T) = 0
+```
+
+```math
+\delta B_{\alpha}(z)\underset{\alpha\rightarrow +\infty}{\longrightarrow}  1
+```
+
+```math
+\delta B_{\alpha}(z)\underset{\alpha\rightarrow -\infty}{\longrightarrow}  1
+```
+
+Using these properties, we define a "modified breadth function":
+
+```math
+B_{\alpha}(z) \underset{def}{=} (1-\delta B_{\alpha})\cdot B(z) + \delta B_{\alpha}(z)\cdot B(T), \alpha>0
+```
+
+```math
+B_{\alpha}(z) \underset{def}{=} (1-\delta B_{\alpha})\cdot B(z), \alpha<=0
+```
+
+  - For $`\alpha \ll 0`$, the area converges to 0.
+  - For $`\alpha=0`$, we get the original curve.
+  - For $`\alpha \gg 0`$, the area converges to that of a rectangular block.
+
+-}
+
 import HullSlices
 
 
