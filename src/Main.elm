@@ -2572,7 +2572,7 @@ msg2json model action =
                             computeDecks model.partitions.decks
 
                         ldecks =
-                            List.map (\u -> u.position) computedPartitions
+                            List.append (List.map (\u -> u.position) computedPartitions) [ zAtDraught_ ]
 
                         hullSlicesAsXYList =
                             EncodersDecoders.exportHullSlicesAsAreaXYList
