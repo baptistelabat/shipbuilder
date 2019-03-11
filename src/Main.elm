@@ -2574,7 +2574,7 @@ msg2json model action =
                             List.map (\u -> u.position) computedPartitions
 
                         datas =
-                            EncodersDecoders.exportCSV
+                            EncodersDecoders.exportHullSlicesAsXYList
                                 { ldecks = ldecks
                                 , xmin = hullSlices.xmin
                                 , xmax = hullSlices.xmin + hullSlices.length.value

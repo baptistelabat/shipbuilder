@@ -5,7 +5,7 @@ module EncodersDecoders exposing
     , encodeCSV
     , encodeSubModel
     , encoder
-    , exportCSV
+    , exportHullSlicesAsXYList
     )
 
 import Dict exposing (Dict)
@@ -16,8 +16,8 @@ import Json.Encode as Encode
 import StringValueInput
 
 
-exportCSV : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List HullSliceAsXYList
-exportCSV config hullSlices =
+exportHullSlicesAsXYList : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List HullSliceAsXYList
+exportHullSlicesAsXYList config hullSlices =
     let
         horizontalSlices =
             List.map
