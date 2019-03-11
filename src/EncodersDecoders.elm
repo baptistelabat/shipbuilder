@@ -4,20 +4,20 @@ module EncodersDecoders exposing
     , dictEncoder
     , encodeSubModel
     , encoder
-    , exportHullSlicesAsXYList
-    , hullSliceAsXYListEncoder
+    , exportHullSlicesAsAreaXYList
+    , hullSliceAsAreaXYListEncoder
     )
 
 import Dict exposing (Dict)
-import HullSlices exposing (HullSlice, HullSliceAsXYList, HullSliceAsZYList, HullSlices, empty)
+import HullSlices exposing (HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList, HullSlices, empty)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import StringValueInput
 
 
-exportHullSlicesAsXYList : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List HullSliceAsXYList
-exportHullSlicesAsXYList config hullSlices =
+exportHullSlicesAsAreaXYList : { a | ldecks : List Float, xmin : Float, xmax : Float, zAtDraught : Float } -> HullSlices -> List HullSliceAsAreaXYList
+exportHullSlicesAsAreaXYList config hullSlices =
     let
         horizontalSlices =
             List.map
@@ -119,11 +119,12 @@ tuple2Encoder enc1 enc2 ( val1, val2 ) =
     Encode.list identity [ enc1 val1, enc2 val2 ]
 
 
-hullSliceAsXYListEncoder : HullSliceAsXYList -> Encode.Value
-hullSliceAsXYListEncoder hsXY =
+hullSliceAsAreaXYListEncoder : HullSliceAsAreaXYList -> Encode.Value
+hullSliceAsAreaXYListEncoder hsXY =
     Encode.object
         [ ( "z", Encode.float hsXY.z )
         , ( "xy", Encode.list (tuple2Encoder Encode.float Encode.float) hsXY.xy )
+        , ( "area", Encode.float hsXY.area )
         ]
 
 
