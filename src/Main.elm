@@ -734,7 +734,7 @@ type alias Block =
     , density : StringValueInput.FloatInput
     , visible : Bool
     , centerOfGravity : CenterOfGravity
-    , centerOfGravityFixed: Bool
+    , centerOfGravityFixed : Bool
     }
 
 
@@ -804,11 +804,19 @@ cogToPoint p =
     }
 
 
-getCenterOfVolume : Block -> Point
-getCenterOfVolume block =
+getAbsoluteCenterOfVolume : Block -> Point
+getAbsoluteCenterOfVolume block =
     { x = StringValueInput.round_n 2 <| block.position.x.value + 0.5 * block.size.length.value
     , y = StringValueInput.round_n 2 <| block.position.y.value + 0.5 * block.size.width.value
     , z = StringValueInput.round_n 2 <| block.position.z.value - 0.5 * block.size.height.value
+    }
+
+
+getRelativeCenterOfVolume : Block -> Point
+getRelativeCenterOfVolume block =
+    { x = StringValueInput.round_n 2 <| 0.5 * block.size.length.value
+    , y = StringValueInput.round_n 2 <| 0.5 * block.size.width.value
+    , z = StringValueInput.round_n 2 <| 0.5 * block.size.height.value
     }
 
 
@@ -819,13 +827,9 @@ getCenterOfGravity block =
 
 getAbsoluteCenterOfGravity : Block -> Point
 getAbsoluteCenterOfGravity block =
-    let
-        p1 =
-            getCenterOfVolume block
-    in
-    { x = p1.x + block.centerOfGravity.x.value
-    , y = p1.y + block.centerOfGravity.y.value
-    , z = p1.z + block.centerOfGravity.z.value
+    { x = block.position.x.value + block.centerOfGravity.x.value
+    , y = block.position.y.value + block.centerOfGravity.y.value
+    , z = block.position.z.value - block.centerOfGravity.z.value
     }
 
 
@@ -1827,7 +1831,7 @@ updateNoJs msg model =
             let
                 centerOfVolume : Point
                 centerOfVolume =
-                    getCenterOfVolume block
+                    getRelativeCenterOfVolume block
 
                 updatedBlock : Block
                 updatedBlock =
