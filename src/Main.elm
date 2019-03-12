@@ -1842,8 +1842,13 @@ updateNoJs msg model =
                             , z = StringValueInput.fromNumber "m" "z" 1 centerOfVolume.z
                             }
                     }
+
+                updatedBlockUnfixed =
+                    { updatedBlock
+                        | centerOfGravityFixed = False
+                    }
             in
-            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
+            ( { model | blocks = updateBlockInBlocks updatedBlockUnfixed model.blocks }, Cmd.none )
 
         MoveBlockDown block ->
             let
@@ -2056,11 +2061,15 @@ updateNoJs msg model =
                                         |> StringValueInput.asStringIn axisFloatInput
                             )
                                 |> asAxisInPosition axis position
-
-                        -- |> UserInput
                     }
+
+                updatedBlockFixed =
+                    { updatedBlock
+                        | centerOfGravityFixed = True
+                    }
+
             in
-            ( updateBlockInModel updatedBlock model, Cmd.none )
+            ( updateBlockInModel updatedBlockFixed model, Cmd.none )
 
         UpdateCustomPropertyLabel property newLabel ->
             ( { model
