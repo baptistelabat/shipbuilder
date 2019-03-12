@@ -2067,7 +2067,6 @@ updateNoJs msg model =
                     { updatedBlock
                         | centerOfGravityFixed = True
                     }
-
             in
             ( updateBlockInModel updatedBlockFixed model, Cmd.none )
 
@@ -2262,10 +2261,32 @@ updateFromJs jsmsg model =
         SynchronizeSize uuid size ->
             ( case getBlockByUUID uuid model.blocks of
                 Just block ->
-                    size
-                        |> asSizeInBlock block
-                        |> updateBlockMassAndDensity
-                        |> flip updateBlockInModel model
+                    let
+                        updatedBlock : Block
+                        updatedBlock =
+                            size
+                                |> asSizeInBlock block
+                                |> updateBlockMassAndDensity
+
+                        newCenterOfVolume : Point
+                        newCenterOfVolume =
+                            if block.centerOfGravityFixed == False then
+                                getRelativeCenterOfVolume updatedBlock
+
+                            else
+                                getCenterOfGravity updatedBlock
+
+                        updatedBlockWithCog : Block
+                        updatedBlockWithCog =
+                            { updatedBlock
+                                | centerOfGravity =
+                                    { x = StringValueInput.fromNumber "m" "x" 1 newCenterOfVolume.x
+                                    , y = StringValueInput.fromNumber "m" "y" 1 newCenterOfVolume.y
+                                    , z = StringValueInput.fromNumber "m" "z" 1 newCenterOfVolume.z
+                                    }
+                            }
+                    in
+                    updateBlockInModel updatedBlockWithCog model
 
                 Nothing ->
                     model
@@ -2528,8 +2549,26 @@ updateModelToJs msg model =
                                 |> asDimensionInSize dimension blockInModel.size
                                 |> asSizeInBlock blockInModel
                                 |> updateBlockMassAndDensity
+
+                        newCenterOfVolume : Point
+                        newCenterOfVolume =
+                            if updatedBlock.centerOfGravityFixed == False then
+                                getRelativeCenterOfVolume updatedBlock
+
+                            else
+                                getCenterOfGravity blockInModel
+
+                        updatedBlockWithCog : Block
+                        updatedBlockWithCog =
+                            { updatedBlock
+                                | centerOfGravity =
+                                    { x = StringValueInput.fromNumber "m" "x" 1 newCenterOfVolume.x
+                                    , y = StringValueInput.fromNumber "m" "y" 1 newCenterOfVolume.y
+                                    , z = StringValueInput.fromNumber "m" "z" 1 newCenterOfVolume.z
+                                    }
+                            }
                     in
-                    updateBlockInModel updatedBlock model
+                    updateBlockInModel updatedBlockWithCog model
 
                 Nothing ->
                     input
