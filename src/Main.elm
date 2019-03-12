@@ -891,9 +891,9 @@ type alias Position =
 
 initPosition : Position
 initPosition =
-    { x = StringValueInput.emptyFloat 1
-    , y = StringValueInput.emptyFloat 1
-    , z = StringValueInput.emptyFloat 1
+    { x = StringValueInput.fromNumber "m" "x" 1 5
+    , y = StringValueInput.fromNumber "m" "x" 1 2.5
+    , z = StringValueInput.fromNumber "m" "x" 1 2.5
     }
 
 
