@@ -16,6 +16,7 @@ module HullSlices exposing
     , fillHullSliceMetrics
     , getHullCentroid
     , hullVolume
+    , integrate
     , intersectBelow
     , scale
     , setBreadth
