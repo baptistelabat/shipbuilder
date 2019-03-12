@@ -1,6 +1,6 @@
 module HullSlices exposing
     ( HullSlice
-    , HullSliceAsXYList
+    , HullSliceAsAreaXYList
     , HullSliceAsZYList
     , HullSlices
     , area
@@ -91,9 +91,10 @@ type alias HullSliceAsZYList =
     }
 
 
-type alias HullSliceAsXYList =
+type alias HullSliceAsAreaXYList =
     { z : Float
     , xy : List ( Float, Float )
+    , area : Float
     }
 
 
@@ -384,7 +385,7 @@ addMetacentre previousStep =
                 zAtDraught =
                     hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
-                horizontalHullSliceAtDraught : HullSliceAsXYList
+                horizontalHullSliceAtDraught : HullSliceAsAreaXYList
                 horizontalHullSliceAtDraught =
                     extractHorizontalSliceAtZ zAtDraught hullSlices
 
@@ -520,21 +521,21 @@ clip_ a b xys =
                     [ ( left, (left - x1) / (x2 - x1) * (y2 - y1) + y1 ), ( right, (right - x1) / (x2 - x1) * (y2 - y1) + y1 ) ] ++ clip a b (( x2, y2 ) :: rest)
 
 
+integrate : List ( Float, Float ) -> Float
+integrate l =
+    case l of
+        [] ->
+            0
+
+        [ _ ] ->
+            0
+
+        ( x1, y1 ) :: ( x2, y2 ) :: rest ->
+            ((x2 - x1) * (y1 + y2) / 2) + integrate (( x2, y2 ) :: rest)
+
+
 area : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Float
 area a b curve =
-    let
-        integrate : List ( Float, Float ) -> Float
-        integrate l =
-            case l of
-                [] ->
-                    0
-
-                [ _ ] ->
-                    0
-
-                ( x1, y1 ) :: ( x2, y2 ) :: rest ->
-                    ((x2 - x1) * (y1 + y2) / 2) + integrate (( x2, y2 ) :: rest)
-    in
     curve
         |> toXY
         |> clip a b
@@ -694,7 +695,7 @@ zGTrapezoid ( z1, y1 ) ( z2, y2 ) =
     ((b + 2 * a) * h) / (3 * (a + b))
 
 
-getInertialMoment : HullSliceAsXYList -> Float
+getInertialMoment : HullSliceAsAreaXYList -> Float
 getInertialMoment o =
     let
         xs =
@@ -739,7 +740,7 @@ extractY hsXY =
         |> List.map Tuple.second
 
 
-extractHorizontalSliceAtZ : Float -> HullSlices -> HullSliceAsXYList
+extractHorizontalSliceAtZ : Float -> HullSlices -> HullSliceAsAreaXYList
 extractHorizontalSliceAtZ z0 hullSlices =
     let
         hullSlicesBelowZ0 =
@@ -748,8 +749,14 @@ extractHorizontalSliceAtZ z0 hullSlices =
         extractFirstXY : HullSliceAsZYList -> ( Float, Float )
         extractFirstXY hullSliceAsZYList =
             ( hullSliceAsZYList.x, Maybe.withDefault 0 <| List.head <| extractY hullSliceAsZYList )
+
+        xy_ =
+            List.map extractFirstXY hullSlicesBelowZ0.hullSlices
+
+        area_ =
+            integrate xy_
     in
-    { z = z0, xy = List.map extractFirstXY hullSlicesBelowZ0.hullSlices }
+    { z = z0, xy = xy_, area = area_ }
 
 
 blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> Float

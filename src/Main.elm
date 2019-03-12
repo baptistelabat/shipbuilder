@@ -2572,10 +2572,10 @@ msg2json model action =
                             computeDecks model.partitions.decks
 
                         ldecks =
-                            List.map (\u -> u.position) computedPartitions
+                            List.append (List.map (\u -> u.position) computedPartitions) [ zAtDraught_ ]
 
                         hullSlicesAsXYList =
-                            EncodersDecoders.exportHullSlicesAsXYList
+                            EncodersDecoders.exportHullSlicesAsAreaXYList
                                 { ldecks = ldecks
                                 , xmin = hullSlices.xmin
                                 , xmax = hullSlices.xmin + hullSlices.length.value
@@ -2585,7 +2585,7 @@ msg2json model action =
                     in
                     Just
                         { tag = "export-csv"
-                        , data = Encode.list EncodersDecoders.hullSliceAsXYListEncoder hullSlicesAsXYList
+                        , data = Encode.list EncodersDecoders.hullSliceAsAreaXYListEncoder hullSlicesAsXYList
                         }
 
         ChangeBlockColor block newColor ->
@@ -3216,14 +3216,6 @@ viewModeller model =
                                 , onClick <| ToJs (ExportSTL hullReference)
                                 ]
                                 [ text "export 3D (stl)" ]
-                            , button
-                                [ id "exportCSV"
-                                , value "exportCSV"
-
-                                -- disabled <| bulkheads.number.value == 0
-                                , onClick <| ToJs (ExportCSV hullReference)
-                                ]
-                                [ text "exportCSV" ]
                             , button
                                 [ id "exportSubModel"
                                 , value "exportSubModel"
