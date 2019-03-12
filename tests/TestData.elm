@@ -20,6 +20,7 @@ module TestData exposing
 import Color
 import Dict
 import Html exposing (Html)
+import HullSliceModifiers exposing (empty)
 import HullSlices exposing (HullSlices)
 import Json.Encode as Encode
 import Main exposing (..)
@@ -28,18 +29,13 @@ import StringValueInput
 import Viewports exposing (..)
 
 
-empty : HullSlices
-empty =
-    HullSlices.empty
-
-
 anthineas : HullSlices
 anthineas =
     initialModel
         |> .slices
         |> Dict.get "anthineas"
         |> Maybe.withDefault empty
-        |> HullSlices.fillHullSliceMetrics
+        |> HullSliceModifiers.fillHullSliceMetrics
 
 
 mpov : Float -> HullSlices
@@ -48,8 +44,7 @@ mpov draught =
         |> .slices
         |> Dict.get "mpov"
         |> Maybe.withDefault empty
-        |> HullSlices.setDraught (String.fromFloat draught)
-        |> HullSlices.fillHullSliceMetrics
+        |> HullSliceModifiers.setDraught (String.fromFloat draught)
 
 
 cube : HullSlices.HullSlices
@@ -80,7 +75,7 @@ cube =
             ]
         , draught = StringValueInput.floatInput 2
     }
-        |> HullSlices.fillHullSliceMetrics
+        |> HullSliceModifiers.fillHullSliceMetrics
 
 
 toblerone : Float -> Float -> HullSlices.HullSlices
@@ -111,7 +106,7 @@ toblerone breadth depth =
             ]
         , draught = StringValueInput.floatInput 2
     }
-        |> HullSlices.fillHullSliceMetrics
+        |> HullSliceModifiers.fillHullSliceMetrics
 
 
 valueToIndentedString : Encode.Value -> String

@@ -4,6 +4,7 @@ import CustomFuzzers exposing (..)
 import EncodersDecoders
 import Expect exposing (..)
 import Fuzz
+import HullSliceModifiers exposing (empty)
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode
@@ -55,11 +56,6 @@ s =
 testSpline : Float -> Float -> (() -> Expect.Expectation)
 testSpline x y =
     \_ -> Expect.equal y <| Interpolate.Cubic.valueAt x s
-
-
-empty : HullSlices
-empty =
-    HullSlices.empty
 
 
 hullSlices : HullSlices
@@ -149,22 +145,22 @@ suite =
         , describe "Setters"
             [ test "Can set length over all" <|
                 \_ ->
-                    Expect.equal { value = 1.2, string = "1.2", description = "Length over all", unit = "m" } (HullSlices.setLengthOverAll "1.234" hullSlices |> .length)
+                    Expect.equal { value = 1.2, string = "1.2", description = "Length over all", unit = "m" } (HullSliceModifiers.setLengthOverAll "1.234" hullSlices |> .length)
             , test "Can set breadth" <|
                 \_ ->
-                    Expect.equal { value = 13.4, string = "13.4", description = "Breadth", unit = "m" } (HullSlices.setBreadth "13.4125" hullSlices |> .breadth)
+                    Expect.equal { value = 13.4, string = "13.4", description = "Breadth", unit = "m" } (HullSliceModifiers.setBreadth "13.4125" hullSlices |> .breadth)
             , test "Can set draught" <|
                 \_ ->
-                    Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m" } (HullSlices.setDraught "13.4125" hullSlices |> .draught)
+                    Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m" } (HullSliceModifiers.setDraught "13.4125" hullSlices |> .draught)
             , test "Resizing should not change centering: changing breadth should also change ymin" <|
                 \_ ->
-                    (HullSlices.setBreadth "7" hullSlices |> .ymin)
+                    (HullSliceModifiers.setBreadth "7" hullSlices |> .ymin)
                         |> Expect.within epsAbsolute -3.5
             ]
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
-                    Expect.equal [ 0.06183408481917592 ] (hullSlices |> HullSlices.setBreadth "10" |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
+                    Expect.equal [ 0.06183408481917592 ] (hullSlices |> HullSliceModifiers.setBreadth "10" |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
             , describe "Clipper" <|
                 [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->
@@ -441,7 +437,7 @@ suite =
                                     [ TestData.cube.breadth.value * TestData.cube.draught.value, TestData.cube.breadth.value * TestData.cube.draught.value, TestData.cube.breadth.value * TestData.cube.draught.value ]
                     , test "Cube after changing breadth" <|
                         \_ ->
-                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.fillHullSliceMetrics TestData.cube) TestData.cube.slices
+                            List.map (HullSlices.calculateSliceArea <| HullSliceModifiers.setBreadth "10" TestData.cube) TestData.cube.slices
                                 |> Expect.equal
                                     [ 10 * TestData.cube.draught.value, 10 * TestData.cube.draught.value, 10 * TestData.cube.draught.value ]
                     , fuzz (Fuzz.map3 makeTriplet positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|

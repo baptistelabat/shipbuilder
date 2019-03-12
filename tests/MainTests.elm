@@ -10,6 +10,7 @@ import Fuzz
 import Html exposing (Html)
 import Html.Attributes as Attributes
 import HullReferences
+import HullSliceModifiers
 import HullSlices
 import Json.Decode as Decode exposing (Decoder, decodeString, decodeValue)
 import Json.Encode as Encode exposing (encode)
@@ -1366,11 +1367,11 @@ suite =
                             |> Query.findAll [ Selector.id "length-over-all" ]
                             |> Query.first
                             |> Event.simulate (Event.input "123.4")
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4")
+                            |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "123.4")
                 , test "ModifySlice sets length over all" <|
                     \_ ->
                         Expect.equal (Just 123.4)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "123.4" ]
                                 |> .slices
                                 |> Dict.get "anthineas"
                                 |> Maybe.map (.length >> .value)
@@ -1379,7 +1380,7 @@ suite =
                     \_ ->
                         let
                             msg =
-                                ModifySlice HullSlices.setLengthOverAll "anthineas" "123.4"
+                                ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "123.4"
                         in
                         Expect.equal
                             (toJS [ ToJs msg ] msg (Decode.map Just EncodersDecoders.decoder))
@@ -1395,7 +1396,7 @@ suite =
                             |> Query.findAll [ Selector.id "length-over-all" ]
                             |> Query.first
                             |> Event.simulate ("22" |> press |> downArrow)
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "21.8")
+                            |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "21.8")
                 , test "Can press shift down arrow key to decrement length over all" <|
                     \_ ->
                         modellerView
@@ -1403,7 +1404,7 @@ suite =
                             |> Query.findAll [ Selector.id "length-over-all" ]
                             |> Query.first
                             |> Event.simulate ("22" |> press |> shift |> downArrow)
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setLengthOverAll "anthineas" "12.8")
+                            |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "12.8")
                 , test "Breadth input is present" <|
                     \_ ->
                         modellerView
@@ -1418,11 +1419,11 @@ suite =
                             |> Query.findAll [ Selector.id "breadth" ]
                             |> Query.first
                             |> Event.simulate (Event.input "123.4")
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "123.4")
+                            |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setBreadth "anthineas" "123.4")
                 , test "ModifySlice sets breadth" <|
                     \_ ->
                         Expect.equal (Just 123.4)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "123.4" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setBreadth "anthineas" "123.4" ]
                                 |> .slices
                                 |> Dict.get "anthineas"
                                 |> Maybe.map (.breadth >> .value)
@@ -1434,7 +1435,7 @@ suite =
                             |> Query.findAll [ Selector.id "breadth" ]
                             |> Query.first
                             |> Event.simulate ("22" |> press |> downArrow)
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "5.9")
+                            |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setBreadth "anthineas" "5.9")
                 , test "Can press up arrow key to increment breadth" <|
                     \_ ->
                         modellerView
@@ -1442,7 +1443,7 @@ suite =
                             |> Query.findAll [ Selector.id "breadth" ]
                             |> Query.first
                             |> Event.simulate ("22" |> press |> upArrow)
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setBreadth "anthineas" "7.9")
+                            |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setBreadth "anthineas" "7.9")
                 , test "Draught input is present" <|
                     \_ ->
                         modellerView
@@ -1457,11 +1458,11 @@ suite =
                             |> Query.findAll [ Selector.id "draught" ]
                             |> Query.first
                             |> Event.simulate (Event.input "123.4")
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setDraught "anthineas" "123.4")
+                            |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setDraught "anthineas" "123.4")
                 , test "SetDraught sets draught" <|
                     \_ ->
                         Expect.equal (Just 123.4)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "anthineas" "123.4" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "anthineas" "123.4" ]
                                 |> .slices
                                 |> Dict.get "anthineas"
                                 |> Maybe.map (.draught >> .value)
@@ -1480,11 +1481,11 @@ suite =
                             |> Query.findAll [ Selector.id "depth" ]
                             |> Query.first
                             |> Event.simulate (Event.input "123.4")
-                            |> Event.expect (ToJs <| ModifySlice HullSlices.setDepth "anthineas" "123.4")
+                            |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setDepth "anthineas" "123.4")
                 , test "ModifySlice sets depth" <|
                     \_ ->
                         Expect.equal (Just 123.4)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDepth "anthineas" "123.4" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDepth "anthineas" "123.4" ]
                                 |> .slices
                                 |> Dict.get "anthineas"
                                 |> Maybe.map (.depth >> .value)
@@ -1492,7 +1493,7 @@ suite =
                 , test "select mpov. set draught to 1.0 and verify displacement" <|
                     \_ ->
                         Expect.equal (Just 48.96)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.displacement >> StringValueInput.round_n 2)
@@ -1500,7 +1501,7 @@ suite =
                 , test "select mpov. set draught to 1.0 and verify block coefficient" <|
                     \_ ->
                         Expect.equal (Just 0.15)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
@@ -1508,7 +1509,7 @@ suite =
                 , test "select mpov. set draught to 1.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 0.63)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
@@ -1516,7 +1517,7 @@ suite =
                 , test "select mpov. set draught to 1.0 and verify KM" <|
                     \_ ->
                         Expect.equal (Just 3.92)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "1.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "1.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
@@ -1524,7 +1525,7 @@ suite =
                 , test "select mpov. set draught to 2.0 and verify displacement" <|
                     \_ ->
                         Expect.equal (Just 303.52)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.displacement >> StringValueInput.round_n 2)
@@ -1532,7 +1533,7 @@ suite =
                 , test "select mpov. set draught to 2.0 and verify block coefficient" <|
                     \_ ->
                         Expect.equal (Just 0.18)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
@@ -1540,7 +1541,7 @@ suite =
                 , test "select mpov. set draught to 2.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 1.39)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
@@ -1548,7 +1549,7 @@ suite =
                 , test "select mpov. set draught to 2.0 and verify KM" <|
                     \_ ->
                         Expect.equal (Just 7.19)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "2.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "2.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
@@ -1556,7 +1557,7 @@ suite =
                 , test "select mpov. set draught to 3.0 and verify displacement" <|
                     \_ ->
                         Expect.equal (Just 797.16)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.displacement >> StringValueInput.round_n 2)
@@ -1564,7 +1565,7 @@ suite =
                 , test "select mpov. set draught to 3.0 and verify block coefficient" <|
                     \_ ->
                         Expect.equal (Just 0.28)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
@@ -1572,7 +1573,7 @@ suite =
                 , test "select mpov. set draught to 3.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 2.09)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
@@ -1580,7 +1581,7 @@ suite =
                 , test "select mpov. set draught to 3.0 and verify KM" <|
                     \_ ->
                         Expect.equal (Just 7.6)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "3.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "3.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
@@ -1588,7 +1589,7 @@ suite =
                 , test "select mpov. set draught to 4.0 and verify displacement" <|
                     \_ ->
                         Expect.equal (Just 1425.02)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.displacement >> StringValueInput.round_n 2)
@@ -1596,7 +1597,7 @@ suite =
                 , test "select mpov. set draught to 4.0 and verify block coefficient" <|
                     \_ ->
                         Expect.equal (Just 0.36)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
@@ -1604,7 +1605,7 @@ suite =
                 , test "select mpov. set draught to 4.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 2.71)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
@@ -1612,7 +1613,7 @@ suite =
                 , test "select mpov. set draught to 4.0 and verify KM" <|
                     \_ ->
                         Expect.equal (Just 6.7)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "4.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "4.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
@@ -1620,7 +1621,7 @@ suite =
                 , test "select mpov. set draught to 5.0 and verify displacement" <|
                     \_ ->
                         Expect.equal (Just 2099.53)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.displacement >> StringValueInput.round_n 2)
@@ -1628,7 +1629,7 @@ suite =
                 , test "select mpov. set draught to 5.0 and verify block coefficient" <|
                     \_ ->
                         Expect.equal (Just 0.41)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
@@ -1636,7 +1637,7 @@ suite =
                 , test "select mpov. set draught to 5.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 3.29)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
@@ -1644,7 +1645,7 @@ suite =
                 , test "select mpov. set draught to 5.0 and verify KM" <|
                     \_ ->
                         Expect.equal (Just 6.38)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "5.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "5.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
@@ -1652,7 +1653,7 @@ suite =
                 , test "select mpov. set draught to 6.0 and verify displacement" <|
                     \_ ->
                         Expect.equal (Just 2813.7)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.displacement >> StringValueInput.round_n 2)
@@ -1660,7 +1661,7 @@ suite =
                 , test "select mpov. set draught to 6.0 and verify block coefficient" <|
                     \_ ->
                         Expect.equal (Just 0.44)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
@@ -1668,7 +1669,7 @@ suite =
                 , test "select mpov. set draught to 6.0 and verify KB" <|
                     \_ ->
                         Expect.equal (Just 3.85)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
@@ -1676,7 +1677,7 @@ suite =
                 , test "select mpov. set draught to 6.0 and verify KM" <|
                     \_ ->
                         Expect.equal (Just 6.48)
-                            (setModel [ ToJs <| ModifySlice HullSlices.setDraught "mpov" "6.0" ]
+                            (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "6.0" ]
                                 |> .slices
                                 |> Dict.get "mpov"
                                 |> Maybe.map (.metacentre >> StringValueInput.round_n 2)

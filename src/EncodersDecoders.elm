@@ -9,7 +9,8 @@ module EncodersDecoders exposing
     )
 
 import Dict exposing (Dict)
-import HullSlices exposing (HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList, HullSlices, empty)
+import HullSliceModifiers exposing (empty)
+import HullSlices exposing (HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList, HullSlices)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -77,7 +78,7 @@ decoder =
         |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth") Decode.float)
         |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught") Decode.float) Nothing
         |> Decode.andThen helper
-        |> Decode.map HullSlices.fillHullSliceMetrics
+        |> Decode.map HullSliceModifiers.fillHullSliceMetrics
 
 
 dictDecoder : Decode.Decoder (Dict String HullSlices)

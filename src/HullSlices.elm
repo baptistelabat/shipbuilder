@@ -4,6 +4,14 @@ module HullSlices exposing
     , HullSliceAsZYList
     , HullSliceCentroidAndArea
     , HullSlices
+    , HullSlicesWithoutComputations(..)
+    , addBlockCoefficient
+    , addCentreOfBuoyancy
+    , addCentroidAreaForEachImmersedSlice
+    , addDenormalizedSlices
+    , addDisplacement
+    , addHullSlicesBeneathFreeSurface
+    , addMetacentre
     , area
     , areaTrapezoid
     , calculateSliceArea
@@ -11,18 +19,12 @@ module HullSlices exposing
     , clip
     , denormalizeHullSlice
     , denormalizeHullSlices
-    , empty
     , extractHorizontalSliceAtZ
-    , fillHullSliceMetrics
     , getHullCentroid
     , hullVolume
     , integrate
     , intersectBelow
     , scale
-    , setBreadth
-    , setDepth
-    , setDraught
-    , setLengthOverAll
     , trapezoidCentroid
     , volume
     , zGTrapezoid
@@ -55,27 +57,6 @@ type alias HullSlices =
         }
     , centroidAreaForEachImmersedSlice : List HullSliceCentroidAndArea
     }
-
-
-empty : HullSlices
-empty =
-    fillHullSliceMetrics
-        { length = StringValueInput.emptyFloat
-        , breadth = StringValueInput.emptyFloat
-        , depth = StringValueInput.emptyFloat
-        , xmin = 0
-        , ymin = 0
-        , zmin = 0
-        , slices = []
-        , draught = StringValueInput.emptyFloat
-        , denormalizedSlices = []
-        , blockCoefficient = 0
-        , centreOfBuoyancy = 0
-        , displacement = 0
-        , metacentre = 0
-        , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
-        , centroidAreaForEachImmersedSlice = []
-        }
 
 
 type alias HullSlice =
@@ -373,40 +354,6 @@ addMetacentre previousStep =
                     hullSlices.centreOfBuoyancy + bM
             in
             { hullSlices | metacentre = metacentre }
-
-
-fillHullSliceMetrics : HullSlices -> HullSlices
-fillHullSliceMetrics hullSlices =
-    HullSlicesWithoutComputations hullSlices
-        |> addDenormalizedSlices
-        |> addHullSlicesBeneathFreeSurface
-        |> addCentroidAreaForEachImmersedSlice
-        |> addDisplacement
-        |> addCentreOfBuoyancy
-        |> addBlockCoefficient
-        |> addMetacentre
-
-
-setLengthOverAll : String -> HullSlices -> HullSlices
-setLengthOverAll loa hullSlices =
-    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa } |> fillHullSliceMetrics
-
-
-setBreadth : String -> HullSlices -> HullSlices
-setBreadth breadth hullSlices =
-    { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth }
-        |> (\slices -> { slices | ymin = -slices.breadth.value / 2 })
-        |> fillHullSliceMetrics
-
-
-setDraught : String -> HullSlices -> HullSlices
-setDraught draught hullSlices =
-    { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught } |> fillHullSliceMetrics
-
-
-setDepth : String -> HullSlices -> HullSlices
-setDepth depth hullSlices =
-    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth } |> fillHullSliceMetrics
 
 
 toXY : { a | zmin : Float, zmax : Float, y : List Float } -> List ( Float, Float )

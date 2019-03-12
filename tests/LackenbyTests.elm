@@ -3,6 +3,7 @@ module LackenbyTests exposing (suite)
 import CustomFuzzers exposing (..)
 import Expect exposing (..)
 import Fuzz
+import HullSliceModifiers exposing (empty)
 import HullSlices exposing (HullSlices)
 import Lackenby
 import StringValueInput
@@ -40,11 +41,6 @@ dbInput alphaFuzzer =
             { maxSliceBreadth = currentBreadth + delta, alpha = alpha, currentBreadth = currentBreadth }
     in
     Fuzz.map3 f positiveFloat positiveFloat alphaFuzzer
-
-
-empty : HullSlices
-empty =
-    HullSlices.empty
 
 
 suite : Test
