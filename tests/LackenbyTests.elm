@@ -42,6 +42,11 @@ dbInput alphaFuzzer =
     Fuzz.map3 f positiveFloat positiveFloat alphaFuzzer
 
 
+empty : HullSlices
+empty =
+    HullSlices.empty
+
+
 suite : Test
 suite =
     describe "Lackenby"
@@ -163,4 +168,11 @@ suite =
                     |> Maybe.map .x
                     |> Maybe.withDefault 999999
                     |> Expect.within epsAbsolute 11.666666
+        , test "Can modify abscicae of area curve to get a given prismatic coefficient" <|
+            \_ ->
+                Lackenby.lackenby 0.03 69.6 40 [ ( 1, 10 ), ( 3, 30 ), ( 4, 40 ), ( 4.5, 12 ), ( 6, 1 ) ]
+                    |> Result.withDefault []
+                    |> HullSlices.integrate
+                    |> (*) (1 / (69.6 * 40))
+                    |> Expect.within (Absolute 1.0e-2) 0.03
         ]

@@ -1,7 +1,9 @@
 module Lackenby exposing
     ( changeSliceAreaWhilePreservingSize
     , dB
-    ,  getMasterCrossSection
+    , getMasterCrossSection
+    , getPrismaticCoefficientBounds
+    , lackenby
     , modifiedBreadth
     , prismaticCoefficient
     , setSliceArea
@@ -216,3 +218,130 @@ modifiedBreadth maxSliceBreadth alpha currentBreadth =
 
     else
         (1 - d) * currentBreadth + d * maxSliceBreadth
+
+
+shiftAreaCurve : Float -> List ( Float, Float ) -> List ( Float, Float )
+shiftAreaCurve c areaCurve =
+    let
+        maybePositionMaxArea : Maybe Float
+        maybePositionMaxArea =
+            areaCurve
+                |> List.Extra.maximumBy Tuple.second
+                |> Maybe.map Tuple.first
+
+        maybeMinMax : Maybe ( Float, Float )
+        maybeMinMax =
+            let
+                xs =
+                    List.map Tuple.first areaCurve
+            in
+            case ( List.minimum xs, List.maximum xs ) of
+                ( Just mi, Just ma ) ->
+                    Just ( mi, ma )
+
+                ( _, _ ) ->
+                    Nothing
+
+        dx : Float -> Float
+        dx x =
+            c * x * (1 - x)
+
+        shift : Float -> Float -> Float -> ( Float, Float ) -> ( Float, Float )
+        shift xmin xmax x0 ( x, a ) =
+            if x < x0 then
+                let
+                    x_ =
+                        (x - xmin) / (x0 - xmin)
+                in
+                ( (x_ - dx x_) * (x0 - xmin) + xmin, a )
+
+            else
+                let
+                    x_ =
+                        (x - x0) / (xmax - x0)
+                in
+                ( (x_ + dx x_) * (xmax - x0) + x0, a )
+    in
+    case ( maybePositionMaxArea, maybeMinMax ) of
+        ( Just x0, Just ( xmin, xmax ) ) ->
+            List.map (shift xmin xmax x0) areaCurve
+
+        ( _, _ ) ->
+            areaCurve
+
+
+getPrismaticCoefficientBounds : Float -> Float -> List ( Float, Float ) -> ( Float, Float )
+getPrismaticCoefficientBounds lengthAtWaterline masterCrossSectionArea areaCurve =
+    let
+        getPrismaticCoeff : List ( Float, Float ) -> Float
+        getPrismaticCoeff curve =
+            curve |> HullSlices.integrate |> (*) (1 / (lengthAtWaterline * masterCrossSectionArea))
+    in
+    ( getPrismaticCoeff <| shiftAreaCurve -1 areaCurve, getPrismaticCoeff <| shiftAreaCurve 1 areaCurve )
+
+
+{-| Modify the abscicae of an area curve to reach a given prismatic coefficient
+-}
+lackenby : Float -> Float -> Float -> List ( Float, Float ) -> Result String (List ( Float, Float ))
+lackenby targetPrismaticCoefficient lengthAtWaterline masterCrossSectionArea areaCurve =
+    let
+        lackenby_ : Float -> Int -> Int -> Float -> Float -> Result String (List ( Float, Float ))
+        lackenby_ tolerance niterMax niter cLow cHigh =
+            let
+                getPrismaticCoeff : List ( Float, Float ) -> Float
+                getPrismaticCoeff curve =
+                    curve |> HullSlices.integrate |> (*) (1 / (lengthAtWaterline * masterCrossSectionArea))
+
+                lowAreaCurve =
+                    shiftAreaCurve cLow areaCurve
+
+                highAreaCurve =
+                    shiftAreaCurve cHigh areaCurve
+
+                lowPrismaticCoeff =
+                    getPrismaticCoeff lowAreaCurve
+
+                highPrismaticCoeff =
+                    getPrismaticCoeff highAreaCurve
+
+                cMid =
+                    (cLow + cHigh) / 2
+
+                midAreaCurve =
+                    shiftAreaCurve cMid areaCurve
+
+                midPrismaticCoeff =
+                    getPrismaticCoeff midAreaCurve
+
+                reachedTolerance c =
+                    if targetPrismaticCoefficient == 0 then
+                        abs (c - targetPrismaticCoefficient) < tolerance
+
+                    else
+                        abs (c - targetPrismaticCoefficient) / targetPrismaticCoefficient < tolerance
+            in
+            if lowPrismaticCoeff > targetPrismaticCoefficient then
+                Err "target prismatic coefficient is lower than the lowest bound"
+
+            else if highPrismaticCoeff < targetPrismaticCoefficient then
+                Err "target prismatic coefficient is higher than the lowest bound"
+
+            else if reachedTolerance lowPrismaticCoeff then
+                Ok lowAreaCurve
+
+            else if reachedTolerance highPrismaticCoeff then
+                Ok highAreaCurve
+
+            else if reachedTolerance midPrismaticCoeff then
+                Ok midAreaCurve
+
+            else if niter > niterMax then
+                Err "Unable to reach tolerance."
+
+            else if midPrismaticCoeff > targetPrismaticCoefficient then
+                lackenby_ tolerance niterMax (niter + 1) cLow cMid
+
+            else
+                lackenby_ tolerance niterMax (niter + 1) cMid cHigh
+    in
+    lackenby_ 1.0e-2 8 0 -1 1
