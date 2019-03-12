@@ -253,7 +253,7 @@ let makeBulkheads = function (bulkheads) {
     );
     oldBulkheads.forEach(oldBulkhead => removeFromScene(oldBulkhead));
 
-    const bulkheadColor = new THREE.Color(0.5, 0.5, 1); // blue
+    const bulkheadColor = new THREE.Color(0.5, 0.5, 0.5); // grey
     // color of the bulkhead #0
     const zeroColor = new THREE.Color(1, 0.5, 0.5); // red
 
@@ -315,7 +315,7 @@ let makeDecks = function (decks) {
     );
     oldDecks.forEach(oldDeck => removeFromScene(oldDeck));
 
-    const deckColor = new THREE.Color(0.5, 0.5, 1); // blue
+    const deckColor = new THREE.Color(0.5, 0.5, 0.5); // grey
     // color of the deck #0
     const zeroColor = new THREE.Color(1, 0.5, 0.5); // red
 
@@ -353,6 +353,44 @@ let makeDecks = function (decks) {
         setObjectOpacityForCurrentMode(deck);
         scene.add(deck);
     })
+}
+
+let makeWaterLine = function (zPosition) {
+    // delete old water line
+    const oldWaterLines = scene.children.filter(child =>
+        child.sbType
+        && child.sbType === "modeller"
+        && child.modellerType
+        && child.modellerType === "waterLine"
+    );
+    oldWaterLines.forEach(oldWaterLine => removeFromScene(oldWaterLine));
+
+    const color = new THREE.Color(0.5, 0.5, 1); // green
+
+    const size = 500;
+    const geometry = new THREE.Geometry();
+
+    // create a 4 points that compose a square centered in 0,0,0
+    geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, 0, coordinatesTransform));
+    geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, 0, coordinatesTransform));
+    geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, 0, coordinatesTransform));
+    geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, 0, coordinatesTransform));
+    var material = new THREE.LineBasicMaterial({ color: color, linewidth: 2, side: THREE.DoubleSide });
+
+    // create a line from the previous 4 points
+    var waterLine = new THREE.LineLoop(geometry, material);
+    // set the position of the deck on the Z axis
+    waterLine.position.copy(toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform));
+
+    // used to include or exclude partitions when filtering objects in the scene
+    waterLine.sbType = "modeller";
+    waterLine.baseColor = color;
+    //waterLine.visible = showingPartitions;
+    // used to separate water line from decks and bulkheads
+    waterLine.modellerType = "waterLine";
+    // used to retrieve the deck by its index in Elm (from 0 to N)
+    setObjectOpacityForCurrentMode(waterLine);
+    scene.add(waterLine);
 }
 
 // remove the hull model from the scene if any
@@ -509,6 +547,8 @@ let loadHull = function (json) {
         hull.sbType = "hull";
         scene.add(hull);
 
+        var zWaterLine = (json.depth + json.zmin) - json.draught;
+        makeWaterLine(zWaterLine);
 }
 
 let hullVolume = function (json) {
