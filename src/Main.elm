@@ -122,6 +122,7 @@ newBlockDecoder =
         |> Pipeline.hardcoded (StringValueInput.emptyFloat 1)
         |> Pipeline.hardcoded True
         |> Pipeline.hardcoded initPosition
+        |> Pipeline.hardcoded False
 
 
 type alias SyncPosition =
@@ -256,6 +257,7 @@ decodeBlock =
         |> Pipeline.optional "density" (StringValueInput.floatInputDecoder 1 "kg/m^3" "Density") (StringValueInput.emptyFloat 1)
         |> Pipeline.optional "visible" Decode.bool True
         |> Pipeline.optional "centerOfGravity" decodePosition initPosition
+        |> Pipeline.optional "centerOfGravityFixed" Decode.bool False
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -732,6 +734,7 @@ type alias Block =
     , density : StringValueInput.FloatInput
     , visible : Bool
     , centerOfGravity : CenterOfGravity
+    , centerOfGravityFixed: Bool
     }
 
 
@@ -756,6 +759,7 @@ emptyBlock =
     , density = StringValueInput.emptyFloat 1
     , visible = False
     , centerOfGravity = { x = StringValueInput.emptyFloat 1, y = StringValueInput.emptyFloat 1, z = StringValueInput.emptyFloat 1 }
+    , centerOfGravityFixed = False
     }
 
 
@@ -784,6 +788,7 @@ initBlock uuid label color position size =
     , density = StringValueInput.emptyFloat 1
     , visible = True
     , centerOfGravity = initPosition
+    , centerOfGravityFixed = False
     }
 
 
