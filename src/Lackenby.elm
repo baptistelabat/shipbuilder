@@ -114,9 +114,23 @@ bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol draught =
         bisectArea slice targetArea alphaMid alphaHigh niterMax (niter + 1) tol draught
 
 
-prismaticCoefficient : Float -> Float -> Float -> Float
-prismaticCoefficient displacement length masterCrossSectionArea =
-    displacement / (length * masterCrossSectionArea)
+prismaticCoefficient : HullSlices -> Maybe Float
+prismaticCoefficient hullSlices =
+    let
+        displacement : Float
+        displacement =
+            hullSlices.displacement
+
+        waterlineLength : Float
+        waterlineLength =
+            hullSlices.hullSlicesBeneathFreeSurface.xmax - hullSlices.hullSlicesBeneathFreeSurface.xmin
+
+        masterCrossSectionArea2PrismaticCoefficient : HullSliceCentroidAndArea -> Float
+        masterCrossSectionArea2PrismaticCoefficient masterCrossSection =
+            displacement / (waterlineLength * masterCrossSection.area)
+    in
+    getMasterCrossSection hullSlices
+        |> Maybe.map masterCrossSectionArea2PrismaticCoefficient
 
 
 getMasterCrossSection : HullSlices -> Maybe HullSliceCentroidAndArea

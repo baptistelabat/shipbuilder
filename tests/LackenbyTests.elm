@@ -47,8 +47,9 @@ suite =
     describe "Lackenby"
         [ test "Can calculate prismatic coefficient" <|
             \_ ->
-                Lackenby.prismaticCoefficient 3 2 1
-                    |> Expect.within (Absolute 1.0e-2) 1.5
+                Lackenby.prismaticCoefficient (TestData.mpov 1)
+                    |> Maybe.withDefault 999999
+                    |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6))
         , describe "Can change slice area"
             [ fuzz (widthHeightAlpha (Fuzz.constant 0)) "Can find original area by setting parameter to 0" <|
                 \{ width, height, alpha } ->

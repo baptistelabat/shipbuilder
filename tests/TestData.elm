@@ -8,6 +8,7 @@ module TestData exposing
     , hullSliceJson
     , initialModel
     , initialView
+    , mpov
     , toblerone
     , valueToIndentedString
     , viewport
@@ -38,6 +39,17 @@ anthineas =
         |> .slices
         |> Dict.get "anthineas"
         |> Maybe.withDefault empty
+        |> HullSlices.fillHullSliceMetrics
+
+
+mpov : Float -> HullSlices
+mpov draught =
+    initialModel
+        |> .slices
+        |> Dict.get "mpov"
+        |> Maybe.withDefault empty
+        |> HullSlices.setDraught (String.fromFloat draught)
+        |> HullSlices.fillHullSliceMetrics
 
 
 cube : HullSlices.HullSlices

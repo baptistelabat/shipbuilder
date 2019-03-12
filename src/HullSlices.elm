@@ -2,6 +2,7 @@ module HullSlices exposing
     ( HullSlice
     , HullSliceAsAreaXYList
     , HullSliceAsZYList
+    , HullSliceCentroidAndArea
     , HullSlices
     , area
     , areaTrapezoid
