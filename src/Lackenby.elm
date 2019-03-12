@@ -123,13 +123,13 @@ prismaticCoefficient hullSlices =
         displacement =
             hullSlices.displacement
 
-        waterlineLength : Float
-        waterlineLength =
+        lengthAtWaterline : Float
+        lengthAtWaterline =
             hullSlices.hullSlicesBeneathFreeSurface.xmax - hullSlices.hullSlicesBeneathFreeSurface.xmin
 
         masterCrossSectionArea2PrismaticCoefficient : HullSliceCentroidAndArea -> Float
         masterCrossSectionArea2PrismaticCoefficient masterCrossSection =
-            displacement / (waterlineLength * masterCrossSection.area)
+            displacement / (lengthAtWaterline * masterCrossSection.area)
     in
     getMasterCrossSection hullSlices
         |> Maybe.map masterCrossSectionArea2PrismaticCoefficient
