@@ -3216,12 +3216,6 @@ viewModeller model =
                                 , onClick <| ToJs (ExportSTL hullReference)
                                 ]
                                 [ text "export 3D (stl)" ]
-                            , button
-                                [ id "exportSubModel"
-                                , value "exportSubModel"
-                                , onClick <| ToJs (ExportSubModel hullReference)
-                                ]
-                                [ text "export draught 3D" ]
                             ]
                         ]
 
