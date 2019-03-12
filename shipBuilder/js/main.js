@@ -564,7 +564,7 @@ let calcVolume = function (geom) {
 var faces_ = geom.faces;
 var vertices = geom.vertices;
 var volumes = 0;
-console.log ("print before volume: " + Math.abs(volumes));
+
 for(var i = 0; i < faces_.length; i++){
   var Pi = faces_[i].a;
   var Qi = faces_[i].b;
@@ -576,7 +576,7 @@ for(var i = 0; i < faces_.length; i++){
 
   volumes += signedVolumeOfTriangle(P, Q, R);
 }
-console.log ("print volume: " + Math.abs(volumes));
+
 return Math.abs(volumes);
 }
 
