@@ -5,6 +5,8 @@ module HullSlices exposing
     , HullSliceCentroidAndArea
     , HullSlices
     , HullSlicesWithoutComputations(..)
+    , HullSlicesWithCentroidAreaForEachImmersedSlice(..)
+    , HullSlicesWithExtremePoints(..)
     , addBlockCoefficient
     , addCentreOfBuoyancy
     , addCentroidAreaForEachImmersedSlice
@@ -15,13 +17,13 @@ module HullSlices exposing
     , addMetacentre
     , area
     , areaTrapezoid
+    , calculateCentroid
     , calculateSliceArea
     , centroidAbscissa
     , clip
     , denormalizeHullSlice
     , denormalizeHullSlices
     , extractHorizontalSliceAtZ
-    , getHullCentroid
     , integrate
     , intersectBelow
     , scale
@@ -273,10 +275,33 @@ addExtremePoints previousStep =
                 xmax =
                     hullSlices.hullSlicesBeneathFreeSurface.xmax
 
-                centroidAreaForEachImmersedSlice =
-                    List.concat [ [ { x = xmin, area = 0.0, centroid = 0 } ], hullSlices.centroidAreaForEachImmersedSlice, [ { x = xmax, area = 0.0, centroid = 0 } ] ]
+                xminAreaCurve =
+                    hullSlices.centroidAreaForEachImmersedSlice
+                        |> List.map .x
+                        |> List.minimum
+                        |> Maybe.withDefault xmin
+
+                xmaxAreaCurve =
+                    hullSlices.centroidAreaForEachImmersedSlice
+                        |> List.map .x
+                        |> List.maximum
+                        |> Maybe.withDefault xmax
+
+                centroidAndAreaWithEndpointsAtZero =
+                    case ( xminAreaCurve == xmin, xmaxAreaCurve == xmax ) of
+                        ( False, False ) ->
+                            List.concat [ [ { x = xmin, area = 0.0, centroid = 0 } ], hullSlices.centroidAreaForEachImmersedSlice, [ { x = xmax, area = 0.0, centroid = 0 } ] ]
+
+                        ( False, True ) ->
+                            List.concat [ [ { x = xmin, area = 0.0, centroid = 0 } ], hullSlices.centroidAreaForEachImmersedSlice ]
+
+                        ( True, False ) ->
+                            List.concat [ hullSlices.centroidAreaForEachImmersedSlice, [ { x = xmax, area = 0.0, centroid = 0 } ] ]
+
+                        ( True, True ) ->
+                            hullSlices.centroidAreaForEachImmersedSlice
             in
-            HullSlicesWithExtremePoints { hullSlices | centroidAreaForEachImmersedSlice = centroidAreaForEachImmersedSlice }
+            HullSlicesWithExtremePoints { hullSlices | centroidAreaForEachImmersedSlice = centroidAndAreaWithEndpointsAtZero }
 
 
 addDisplacement : HullSlicesWithExtremePoints -> HullSlicesWithDisplacement
@@ -293,7 +318,7 @@ addCentreOfBuoyancy previousStep =
             let
                 hullCentroid : Float
                 hullCentroid =
-                    getHullCentroid hullSlices
+                    calculateCentroid hullSlices.centroidAreaForEachImmersedSlice
 
                 centreOfBuoyancy : Float
                 centreOfBuoyancy =
@@ -756,21 +781,6 @@ blockVolume o =
                     0
     in
     res
-
-
-getHullCentroid : HullSlices -> Float
-getHullCentroid hullSlices =
-    let
-        xmin =
-            hullSlices.hullSlicesBeneathFreeSurface.xmin
-
-        xmax =
-            hullSlices.hullSlicesBeneathFreeSurface.xmax
-
-        centroidAndAreaWithEndpointsAtZero =
-            List.concat [ [ { x = xmin, area = 0.0, centroid = 0 } ], hullSlices.centroidAreaForEachImmersedSlice, [ { x = xmax, area = 0.0, centroid = 0 } ] ]
-    in
-    calculateCentroid centroidAndAreaWithEndpointsAtZero
 
 
 calculateCentroid : List HullSliceCentroidAndArea -> Float
