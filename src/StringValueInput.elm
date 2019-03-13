@@ -200,7 +200,7 @@ view floatInput_ onChange =
             [ type_ "text"
             , id generatedID
             , value floatInput_.string
-            , ExtraEvents.onKeyDown floatInput_.string onChange
+            , ExtraEvents.onKeyDown floatInput_.nbOfDigits floatInput_.string onChange
             , onInput onChange
             ]
             []

@@ -19,19 +19,19 @@ isKeyArrowDown keyEvent =
     keyEvent.key == 40
 
 
-toIncrement : KeyEvent -> Maybe Float
-toIncrement keyEvent =
+toIncrement : Int -> KeyEvent -> Maybe Float
+toIncrement nbOfDigits keyEvent =
     let
         magnitude : Float
         magnitude =
             if keyEvent.shift && not keyEvent.alt then
-                10
+                10 ^ toFloat (2 - nbOfDigits)
 
             else if keyEvent.alt && not keyEvent.shift then
-                0.1
+                10 ^ toFloat (0 - nbOfDigits)
 
             else
-                1
+                10 ^ toFloat (1 - nbOfDigits)
     in
     if isKeyArrowUp keyEvent then
         Just magnitude
@@ -43,9 +43,9 @@ toIncrement keyEvent =
         Nothing
 
 
-onKeyDown : String -> (String -> msg) -> Attribute msg
-onKeyDown currentValue onValueChange =
-    on "keydown" (Decode.map onValueChange (keyEventDecoder currentValue))
+onKeyDown : Int -> String -> (String -> msg) -> Attribute msg
+onKeyDown nbOfDigits currentValue onValueChange =
+    on "keydown" (Decode.map onValueChange (keyEventDecoder nbOfDigits currentValue))
 
 
 type alias KeyEvent =
@@ -57,12 +57,12 @@ type alias KeyEvent =
     }
 
 
-keyEventDecoder : String -> Decode.Decoder String
-keyEventDecoder currentValue =
+keyEventDecoder : Int -> String -> Decode.Decoder String
+keyEventDecoder nbOfDigits currentValue =
     let
         convertToString : KeyEvent -> String
         convertToString keyEvent =
-            case toIncrement keyEvent of
+            case toIncrement nbOfDigits keyEvent of
                 Nothing ->
                     keyEvent.targetValue
 

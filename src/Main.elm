@@ -3589,7 +3589,7 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
                     , value decks.spacing.string
                     , onInput <| ToJs << UpdatePartitionSpacing Deck
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown decks.spacing.string <| ToJs << UpdatePartitionSpacing Deck
+                    , onKeyDown decks.spacing.nbOfDigits decks.spacing.string <| ToJs << UpdatePartitionSpacing Deck
                     ]
                     []
                 ]
@@ -3616,7 +3616,7 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
                     , value decks.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Deck
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown decks.zero.position.string <| ToJs << UpdatePartitionZeroPosition Deck
+                    , onKeyDown decks.zero.position.nbOfDigits decks.zero.position.string <| ToJs << UpdatePartitionZeroPosition Deck
                     ]
                     []
                 ]
@@ -3750,7 +3750,7 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
                     , value bulkheads.spacing.string
                     , onInput <| ToJs << UpdatePartitionSpacing Bulkhead
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown bulkheads.spacing.string <| ToJs << UpdatePartitionSpacing Bulkhead
+                    , onKeyDown bulkheads.spacing.nbOfDigits bulkheads.spacing.string <| ToJs << UpdatePartitionSpacing Bulkhead
                     ]
                     []
                 ]
@@ -3777,7 +3777,7 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
                     , value bulkheads.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Bulkhead
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown bulkheads.zero.position.string <| ToJs << UpdatePartitionZeroPosition Bulkhead
+                    , onKeyDown bulkheads.zero.position.nbOfDigits bulkheads.zero.position.string <| ToJs << UpdatePartitionZeroPosition Bulkhead
                     ]
                     []
                 ]
@@ -4244,7 +4244,7 @@ viewPositionInputInput axis block axisLabel =
         , value val
         , onInput <| ToJs << UpdatePosition axis block
         , onBlur <| NoJs <| SyncBlockInputs block
-        , onKeyDown val <| ToJs << UpdatePosition axis block
+        , onKeyDown 1 val <| ToJs << UpdatePosition axis block
         ]
         []
 
@@ -4308,7 +4308,7 @@ viewSizeInputInput dimension block dimensionLabel =
         , value val
         , onInput <| ToJs << UpdateDimension dimension block
         , onBlur <| NoJs <| SyncBlockInputs block
-        , onKeyDown val <| ToJs << UpdateDimension dimension block
+        , onKeyDown 1 val <| ToJs << UpdateDimension dimension block
         ]
         []
 
