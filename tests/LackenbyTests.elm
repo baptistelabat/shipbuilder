@@ -50,7 +50,7 @@ suite =
             \_ ->
                 Lackenby.prismaticCoefficient (TestData.mpov 1)
                     |> Maybe.withDefault 999999
-                    |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6))
+                    |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6 * 2))
         , describe "Can change slice area"
             [ fuzz (widthHeightAlpha (Fuzz.constant 0)) "Can find original area by setting parameter to 0" <|
                 \{ width, height, alpha } ->
@@ -163,7 +163,7 @@ suite =
                 Lackenby.getMasterCrossSection TestData.anthineas
                     |> Maybe.map .x
                     |> Maybe.withDefault 999999
-                    |> Expect.within epsAbsolute 11.666666
+                    |> Expect.within epsAbsolute 9.133333333
         , test "Can modify abscicae of area curve to get a given prismatic coefficient" <|
             \_ ->
                 Lackenby.lackenby 0.03 69.6 40 [ ( 1, 10 ), ( 3, 30 ), ( 4, 40 ), ( 4.5, 12 ), ( 6, 1 ) ]

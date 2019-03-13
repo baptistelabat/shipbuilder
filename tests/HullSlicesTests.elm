@@ -160,7 +160,7 @@ suite =
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
-                    Expect.equal [ 0.06183408481917592 ] (hullSlices |> HullSliceModifiers.setBreadth "10" |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
+                    Expect.equal [ 0, 0.12366816963835184, 0 ] (hullSlices |> HullSliceModifiers.setBreadth "10" |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
             , describe "Clipper" <|
                 [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->
@@ -714,11 +714,11 @@ suite =
                         }
         , test "hullVolume" <|
             \_ ->
-                HullSlices.hullVolume { xmin = 0, xmax = 100 } [ { x = 50, area = 2 } ]
+                HullSlices.volume [ { x = 0, area = 0 }, { x = 50, area = 2 }, { x = 100, area = 0 } ]
                     |> Expect.within epsAbsolute 100.0
         , test "hullVolume2" <|
             \_ ->
-                HullSlices.hullVolume { xmin = 0, xmax = 100 } [ { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 } ]
+                HullSlices.volume [ { x = 0, area = 0 }, { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 }, { x = 100, area = 0 } ]
                     |> Expect.within epsAbsolute 1000.0
         , test "getHullCentroid" <|
             \_ ->

@@ -38,6 +38,7 @@ fillHullSliceMetrics hullSlices =
         |> HullSlices.addDenormalizedSlices
         |> HullSlices.addHullSlicesBeneathFreeSurface
         |> HullSlices.addCentroidAreaForEachImmersedSlice
+        |> HullSlices.addExtremePoints
         |> HullSlices.addDisplacement
         |> HullSlices.addCentreOfBuoyancy
         |> HullSlices.addBlockCoefficient

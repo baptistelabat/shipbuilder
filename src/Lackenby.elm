@@ -137,21 +137,7 @@ prismaticCoefficient hullSlices =
 
 getMasterCrossSection : HullSlices -> Maybe HullSliceCentroidAndArea
 getMasterCrossSection hullSlices =
-    let
-        sliceAndArea : List ( HullSlices.HullSliceAsZYList, HullSliceCentroidAndArea )
-        sliceAndArea =
-            List.map2 Tuple.pair hullSlices.hullSlicesBeneathFreeSurface.hullSlices hullSlices.centroidAreaForEachImmersedSlice
-
-        sliceBreadth : HullSlices.HullSliceAsZYList -> Float
-        sliceBreadth slice =
-            slice
-                |> .zylist
-                |> List.map Tuple.second
-                |> List.maximum
-                |> Maybe.withDefault 0
-    in
-    List.Extra.maximumBy (\( slice, _ ) -> sliceBreadth slice) sliceAndArea
-        |> Maybe.map Tuple.second
+    List.Extra.maximumBy .area hullSlices.centroidAreaForEachImmersedSlice
 
 
 setSliceArea : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
