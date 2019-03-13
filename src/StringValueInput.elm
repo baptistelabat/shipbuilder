@@ -2,6 +2,7 @@ module StringValueInput exposing
     ( FloatInput
     , IntInput
     , addToFloatInput
+    , asFloatIn
     , asStringIn
     , asValueIn
     , decodeSpacingExceptions
@@ -144,6 +145,11 @@ addToFloatInput toAdd floatInput_ =
 asValueIn : { a | value : b, string : String } -> b -> { a | value : b, string : String }
 asValueIn numberInput value =
     { numberInput | value = value }
+
+
+asFloatIn : FloatInput -> Float -> FloatInput
+asFloatIn input value =
+    { input | value = value, string = String.fromFloat value }
 
 
 asStringIn : { a | value : b, string : String } -> String -> { a | value : b, string : String }
