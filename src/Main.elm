@@ -3284,34 +3284,43 @@ roundToNearestHundredth float =
         |> flip (/) 100.0
 
 
+roundToNearestDecimal : Float -> Float
+roundToNearestDecimal float =
+    float
+        |> (*) 10.0
+        |> round
+        |> toFloat
+        |> flip (/) 10.0
+
+
 viewLengthKpi : Float -> Html Msg
 viewLengthKpi length =
-    viewSimpleKpi "Length (m)" "length" <| roundToNearestHundredth length
+    viewSimpleKpi "Length (m)" "length" <| roundToNearestDecimal length
 
 
 viewWidthKpi : Float -> Html Msg
 viewWidthKpi width =
-    viewSimpleKpi "Width (m)" "width" <| roundToNearestHundredth width
+    viewSimpleKpi "Width (m)" "width" <| roundToNearestDecimal width
 
 
 viewHeightKpi : Float -> Html Msg
 viewHeightKpi height =
-    viewSimpleKpi "Height (m)" "height" <| roundToNearestHundredth height
+    viewSimpleKpi "Height (m)" "height" <| roundToNearestDecimal height
 
 
 viewCenterOfGravityXKpi : Float -> Html Msg
 viewCenterOfGravityXKpi cogx =
-    viewSimpleKpi "Center of gravity : x" "cog-x" <| roundToNearestHundredth cogx
+    viewSimpleKpi "Center of gravity : x" "cog-x" <| roundToNearestDecimal cogx
 
 
 viewCenterOfGravityYKpi : Float -> Html Msg
 viewCenterOfGravityYKpi cogy =
-    viewSimpleKpi "Center of gravity : y" "cog-y" <| roundToNearestHundredth cogy
+    viewSimpleKpi "Center of gravity : y" "cog-y" <| roundToNearestDecimal cogy
 
 
 viewCenterOfGravityZKpi : Float -> Html Msg
 viewCenterOfGravityZKpi cogz =
-    viewSimpleKpi "Center of gravity : z" "cog-z" <| roundToNearestHundredth cogz
+    viewSimpleKpi "Center of gravity : z" "cog-z" <| roundToNearestDecimal cogz
 
 
 kpisAsCsv : Blocks -> Tags -> String
