@@ -17,6 +17,7 @@ empty =
         { length = StringValueInput.emptyFloat 1
         , breadth = StringValueInput.emptyFloat 1
         , depth = StringValueInput.emptyFloat 1
+        , prismaticCoefficient = StringValueInput.emptyFloat 1
         , xmin = 0
         , ymin = 0
         , zmin = 0

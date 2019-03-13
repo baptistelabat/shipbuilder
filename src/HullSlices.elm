@@ -44,6 +44,7 @@ type alias HullSlices =
     { length : StringValueInput.FloatInput
     , breadth : StringValueInput.FloatInput
     , depth : StringValueInput.FloatInput
+    , prismaticCoefficient : StringValueInput.FloatInput
     , xmin : Float
     , ymin : Float
     , zmin : Float
