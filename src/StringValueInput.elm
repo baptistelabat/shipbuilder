@@ -1,7 +1,6 @@
 module StringValueInput exposing
     ( FloatInput
     , IntInput
-    , addToFloatInput
     , asFloatIn
     , asStringIn
     , asValueIn
@@ -131,17 +130,6 @@ decodeSpacingExceptions =
             Dict.foldl makeException Dict.empty dict
     in
     Decode.map parse (Decode.dict Decode.float)
-
-
-addToFloatInput : Float -> FloatInput -> FloatInput
-addToFloatInput toAdd floatInput_ =
-    let
-        newValue : Float
-        newValue =
-            -- rounded to .2f
-            toFloat (round ((floatInput_.value + toAdd) * 100)) / 100
-    in
-    { floatInput_ | value = newValue, string = String.fromFloat newValue }
 
 
 asValueIn : { a | value : b, string : String } -> b -> { a | value : b, string : String }
