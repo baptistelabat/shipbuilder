@@ -34,6 +34,7 @@ port module Main exposing
     , toJs
     , toList
     , update
+    , updateNoJs
     , view
     )
 

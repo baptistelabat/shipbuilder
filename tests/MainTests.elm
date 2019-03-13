@@ -267,7 +267,7 @@ updateTests =
                   <|
                     \_ ->
                         initialModel
-                            |> update (NoJs NoOp)
+                            |> updateNoJs NoOp
                             |> Tuple.second
                             |> Expect.equal Cmd.none
                 ]
@@ -292,12 +292,6 @@ updateTests =
                             |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
                             |> Tuple.second
                             |> Expect.notEqual Cmd.none
-                , test "has no side effect if the block doesn't exist" <|
-                    \_ ->
-                        { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                            |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
-                            |> Tuple.second
-                            |> Expect.equal Cmd.none
                 ]
             , describe "AddBlock"
                 [ test "leaves the model untouched" <|
