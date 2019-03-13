@@ -4190,7 +4190,7 @@ viewBlockCenterOfGravityUserInput block cog =
         [ text "Center of gravity"
         , div
             [ class "form-group-action"
-            , title "Set to the center of the volume"
+            , title "Reset the center of gravity to the center of the volume"
             , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
             ]
             [ FASolid.crosshairs [] ]
