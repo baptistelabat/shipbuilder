@@ -52,6 +52,7 @@ decoder =
                 , ymin = ymin
                 , zmin = zmin
                 , slices = slices
+                , originalSlicePositions = List.map .x slices
                 , draught = draught
             }
 

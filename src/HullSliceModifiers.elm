@@ -21,6 +21,7 @@ empty =
         , ymin = 0
         , zmin = 0
         , slices = []
+        , originalSlicePositions = []
         , draught = StringValueInput.emptyFloat
         , denormalizedSlices = []
         , blockCoefficient = 0

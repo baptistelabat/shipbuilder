@@ -44,6 +44,7 @@ type alias HullSlices =
     , ymin : Float
     , zmin : Float
     , slices : List HullSlice
+    , originalSlicePositions : List Float
     , draught : StringValueInput.FloatInput
     , blockCoefficient : Float
     , displacement : Float
