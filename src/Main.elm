@@ -3200,12 +3200,12 @@ viewModeller model =
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
                             , AreaCurve.view slices
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n 2 <| slices.displacement)
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (roundToTensDigit <| slices.displacement)
                             , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 <| slices.blockCoefficient)
 
                             -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
-                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 2 <| slices.centreOfBuoyancy)
-                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 2 <| slices.metacentre)
+                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| slices.centreOfBuoyancy)
+                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 <| slices.metacentre)
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"
@@ -3291,6 +3291,15 @@ roundToNearestDecimal float =
         |> round
         |> toFloat
         |> flip (/) 10.0
+
+
+roundToTensDigit : Float -> Float
+roundToTensDigit float =
+    float
+        |> flip (/) 10.0
+        |> round
+        |> toFloat
+        |> (*) 10.0
 
 
 viewLengthKpi : Float -> Html Msg
@@ -3413,7 +3422,7 @@ viewMassKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
-            toFloat <| round value
+            roundToTensDigit value
 
         viewMassKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewMassKpiContent =
@@ -3431,7 +3440,7 @@ viewVolumeKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
-            toFloat <| round value
+            roundToTensDigit value
 
         viewVolumeKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewVolumeKpiContent =
