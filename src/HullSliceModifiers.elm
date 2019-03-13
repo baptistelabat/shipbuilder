@@ -5,6 +5,7 @@ module HullSliceModifiers exposing
     , setDepth
     , setDraught
     , setLengthOverAll
+    , setPrismaticCoefficient
     )
 
 import HullSlices exposing (HullSlices)
@@ -73,3 +74,22 @@ setDraught draught hullSlices =
 setDepth : String -> HullSlices -> HullSlices
 setDepth depth hullSlices =
     { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth } |> fillHullSliceMetrics
+
+
+setPrismaticCoefficient : String -> HullSlices -> HullSlices
+setPrismaticCoefficient prismaticCoefficient hullSlices =
+    let
+        modifyPrismaticCoeff : HullSlices -> HullSlices
+        modifyPrismaticCoeff hs =
+            case String.toFloat prismaticCoefficient of
+                Nothing ->
+                    hs
+
+                Just pc ->
+                    Lackenby.setPrismaticCoefficientAndClamp pc hs
+    in
+    hullSlices
+        |> fillHullSliceMetrics
+        |> modifyPrismaticCoeff
+        |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient
+        |> fillHullSliceMetrics

@@ -3195,7 +3195,7 @@ viewModeller model =
                         , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
                         , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
                         , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
-                        , StringValueInput.view slices.prismaticCoefficient (\_ -> NoJs NoOp)
+                        , StringValueInput.view slices.prismaticCoefficient <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
