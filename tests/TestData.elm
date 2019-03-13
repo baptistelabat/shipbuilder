@@ -50,9 +50,9 @@ mpov draught =
 cube : HullSlices.HullSlices
 cube =
     { empty
-        | length = StringValueInput.floatInput 200
-        , breadth = StringValueInput.floatInput 20
-        , depth = StringValueInput.floatInput 10
+        | length = StringValueInput.floatInput 1 200
+        , breadth = StringValueInput.floatInput 1 20
+        , depth = StringValueInput.floatInput 1 10
         , xmin = -1
         , ymin = -10
         , zmin = 3
@@ -73,7 +73,7 @@ cube =
               , y = [ 1, 1, 1, 1 ]
               }
             ]
-        , draught = StringValueInput.floatInput 2
+        , draught = StringValueInput.floatInput 1 2
     }
         |> HullSliceModifiers.fillHullSliceMetrics
 
@@ -81,9 +81,9 @@ cube =
 toblerone : Float -> Float -> HullSlices.HullSlices
 toblerone breadth depth =
     { empty
-        | length = StringValueInput.floatInput 200
-        , breadth = StringValueInput.floatInput breadth
-        , depth = StringValueInput.floatInput depth
+        | length = StringValueInput.floatInput 1 200
+        , breadth = StringValueInput.floatInput 1 breadth
+        , depth = StringValueInput.floatInput 1 depth
         , xmin = -1
         , ymin = -breadth / 2
         , zmin = 3
@@ -104,7 +104,7 @@ toblerone breadth depth =
               , y = [ 1, 0.75, 0.5 ]
               }
             ]
-        , draught = StringValueInput.floatInput 2
+        , draught = StringValueInput.floatInput 1 2
     }
         |> HullSliceModifiers.fillHullSliceMetrics
 
@@ -120,13 +120,13 @@ blockA =
         "abcd"
         "Helicopter"
         Color.blue
-        { x = StringValueInput.emptyFloat
-        , y = StringValueInput.emptyFloat
-        , z = StringValueInput.emptyFloat
+        { x = StringValueInput.emptyFloat 1
+        , y = StringValueInput.emptyFloat 1
+        , z = StringValueInput.emptyFloat 1
         }
-        { length = StringValueInput.fromNumber "" "" 10
-        , width = StringValueInput.fromNumber "" "" 10
-        , height = StringValueInput.fromNumber "" "" 10
+        { length = StringValueInput.fromNumber "" "" 1 10
+        , width = StringValueInput.fromNumber "" "" 1 10
+        , height = StringValueInput.fromNumber "" "" 1 10
         }
 
 
@@ -136,13 +136,13 @@ blockB =
         "efgh"
         "Tank"
         Color.red
-        { x = StringValueInput.emptyFloat
-        , y = StringValueInput.emptyFloat
-        , z = StringValueInput.emptyFloat
+        { x = StringValueInput.emptyFloat 1
+        , y = StringValueInput.emptyFloat 1
+        , z = StringValueInput.emptyFloat 1
         }
-        { length = StringValueInput.fromNumber "" "" 10
-        , width = StringValueInput.fromNumber "" "" 10
-        , height = StringValueInput.fromNumber "" "" 10
+        { length = StringValueInput.fromNumber "" "" 1 10
+        , width = StringValueInput.fromNumber "" "" 1 10
+        , height = StringValueInput.fromNumber "" "" 1 10
         }
 
 
@@ -152,13 +152,13 @@ blockC =
         "ijkl"
         "Hangar"
         Color.green
-        { x = StringValueInput.emptyFloat
-        , y = StringValueInput.emptyFloat
-        , z = StringValueInput.emptyFloat
+        { x = StringValueInput.emptyFloat 1
+        , y = StringValueInput.emptyFloat 1
+        , z = StringValueInput.emptyFloat 1
         }
-        { length = StringValueInput.fromNumber "" "" 10
-        , width = StringValueInput.fromNumber "" "" 10
-        , height = StringValueInput.fromNumber "" "" 10
+        { length = StringValueInput.fromNumber "" "" 1 10
+        , width = StringValueInput.fromNumber "" "" 1 10
+        , height = StringValueInput.fromNumber "" "" 1 10
         }
 
 

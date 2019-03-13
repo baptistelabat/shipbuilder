@@ -59,8 +59,8 @@ decoder =
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
         helper ( depth, maybeDraught ) =
             Decode.succeed hullSlicesConstructor
-                |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)
-                |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth") Decode.float)
+                |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all" 1) Decode.float)
+                |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth" 1) Decode.float)
                 |> Pipeline.hardcoded depth
                 |> Pipeline.required "xmin" Decode.float
                 |> Pipeline.required "ymin" Decode.float
@@ -72,12 +72,12 @@ decoder =
                             draught
 
                         Nothing ->
-                            StringValueInput.fromNumber "m" "Draught" (depth.value / 5)
+                            StringValueInput.fromNumber "m" "Draught" 1 (depth.value / 5)
                     )
     in
     Decode.succeed Tuple.pair
-        |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth") Decode.float)
-        |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught") Decode.float) Nothing
+        |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth" 1) Decode.float)
+        |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught" 1) Decode.float) Nothing
         |> Decode.andThen helper
         |> Decode.map HullSliceModifiers.fillHullSliceMetrics
 

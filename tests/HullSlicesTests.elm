@@ -145,13 +145,13 @@ suite =
         , describe "Setters"
             [ test "Can set length over all" <|
                 \_ ->
-                    Expect.equal { value = 1.2, string = "1.2", description = "Length over all", unit = "m" } (HullSliceModifiers.setLengthOverAll "1.234" hullSlices |> .length)
+                    Expect.equal { value = 1.2, string = "1.2", description = "Length over all", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setLengthOverAll "1.234" hullSlices |> .length)
             , test "Can set breadth" <|
                 \_ ->
-                    Expect.equal { value = 13.4, string = "13.4", description = "Breadth", unit = "m" } (HullSliceModifiers.setBreadth "13.4125" hullSlices |> .breadth)
+                    Expect.equal { value = 13.4, string = "13.4", description = "Breadth", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setBreadth "13.4125" hullSlices |> .breadth)
             , test "Can set draught" <|
                 \_ ->
-                    Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m" } (HullSliceModifiers.setDraught "13.4125" hullSlices |> .draught)
+                    Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setDraught "13.4125" hullSlices |> .draught)
             , test "Resizing should not change centering: changing breadth should also change ymin" <|
                 \_ ->
                     (HullSliceModifiers.setBreadth "7" hullSlices |> .ymin)
@@ -499,13 +499,13 @@ suite =
                 \_ ->
                     HullSlices.scale
                         { empty
-                            | breadth = 10 |> StringValueInput.floatInput
-                            , depth = 5 |> StringValueInput.floatInput
-                            , draught = 4 |> StringValueInput.floatInput
+                            | breadth = 10 |> StringValueInput.floatInput 1
+                            , depth = 5 |> StringValueInput.floatInput 1
+                            , draught = 4 |> StringValueInput.floatInput 1
                             , xmin = -5
                             , ymin = -89
                             , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput
+                            , length = 456 |> StringValueInput.floatInput 1
                             , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
@@ -516,13 +516,13 @@ suite =
                 \_ ->
                     HullSlices.scale
                         { empty
-                            | breadth = 10 |> StringValueInput.floatInput
-                            , depth = 5 |> StringValueInput.floatInput
-                            , draught = 4 |> StringValueInput.floatInput
+                            | breadth = 10 |> StringValueInput.floatInput 1
+                            , depth = 5 |> StringValueInput.floatInput 1
+                            , draught = 4 |> StringValueInput.floatInput 1
                             , xmin = -5
                             , ymin = -89
                             , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput
+                            , length = 456 |> StringValueInput.floatInput 1
                             , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
@@ -533,13 +533,13 @@ suite =
                 \_ ->
                     HullSlices.scale
                         { empty
-                            | breadth = 10 |> StringValueInput.floatInput
-                            , depth = 5 |> StringValueInput.floatInput
-                            , draught = 4 |> StringValueInput.floatInput
+                            | breadth = 10 |> StringValueInput.floatInput 1
+                            , depth = 5 |> StringValueInput.floatInput 1
+                            , draught = 4 |> StringValueInput.floatInput 1
                             , xmin = -5
                             , ymin = -89
                             , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput
+                            , length = 456 |> StringValueInput.floatInput 1
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .y
@@ -692,7 +692,7 @@ suite =
                     hull =
                         { empty
                             | xmin = 0
-                            , length = 100 |> StringValueInput.asValueIn StringValueInput.emptyFloat
+                            , length = 100 |> StringValueInput.asValueIn (StringValueInput.emptyFloat 1)
                             , denormalizedSlices =
                                 [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
                                 , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
