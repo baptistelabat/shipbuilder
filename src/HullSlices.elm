@@ -4,9 +4,11 @@ module HullSlices exposing
     , HullSliceAsZYList
     , HullSliceCentroidAndArea
     , HullSlices
-    , HullSlicesWithoutComputations(..)
     , HullSlicesWithCentroidAreaForEachImmersedSlice(..)
+    , HullSlicesWithDisplacement(..)
     , HullSlicesWithExtremePoints(..)
+    , HullSlicesWithMetacentre(..)
+    , addAreaAndDisplacement
     , addBlockCoefficient
     , addCentreOfBuoyancy
     , addCentroidAreaForEachImmersedSlice
@@ -146,6 +148,10 @@ type HullSlicesWithCentreOfBuoyancy
 
 type HullSlicesWithBlockCoefficient
     = HullSlicesWithBlockCoefficient HullSlices
+
+
+type HullSlicesWithMetacentre
+    = HullSlicesWithMetacentre HullSlices
 
 
 addDenormalizedSlices : HullSlicesWithoutComputations -> HullSlicesWithDenormalizedSlices
@@ -352,7 +358,7 @@ addBlockCoefficient previousStep =
             HullSlicesWithBlockCoefficient { hullSlices | blockCoefficient = blockCoefficient }
 
 
-addMetacentre : HullSlicesWithBlockCoefficient -> HullSlices
+addMetacentre : HullSlicesWithBlockCoefficient -> HullSlicesWithMetacentre
 addMetacentre previousStep =
     case previousStep of
         HullSlicesWithBlockCoefficient hullSlices ->
@@ -381,7 +387,7 @@ addMetacentre previousStep =
                 metacentre =
                     hullSlices.centreOfBuoyancy + bM
             in
-            { hullSlices | metacentre = metacentre }
+            HullSlicesWithMetacentre { hullSlices | metacentre = metacentre }
 
 
 toXY : { a | zmin : Float, zmax : Float, y : List Float } -> List ( Float, Float )
@@ -996,3 +1002,14 @@ intersectBelow z0 hullSlices =
             xMaxAtZ (hullSlices.xmin + hullSlices.length.value) (List.reverse hullSlices.denormalizedSlices)
     in
     { xmin = xmin, xmax = xmax, hullSlices = lhsXY_AtZ }
+
+
+addAreaAndDisplacement : HullSlices -> HullSlicesWithDisplacement
+addAreaAndDisplacement hullSlices =
+    hullSlices
+        |> HullSlicesWithoutComputations
+        |> addDenormalizedSlices
+        |> addHullSlicesBeneathFreeSurface
+        |> addCentroidAreaForEachImmersedSlice
+        |> addExtremePoints
+        |> addDisplacement

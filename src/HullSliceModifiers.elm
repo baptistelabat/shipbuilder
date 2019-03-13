@@ -35,15 +35,19 @@ empty =
 
 fillHullSliceMetrics : HullSlices -> HullSlices
 fillHullSliceMetrics hullSlices =
-    HullSlices.HullSlicesWithoutComputations hullSlices
-        |> HullSlices.addDenormalizedSlices
-        |> HullSlices.addHullSlicesBeneathFreeSurface
-        |> HullSlices.addCentroidAreaForEachImmersedSlice
-        |> HullSlices.addExtremePoints
-        |> HullSlices.addDisplacement
+    let
+        extract : HullSlices.HullSlicesWithMetacentre -> HullSlices
+        extract hs =
+            case hs of
+                HullSlices.HullSlicesWithMetacentre hs_ ->
+                    hs_
+    in
+    hullSlices
+        |> HullSlices.addAreaAndDisplacement
         |> HullSlices.addCentreOfBuoyancy
         |> HullSlices.addBlockCoefficient
         |> HullSlices.addMetacentre
+        |> extract
 
 
 setLengthOverAll : String -> HullSlices -> HullSlices
