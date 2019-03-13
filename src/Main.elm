@@ -2951,6 +2951,9 @@ viewHeader model =
             [ class "header-left" ]
             -- groups img and title together for flexbox
             [ img
+                [ src "assets/holiship.png" ]
+                []
+            , img
                 [ src "assets/SIREHNA_R.png" ]
                 []
             , h1
