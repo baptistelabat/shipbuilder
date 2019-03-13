@@ -3,7 +3,6 @@ module Lackenby exposing
     , computePrismaticCoefficient
     , dB
     , getMasterCrossSection
-    , getPrismaticCoefficientBounds
     , lackenby
     , modifiedBreadth
     , setSliceArea
