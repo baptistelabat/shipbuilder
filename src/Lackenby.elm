@@ -3,6 +3,7 @@ module Lackenby exposing
     , computePrismaticCoefficient
     , dB
     , getMasterCrossSection
+    , initializePrismaticCoefficient
     , lackenby
     , modifiedBreadth
     , setSliceArea
@@ -342,3 +343,31 @@ lackenby targetPrismaticCoefficient lengthAtWaterline masterCrossSectionArea are
                 lackenby_ tolerance niterMax (niter + 1) cMid cHigh
     in
     lackenby_ 1.0e-2 8 0 -1 1
+
+
+initializePrismaticCoefficient : HullSlices -> HullSlices
+initializePrismaticCoefficient hullSlices =
+    let
+        p : StringValueInput.FloatInput
+        p =
+            { value = 0
+            , string = ""
+            , unit = "-"
+            , description = "Prismatic coefficient"
+            , nbOfDigits = 2
+            }
+
+        maybePrismatic : Maybe Float
+        maybePrismatic =
+            hullSlices
+                |> HullSlices.addAreaAndDisplacement
+                |> computePrismaticCoefficient
+    in
+    case maybePrismatic of
+        Nothing ->
+            { hullSlices | prismaticCoefficient = p }
+
+        Just coeff ->
+            { hullSlices | prismaticCoefficient = coeff |> StringValueInput.round_n 2 |> StringValueInput.asFloatIn p }
+
+

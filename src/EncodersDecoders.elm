@@ -14,6 +14,7 @@ import HullSlices exposing (HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList,
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Lackenby
 import StringValueInput
 
 
@@ -55,6 +56,7 @@ decoder =
                 , originalSlicePositions = List.map .x slices
                 , draught = draught
             }
+                |> Lackenby.initializePrismaticCoefficient
 
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
         helper ( depth, maybeDraught ) =

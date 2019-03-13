@@ -8,6 +8,7 @@ module HullSliceModifiers exposing
     )
 
 import HullSlices exposing (HullSlices)
+import Lackenby
 import StringValueInput
 
 
@@ -49,6 +50,7 @@ fillHullSliceMetrics hullSlices =
         |> HullSlices.addBlockCoefficient
         |> HullSlices.addMetacentre
         |> extract
+        |> Lackenby.initializePrismaticCoefficient
 
 
 setLengthOverAll : String -> HullSlices -> HullSlices
