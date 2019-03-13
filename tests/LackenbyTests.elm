@@ -48,7 +48,7 @@ suite =
     describe "Lackenby"
         [ test "Can calculate prismatic coefficient" <|
             \_ ->
-                Lackenby.prismaticCoefficient (TestData.mpov 1)
+                Lackenby.computePrismaticCoefficient (TestData.mpov 1 |> HullSlices.addAreaAndDisplacement)
                     |> Maybe.withDefault 999999
                     |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6 * 2))
         , describe "Can change slice area"
@@ -160,7 +160,7 @@ suite =
             ]
         , test "Can get master cross section of Anthineas" <|
             \_ ->
-                Lackenby.getMasterCrossSection TestData.anthineas
+                Lackenby.getMasterCrossSection (TestData.anthineas |> HullSlices.addAreaAndDisplacement)
                     |> Maybe.map .x
                     |> Maybe.withDefault 999999
                     |> Expect.within epsAbsolute 9.133333333

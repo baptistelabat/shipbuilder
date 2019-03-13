@@ -1,11 +1,11 @@
 module Lackenby exposing
     ( changeSliceAreaWhilePreservingSize
+    , computePrismaticCoefficient
     , dB
     , getMasterCrossSection
     , getPrismaticCoefficientBounds
     , lackenby
     , modifiedBreadth
-    , prismaticCoefficient
     , setSliceArea
     )
 
@@ -116,28 +116,40 @@ bisectArea slice targetArea alphaLow alphaHigh niterMax niter tol draught =
         bisectArea slice targetArea alphaMid alphaHigh niterMax (niter + 1) tol draught
 
 
-prismaticCoefficient : HullSlices -> Maybe Float
-prismaticCoefficient hullSlices =
-    let
-        displacement : Float
-        displacement =
-            hullSlices.displacement
+computePrismaticCoefficient : HullSlices.HullSlicesWithDisplacement -> Maybe Float
+computePrismaticCoefficient hs =
+    case hs of
+        HullSlices.HullSlicesWithDisplacement hullSlices ->
+            let
+                displacement : Float
+                displacement =
+                    hullSlices.displacement
 
-        lengthAtWaterline : Float
-        lengthAtWaterline =
-            hullSlices.hullSlicesBeneathFreeSurface.xmax - hullSlices.hullSlicesBeneathFreeSurface.xmin
+                lengthAtWaterline : Float
+                lengthAtWaterline =
+                    hullSlices.hullSlicesBeneathFreeSurface.xmax - hullSlices.hullSlicesBeneathFreeSurface.xmin
 
-        masterCrossSectionArea2PrismaticCoefficient : HullSliceCentroidAndArea -> Float
-        masterCrossSectionArea2PrismaticCoefficient masterCrossSection =
-            displacement / (lengthAtWaterline * masterCrossSection.area)
-    in
-    getMasterCrossSection hullSlices
-        |> Maybe.map masterCrossSectionArea2PrismaticCoefficient
+                masterCrossSectionArea2PrismaticCoefficient : HullSliceCentroidAndArea -> Maybe Float
+                masterCrossSectionArea2PrismaticCoefficient masterCrossSection =
+                    if lengthAtWaterline * masterCrossSection.area == 0 then
+                        Nothing
+
+                    else
+                        Just <| displacement / (lengthAtWaterline * masterCrossSection.area)
+            in
+            getMasterCrossSection hs
+                |> Maybe.andThen masterCrossSectionArea2PrismaticCoefficient
 
 
-getMasterCrossSection : HullSlices -> Maybe HullSliceCentroidAndArea
+
+-- |> masterCrossSectionArea2PrismaticCoefficient
+
+
+getMasterCrossSection : HullSlices.HullSlicesWithDisplacement -> Maybe HullSliceCentroidAndArea
 getMasterCrossSection hullSlices =
-    List.Extra.maximumBy .area hullSlices.centroidAreaForEachImmersedSlice
+    case hullSlices of
+        HullSlices.HullSlicesWithDisplacement hs ->
+            List.Extra.maximumBy .area hs.centroidAreaForEachImmersedSlice
 
 
 setSliceArea : Float -> Float -> { c | zmin : Float, zmax : Float, y : List Float } -> Result String { c | zmin : Float, zmax : Float, y : List Float }
