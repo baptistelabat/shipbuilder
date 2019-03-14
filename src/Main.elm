@@ -792,9 +792,9 @@ cogToPoint p =
 
 getCenterOfVolume : Block -> Point
 getCenterOfVolume block =
-    { x = roundToNearestHundredth <| block.position.x.value + 0.5 * block.size.length.value
-    , y = roundToNearestHundredth <| block.position.y.value + 0.5 * block.size.width.value
-    , z = roundToNearestHundredth <| block.position.z.value - 0.5 * block.size.height.value
+    { x = StringValueInput.round_n 2 <| block.position.x.value + 0.5 * block.size.length.value
+    , y = StringValueInput.round_n 2 <| block.position.y.value + 0.5 * block.size.width.value
+    , z = StringValueInput.round_n 2 <| block.position.z.value - 0.5 * block.size.height.value
     }
 
 
@@ -3200,8 +3200,8 @@ viewModeller model =
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
                             , AreaCurve.view slices
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (roundToTensDigit <| slices.displacement)
-                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 <| slices.blockCoefficient)
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 slices.displacement)
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 slices.blockCoefficient)
 
                             -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
                             , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| slices.centreOfBuoyancy)
@@ -3275,61 +3275,34 @@ viewKpiStudio model =
         ]
 
 
-roundToNearestHundredth : Float -> Float
-roundToNearestHundredth float =
-    float
-        |> (*) 100.0
-        |> round
-        |> toFloat
-        |> flip (/) 100.0
-
-
-roundToNearestDecimal : Float -> Float
-roundToNearestDecimal float =
-    float
-        |> (*) 10.0
-        |> round
-        |> toFloat
-        |> flip (/) 10.0
-
-
-roundToTensDigit : Float -> Float
-roundToTensDigit float =
-    float
-        |> flip (/) 10.0
-        |> round
-        |> toFloat
-        |> (*) 10.0
-
-
 viewLengthKpi : Float -> Html Msg
 viewLengthKpi length =
-    viewSimpleKpi "Length (m)" "length" <| roundToNearestDecimal length
+    viewSimpleKpi "Length (m)" "length" <| StringValueInput.round_n 1 length
 
 
 viewWidthKpi : Float -> Html Msg
 viewWidthKpi width =
-    viewSimpleKpi "Width (m)" "width" <| roundToNearestDecimal width
+    viewSimpleKpi "Width (m)" "width" <| StringValueInput.round_n 1 width
 
 
 viewHeightKpi : Float -> Html Msg
 viewHeightKpi height =
-    viewSimpleKpi "Height (m)" "height" <| roundToNearestDecimal height
+    viewSimpleKpi "Height (m)" "height" <| StringValueInput.round_n 1 height
 
 
 viewCenterOfGravityXKpi : Float -> Html Msg
 viewCenterOfGravityXKpi cogx =
-    viewSimpleKpi "Center of gravity : x" "cog-x" <| roundToNearestDecimal cogx
+    viewSimpleKpi "Center of gravity : x" "cog-x" <| StringValueInput.round_n 1 cogx
 
 
 viewCenterOfGravityYKpi : Float -> Html Msg
 viewCenterOfGravityYKpi cogy =
-    viewSimpleKpi "Center of gravity : y" "cog-y" <| roundToNearestDecimal cogy
+    viewSimpleKpi "Center of gravity : y" "cog-y" <| StringValueInput.round_n 1 cogy
 
 
 viewCenterOfGravityZKpi : Float -> Html Msg
 viewCenterOfGravityZKpi cogz =
-    viewSimpleKpi "Center of gravity : z" "cog-z" <| roundToNearestDecimal cogz
+    viewSimpleKpi "Center of gravity : z" "cog-z" <| StringValueInput.round_n 1 cogz
 
 
 kpisAsCsv : Blocks -> Tags -> String
@@ -3406,7 +3379,7 @@ kpiSummaryToStringList tags summary =
         ColorGroup color ->
             getLabelForColor_ color
     , String.fromInt <| round <| summary.mass
-    , String.fromFloat <| roundToNearestHundredth summary.volume
+    , String.fromFloat <| StringValueInput.round_n 2 summary.volume
     ]
 
 
@@ -3422,7 +3395,7 @@ viewMassKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
-            roundToTensDigit value
+            StringValueInput.round_n -1 value
 
         viewMassKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewMassKpiContent =
@@ -3440,7 +3413,7 @@ viewVolumeKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
-            roundToTensDigit value
+            StringValueInput.round_n -1 value
 
         viewVolumeKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewVolumeKpiContent =
