@@ -4079,7 +4079,7 @@ viewBlockMassInfo block =
                 [ text "volume" ]
             , p
                 [ class "block-volume-value" ]
-                [ text <| String.fromFloat <| computeVolume block ]
+                [ text <| String.fromFloat <| StringValueInput.round_n 0 <| computeVolume block ]
             ]
         , div
             [ class "input-group block-density" ]
