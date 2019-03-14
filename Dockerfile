@@ -20,4 +20,5 @@ ENV ELM_HOME /work
 # Need that exact version of elm-test otherwise it hangs indefinitely on Docker (as per https://github.com/rtfeldman/node-test-runner/issues/219#issuecomment-345037285)
 RUN npm config set unsafe-perm=true && npm install -g elm@0.19.0-bugfix2 elm-test@0.19.0-rev3 elm-format@0.8.1
 
+#node --stack-size=65500 node_modules/.bin/elm-test
 ENTRYPOINT ["elm"]

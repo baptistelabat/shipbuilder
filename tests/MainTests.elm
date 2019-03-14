@@ -420,15 +420,15 @@ updateBlockPosition =
 
             updateX : Block -> Block
             updateX block =
-                { block | position = StringValueInput.fromNumber "" "" 1 1.0 |> asXInPosition block.position }
+                { block | position = StringValueInput.fromNumber "m" "x" 1 1.0 |> asXInPosition block.position }
 
             updateY : Block -> Block
             updateY block =
-                { block | position = StringValueInput.fromNumber "" "" 1 2.0 |> asYInPosition block.position }
+                { block | position = StringValueInput.fromNumber "m" "y" 1 2.0 |> asYInPosition block.position }
 
             updateZ : Block -> Block
             updateZ block =
-                { block | position = StringValueInput.fromNumber "" "" 1 3.3 |> asZInPosition block.position }
+                { block | position = StringValueInput.fromNumber "m" "z" 1 3.3 |> asZInPosition block.position }
 
             updateXInAFromElm : Model
             updateXInAFromElm =
@@ -495,15 +495,15 @@ updateBlockSize =
 
             updateLength : Block -> Block
             updateLength block =
-                { block | size = StringValueInput.fromNumber "" "" 1 20 |> asLengthInSize block.size }
+                { block | size = StringValueInput.fromNumber "m" "" 1 20 |> asLengthInSize block.size }
 
             updateWidth : Block -> Block
             updateWidth block =
-                { block | size = StringValueInput.fromNumber "" "" 1 1 |> asWidthInSize block.size }
+                { block | size = StringValueInput.fromNumber "m" "" 1 1 |> asWidthInSize block.size }
 
             updateHeight : Block -> Block
             updateHeight block =
-                { block | size = StringValueInput.fromNumber "" "" 1 150.8 |> asHeightInSize block.size }
+                { block | size = StringValueInput.fromNumber "m" "" 1 150.8 |> asHeightInSize block.size }
 
             updateLengthInAFromElm : Model
             updateLengthInAFromElm =

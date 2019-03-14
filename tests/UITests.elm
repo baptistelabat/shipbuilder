@@ -682,68 +682,44 @@ blockDetails =
             \_ ->
                 blockDetailsView
                     |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.has [ Selector.tag "input", Selector.id "position-x" ]
+                    |> Query.find [ Selector.class "block-position" ]
+                    |> Query.has [ Selector.tag "input", Selector.id "x" ]
         , test "Input for the position of the block on X triggers UpdatePosition X" <|
             \_ ->
                 blockDetailsView
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "position-x" ]
+                    |> Query.find [ Selector.tag "input", Selector.id "x" ]
                     |> Event.simulate (Event.input "-8")
                     |> Event.expect (ToJs <| UpdatePosition X blockA "-8")
-        , test "onBlur on position on X triggers SyncBlockInputs" <|
-            \_ ->
-                blockDetailsView
-                    |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "position-x" ]
-                    |> Event.simulate Event.blur
-                    |> Event.expect (NoJs <| SyncBlockInputs blockA)
         , test "Block details view displays an input for the position on Y" <|
             \_ ->
                 blockDetailsView
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "panel" ]
-                    |> Query.has [ Selector.tag "input", Selector.id "position-y" ]
+                    |> Query.has [ Selector.tag "input", Selector.id "y" ]
         , test "Input for the position of the block on Y triggers UpdatePosition Y" <|
             \_ ->
                 blockDetailsView
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "position-y" ]
+                    |> Query.find [ Selector.tag "input", Selector.id "y" ]
                     |> Event.simulate (Event.input "1.2")
                     |> Event.expect (ToJs <| UpdatePosition Y blockA "1.2")
-        , test "onBlur on position on Y triggers SyncBlockInputs" <|
-            \_ ->
-                blockDetailsView
-                    |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "position-y" ]
-                    |> Event.simulate Event.blur
-                    |> Event.expect (NoJs <| SyncBlockInputs blockA)
         , test "Block details view displays an input for the position on Z" <|
             \_ ->
                 blockDetailsView
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "panel" ]
-                    |> Query.has [ Selector.tag "input", Selector.id "position-z" ]
+                    |> Query.has [ Selector.tag "input", Selector.id "z" ]
         , test "Input for the position of the block on Z triggers UpdatePosition Z" <|
             \_ ->
                 blockDetailsView
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "position-z" ]
+                    |> Query.find [ Selector.tag "input", Selector.id "z" ]
                     |> Event.simulate (Event.input "199")
                     |> Event.expect (ToJs <| UpdatePosition Z blockA "199")
-        , test "onBlur on position on Z triggers SyncBlockInputs" <|
-            \_ ->
-                blockDetailsView
-                    |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "position-z" ]
-                    |> Event.simulate Event.blur
-                    |> Event.expect (NoJs <| SyncBlockInputs blockA)
         , test "Block details view displays the size" <|
             \_ ->
                 blockDetailsView
@@ -772,14 +748,6 @@ blockDetails =
                     |> Query.find [ Selector.tag "input", Selector.id "size-length" ]
                     |> Event.simulate (Event.input "0")
                     |> Event.expect (ToJs <| UpdateDimension Length blockA "0")
-        , test "onBlur on length triggers SyncBlockInputs" <|
-            \_ ->
-                blockDetailsView
-                    |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "size-length" ]
-                    |> Event.simulate Event.blur
-                    |> Event.expect (NoJs <| SyncBlockInputs blockA)
         , test "Block details view displays an input for the width" <|
             \_ ->
                 blockDetailsView
@@ -794,14 +762,6 @@ blockDetails =
                     |> Query.find [ Selector.tag "input", Selector.id "size-width" ]
                     |> Event.simulate (Event.input "1.2")
                     |> Event.expect (ToJs <| UpdateDimension Width blockA "1.2")
-        , test "onBlur on width triggers SyncBlockInputs" <|
-            \_ ->
-                blockDetailsView
-                    |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "size-width" ]
-                    |> Event.simulate Event.blur
-                    |> Event.expect (NoJs <| SyncBlockInputs blockA)
         , test "Block details view displays an input for the height" <|
             \_ ->
                 blockDetailsView
@@ -816,14 +776,6 @@ blockDetails =
                     |> Query.find [ Selector.tag "input", Selector.id "size-height" ]
                     |> Event.simulate (Event.input "255")
                     |> Event.expect (ToJs <| UpdateDimension Height blockA "255")
-        , test "onBlur on height triggers SyncBlockInputs" <|
-            \_ ->
-                blockDetailsView
-                    |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "size-height" ]
-                    |> Event.simulate Event.blur
-                    |> Event.expect (NoJs <| SyncBlockInputs blockA)
         , test "Block details view displays an input for the density" <|
             \_ ->
                 blockDetailsView
@@ -838,14 +790,6 @@ blockDetails =
                     |> Query.find [ Selector.tag "input", Selector.id "block-density-input" ]
                     |> Event.simulate (Event.input "0.5")
                     |> Event.expect (NoJs <| UpdateDensity blockA "0.5")
-        , test "onBlur on density triggers SyncBlockInputs" <|
-            \_ ->
-                blockDetailsView
-                    |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "block-density-input" ]
-                    |> Event.simulate Event.blur
-                    |> Event.expect (NoJs <| SyncBlockInputs blockA)
         , test "Block details view displays an input for the mass" <|
             \_ ->
                 blockDetailsView
@@ -860,14 +804,6 @@ blockDetails =
                     |> Query.find [ Selector.tag "input", Selector.id "block-mass-input" ]
                     |> Event.simulate (Event.input "10.5")
                     |> Event.expect (NoJs <| UpdateMass blockA "10.5")
-        , test "onBlur on mass triggers SyncBlockInputs" <|
-            \_ ->
-                blockDetailsView
-                    |> Query.fromHtml
-                    |> Query.find [ Selector.class "panel" ]
-                    |> Query.find [ Selector.tag "input", Selector.id "block-mass-input" ]
-                    |> Event.simulate Event.blur
-                    |> Event.expect (NoJs <| SyncBlockInputs blockA)
         ]
 
 
@@ -989,7 +925,7 @@ modellerTests =
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "displacement" ]
                     |> Query.find [ Selector.class "kpi-modeller-value" ]
-                    |> Query.has [ Selector.text "19.84" ]
+                    |> Query.has [ Selector.text "20" ]
         , test "Length over all input triggers ModifySlice" <|
             \_ ->
                 modellerView

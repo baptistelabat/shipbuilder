@@ -737,10 +737,19 @@ type alias Block =
 
 emptyBlock : Block
 emptyBlock =
+    let
+        emptyFloat : StringValueInput.FloatInput
+        emptyFloat =
+            StringValueInput.emptyFloat 1
+    in
     { uuid = ""
     , label = ""
     , color = Color.red
-    , position = { x = StringValueInput.emptyFloat 1, y = StringValueInput.emptyFloat 1, z = StringValueInput.emptyFloat 1 }
+    , position =
+        { x = { emptyFloat | description = "x" }
+        , y = { emptyFloat | description = "y" }
+        , z = { emptyFloat | description = "z" }
+        }
     , size = { length = StringValueInput.emptyFloat 1, width = StringValueInput.emptyFloat 1, height = StringValueInput.emptyFloat 1 }
     , referenceForMass = None
     , mass = StringValueInput.emptyFloat 1
@@ -792,9 +801,9 @@ cogToPoint p =
 
 getCenterOfVolume : Block -> Point
 getCenterOfVolume block =
-    { x = roundToNearestHundredth <| block.position.x.value + 0.5 * block.size.length.value
-    , y = roundToNearestHundredth <| block.position.y.value + 0.5 * block.size.width.value
-    , z = roundToNearestHundredth <| block.position.z.value - 0.5 * block.size.height.value
+    { x = StringValueInput.round_n 2 <| block.position.x.value + 0.5 * block.size.length.value
+    , y = StringValueInput.round_n 2 <| block.position.y.value + 0.5 * block.size.width.value
+    , z = StringValueInput.round_n 2 <| block.position.z.value - 0.5 * block.size.height.value
     }
 
 
@@ -2463,26 +2472,15 @@ updateModelToJs msg model =
                 blockInModel : Block
                 blockInModel =
                     Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
-            in
-            case String.toFloat input of
-                Just value ->
-                    let
-                        updatedBlock : Block
-                        updatedBlock =
-                            value
-                                |> StringValueInput.asValueIn axisFloatInput
-                                |> flip StringValueInput.asStringIn input
-                                |> asAxisInPosition axis blockInModel.position
-                                |> asPositionInBlock blockInModel
-                    in
-                    updateBlockInModel updatedBlock model
 
-                Nothing ->
-                    input
-                        |> StringValueInput.asStringIn axisFloatInput
+                updatedBlock : Block
+                updatedBlock =
+                    axisFloatInput
+                        |> StringValueInput.setString input
                         |> asAxisInPosition axis blockInModel.position
                         |> asPositionInBlock blockInModel
-                        |> flip updateBlockInModel model
+            in
+            updateBlockInModel updatedBlock model
 
         UpdateDimension dimension block input ->
             let
@@ -3200,12 +3198,12 @@ viewModeller model =
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
                             , AreaCurve.view slices
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n 2 <| slices.displacement)
-                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 <| slices.blockCoefficient)
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 slices.displacement)
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 slices.blockCoefficient)
 
                             -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
-                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 2 <| slices.centreOfBuoyancy)
-                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 2 <| slices.metacentre)
+                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| slices.centreOfBuoyancy)
+                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 <| slices.metacentre)
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"
@@ -3275,43 +3273,34 @@ viewKpiStudio model =
         ]
 
 
-roundToNearestHundredth : Float -> Float
-roundToNearestHundredth float =
-    float
-        |> (*) 100.0
-        |> round
-        |> toFloat
-        |> flip (/) 100.0
-
-
 viewLengthKpi : Float -> Html Msg
 viewLengthKpi length =
-    viewSimpleKpi "Length (m)" "length" <| roundToNearestHundredth length
+    viewSimpleKpi "Length (m)" "length" <| StringValueInput.round_n 1 length
 
 
 viewWidthKpi : Float -> Html Msg
 viewWidthKpi width =
-    viewSimpleKpi "Width (m)" "width" <| roundToNearestHundredth width
+    viewSimpleKpi "Width (m)" "width" <| StringValueInput.round_n 1 width
 
 
 viewHeightKpi : Float -> Html Msg
 viewHeightKpi height =
-    viewSimpleKpi "Height (m)" "height" <| roundToNearestHundredth height
+    viewSimpleKpi "Height (m)" "height" <| StringValueInput.round_n 1 height
 
 
 viewCenterOfGravityXKpi : Float -> Html Msg
 viewCenterOfGravityXKpi cogx =
-    viewSimpleKpi "Center of gravity : x" "cog-x" <| roundToNearestHundredth cogx
+    viewSimpleKpi "Center of gravity : x" "cog-x" <| StringValueInput.round_n 1 cogx
 
 
 viewCenterOfGravityYKpi : Float -> Html Msg
 viewCenterOfGravityYKpi cogy =
-    viewSimpleKpi "Center of gravity : y" "cog-y" <| roundToNearestHundredth cogy
+    viewSimpleKpi "Center of gravity : y" "cog-y" <| StringValueInput.round_n 1 cogy
 
 
 viewCenterOfGravityZKpi : Float -> Html Msg
 viewCenterOfGravityZKpi cogz =
-    viewSimpleKpi "Center of gravity : z" "cog-z" <| roundToNearestHundredth cogz
+    viewSimpleKpi "Center of gravity : z" "cog-z" <| StringValueInput.round_n 1 cogz
 
 
 kpisAsCsv : Blocks -> Tags -> String
@@ -3388,7 +3377,7 @@ kpiSummaryToStringList tags summary =
         ColorGroup color ->
             getLabelForColor_ color
     , String.fromInt <| round <| summary.mass
-    , String.fromFloat <| roundToNearestHundredth summary.volume
+    , String.fromFloat <| StringValueInput.round_n 2 summary.volume
     ]
 
 
@@ -3404,7 +3393,7 @@ viewMassKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
-            toFloat <| round value
+            StringValueInput.round_n -1 value
 
         viewMassKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewMassKpiContent =
@@ -3422,7 +3411,7 @@ viewVolumeKpi blocks tags showKpiForColors =
     let
         transform : Float -> Float
         transform value =
-            roundToNearestHundredth value
+            StringValueInput.round_n -1 value
 
         viewVolumeKpiContent : String -> String -> Float -> (Color -> Float) -> Tags -> Html Msg
         viewVolumeKpiContent =
@@ -4088,7 +4077,7 @@ viewBlockMassInfo block =
                 [ text "volume" ]
             , p
                 [ class "block-volume-value" ]
-                [ text <| String.fromFloat <| computeVolume block ]
+                [ text <| String.fromFloat <| StringValueInput.round_n 0 <| computeVolume block ]
             ]
         , div
             [ class "input-group block-density" ]
@@ -4215,38 +4204,11 @@ axisToString axis =
 viewPositionInput : Axis -> Block -> Html Msg
 viewPositionInput axis block =
     let
-        axisLabel =
-            axisToString axis
+        floatInput : StringValueInput.FloatInput
+        floatInput =
+            axisAccessor axis <| .position block
     in
-    div [ class "input-group" ]
-        [ viewPositionInputLabel axisLabel
-        , viewPositionInputInput axis block axisLabel
-        ]
-
-
-viewPositionInputLabel : String -> Html Msg
-viewPositionInputLabel axisLabel =
-    label [ for <| "position-" ++ axisLabel ]
-        [ text axisLabel ]
-
-
-viewPositionInputInput : Axis -> Block -> String -> Html Msg
-viewPositionInputInput axis block axisLabel =
-    let
-        val : String
-        val =
-            .string <| axisAccessor axis <| .position block
-    in
-    input
-        [ class "block-position-input"
-        , id <| "position-" ++ axisLabel
-        , type_ "text"
-        , value val
-        , onInput <| ToJs << UpdatePosition axis block
-        , onBlur <| NoJs <| SyncBlockInputs block
-        , onKeyDown 1 val <| ToJs << UpdatePosition axis block
-        ]
-        []
+    StringValueInput.view floatInput <| ToJs << UpdatePosition axis block
 
 
 type Dimension
