@@ -108,22 +108,6 @@ subscriptions _ =
         ]
 
 
-newBlockDecoder : Decode.Decoder Block
-newBlockDecoder =
-    Decode.succeed Block
-        |> Pipeline.required "uuid" Decode.string
-        |> Pipeline.required "label" Decode.string
-        |> Pipeline.required "color" decodeRgbRecord
-        |> Pipeline.required "position" decodePosition
-        |> Pipeline.required "size" decodeSize
-        |> Pipeline.hardcoded None
-        |> Pipeline.hardcoded (StringValueInput.emptyFloat 1)
-        |> Pipeline.hardcoded (StringValueInput.emptyFloat 1)
-        |> Pipeline.hardcoded True
-        |> Pipeline.hardcoded initPosition
-        |> Pipeline.hardcoded False
-
-
 type alias SyncPosition =
     { uuid : String
     , position : Position
@@ -243,20 +227,40 @@ decodeBlocks =
     Decode.list decodeBlock
 
 
+updateBlockCenterOfGravity : Block -> Block
+updateBlockCenterOfGravity block =
+    let
+        centerOfVolume : Point
+        centerOfVolume =
+            getRelativeCenterOfVolume block
+    in
+    { block
+        | centerOfGravity =
+            { x = StringValueInput.fromNumber "m" "x" 1 centerOfVolume.x
+            , y = StringValueInput.fromNumber "m" "y" 1 centerOfVolume.y
+            , z = StringValueInput.fromNumber "m" "z" 1 centerOfVolume.z
+            }
+    }
+
+
 decodeBlock : Decode.Decoder Block
 decodeBlock =
-    Decode.succeed Block
-        |> Pipeline.required "uuid" Decode.string
-        |> Pipeline.required "label" Decode.string
-        |> Pipeline.required "color" decodeColor
-        |> Pipeline.required "position" decodePosition
-        |> Pipeline.required "size" decodeSize
-        |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
-        |> Pipeline.optional "mass" (StringValueInput.floatInputDecoder 1 "m" "Mass") (StringValueInput.emptyFloat 1)
-        |> Pipeline.optional "density" (StringValueInput.floatInputDecoder 1 "kg/m^3" "Density") (StringValueInput.emptyFloat 1)
-        |> Pipeline.optional "visible" Decode.bool True
-        |> Pipeline.optional "centerOfGravity" decodePosition initPosition
-        |> Pipeline.optional "centerOfGravityFixed" Decode.bool False
+    let
+        d =
+            Decode.succeed Block
+                |> Pipeline.required "uuid" Decode.string
+                |> Pipeline.required "label" Decode.string
+                |> Pipeline.required "color" decodeColor
+                |> Pipeline.required "position" decodePosition
+                |> Pipeline.required "size" decodeSize
+                |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
+                |> Pipeline.optional "mass" (StringValueInput.floatInputDecoder 1 "m" "Mass") (StringValueInput.emptyFloat 1)
+                |> Pipeline.optional "density" (StringValueInput.floatInputDecoder 1 "kg/m^3" "Density") (StringValueInput.emptyFloat 1)
+                |> Pipeline.optional "visible" Decode.bool True
+                |> Pipeline.optional "centerOfGravity" decodePosition initPosition
+                |> Pipeline.optional "centerOfGravityFixed" Decode.bool False
+    in
+    Decode.map updateBlockCenterOfGravity d
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -285,7 +289,7 @@ decodeColor =
         |> Pipeline.required "red" Decode.float
         |> Pipeline.required "green" Decode.float
         |> Pipeline.required "blue" Decode.float
-        |> Pipeline.required "alpha" Decode.float
+        |> Pipeline.optional "alpha" Decode.float 1
 
 
 syncSizeDecoder : Decode.Decoder SyncSize
@@ -495,7 +499,7 @@ jsMsgToMsg js =
                     FromJs <| JSError <| Decode.errorToString message
 
         "new-block" ->
-            case Decode.decodeValue newBlockDecoder js.data of
+            case Decode.decodeValue decodeBlock js.data of
                 Ok block ->
                     FromJs <| NewBlock block
 
@@ -787,7 +791,11 @@ initBlock uuid label color position size =
     , mass = StringValueInput.emptyFloat 1
     , density = StringValueInput.emptyFloat 1
     , visible = True
-    , centerOfGravity = initPosition
+    , centerOfGravity =
+        { x = StringValueInput.fromNumber "m" "x" 1 <| size.length.value / 2
+        , y = StringValueInput.fromNumber "m" "y" 1 <| size.width.value / 2
+        , z = StringValueInput.fromNumber "m" "z" 1 <| size.height.value / 2
+        }
     , centerOfGravityFixed = False
     }
 
@@ -892,8 +900,8 @@ type alias Position =
 initPosition : Position
 initPosition =
     { x = StringValueInput.fromNumber "m" "x" 1 5
-    , y = StringValueInput.fromNumber "m" "x" 1 2.5
-    , z = StringValueInput.fromNumber "m" "x" 1 2.5
+    , y = StringValueInput.fromNumber "m" "y" 1 2.5
+    , z = StringValueInput.fromNumber "m" "z" 1 2.5
     }
 
 
@@ -1838,19 +1846,9 @@ updateNoJs msg model =
 
         LockCenterOfGravityToCenterOfVolume block ->
             let
-                centerOfVolume : Point
-                centerOfVolume =
-                    getRelativeCenterOfVolume block
-
                 updatedBlock : Block
                 updatedBlock =
-                    { block
-                        | centerOfGravity =
-                            { x = StringValueInput.fromNumber "m" "x" 1 centerOfVolume.x
-                            , y = StringValueInput.fromNumber "m" "y" 1 centerOfVolume.y
-                            , z = StringValueInput.fromNumber "m" "z" 1 centerOfVolume.z
-                            }
-                    }
+                    updateBlockCenterOfGravity block
 
                 updatedBlockUnfixed =
                     { updatedBlock
@@ -2160,7 +2158,7 @@ updateFromJs jsmsg model =
             let
                 blocks : Blocks
                 blocks =
-                    addBlockTo model.blocks block
+                    addBlockTo model.blocks <| updateBlockCenterOfGravity block
             in
             ( { model | blocks = blocks }, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus block.uuid) ] )
 
