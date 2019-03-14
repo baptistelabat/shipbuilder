@@ -505,6 +505,20 @@ updateBlockSize =
             updateHeight block =
                 { block | size = StringValueInput.fromNumber "m" "" 1 150.8 |> asHeightInSize block.size }
 
+            updateCenterOfGravity : Float -> Float -> Float -> Block -> Block
+            updateCenterOfGravity x y z block =
+                { block
+                    | centerOfGravity =
+                        { x = StringValueInput.fromNumber "m" "x" 1 x
+                        , y = StringValueInput.fromNumber "m" "y" 1 y
+                        , z = StringValueInput.fromNumber "m" "z" 1 z
+                        }
+                }
+
+            updateCenterOfGravityFixed : Bool -> Block -> Block
+            updateCenterOfGravityFixed boolean block =
+                { block | centerOfGravityFixed = boolean }
+
             updateLengthInAFromElm : Model
             updateLengthInAFromElm =
                 updateModel [ ToJs <| UpdateDimension Length blockA "20" ] modelWithTwoBlocks
@@ -515,24 +529,57 @@ updateBlockSize =
 
             updateMultipleDimensionFromElm : Model
             updateMultipleDimensionFromElm =
-                updateModel [ ToJs <| UpdateDimension Length blockB "20", ToJs <| UpdateDimension Width blockB "1", ToJs <| UpdateDimension Height blockB "150.8" ] modelWithTwoBlocks
+                updateModel
+                    [ ToJs <| UpdateDimension Length blockB "20"
+                    , ToJs <| UpdateDimension Width blockB "1"
+                    , ToJs <| UpdateDimension Height blockB "150.8"
+                    ]
+                    modelWithTwoBlocks
 
             updateMultipleDimensionFromJs : Model
             updateMultipleDimensionFromJs =
                 updateModel [ FromJs <| SynchronizeSize blockB.uuid (.size <| updateLength <| updateWidth <| updateHeight blockB) ] modelWithTwoBlocks
+
+            updateCogThenLengthInAFromElm : Model
+            updateCogThenLengthInAFromElm =
+                updateModel
+                    [ NoJs <| UpdateCenterOfGravity X blockA "7"
+                    , ToJs <| UpdateDimension Length blockA "20"
+                    ]
+                    modelWithTwoBlocks
+
+            updateCogThenLengthInAFromJs : Model
+            updateCogThenLengthInAFromJs =
+                updateModel
+                    [ NoJs <| UpdateCenterOfGravity X blockA "7"
+                    , FromJs <| SynchronizeSize blockA.uuid (.size <| updateLength blockA)
+                    ]
+                    modelWithTwoBlocks
         in
         [ test "Update length from Elm" <|
             \_ ->
                 updateLengthInAFromElm
                     |> .blocks
                     |> toList
-                    |> Expect.equal [ updateLength blockA, blockB ]
+                    |> Expect.equal [ updateCenterOfGravity 10 5 5 <| updateLength blockA, blockB ]
         , test "Update length from Js" <|
             \_ ->
                 updateLengthInAFromJs
                     |> .blocks
                     |> toList
-                    |> Expect.equal [ updateLength blockA, blockB ]
+                    |> Expect.equal [ updateCenterOfGravity 10 5 5 <| updateLength blockA, blockB ]
+        , test "Update length from Elm with fixed Cog" <|
+            \_ ->
+                updateCogThenLengthInAFromElm
+                    |> .blocks
+                    |> toList
+                    |> Expect.equal [ updateCenterOfGravity 7 2.5 2.5 <| updateCenterOfGravityFixed True <| updateLength blockA, blockB ]
+        , test "Update length from Js with fixed Cog" <|
+            \_ ->
+                updateCogThenLengthInAFromJs
+                    |> .blocks
+                    |> toList
+                    |> Expect.equal [ updateCenterOfGravity 7 2.5 2.5 <| updateCenterOfGravityFixed True <| updateLength blockA, blockB ]
         , test "Update length from Elm == Update length from Js" <|
             \_ ->
                 Expect.equal updateLengthInAFromElm updateLengthInAFromJs
@@ -541,13 +588,13 @@ updateBlockSize =
                 updateMultipleDimensionFromElm
                     |> .blocks
                     |> toList
-                    |> Expect.equal [ blockA, updateLength <| updateWidth <| updateHeight blockB ]
+                    |> Expect.equal [ blockA, updateCenterOfGravity 10 0.5 75.4 <| updateLength <| updateWidth <| updateHeight blockB ]
         , test "Update the size on multiple dimensions from Js" <|
             \_ ->
                 updateMultipleDimensionFromJs
                     |> .blocks
                     |> toList
-                    |> Expect.equal [ blockA, updateLength <| updateWidth <| updateHeight blockB ]
+                    |> Expect.equal [ blockA, updateCenterOfGravity 10 0.5 75.4 <| updateLength <| updateWidth <| updateHeight blockB ]
         , test "Update the size on multiple dimensions from Elm == from Js" <|
             \_ ->
                 Expect.equal updateMultipleDimensionFromElm updateMultipleDimensionFromJs

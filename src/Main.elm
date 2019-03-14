@@ -122,6 +122,7 @@ newBlockDecoder =
         |> Pipeline.hardcoded (StringValueInput.emptyFloat 1)
         |> Pipeline.hardcoded True
         |> Pipeline.hardcoded initPosition
+        |> Pipeline.hardcoded False
 
 
 type alias SyncPosition =
@@ -256,6 +257,7 @@ decodeBlock =
         |> Pipeline.optional "density" (StringValueInput.floatInputDecoder 1 "kg/m^3" "Density") (StringValueInput.emptyFloat 1)
         |> Pipeline.optional "visible" Decode.bool True
         |> Pipeline.optional "centerOfGravity" decodePosition initPosition
+        |> Pipeline.optional "centerOfGravityFixed" Decode.bool False
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -732,6 +734,7 @@ type alias Block =
     , density : StringValueInput.FloatInput
     , visible : Bool
     , centerOfGravity : CenterOfGravity
+    , centerOfGravityFixed : Bool
     }
 
 
@@ -756,6 +759,7 @@ emptyBlock =
     , density = StringValueInput.emptyFloat 1
     , visible = False
     , centerOfGravity = { x = StringValueInput.emptyFloat 1, y = StringValueInput.emptyFloat 1, z = StringValueInput.emptyFloat 1 }
+    , centerOfGravityFixed = False
     }
 
 
@@ -784,6 +788,7 @@ initBlock uuid label color position size =
     , density = StringValueInput.emptyFloat 1
     , visible = True
     , centerOfGravity = initPosition
+    , centerOfGravityFixed = False
     }
 
 
@@ -799,11 +804,19 @@ cogToPoint p =
     }
 
 
-getCenterOfVolume : Block -> Point
-getCenterOfVolume block =
+getAbsoluteCenterOfVolume : Block -> Point
+getAbsoluteCenterOfVolume block =
     { x = StringValueInput.round_n 2 <| block.position.x.value + 0.5 * block.size.length.value
     , y = StringValueInput.round_n 2 <| block.position.y.value + 0.5 * block.size.width.value
     , z = StringValueInput.round_n 2 <| block.position.z.value - 0.5 * block.size.height.value
+    }
+
+
+getRelativeCenterOfVolume : Block -> Point
+getRelativeCenterOfVolume block =
+    { x = StringValueInput.round_n 2 <| 0.5 * block.size.length.value
+    , y = StringValueInput.round_n 2 <| 0.5 * block.size.width.value
+    , z = StringValueInput.round_n 2 <| 0.5 * block.size.height.value
     }
 
 
@@ -814,13 +827,9 @@ getCenterOfGravity block =
 
 getAbsoluteCenterOfGravity : Block -> Point
 getAbsoluteCenterOfGravity block =
-    let
-        p1 =
-            getCenterOfVolume block
-    in
-    { x = p1.x + block.centerOfGravity.x.value
-    , y = p1.y + block.centerOfGravity.y.value
-    , z = p1.z + block.centerOfGravity.z.value
+    { x = block.position.x.value + block.centerOfGravity.x.value
+    , y = block.position.y.value + block.centerOfGravity.y.value
+    , z = block.position.z.value - block.centerOfGravity.z.value
     }
 
 
@@ -882,9 +891,9 @@ type alias Position =
 
 initPosition : Position
 initPosition =
-    { x = StringValueInput.emptyFloat 1
-    , y = StringValueInput.emptyFloat 1
-    , z = StringValueInput.emptyFloat 1
+    { x = StringValueInput.fromNumber "m" "x" 1 5
+    , y = StringValueInput.fromNumber "m" "x" 1 2.5
+    , z = StringValueInput.fromNumber "m" "x" 1 2.5
     }
 
 
@@ -1810,9 +1819,19 @@ updateNoJs msg model =
 
         FreeCenterOfGravity block ->
             let
+                updatedBlock : Block
+                updatedBlock =
+                    { block
+                        | centerOfGravity = initPosition
+                    }
+            in
+            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
+
+        LockCenterOfGravityToCenterOfVolume block ->
+            let
                 centerOfVolume : Point
                 centerOfVolume =
-                    getCenterOfVolume block
+                    getRelativeCenterOfVolume block
 
                 updatedBlock : Block
                 updatedBlock =
@@ -1823,18 +1842,13 @@ updateNoJs msg model =
                             , z = StringValueInput.fromNumber "m" "z" 1 centerOfVolume.z
                             }
                     }
-            in
-            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
 
-        LockCenterOfGravityToCenterOfVolume block ->
-            let
-                updatedBlock : Block
-                updatedBlock =
-                    { block
-                        | centerOfGravity = initPosition
+                updatedBlockUnfixed =
+                    { updatedBlock
+                        | centerOfGravityFixed = False
                     }
             in
-            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
+            ( { model | blocks = updateBlockInBlocks updatedBlockUnfixed model.blocks }, Cmd.none )
 
         MoveBlockDown block ->
             let
@@ -2047,11 +2061,14 @@ updateNoJs msg model =
                                         |> StringValueInput.asStringIn axisFloatInput
                             )
                                 |> asAxisInPosition axis position
+                    }
 
-                        -- |> UserInput
+                updatedBlockFixed =
+                    { updatedBlock
+                        | centerOfGravityFixed = True
                     }
             in
-            ( updateBlockInModel updatedBlock model, Cmd.none )
+            ( updateBlockInModel updatedBlockFixed model, Cmd.none )
 
         UpdateCustomPropertyLabel property newLabel ->
             ( { model
@@ -2244,10 +2261,32 @@ updateFromJs jsmsg model =
         SynchronizeSize uuid size ->
             ( case getBlockByUUID uuid model.blocks of
                 Just block ->
-                    size
-                        |> asSizeInBlock block
-                        |> updateBlockMassAndDensity
-                        |> flip updateBlockInModel model
+                    let
+                        updatedBlock : Block
+                        updatedBlock =
+                            size
+                                |> asSizeInBlock block
+                                |> updateBlockMassAndDensity
+
+                        newCenterOfVolume : Point
+                        newCenterOfVolume =
+                            if block.centerOfGravityFixed == False then
+                                getRelativeCenterOfVolume updatedBlock
+
+                            else
+                                getCenterOfGravity updatedBlock
+
+                        updatedBlockWithCog : Block
+                        updatedBlockWithCog =
+                            { updatedBlock
+                                | centerOfGravity =
+                                    { x = StringValueInput.fromNumber "m" "x" 1 newCenterOfVolume.x
+                                    , y = StringValueInput.fromNumber "m" "y" 1 newCenterOfVolume.y
+                                    , z = StringValueInput.fromNumber "m" "z" 1 newCenterOfVolume.z
+                                    }
+                            }
+                    in
+                    updateBlockInModel updatedBlockWithCog model
 
                 Nothing ->
                     model
@@ -2510,8 +2549,26 @@ updateModelToJs msg model =
                                 |> asDimensionInSize dimension blockInModel.size
                                 |> asSizeInBlock blockInModel
                                 |> updateBlockMassAndDensity
+
+                        newCenterOfVolume : Point
+                        newCenterOfVolume =
+                            if updatedBlock.centerOfGravityFixed == False then
+                                getRelativeCenterOfVolume updatedBlock
+
+                            else
+                                getCenterOfGravity blockInModel
+
+                        updatedBlockWithCog : Block
+                        updatedBlockWithCog =
+                            { updatedBlock
+                                | centerOfGravity =
+                                    { x = StringValueInput.fromNumber "m" "x" 1 newCenterOfVolume.x
+                                    , y = StringValueInput.fromNumber "m" "y" 1 newCenterOfVolume.y
+                                    , z = StringValueInput.fromNumber "m" "z" 1 newCenterOfVolume.z
+                                    }
+                            }
                     in
-                    updateBlockInModel updatedBlock model
+                    updateBlockInModel updatedBlockWithCog model
 
                 Nothing ->
                     input
@@ -4133,7 +4190,7 @@ viewBlockCenterOfGravityUserInput block cog =
         [ text "Center of gravity"
         , div
             [ class "form-group-action"
-            , title "Set to the center of the volume"
+            , title "Reset the center of gravity to the center of the volume"
             , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
             ]
             [ FASolid.crosshairs [] ]
