@@ -737,10 +737,19 @@ type alias Block =
 
 emptyBlock : Block
 emptyBlock =
+    let
+        emptyFloat : StringValueInput.FloatInput
+        emptyFloat =
+            StringValueInput.emptyFloat 1
+    in
     { uuid = ""
     , label = ""
     , color = Color.red
-    , position = { x = StringValueInput.emptyFloat 1, y = StringValueInput.emptyFloat 1, z = StringValueInput.emptyFloat 1 }
+    , position =
+        { x = { emptyFloat | description = "x" }
+        , y = { emptyFloat | description = "y" }
+        , z = { emptyFloat | description = "z" }
+        }
     , size = { length = StringValueInput.emptyFloat 1, width = StringValueInput.emptyFloat 1, height = StringValueInput.emptyFloat 1 }
     , referenceForMass = None
     , mass = StringValueInput.emptyFloat 1
@@ -2463,26 +2472,15 @@ updateModelToJs msg model =
                 blockInModel : Block
                 blockInModel =
                     Maybe.withDefault block <| getBlockByUUID block.uuid model.blocks
-            in
-            case String.toFloat input of
-                Just value ->
-                    let
-                        updatedBlock : Block
-                        updatedBlock =
-                            value
-                                |> StringValueInput.asValueIn axisFloatInput
-                                |> flip StringValueInput.asStringIn input
-                                |> asAxisInPosition axis blockInModel.position
-                                |> asPositionInBlock blockInModel
-                    in
-                    updateBlockInModel updatedBlock model
 
-                Nothing ->
-                    input
-                        |> StringValueInput.asStringIn axisFloatInput
+                updatedBlock : Block
+                updatedBlock =
+                    axisFloatInput
+                        |> StringValueInput.setString input
                         |> asAxisInPosition axis blockInModel.position
                         |> asPositionInBlock blockInModel
-                        |> flip updateBlockInModel model
+            in
+            updateBlockInModel updatedBlock model
 
         UpdateDimension dimension block input ->
             let
@@ -4206,38 +4204,11 @@ axisToString axis =
 viewPositionInput : Axis -> Block -> Html Msg
 viewPositionInput axis block =
     let
-        axisLabel =
-            axisToString axis
+        floatInput : StringValueInput.FloatInput
+        floatInput =
+            axisAccessor axis <| .position block
     in
-    div [ class "input-group" ]
-        [ viewPositionInputLabel axisLabel
-        , viewPositionInputInput axis block axisLabel
-        ]
-
-
-viewPositionInputLabel : String -> Html Msg
-viewPositionInputLabel axisLabel =
-    label [ for <| "position-" ++ axisLabel ]
-        [ text axisLabel ]
-
-
-viewPositionInputInput : Axis -> Block -> String -> Html Msg
-viewPositionInputInput axis block axisLabel =
-    let
-        val : String
-        val =
-            .string <| axisAccessor axis <| .position block
-    in
-    input
-        [ class "block-position-input"
-        , id <| "position-" ++ axisLabel
-        , type_ "text"
-        , value val
-        , onInput <| ToJs << UpdatePosition axis block
-        , onBlur <| NoJs <| SyncBlockInputs block
-        , onKeyDown 1 val <| ToJs << UpdatePosition axis block
-        ]
-        []
+    StringValueInput.view floatInput <| ToJs << UpdatePosition axis block
 
 
 type Dimension

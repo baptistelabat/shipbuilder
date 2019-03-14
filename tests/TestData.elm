@@ -120,13 +120,13 @@ blockA =
         "abcd"
         "Helicopter"
         Color.blue
-        { x = StringValueInput.emptyFloat 1
-        , y = StringValueInput.emptyFloat 1
-        , z = StringValueInput.emptyFloat 1
+        { x = StringValueInput.fromNumber "m" "x" 1 0
+        , y = StringValueInput.fromNumber "m" "y" 1 0
+        , z = StringValueInput.fromNumber "m" "z" 1 0
         }
-        { length = StringValueInput.fromNumber "" "" 1 10
-        , width = StringValueInput.fromNumber "" "" 1 10
-        , height = StringValueInput.fromNumber "" "" 1 10
+        { length = StringValueInput.fromNumber "m" "" 1 10
+        , width = StringValueInput.fromNumber "m" "" 1 10
+        , height = StringValueInput.fromNumber "m" "" 1 10
         }
 
 
@@ -136,13 +136,13 @@ blockB =
         "efgh"
         "Tank"
         Color.red
-        { x = StringValueInput.emptyFloat 1
-        , y = StringValueInput.emptyFloat 1
-        , z = StringValueInput.emptyFloat 1
+        { x = StringValueInput.fromNumber "m" "x" 1 0
+        , y = StringValueInput.fromNumber "m" "y" 1 0
+        , z = StringValueInput.fromNumber "m" "z" 1 0
         }
-        { length = StringValueInput.fromNumber "" "" 1 10
-        , width = StringValueInput.fromNumber "" "" 1 10
-        , height = StringValueInput.fromNumber "" "" 1 10
+        { length = StringValueInput.fromNumber "m" "" 1 10
+        , width = StringValueInput.fromNumber "m" "" 1 10
+        , height = StringValueInput.fromNumber "m" "" 1 10
         }
 
 
@@ -152,13 +152,13 @@ blockC =
         "ijkl"
         "Hangar"
         Color.green
-        { x = StringValueInput.emptyFloat 1
-        , y = StringValueInput.emptyFloat 1
-        , z = StringValueInput.emptyFloat 1
+        { x = StringValueInput.fromNumber "m" "x" 1 0
+        , y = StringValueInput.fromNumber "m" "y" 1 0
+        , z = StringValueInput.fromNumber "m" "z" 1 0
         }
-        { length = StringValueInput.fromNumber "" "" 1 10
-        , width = StringValueInput.fromNumber "" "" 1 10
-        , height = StringValueInput.fromNumber "" "" 1 10
+        { length = StringValueInput.fromNumber "m" "" 1 10
+        , width = StringValueInput.fromNumber "m" "" 1 10
+        , height = StringValueInput.fromNumber "m" "" 1 10
         }
 
 
