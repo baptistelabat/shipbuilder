@@ -54,6 +54,7 @@ import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p
 import Html.Attributes exposing (accept, class, disabled, download, for, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
+import HullSliceModifiers
 import HullSlices exposing (HullSlices)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
@@ -117,8 +118,8 @@ newBlockDecoder =
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
         |> Pipeline.hardcoded None
-        |> Pipeline.hardcoded StringValueInput.emptyFloat
-        |> Pipeline.hardcoded StringValueInput.emptyFloat
+        |> Pipeline.hardcoded (StringValueInput.emptyFloat 1)
+        |> Pipeline.hardcoded (StringValueInput.emptyFloat 1)
         |> Pipeline.hardcoded True
         |> Pipeline.hardcoded initPosition
 
@@ -251,8 +252,8 @@ decodeBlock =
         |> Pipeline.required "position" decodePosition
         |> Pipeline.required "size" decodeSize
         |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
-        |> Pipeline.optional "mass" (StringValueInput.floatInputDecoder "m" "Mass") StringValueInput.emptyFloat
-        |> Pipeline.optional "density" (StringValueInput.floatInputDecoder "kg/m^3" "Density") StringValueInput.emptyFloat
+        |> Pipeline.optional "mass" (StringValueInput.floatInputDecoder 1 "m" "Mass") (StringValueInput.emptyFloat 1)
+        |> Pipeline.optional "density" (StringValueInput.floatInputDecoder 1 "kg/m^3" "Density") (StringValueInput.emptyFloat 1)
         |> Pipeline.optional "visible" Decode.bool True
         |> Pipeline.optional "centerOfGravity" decodePosition initPosition
 
@@ -296,17 +297,17 @@ syncSizeDecoder =
 decodePosition : Decode.Decoder Position
 decodePosition =
     Decode.succeed Position
-        |> Pipeline.required "x" (StringValueInput.floatInputDecoder "m" "x")
-        |> Pipeline.required "y" (StringValueInput.floatInputDecoder "m" "y")
-        |> Pipeline.required "z" (StringValueInput.floatInputDecoder "m" "z")
+        |> Pipeline.required "x" (StringValueInput.floatInputDecoder 1 "m" "x")
+        |> Pipeline.required "y" (StringValueInput.floatInputDecoder 1 "m" "y")
+        |> Pipeline.required "z" (StringValueInput.floatInputDecoder 1 "m" "z")
 
 
 decodeSize : Decode.Decoder Size
 decodeSize =
     Decode.succeed Size
-        |> Pipeline.required "x" (StringValueInput.floatInputDecoder "m" "x")
-        |> Pipeline.required "y" (StringValueInput.floatInputDecoder "m" "y")
-        |> Pipeline.required "z" (StringValueInput.floatInputDecoder "m" "z")
+        |> Pipeline.required "x" (StringValueInput.floatInputDecoder 1 "m" "x")
+        |> Pipeline.required "y" (StringValueInput.floatInputDecoder 1 "m" "y")
+        |> Pipeline.required "z" (StringValueInput.floatInputDecoder 1 "m" "z")
 
 
 decodeRgbRecord : Decode.Decoder Color
@@ -329,7 +330,7 @@ decodeDecks : Decode.Decoder Decks
 decodeDecks =
     Decode.succeed Decks
         |> Pipeline.required "number" (Decode.map (StringValueInput.fromInt "Number of decks") Decode.int)
-        |> Pipeline.required "spacing" (StringValueInput.floatInputDecoder "m" "Spacing")
+        |> Pipeline.required "spacing" (StringValueInput.floatInputDecoder 1 "m" "Spacing")
         |> Pipeline.required "zero" decodePartitionZero
         |> Pipeline.optional "spacingExceptions" StringValueInput.decodeSpacingExceptions Dict.empty
 
@@ -338,7 +339,7 @@ decodeBulkheads : Decode.Decoder Bulkheads
 decodeBulkheads =
     Decode.succeed Bulkheads
         |> Pipeline.required "number" (Decode.map (StringValueInput.fromInt "Number of decks") Decode.int)
-        |> Pipeline.required "spacing" (StringValueInput.floatInputDecoder "m" "Spacing")
+        |> Pipeline.required "spacing" (StringValueInput.floatInputDecoder 1 "m" "Spacing")
         |> Pipeline.required "zero" decodePartitionZero
         |> Pipeline.optional "spacingExceptions" StringValueInput.decodeSpacingExceptions Dict.empty
 
@@ -347,7 +348,7 @@ decodePartitionZero : Decode.Decoder PartitionZero
 decodePartitionZero =
     Decode.succeed PartitionZero
         |> Pipeline.required "index" Decode.int
-        |> Pipeline.required "position" (StringValueInput.floatInputDecoder "m" "Position")
+        |> Pipeline.required "position" (StringValueInput.floatInputDecoder 1 "m" "Position")
 
 
 type alias Toasts =
@@ -739,13 +740,13 @@ emptyBlock =
     { uuid = ""
     , label = ""
     , color = Color.red
-    , position = { x = StringValueInput.emptyFloat, y = StringValueInput.emptyFloat, z = StringValueInput.emptyFloat }
-    , size = { length = StringValueInput.emptyFloat, width = StringValueInput.emptyFloat, height = StringValueInput.emptyFloat }
+    , position = { x = StringValueInput.emptyFloat 1, y = StringValueInput.emptyFloat 1, z = StringValueInput.emptyFloat 1 }
+    , size = { length = StringValueInput.emptyFloat 1, width = StringValueInput.emptyFloat 1, height = StringValueInput.emptyFloat 1 }
     , referenceForMass = None
-    , mass = StringValueInput.emptyFloat
-    , density = StringValueInput.emptyFloat
+    , mass = StringValueInput.emptyFloat 1
+    , density = StringValueInput.emptyFloat 1
     , visible = False
-    , centerOfGravity = { x = StringValueInput.emptyFloat, y = StringValueInput.emptyFloat, z = StringValueInput.emptyFloat }
+    , centerOfGravity = { x = StringValueInput.emptyFloat 1, y = StringValueInput.emptyFloat 1, z = StringValueInput.emptyFloat 1 }
     }
 
 
@@ -770,8 +771,8 @@ initBlock uuid label color position size =
     , position = position
     , size = size
     , referenceForMass = None
-    , mass = StringValueInput.emptyFloat
-    , density = StringValueInput.emptyFloat
+    , mass = StringValueInput.emptyFloat 1
+    , density = StringValueInput.emptyFloat 1
     , visible = True
     , centerOfGravity = initPosition
     }
@@ -872,9 +873,9 @@ type alias Position =
 
 initPosition : Position
 initPosition =
-    { x = StringValueInput.emptyFloat
-    , y = StringValueInput.emptyFloat
-    , z = StringValueInput.emptyFloat
+    { x = StringValueInput.emptyFloat 1
+    , y = StringValueInput.emptyFloat 1
+    , z = StringValueInput.emptyFloat 1
     }
 
 
@@ -1380,19 +1381,19 @@ initPartitions : PartitionsData
 initPartitions =
     { decks =
         { number = StringValueInput.emptyInt
-        , spacing = StringValueInput.fromNumber "m" "Spacing" 3.0
+        , spacing = StringValueInput.fromNumber "m" "Spacing" 1 3.0
         , zero =
             { index = 0
-            , position = StringValueInput.emptyFloat
+            , position = StringValueInput.emptyFloat 1
             }
         , spacingExceptions = Dict.empty
         }
     , bulkheads =
         { number = StringValueInput.emptyInt
-        , spacing = StringValueInput.fromNumber "m" "Spacing" 5
+        , spacing = StringValueInput.fromNumber "m" "Spacing" 1 5
         , zero =
             { index = 0
-            , position = StringValueInput.fromNumber "m" "Position of bulckhead zero" 0
+            , position = StringValueInput.fromNumber "m" "Position of bulckhead zero" 1 0
             }
         , spacingExceptions = Dict.empty
         }
@@ -1604,10 +1605,10 @@ updateBlockMassAndDensity block =
             block
 
         Mass ->
-            { block | density = StringValueInput.fromNumber "kg" "Mass" <| block.mass.value / computeVolume block }
+            { block | density = StringValueInput.fromNumber "kg" "Mass" 1 <| block.mass.value / computeVolume block }
 
         Density ->
-            { block | mass = StringValueInput.fromNumber "kg/m^3" "Density" <| block.density.value * computeVolume block }
+            { block | mass = StringValueInput.fromNumber "kg/m^3" "Density" 1 <| block.density.value * computeVolume block }
 
 
 type alias BoundingBox =
@@ -1808,9 +1809,9 @@ updateNoJs msg model =
                 updatedBlock =
                     { block
                         | centerOfGravity =
-                            { x = StringValueInput.fromNumber "m" "x" centerOfVolume.x
-                            , y = StringValueInput.fromNumber "m" "y" centerOfVolume.y
-                            , z = StringValueInput.fromNumber "m" "z" centerOfVolume.z
+                            { x = StringValueInput.fromNumber "m" "x" 1 centerOfVolume.x
+                            , y = StringValueInput.fromNumber "m" "y" 1 centerOfVolume.y
+                            , z = StringValueInput.fromNumber "m" "z" 1 centerOfVolume.z
                             }
                     }
             in
@@ -2175,7 +2176,7 @@ updateFromJs jsmsg model =
                                 | partitions =
                                     updatePartition <|
                                         asZeroInPartition (partition model) <|
-                                            flip asPositionInPartitionZero (StringValueInput.fromNumber "m" "Position" position) <|
+                                            flip asPositionInPartitionZero (StringValueInput.fromNumber "m" "Position" 1 position) <|
                                                 asIndexInPartitionZero (.zero <| partition model) index
                                 , viewMode = Partitioning PropertiesEdition
                             }
@@ -2735,7 +2736,7 @@ msg2json model action =
                         , data =
                             encodeComputedPartitions <|
                                 computePartition
-                                    { partition | spacing = StringValueInput.fromNumber "m" "Spacing" <| abs value }
+                                    { partition | spacing = StringValueInput.fromNumber "m" "Spacing" 1 <| abs value }
                         }
 
                 Nothing ->
@@ -2760,7 +2761,7 @@ msg2json model action =
                                 computePartition <|
                                     asZeroInPartition partition <|
                                         asPositionInPartitionZero partition.zero <|
-                                            StringValueInput.fromNumber "m" "Position of partition zero" value
+                                            StringValueInput.fromNumber "m" "Position of partition zero" 0 value
                         }
 
                 Nothing ->
@@ -3190,10 +3191,11 @@ viewModeller model =
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSlices.setLengthOverAll hullReference
-                        , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSlices.setBreadth hullReference
-                        , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSlices.setDepth hullReference
-                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSlices.setDraught hullReference
+                        [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
+                        , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
+                        , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
+                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
+                        , StringValueInput.view slices.prismaticCoefficient <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
@@ -3587,7 +3589,7 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
                     , value decks.spacing.string
                     , onInput <| ToJs << UpdatePartitionSpacing Deck
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown decks.spacing.string <| ToJs << UpdatePartitionSpacing Deck
+                    , onKeyDown decks.spacing.nbOfDigits decks.spacing.string <| ToJs << UpdatePartitionSpacing Deck
                     ]
                     []
                 ]
@@ -3614,7 +3616,7 @@ viewDecks isDefiningOrigin isDetailsOpen decks =
                     , value decks.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Deck
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown decks.zero.position.string <| ToJs << UpdatePartitionZeroPosition Deck
+                    , onKeyDown decks.zero.position.nbOfDigits decks.zero.position.string <| ToJs << UpdatePartitionZeroPosition Deck
                     ]
                     []
                 ]
@@ -3748,7 +3750,7 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
                     , value bulkheads.spacing.string
                     , onInput <| ToJs << UpdatePartitionSpacing Bulkhead
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown bulkheads.spacing.string <| ToJs << UpdatePartitionSpacing Bulkhead
+                    , onKeyDown bulkheads.spacing.nbOfDigits bulkheads.spacing.string <| ToJs << UpdatePartitionSpacing Bulkhead
                     ]
                     []
                 ]
@@ -3775,7 +3777,7 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
                     , value bulkheads.zero.position.string
                     , onInput <| ToJs << UpdatePartitionZeroPosition Bulkhead
                     , onBlur <| NoJs SyncPartitions
-                    , onKeyDown bulkheads.zero.position.string <| ToJs << UpdatePartitionZeroPosition Bulkhead
+                    , onKeyDown bulkheads.zero.position.nbOfDigits bulkheads.zero.position.string <| ToJs << UpdatePartitionZeroPosition Bulkhead
                     ]
                     []
                 ]
@@ -4242,7 +4244,7 @@ viewPositionInputInput axis block axisLabel =
         , value val
         , onInput <| ToJs << UpdatePosition axis block
         , onBlur <| NoJs <| SyncBlockInputs block
-        , onKeyDown val <| ToJs << UpdatePosition axis block
+        , onKeyDown 1 val <| ToJs << UpdatePosition axis block
         ]
         []
 
@@ -4306,7 +4308,7 @@ viewSizeInputInput dimension block dimensionLabel =
         , value val
         , onInput <| ToJs << UpdateDimension dimension block
         , onBlur <| NoJs <| SyncBlockInputs block
-        , onKeyDown val <| ToJs << UpdateDimension dimension block
+        , onKeyDown 1 val <| ToJs << UpdateDimension dimension block
         ]
         []
 

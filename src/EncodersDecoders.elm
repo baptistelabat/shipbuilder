@@ -9,10 +9,12 @@ module EncodersDecoders exposing
     )
 
 import Dict exposing (Dict)
-import HullSlices exposing (HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList, HullSlices, empty)
+import HullSliceModifiers exposing (empty)
+import HullSlices exposing (HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList, HullSlices)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Lackenby
 import StringValueInput
 
 
@@ -51,14 +53,16 @@ decoder =
                 , ymin = ymin
                 , zmin = zmin
                 , slices = slices
+                , originalSlicePositions = List.map .x slices
                 , draught = draught
             }
+                |> Lackenby.initializePrismaticCoefficient
 
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
         helper ( depth, maybeDraught ) =
             Decode.succeed hullSlicesConstructor
-                |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all") Decode.float)
-                |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth") Decode.float)
+                |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all" 1) Decode.float)
+                |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth" 1) Decode.float)
                 |> Pipeline.hardcoded depth
                 |> Pipeline.required "xmin" Decode.float
                 |> Pipeline.required "ymin" Decode.float
@@ -70,14 +74,14 @@ decoder =
                             draught
 
                         Nothing ->
-                            StringValueInput.fromNumber "m" "Draught" (depth.value / 5)
+                            StringValueInput.fromNumber "m" "Draught" 1 (depth.value / 5)
                     )
     in
     Decode.succeed Tuple.pair
-        |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth") Decode.float)
-        |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught") Decode.float) Nothing
+        |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth" 1) Decode.float)
+        |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught" 1) Decode.float) Nothing
         |> Decode.andThen helper
-        |> Decode.map HullSlices.fillHullSliceMetrics
+        |> Decode.map HullSliceModifiers.fillHullSliceMetrics
 
 
 dictDecoder : Decode.Decoder (Dict String HullSlices)

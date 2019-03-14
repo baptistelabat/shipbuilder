@@ -4,6 +4,7 @@ import CustomFuzzers exposing (..)
 import EncodersDecoders
 import Expect exposing (..)
 import Fuzz
+import HullSliceModifiers exposing (empty)
 import HullSlices exposing (HullSlices)
 import Interpolate.Cubic
 import Json.Decode as Decode
@@ -57,74 +58,9 @@ testSpline x y =
     \_ -> Expect.equal y <| Interpolate.Cubic.valueAt x s
 
 
-empty : HullSlices
-empty =
-    HullSlices.empty
-
-
 hullSlices : HullSlices
 hullSlices =
     Result.withDefault empty (Decode.decodeString EncodersDecoders.decoder TestData.hullSliceJson)
-
-
-cube : HullSlices.HullSlices
-cube =
-    { empty
-        | length = StringValueInput.floatInput 200
-        , breadth = StringValueInput.floatInput 20
-        , depth = StringValueInput.floatInput 10
-        , xmin = -1
-        , ymin = -10
-        , zmin = 3
-        , slices =
-            [ { x = 0
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            , { x = 0.5
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            , { x = 1
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            ]
-        , draught = StringValueInput.floatInput 2
-    }
-
-
-toblerone : Float -> Float -> HullSlices.HullSlices
-toblerone breadth depth =
-    { empty
-        | length = StringValueInput.floatInput 200
-        , breadth = StringValueInput.floatInput breadth
-        , depth = StringValueInput.floatInput depth
-        , xmin = -1
-        , ymin = -breadth / 2
-        , zmin = 3
-        , slices =
-            [ { x = 0
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 0.75, 0.5 ]
-              }
-            , { x = 0.5
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 0.75, 0.5 ]
-              }
-            , { x = 1
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 0.75, 0.5 ]
-              }
-            ]
-        , draught = StringValueInput.floatInput 2
-    }
 
 
 makeTriplet : a -> b -> c -> ( a, b, c )
@@ -209,22 +145,22 @@ suite =
         , describe "Setters"
             [ test "Can set length over all" <|
                 \_ ->
-                    Expect.equal { value = 1.2, string = "1.2", description = "Length over all", unit = "m" } (HullSlices.setLengthOverAll "1.234" hullSlices |> .length)
+                    Expect.equal { value = 1.2, string = "1.2", description = "Length over all", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setLengthOverAll "1.234" hullSlices |> .length)
             , test "Can set breadth" <|
                 \_ ->
-                    Expect.equal { value = 13.4, string = "13.4", description = "Breadth", unit = "m" } (HullSlices.setBreadth "13.4125" hullSlices |> .breadth)
+                    Expect.equal { value = 13.4, string = "13.4", description = "Breadth", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setBreadth "13.4125" hullSlices |> .breadth)
             , test "Can set draught" <|
                 \_ ->
-                    Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m" } (HullSlices.setDraught "13.4125" hullSlices |> .draught)
+                    Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setDraught "13.4125" hullSlices |> .draught)
             , test "Resizing should not change centering: changing breadth should also change ymin" <|
                 \_ ->
-                    (HullSlices.setBreadth "7" hullSlices |> .ymin)
+                    (HullSliceModifiers.setBreadth "7" hullSlices |> .ymin)
                         |> Expect.within epsAbsolute -3.5
             ]
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
-                    Expect.equal [ 0.06183408481917592 ] (hullSlices |> HullSlices.setBreadth "10" |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
+                    Expect.equal [ 0, 0.12366816963835184, 0 ] (hullSlices |> HullSliceModifiers.setBreadth "10" |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
             , describe "Clipper" <|
                 [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->
@@ -496,19 +432,19 @@ suite =
                                     0.20027049633242555
                     , test "Cube" <|
                         \_ ->
-                            List.map (HullSlices.calculateSliceArea cube) cube.slices
+                            List.map (HullSlices.calculateSliceArea TestData.cube) TestData.cube.slices
                                 |> Expect.equal
-                                    [ cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value, cube.breadth.value * cube.draught.value ]
+                                    [ TestData.cube.breadth.value * TestData.cube.draught.value, TestData.cube.breadth.value * TestData.cube.draught.value, TestData.cube.breadth.value * TestData.cube.draught.value ]
                     , test "Cube after changing breadth" <|
                         \_ ->
-                            List.map (HullSlices.calculateSliceArea <| HullSlices.setBreadth "10" <| HullSlices.fillHullSliceMetrics cube) cube.slices
+                            List.map (HullSlices.calculateSliceArea <| HullSliceModifiers.setBreadth "10" TestData.cube) TestData.cube.slices
                                 |> Expect.equal
-                                    [ 10 * cube.draught.value, 10 * cube.draught.value, 10 * cube.draught.value ]
+                                    [ 10 * TestData.cube.draught.value, 10 * TestData.cube.draught.value, 10 * TestData.cube.draught.value ]
                     , fuzz (Fuzz.map3 makeTriplet positiveFloat positiveFloat (Fuzz.floatRange 0 1)) "Toblerone" <|
                         \( breadth, depth, draughtDividedByDepth ) ->
                             let
                                 t =
-                                    toblerone breadth depth
+                                    TestData.toblerone breadth depth
                                         |> setDraught (draughtDividedByDepth * depth)
 
                                 expectedArea =
@@ -538,7 +474,7 @@ suite =
                                     0.00005983669402257387
 
                                 t =
-                                    toblerone breadth depth
+                                    TestData.toblerone breadth depth
                                         |> setDraught (draughtDividedByDepth * depth)
 
                                 expectedArea =
@@ -563,13 +499,13 @@ suite =
                 \_ ->
                     HullSlices.scale
                         { empty
-                            | breadth = 10 |> StringValueInput.floatInput
-                            , depth = 5 |> StringValueInput.floatInput
-                            , draught = 4 |> StringValueInput.floatInput
+                            | breadth = 10 |> StringValueInput.floatInput 1
+                            , depth = 5 |> StringValueInput.floatInput 1
+                            , draught = 4 |> StringValueInput.floatInput 1
                             , xmin = -5
                             , ymin = -89
                             , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput
+                            , length = 456 |> StringValueInput.floatInput 1
                             , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
@@ -580,13 +516,13 @@ suite =
                 \_ ->
                     HullSlices.scale
                         { empty
-                            | breadth = 10 |> StringValueInput.floatInput
-                            , depth = 5 |> StringValueInput.floatInput
-                            , draught = 4 |> StringValueInput.floatInput
+                            | breadth = 10 |> StringValueInput.floatInput 1
+                            , depth = 5 |> StringValueInput.floatInput 1
+                            , draught = 4 |> StringValueInput.floatInput 1
                             , xmin = -5
                             , ymin = -89
                             , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput
+                            , length = 456 |> StringValueInput.floatInput 1
                             , slices = []
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
@@ -597,13 +533,13 @@ suite =
                 \_ ->
                     HullSlices.scale
                         { empty
-                            | breadth = 10 |> StringValueInput.floatInput
-                            , depth = 5 |> StringValueInput.floatInput
-                            , draught = 4 |> StringValueInput.floatInput
+                            | breadth = 10 |> StringValueInput.floatInput 1
+                            , depth = 5 |> StringValueInput.floatInput 1
+                            , draught = 4 |> StringValueInput.floatInput 1
                             , xmin = -5
                             , ymin = -89
                             , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput
+                            , length = 456 |> StringValueInput.floatInput 1
                         }
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .y
@@ -756,7 +692,7 @@ suite =
                     hull =
                         { empty
                             | xmin = 0
-                            , length = 100 |> StringValueInput.asValueIn StringValueInput.emptyFloat
+                            , length = 100 |> StringValueInput.asValueIn (StringValueInput.emptyFloat 1)
                             , denormalizedSlices =
                                 [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
                                 , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
@@ -778,22 +714,32 @@ suite =
                         }
         , test "hullVolume" <|
             \_ ->
-                HullSlices.hullVolume { xmin = 0, xmax = 100 } [ { x = 50, area = 2 } ]
+                HullSlices.volume [ { x = 0, area = 0 }, { x = 50, area = 2 }, { x = 100, area = 0 } ]
                     |> Expect.within epsAbsolute 100.0
         , test "hullVolume2" <|
             \_ ->
-                HullSlices.hullVolume { xmin = 0, xmax = 100 } [ { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 } ]
+                HullSlices.volume [ { x = 0, area = 0 }, { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 }, { x = 100, area = 0 } ]
                     |> Expect.within epsAbsolute 1000.0
-        , test "getHullCentroid" <|
+        , test "centroidAreaForEachImmersedSlice" <|
             \_ ->
                 let
                     hull =
-                        { empty
-                            | hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 100, hullSlices = [] }
-                            , centroidAreaForEachImmersedSlice =
-                                [ { x = 50, area = 2, centroid = 1 } ]
-                        }
+                        case
+                            { empty
+                                | hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 100, hullSlices = [] }
+                                , centroidAreaForEachImmersedSlice =
+                                    [ { x = 50, area = 2, centroid = 1 } ]
+                            }
+                                |> HullSlices.HullSlicesWithCentroidAreaForEachImmersedSlice
+                                |> HullSlices.addExtremePoints
+                        of
+                            HullSlices.HullSlicesWithExtremePoints hs ->
+                                hs
                 in
-                HullSlices.getHullCentroid hull
+                HullSlices.calculateCentroid hull.centroidAreaForEachImmersedSlice
                     |> Expect.within epsAbsolute 100.0
+        , test "Should store original slice positions" <|
+            \_ ->
+                TestData.anthineas.originalSlicePositions
+                    |> Expect.equal [ 0.00437713372412022, 0.1111111111111111, 0.2222222222222222, 0.3333333333333333, 0.4444444444444444, 0.5555555555555556, 0.6666666666666666, 0.7777777777777778, 0.8888888888888888, 0.9956228662758797 ]
         ]

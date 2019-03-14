@@ -1,12 +1,112 @@
-module TestData exposing (blockA, blockB, blockC, flags, hullSliceJson, initialModel, initialView, valueToIndentedString, viewport, viewportJsonString, viewports, viewportsJsonString)
+module TestData exposing
+    ( anthineas
+    , blockA
+    , blockB
+    , blockC
+    , cube
+    , flags
+    , hullSliceJson
+    , initialModel
+    , initialView
+    , mpov
+    , toblerone
+    , valueToIndentedString
+    , viewport
+    , viewportJsonString
+    , viewports
+    , viewportsJsonString
+    )
 
 import Color
+import Dict
 import Html exposing (Html)
+import HullSliceModifiers exposing (empty)
+import HullSlices exposing (HullSlices)
 import Json.Encode as Encode
 import Main exposing (..)
 import Math.Vector3 exposing (..)
 import StringValueInput
 import Viewports exposing (..)
+
+
+anthineas : HullSlices
+anthineas =
+    initialModel
+        |> .slices
+        |> Dict.get "anthineas"
+        |> Maybe.withDefault empty
+        |> HullSliceModifiers.fillHullSliceMetrics
+
+
+mpov : Float -> HullSlices
+mpov draught =
+    initialModel
+        |> .slices
+        |> Dict.get "mpov"
+        |> Maybe.withDefault empty
+        |> HullSliceModifiers.setDraught (String.fromFloat draught)
+
+
+cube : HullSlices.HullSlices
+cube =
+    { empty
+        | length = StringValueInput.floatInput 1 200
+        , breadth = StringValueInput.floatInput 1 20
+        , depth = StringValueInput.floatInput 1 10
+        , xmin = -1
+        , ymin = -10
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 1 2
+    }
+        |> HullSliceModifiers.fillHullSliceMetrics
+
+
+toblerone : Float -> Float -> HullSlices.HullSlices
+toblerone breadth depth =
+    { empty
+        | length = StringValueInput.floatInput 1 200
+        , breadth = StringValueInput.floatInput 1 breadth
+        , depth = StringValueInput.floatInput 1 depth
+        , xmin = -1
+        , ymin = -breadth / 2
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.75, 0.5 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 1 2
+    }
+        |> HullSliceModifiers.fillHullSliceMetrics
 
 
 valueToIndentedString : Encode.Value -> String
@@ -20,13 +120,13 @@ blockA =
         "abcd"
         "Helicopter"
         Color.blue
-        { x = StringValueInput.emptyFloat
-        , y = StringValueInput.emptyFloat
-        , z = StringValueInput.emptyFloat
+        { x = StringValueInput.emptyFloat 1
+        , y = StringValueInput.emptyFloat 1
+        , z = StringValueInput.emptyFloat 1
         }
-        { length = StringValueInput.fromNumber "" "" 10
-        , width = StringValueInput.fromNumber "" "" 10
-        , height = StringValueInput.fromNumber "" "" 10
+        { length = StringValueInput.fromNumber "" "" 1 10
+        , width = StringValueInput.fromNumber "" "" 1 10
+        , height = StringValueInput.fromNumber "" "" 1 10
         }
 
 
@@ -36,13 +136,13 @@ blockB =
         "efgh"
         "Tank"
         Color.red
-        { x = StringValueInput.emptyFloat
-        , y = StringValueInput.emptyFloat
-        , z = StringValueInput.emptyFloat
+        { x = StringValueInput.emptyFloat 1
+        , y = StringValueInput.emptyFloat 1
+        , z = StringValueInput.emptyFloat 1
         }
-        { length = StringValueInput.fromNumber "" "" 10
-        , width = StringValueInput.fromNumber "" "" 10
-        , height = StringValueInput.fromNumber "" "" 10
+        { length = StringValueInput.fromNumber "" "" 1 10
+        , width = StringValueInput.fromNumber "" "" 1 10
+        , height = StringValueInput.fromNumber "" "" 1 10
         }
 
 
@@ -52,13 +152,13 @@ blockC =
         "ijkl"
         "Hangar"
         Color.green
-        { x = StringValueInput.emptyFloat
-        , y = StringValueInput.emptyFloat
-        , z = StringValueInput.emptyFloat
+        { x = StringValueInput.emptyFloat 1
+        , y = StringValueInput.emptyFloat 1
+        , z = StringValueInput.emptyFloat 1
         }
-        { length = StringValueInput.fromNumber "" "" 10
-        , width = StringValueInput.fromNumber "" "" 10
-        , height = StringValueInput.fromNumber "" "" 10
+        { length = StringValueInput.fromNumber "" "" 1 10
+        , width = StringValueInput.fromNumber "" "" 1 10
+        , height = StringValueInput.fromNumber "" "" 1 10
         }
 
 

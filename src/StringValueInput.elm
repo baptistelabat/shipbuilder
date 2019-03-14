@@ -1,7 +1,7 @@
 module StringValueInput exposing
     ( FloatInput
     , IntInput
-    , addToFloatInput
+    , asFloatIn
     , asStringIn
     , asValueIn
     , decodeSpacingExceptions
@@ -32,15 +32,17 @@ type alias FloatInput =
     , string : String
     , unit : String
     , description : String
+    , nbOfDigits : Int
     }
 
 
-emptyFloat : FloatInput
-emptyFloat =
+emptyFloat : Int -> FloatInput
+emptyFloat nbOfDigits =
     { value = 0
     , string = ""
     , unit = ""
     , description = ""
+    , nbOfDigits = nbOfDigits
     }
 
 
@@ -69,23 +71,23 @@ syncIntInput input =
     { input | string = String.fromInt input.value }
 
 
-floatInputDecoder : String -> String -> Decode.Decoder FloatInput
-floatInputDecoder unit description =
-    Decode.map (fromNumber unit description) Decode.float
+floatInputDecoder : Int -> String -> String -> Decode.Decoder FloatInput
+floatInputDecoder nbOfDigits unit description =
+    Decode.map (fromNumber unit description nbOfDigits) Decode.float
 
 
-fromNumber : String -> String -> Float -> FloatInput
-fromNumber unit description value =
+fromNumber : String -> String -> Int -> Float -> FloatInput
+fromNumber unit description nbOfDigits value =
     let
         roundedValue =
-            round_n 1 value
+            round_n nbOfDigits value
     in
-    { value = roundedValue, string = String.fromFloat roundedValue, unit = unit, description = description }
+    { value = roundedValue, string = String.fromFloat roundedValue, unit = unit, description = description, nbOfDigits = nbOfDigits }
 
 
-floatInput : Float -> FloatInput
-floatInput value =
-    { value = value, string = "", unit = "", description = "" }
+floatInput : Int -> Float -> FloatInput
+floatInput nbOfDigits value =
+    { value = value, string = "", unit = "", description = "", nbOfDigits = nbOfDigits }
 
 
 fromInt : String -> Int -> IntInput
@@ -99,7 +101,7 @@ setString s floatInput_ =
         Just value ->
             let
                 roundedValue =
-                    round_n 1 value
+                    round_n floatInput_.nbOfDigits value
             in
             if value == roundedValue then
                 { floatInput_ | value = roundedValue, string = s }
@@ -118,7 +120,7 @@ decodeSpacingExceptions =
         makeException key value dict =
             case String.toInt key of
                 Just intKey ->
-                    Dict.insert intKey (fromNumber "" "" value) dict
+                    Dict.insert intKey (fromNumber "" "" 0 value) dict
 
                 Nothing ->
                     dict
@@ -130,20 +132,14 @@ decodeSpacingExceptions =
     Decode.map parse (Decode.dict Decode.float)
 
 
-addToFloatInput : Float -> FloatInput -> FloatInput
-addToFloatInput toAdd floatInput_ =
-    let
-        newValue : Float
-        newValue =
-            -- rounded to .2f
-            toFloat (round ((floatInput_.value + toAdd) * 100)) / 100
-    in
-    { floatInput_ | value = newValue, string = String.fromFloat newValue }
-
-
 asValueIn : { a | value : b, string : String } -> b -> { a | value : b, string : String }
 asValueIn numberInput value =
     { numberInput | value = value }
+
+
+asFloatIn : FloatInput -> Float -> FloatInput
+asFloatIn input value =
+    { input | value = value, string = String.fromFloat value }
 
 
 asStringIn : { a | value : b, string : String } -> String -> { a | value : b, string : String }
@@ -204,7 +200,7 @@ view floatInput_ onChange =
             [ type_ "text"
             , id generatedID
             , value floatInput_.string
-            , ExtraEvents.onKeyDown floatInput_.string onChange
+            , ExtraEvents.onKeyDown floatInput_.nbOfDigits floatInput_.string onChange
             , onInput onChange
             ]
             []
