@@ -989,7 +989,7 @@ modellerTests =
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "displacement" ]
                     |> Query.find [ Selector.class "kpi-modeller-value" ]
-                    |> Query.has [ Selector.text "19.84" ]
+                    |> Query.has [ Selector.text "20" ]
         , test "Length over all input triggers ModifySlice" <|
             \_ ->
                 modellerView
