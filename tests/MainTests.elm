@@ -132,6 +132,7 @@ suite =
         , integrationtestsOnMPOV
         , parseJSONSlices
         , encodeJSONTests
+        , testUpdateCenterOfGravity
         ]
 
 
@@ -267,7 +268,7 @@ updateTests =
                   <|
                     \_ ->
                         initialModel
-                            |> update (NoJs NoOp)
+                            |> updateNoJs NoOp
                             |> Tuple.second
                             |> Expect.equal Cmd.none
                 ]
@@ -292,12 +293,6 @@ updateTests =
                             |> update (ToJs <| ChangeBlockColor blockA Color.yellow)
                             |> Tuple.second
                             |> Expect.notEqual Cmd.none
-                , test "has no side effect if the block doesn't exist" <|
-                    \_ ->
-                        { initialModel | blocks = DictList.fromList [ ( blockA.uuid, blockA ) ] }
-                            |> update (ToJs <| ChangeBlockColor blockB Color.yellow)
-                            |> Tuple.second
-                            |> Expect.equal Cmd.none
                 ]
             , describe "AddBlock"
                 [ test "leaves the model untouched" <|
@@ -573,13 +568,13 @@ updateBlockSize =
                 updateCogThenLengthInAFromElm
                     |> .blocks
                     |> toList
-                    |> Expect.equal [ updateCenterOfGravity 7 2.5 2.5 <| updateCenterOfGravityFixed True <| updateLength blockA, blockB ]
+                    |> Expect.equal [ updateCenterOfGravity 7 5 5 <| updateCenterOfGravityFixed True <| updateLength blockA, blockB ]
         , test "Update length from Js with fixed Cog" <|
             \_ ->
                 updateCogThenLengthInAFromJs
                     |> .blocks
                     |> toList
-                    |> Expect.equal [ updateCenterOfGravity 7 2.5 2.5 <| updateCenterOfGravityFixed True <| updateLength blockA, blockB ]
+                    |> Expect.equal [ updateCenterOfGravity 7 5 5 <| updateCenterOfGravityFixed True <| updateLength blockA, blockB ]
         , test "Update length from Elm == Update length from Js" <|
             \_ ->
                 Expect.equal updateLengthInAFromElm updateLengthInAFromJs
@@ -871,6 +866,39 @@ encodeJSONTests =
                     , 0.742320749879794
                     ]
                 )
+        ]
+
+
+testUpdateCenterOfGravity =
+    describe "Update the global center of gravity" <|
+        let
+            modelWithTwoBlocks : Model
+            modelWithTwoBlocks =
+                setModel
+                    [ FromJs <| NewBlock blockA
+                    , FromJs <| NewBlock blockB
+                    ]
+        in
+        [ test "Global center of gravity when no block has a mass" <|
+            \_ ->
+                modelWithTwoBlocks
+                    |> .globalCenterOfGravity
+                    |> Expect.equal { x = 0, y = 0, z = 0 }
+        , test "Global center of gravity when only one block has a mass" <|
+            \_ ->
+                updateModel [ NoJs <| UpdateMass blockA "1" ] modelWithTwoBlocks
+                    |> .globalCenterOfGravity
+                    |> Expect.equal { x = 5, y = 5, z = -5 }
+        , test "Global center of gravity when two blocks have a mass" <|
+            \_ ->
+                updateModel
+                    [ NoJs <| UpdateMass blockA "1"
+                    , NoJs <| UpdateMass blockB "1"
+                    , ToJs <| UpdatePosition X blockB "10"
+                    ]
+                    modelWithTwoBlocks
+                    |> .globalCenterOfGravity
+                    |> Expect.equal { x = 10, y = 5, z = -5 }
         ]
 
 

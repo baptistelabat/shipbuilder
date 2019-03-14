@@ -99,6 +99,9 @@ app.ports.toJs.subscribe(function (message) {
         case "showing-partitions":
             toggleShowingPartitions(data);
             break;
+        case "show-center-of-gravity":
+            showCenterOfGravity(data);
+            break;
         case "switch-mode": // used to synchronize the view mode with Elm
             switchMode(data);
             break;
@@ -146,7 +149,7 @@ let toggleBlocksVisibility = function (data) {
 }
 
 let setObjectOpacityForCurrentMode = function (object) {
-    if (object.sbType === mode) { // if the object is "active" in the current mode (a block in the "block" mode, a deck in the "partition" mode etc)
+    if (object.sbType === mode || object.sbType == "exception") { // if the object is "active" in the current mode (a block in the "block" mode, a deck in the "partition" mode etc)
         object.material.opacity = 1;
         object.material.transparent = false;
     } else {
@@ -304,6 +307,57 @@ let toggleShowingPartitions = function (showing) {
             // prevents their rendering
             partition.visible = showing;
         });
+}
+
+let showCenterOfGravity = function (cogCoordinates) {
+    //Delete old center of gravity
+    const oldCentersOfGravity= scene.children.filter(child =>
+        child.sbType // checks if the sbType attribute exists to prevent JS from crashing on an undefined check
+        && child.sbType === "exception"
+    );
+    oldCentersOfGravity.forEach(oldCenterOfGravity => removeFromScene(oldCenterOfGravity));
+
+    //Create centers of gravity to be displayed on top, side and front of the model
+    makeLandMark("exception", 1, {x: 250, z: -cogCoordinates.z, y: cogCoordinates.y}, {x: 0, z: 0, y: Math.PI /2});
+    makeLandMark("exception", 1, {x: cogCoordinates.x, z: 250, y: cogCoordinates.y}, {x: Math.PI /2, z: 0, y: 0});
+    makeLandMark("exception", 1, {x: cogCoordinates.x, z: -cogCoordinates.z, y: 250}, {x: 0, z: 0, y: 0});
+}
+
+let makeLandMark = function (type, radius, position, rotation) {
+    const color = new THREE.Color(0.5, 0.5, 0.5); // grey
+    var lineMaterial = new THREE.LineBasicMaterial({ linewidth: 1, color: color }); //line parameters
+
+    //Create a circle
+    var circleGeometry = new THREE.CircleGeometry(radius, 128);
+    circleGeometry.vertices.shift();
+
+    var circle = new THREE.LineLoop(circleGeometry, lineMaterial);
+    circle.sbType = type;
+    circle.position.set(position.x, position.z, position.y);
+    circle.rotation.set(rotation.x, rotation.y, rotation.z);
+
+    //Create two lines which cross in the circle
+    const lineGeometryH = new THREE.Geometry();
+    const lineGeometryV = new THREE.Geometry();
+
+    //horizontal line
+    lineGeometryH.vertices.push(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(1, 0, 0));
+    var lineH = new THREE.LineLoop(lineGeometryH, lineMaterial);
+    lineH.sbType = type;
+    lineH.position.set(position.x, position.z, position.y);
+    lineH.rotation.set(rotation.x, rotation.y, rotation.z);
+
+    //vertical line
+    lineGeometryV.vertices.push(new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 1, 0));
+    var lineV = new THREE.LineLoop(lineGeometryV, lineMaterial);
+    lineV.sbType = type;
+    lineV.position.set(position.x, position.z, position.y);
+    lineV.rotation.set(rotation.x, rotation.y, rotation.z);
+
+    //Add landMark to the scene
+    scene.add(circle);
+    scene.add(lineH);
+    scene.add(lineV);
 }
 
 let makeDecks = function (decks) {

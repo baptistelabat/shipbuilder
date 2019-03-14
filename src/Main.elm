@@ -27,13 +27,12 @@ port module Main exposing
     , initCmd
     , initModel
     , main
-    ,  msg2json
-       --Blocks
-
+    , msg2json
     , removeBlockFrom
     , toJs
     , toList
     , update
+    , updateNoJs
     , view
     )
 
@@ -107,22 +106,6 @@ subscriptions _ =
         , Browser.Events.onKeyUp <| Decode.map keyupToMsg keyDecoder
         , Time.every (20 * 1000) (NoJs << SetCurrentDate)
         ]
-
-
-newBlockDecoder : Decode.Decoder Block
-newBlockDecoder =
-    Decode.succeed Block
-        |> Pipeline.required "uuid" Decode.string
-        |> Pipeline.required "label" Decode.string
-        |> Pipeline.required "color" decodeRgbRecord
-        |> Pipeline.required "position" decodePosition
-        |> Pipeline.required "size" decodeSize
-        |> Pipeline.hardcoded None
-        |> Pipeline.hardcoded (StringValueInput.emptyFloat 1)
-        |> Pipeline.hardcoded (StringValueInput.emptyFloat 1)
-        |> Pipeline.hardcoded True
-        |> Pipeline.hardcoded initPosition
-        |> Pipeline.hardcoded False
 
 
 type alias SyncPosition =
@@ -244,20 +227,40 @@ decodeBlocks =
     Decode.list decodeBlock
 
 
+updateBlockCenterOfGravity : Block -> Block
+updateBlockCenterOfGravity block =
+    let
+        centerOfVolume : Point
+        centerOfVolume =
+            getRelativeCenterOfVolume block
+    in
+    { block
+        | centerOfGravity =
+            { x = StringValueInput.fromNumber "m" "x" 1 centerOfVolume.x
+            , y = StringValueInput.fromNumber "m" "y" 1 centerOfVolume.y
+            , z = StringValueInput.fromNumber "m" "z" 1 centerOfVolume.z
+            }
+    }
+
+
 decodeBlock : Decode.Decoder Block
 decodeBlock =
-    Decode.succeed Block
-        |> Pipeline.required "uuid" Decode.string
-        |> Pipeline.required "label" Decode.string
-        |> Pipeline.required "color" decodeColor
-        |> Pipeline.required "position" decodePosition
-        |> Pipeline.required "size" decodeSize
-        |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
-        |> Pipeline.optional "mass" (StringValueInput.floatInputDecoder 1 "m" "Mass") (StringValueInput.emptyFloat 1)
-        |> Pipeline.optional "density" (StringValueInput.floatInputDecoder 1 "kg/m^3" "Density") (StringValueInput.emptyFloat 1)
-        |> Pipeline.optional "visible" Decode.bool True
-        |> Pipeline.optional "centerOfGravity" decodePosition initPosition
-        |> Pipeline.optional "centerOfGravityFixed" Decode.bool False
+    let
+        d =
+            Decode.succeed Block
+                |> Pipeline.required "uuid" Decode.string
+                |> Pipeline.required "label" Decode.string
+                |> Pipeline.required "color" decodeColor
+                |> Pipeline.required "position" decodePosition
+                |> Pipeline.required "size" decodeSize
+                |> Pipeline.optional "referenceForMass" decodeReferenceForMass None
+                |> Pipeline.optional "mass" (StringValueInput.floatInputDecoder 1 "m" "Mass") (StringValueInput.emptyFloat 1)
+                |> Pipeline.optional "density" (StringValueInput.floatInputDecoder 1 "kg/m^3" "Density") (StringValueInput.emptyFloat 1)
+                |> Pipeline.optional "visible" Decode.bool True
+                |> Pipeline.optional "centerOfGravity" decodePosition initPosition
+                |> Pipeline.optional "centerOfGravityFixed" Decode.bool False
+    in
+    Decode.map updateBlockCenterOfGravity d
 
 
 decodeReferenceForMass : Decode.Decoder ReferenceForMass
@@ -286,7 +289,7 @@ decodeColor =
         |> Pipeline.required "red" Decode.float
         |> Pipeline.required "green" Decode.float
         |> Pipeline.required "blue" Decode.float
-        |> Pipeline.required "alpha" Decode.float
+        |> Pipeline.optional "alpha" Decode.float 1
 
 
 syncSizeDecoder : Decode.Decoder SyncSize
@@ -496,7 +499,7 @@ jsMsgToMsg js =
                     FromJs <| JSError <| Decode.errorToString message
 
         "new-block" ->
-            case Decode.decodeValue newBlockDecoder js.data of
+            case Decode.decodeValue decodeBlock js.data of
                 Ok block ->
                     FromJs <| NewBlock block
 
@@ -675,6 +678,7 @@ type alias Model =
     , multipleSelect : Bool
     , selectedHullReference : Maybe String
     , blocks : Blocks
+    , globalCenterOfGravity : Point
     , toasts : Toasts
     , partitions : PartitionsData
     , uiState : UiState
@@ -787,7 +791,11 @@ initBlock uuid label color position size =
     , mass = StringValueInput.emptyFloat 1
     , density = StringValueInput.emptyFloat 1
     , visible = True
-    , centerOfGravity = initPosition
+    , centerOfGravity =
+        { x = StringValueInput.fromNumber "m" "x" 1 <| size.length.value / 2
+        , y = StringValueInput.fromNumber "m" "y" 1 <| size.width.value / 2
+        , z = StringValueInput.fromNumber "m" "z" 1 <| size.height.value / 2
+        }
     , centerOfGravityFixed = False
     }
 
@@ -892,8 +900,8 @@ type alias Position =
 initPosition : Position
 initPosition =
     { x = StringValueInput.fromNumber "m" "x" 1 5
-    , y = StringValueInput.fromNumber "m" "x" 1 2.5
-    , z = StringValueInput.fromNumber "m" "x" 1 2.5
+    , y = StringValueInput.fromNumber "m" "y" 1 2.5
+    , z = StringValueInput.fromNumber "m" "z" 1 2.5
     }
 
 
@@ -1082,6 +1090,15 @@ encodePosition position =
         [ ( "x", Encode.float position.x.value )
         , ( "y", Encode.float position.y.value )
         , ( "z", Encode.float position.z.value )
+        ]
+
+
+encodePoint : Point -> Encode.Value
+encodePoint point =
+    Encode.object
+        [ ( "x", Encode.float point.x )
+        , ( "y", Encode.float point.y )
+        , ( "z", Encode.float point.z )
         ]
 
 
@@ -1373,6 +1390,7 @@ initModel flag =
     , multipleSelect = False
     , selectedHullReference = Nothing
     , blocks = DictList.empty
+    , globalCenterOfGravity = { x = 0, y = 0, z = 0 }
     , toasts = emptyToasts
     , partitions = initPartitions
     , uiState =
@@ -1498,8 +1516,6 @@ encodeAddBlockCommand label =
     Encode.object
         [ ( "label", Encode.string label )
         , ( "color", encodeColor SIRColorPicker.indigo )
-
-        -- blue
         ]
 
 
@@ -1726,9 +1742,18 @@ type Msg
     | ToJs ToJsMsg
 
 
+updateCentreOfGravity : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+updateCentreOfGravity ( model, cmd ) =
+    let
+        ( updatedModel, cmdUpdateCog ) =
+            updateToJs UpdateGlobalCenterOfGravity model
+    in
+    ( updatedModel, Cmd.batch [ cmd, cmdUpdateCog ] )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
+    (case msg of
         FromJs fromJsMsg ->
             updateFromJs fromJsMsg model
 
@@ -1737,6 +1762,8 @@ update msg model =
 
         ToJs toJsMsg ->
             updateToJs toJsMsg model
+    )
+        |> updateCentreOfGravity
 
 
 type ToJsMsg
@@ -1758,6 +1785,7 @@ type ToJsMsg
     | UpdatePartitionZeroPosition PartitionType String
     | UpdatePosition Axis Block String
     | UpdateDimension Dimension Block String
+    | UpdateGlobalCenterOfGravity
     | ExportCSV String
     | ExportSTL String
     | ExportSubModel String
@@ -1769,7 +1797,6 @@ type NoJsMsg
     | DeleteCustomProperty CustomProperty
     | DismissToast String
     | DisplayToast Toast
-    | FreeCenterOfGravity Block
     | LockCenterOfGravityToCenterOfVolume Block
     | MoveBlockDown Block
     | MoveBlockUp Block
@@ -1817,31 +1844,11 @@ updateNoJs msg model =
         DisplayToast toast ->
             ( { model | toasts = addToast toast model.toasts }, Cmd.none )
 
-        FreeCenterOfGravity block ->
-            let
-                updatedBlock : Block
-                updatedBlock =
-                    { block
-                        | centerOfGravity = initPosition
-                    }
-            in
-            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
-
         LockCenterOfGravityToCenterOfVolume block ->
             let
-                centerOfVolume : Point
-                centerOfVolume =
-                    getRelativeCenterOfVolume block
-
                 updatedBlock : Block
                 updatedBlock =
-                    { block
-                        | centerOfGravity =
-                            { x = StringValueInput.fromNumber "m" "x" 1 centerOfVolume.x
-                            , y = StringValueInput.fromNumber "m" "y" 1 centerOfVolume.y
-                            , z = StringValueInput.fromNumber "m" "z" 1 centerOfVolume.z
-                            }
-                    }
+                    updateBlockCenterOfGravity block
 
                 updatedBlockUnfixed =
                     { updatedBlock
@@ -2151,7 +2158,7 @@ updateFromJs jsmsg model =
             let
                 blocks : Blocks
                 blocks =
-                    addBlockTo model.blocks block
+                    addBlockTo model.blocks <| updateBlockCenterOfGravity block
             in
             ( { model | blocks = blocks }, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus block.uuid) ] )
 
@@ -2577,6 +2584,14 @@ updateModelToJs msg model =
                         |> asSizeInBlock blockInModel
                         |> flip updateBlockInModel model
 
+        UpdateGlobalCenterOfGravity ->
+            let
+                updatedCoG : Point
+                updatedCoG =
+                    getCentroidOfBlocks model.blocks
+            in
+            { model | globalCenterOfGravity = updatedCoG }
+
 
 sendCmdToJs : Model -> ToJsMsg -> Cmd msg
 sendCmdToJs model msg =
@@ -2879,6 +2894,13 @@ msg2json model action =
                 )
             <|
                 String.toFloat input
+
+        UpdateGlobalCenterOfGravity ->
+            let
+                updatedCoG =
+                    model.globalCenterOfGravity
+            in
+            Just { tag = "show-center-of-gravity", data = encodePoint updatedCoG }
 
 
 
@@ -3257,8 +3279,6 @@ viewModeller model =
                             , AreaCurve.view slices
                             , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 slices.displacement)
                             , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 slices.blockCoefficient)
-
-                            -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
                             , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| slices.centreOfBuoyancy)
                             , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 <| slices.metacentre)
                             , button
