@@ -297,7 +297,7 @@ lackenby targetPrismaticCoefficient lengthAtWaterline masterCrossSectionArea are
             else
                 lackenby_ tolerance niterMax (niter + 1) cMid cHigh
     in
-    lackenby_ 1.0e-2 8 0 -1 1
+    lackenby_ 1.0e-3 10 0 -1 1
 
 
 modifyLongitudinalPositionOfEachSlice : HullSlices -> List Float -> HullSlices
