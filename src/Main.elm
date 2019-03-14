@@ -1789,7 +1789,6 @@ type NoJsMsg
     | DeleteCustomProperty CustomProperty
     | DismissToast String
     | DisplayToast Toast
-    | FreeCenterOfGravity Block
     | LockCenterOfGravityToCenterOfVolume Block
     | MoveBlockDown Block
     | MoveBlockUp Block
@@ -1836,16 +1835,6 @@ updateNoJs msg model =
 
         DisplayToast toast ->
             ( { model | toasts = addToast toast model.toasts }, Cmd.none )
-
-        FreeCenterOfGravity block ->
-            let
-                updatedBlock : Block
-                updatedBlock =
-                    { block
-                        | centerOfGravity = initPosition
-                    }
-            in
-            ( { model | blocks = updateBlockInBlocks updatedBlock model.blocks }, Cmd.none )
 
         LockCenterOfGravityToCenterOfVolume block ->
             let
