@@ -27,9 +27,7 @@ port module Main exposing
     , initCmd
     , initModel
     , main
-    ,  msg2json
-       --Blocks
-
+    , msg2json
     , removeBlockFrom
     , toJs
     , toList
@@ -1086,6 +1084,7 @@ encodePosition position =
         , ( "z", Encode.float position.z.value )
         ]
 
+
 encodePoint : Point -> Encode.Value
 encodePoint point =
     Encode.object
@@ -1093,6 +1092,7 @@ encodePoint point =
         , ( "y", Encode.float point.y )
         , ( "z", Encode.float point.z )
         ]
+
 
 encodeSize : Size -> Encode.Value
 encodeSize size =
@@ -1382,7 +1382,7 @@ initModel flag =
     , multipleSelect = False
     , selectedHullReference = Nothing
     , blocks = DictList.empty
-    , globalCenterOfGravity = {x=0, y=0, z=0}
+    , globalCenterOfGravity = { x = 0, y = 0, z = 0 }
     , toasts = emptyToasts
     , partitions = initPartitions
     , uiState =
@@ -1508,8 +1508,6 @@ encodeAddBlockCommand label =
     Encode.object
         [ ( "label", Encode.string label )
         , ( "color", encodeColor SIRColorPicker.indigo )
-
-        -- blue
         ]
 
 
@@ -1736,17 +1734,13 @@ type Msg
     | ToJs ToJsMsg
 
 
--- run : msg -> Cmd msg
--- run m =
---   Task.perform (always m) (Task.succeed ())
-
-updateCentreOfGravity :  ( Model, Cmd Msg ) ->  ( Model, Cmd Msg )
-updateCentreOfGravity (model, cmd) =
+updateCentreOfGravity : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+updateCentreOfGravity ( model, cmd ) =
     let
-      (updatedModel, cmdUpdateCog) = updateToJs UpdateGlobalCenterOfGravity model
+        ( updatedModel, cmdUpdateCog ) =
+            updateToJs UpdateGlobalCenterOfGravity model
     in
-    (updatedModel, Cmd.batch [ cmd, cmdUpdateCog ])
-      --(model, Cmd.batch [cmd,updateToJs UpdateGlobalCenterOfGravity model ])
+    ( updatedModel, Cmd.batch [ cmd, cmdUpdateCog ] )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -1759,8 +1753,9 @@ update msg model =
             updateNoJs noJsMsg model
 
         ToJs toJsMsg ->
-            updateToJs toJsMsg model)
-      |> updateCentreOfGravity
+            updateToJs toJsMsg model
+    )
+        |> updateCentreOfGravity
 
 
 type ToJsMsg
@@ -2604,11 +2599,12 @@ updateModelToJs msg model =
 
         UpdateGlobalCenterOfGravity ->
             let
-              updatedCoG : Point
-              updatedCoG =
-                  getCentroidOfBlocks model.blocks
+                updatedCoG : Point
+                updatedCoG =
+                    getCentroidOfBlocks model.blocks
             in
             { model | globalCenterOfGravity = updatedCoG }
+
 
 sendCmdToJs : Model -> ToJsMsg -> Cmd msg
 sendCmdToJs model msg =
@@ -2914,9 +2910,12 @@ msg2json model action =
 
         UpdateGlobalCenterOfGravity ->
             let
-                updatedCoG = model.globalCenterOfGravity
+                updatedCoG =
+                    model.globalCenterOfGravity
             in
-            Just { tag = "show-center-of-gravity", data =  encodePoint updatedCoG}
+            Just { tag = "show-center-of-gravity", data = encodePoint updatedCoG }
+
+
 
 -- VIEW
 
@@ -3293,8 +3292,6 @@ viewModeller model =
                             , AreaCurve.view slices
                             , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 slices.displacement)
                             , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 slices.blockCoefficient)
-
-                            -- , viewModellerSimpleKpi "NewVolume" "NewVolume" slices.volume
                             , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| slices.centreOfBuoyancy)
                             , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 <| slices.metacentre)
                             , button
@@ -4228,7 +4225,6 @@ viewBlockCenterOfGravityUserInput block cog =
             [ class "form-group-action"
             , title "Reset the center of gravity to the center of the volume"
             , onClick <| NoJs <| LockCenterOfGravityToCenterOfVolume block
-            --, onClick <| ToJs <| UpdateGlobalCenterOfGravity
             ]
             [ FASolid.crosshairs [] ]
         ]
