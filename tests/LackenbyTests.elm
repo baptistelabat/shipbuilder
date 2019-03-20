@@ -64,4 +64,10 @@ suite =
                     |> HullSlices.integrate
                     |> (*) (1 / (69.6 * 40))
                     |> Expect.within (Absolute 1.0e-2) 0.03
+        , test "Have same amount of slices before and after updating prismatic coefficient on MPOV" <|
+            \_ ->
+                Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient (TestData.mpov 1.5)
+                    |> .slices
+                    |> List.length
+                    |> Expect.equal 10
         ]
