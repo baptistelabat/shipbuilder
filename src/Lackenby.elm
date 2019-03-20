@@ -340,8 +340,12 @@ modifyLongitudinalPositionOfEachSlice hullSlices newXPositions =
         modifiedSlices : List HullSlice
         modifiedSlices =
             List.map2 shiftSliceLongitudinalPosition slicesToShift newXPositions
+
+        allSlices : List HullSlice
+        allSlices =
+            slicesBeforeXminOfAreaCurve ++ modifiedSlices ++ slicesAfterXmaxOfAreaCurve
     in
-    { hullSlices | slices = modifiedSlices }
+    { hullSlices | slices = allSlices }
 
 
 initializePrismaticCoefficient : HullSlices -> HullSlices
