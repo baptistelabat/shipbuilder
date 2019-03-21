@@ -325,15 +325,15 @@ modifyLongitudinalPositionOfEachSlice hullSlices newXPositions =
 
         slicesBeforeXminOfAreaCurve : List HullSlice
         slicesBeforeXminOfAreaCurve =
-            List.filter (\slice -> (StringValueInput.round_n 4 <| slice.x) < xminOfAreaCurve) hullSlices.slices
+            List.filter (\slice -> StringValueInput.round_n 4 slice.x < xminOfAreaCurve) hullSlices.slices
 
         slicesAfterXmaxOfAreaCurve : List HullSlice
         slicesAfterXmaxOfAreaCurve =
-            List.filter (\slice -> (StringValueInput.round_n 4 <| slice.x) > xmaxOfAreaCurve) hullSlices.slices
+            List.filter (\slice -> StringValueInput.round_n 4 slice.x > xmaxOfAreaCurve) hullSlices.slices
 
         slicesToShift : List HullSlice
         slicesToShift =
-            List.filter (\slice -> ((StringValueInput.round_n 4 <| slice.x) >= xminOfAreaCurve) && ((StringValueInput.round_n 4 <| slice.x) <= xmaxOfAreaCurve)) hullSlices.slices
+            List.filter (\slice -> (StringValueInput.round_n 4 slice.x >= xminOfAreaCurve) && (StringValueInput.round_n 4 slice.x <= xmaxOfAreaCurve)) hullSlices.slices
 
         shiftSliceLongitudinalPosition : HullSlice -> Float -> HullSlice
         shiftSliceLongitudinalPosition slice x =
