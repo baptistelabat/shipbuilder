@@ -128,7 +128,9 @@ type alias SyncSize =
 
 
 type alias SaveFile =
-    { blocks : List Block
+    { selectedHullReference : Maybe String
+    , hulls : Dict ShipName HullSlices.HullSlices
+    , blocks : List Block
     , coordinatesTransform : List Float
     , partitions : PartitionsData
     , tags : Tags
@@ -139,6 +141,8 @@ type alias SaveFile =
 saveFileDecoderV1 : Decode.Decoder SaveFile
 saveFileDecoderV1 =
     Decode.succeed SaveFile
+        |> Pipeline.optional "selectedHullReference" (Decode.map Just Decode.string) Nothing
+        |> Pipeline.optional "hulls" EncodersDecoders.dictDecoder Dict.empty
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.hardcoded initPartitions
@@ -149,6 +153,8 @@ saveFileDecoderV1 =
 saveFileDecoderV2 : Decode.Decoder SaveFile
 saveFileDecoderV2 =
     Decode.succeed SaveFile
+        |> Pipeline.optional "selectedHullReference" (Decode.map Just Decode.string) Nothing
+        |> Pipeline.optional "hulls" EncodersDecoders.dictDecoder Dict.empty
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.required "partitions" decodePartitions
@@ -585,6 +591,12 @@ restoreSaveInModel model saveFile =
         maybeCoordinatesTransform =
             CoordinatesTransform.fromList saveFile.coordinatesTransform
 
+        savedSelectedHullReference =
+            saveFile.selectedHullReference
+
+        savedHull =
+            saveFile.hulls
+
         savedBlocks =
             listOfBlocksToBlocks saveFile.blocks
 
@@ -609,6 +621,8 @@ restoreSaveInModel model saveFile =
             { cleanModel
               -- resets focused block and selections
                 | currentDate = model.currentDate
+                , selectedHullReference = savedSelectedHullReference
+                , slices = savedHull
                 , blocks = savedBlocks
                 , coordinatesTransform = savedCoordinatesTransform
                 , partitions = partitions
@@ -642,9 +656,24 @@ restoreSaveCmd model =
 
 encodeRestoreSaveCmd : Model -> Encode.Value
 encodeRestoreSaveCmd model =
+    let
+        currentHullSlices =
+            case model.selectedHullReference of
+                Nothing ->
+                    Encode.string ""
+
+                Just hullName ->
+                    case Dict.get hullName model.slices of
+                        Nothing ->
+                            Encode.string ""
+
+                        Just hullSlices ->
+                            EncodersDecoders.encoder hullSlices
+    in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
+        , ( "hull", currentHullSlices )
         , ( "blocks", encodeBlocks model.blocks )
         , ( "showingPartitions", Encode.bool model.partitions.showing )
         , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
@@ -1043,12 +1072,24 @@ encodeModelForSave : Model -> Encode.Value
 encodeModelForSave model =
     Encode.object
         [ ( "version", Encode.int 2 )
+        , ( "selectedHullReference", encodeselectedHullReference model )
+        , ( "hulls", EncodersDecoders.dictEncoder model.slices )
         , ( "blocks", encodeBlocks model.blocks )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "partitions", encodePartitions model.partitions )
         , ( "tags", encodeTags model.tags )
         , ( "customProperties", encodeCustomProperties model.customProperties )
         ]
+
+
+encodeselectedHullReference : Model -> Encode.Value
+encodeselectedHullReference model =
+    case model.selectedHullReference of
+        Just hullName ->
+            Encode.string hullName
+
+        Nothing ->
+            Encode.string ""
 
 
 encodeCustomProperties : List CustomProperty -> Encode.Value

@@ -181,6 +181,7 @@ let readFile = function (inputId) {
 }
 
 let restoreSave = function (savedData) {
+    const savedHull = savedData.hull;
     const savedBlocks = savedData.blocks;
     const savedCoordinatesTransform = savedData.coordinatesTransform;
     const decks = savedData.decks;
@@ -195,6 +196,10 @@ let restoreSave = function (savedData) {
     restoreBlocks(savedBlocks);
     makeDecks(decks);
     makeBulkheads(bulkheads);
+
+    if(savedHull != ""){
+      loadHull(savedHull);
+    }
 }
 
 // clean the scene, reset selection and gizmos
