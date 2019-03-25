@@ -62,7 +62,7 @@ B_{\alpha}(z) \underset{def}{=} (1-\delta B_{\alpha})\cdot B(z), \alpha<=0
 
 -}
 
-import HullSlices exposing (HullSlice, HullSliceCentroidAndArea, HullSlices)
+import HullSlices exposing (HullSlice, HullSliceCentroidAndArea, HullSlices, HullSlicesMetrics)
 import List.Extra
 import StringValueInput
 
@@ -172,7 +172,7 @@ clampPrismaticCoefficient prismaticCoeff lengthAtWaterline masterCrossSectionAre
     StringValueInput.round_n 2 <| clamp minCoeff maxCoeff prismaticCoeff
 
 
-setPrismaticCoefficientAndClamp : Float -> HullSlices -> HullSlices
+setPrismaticCoefficientAndClamp : Float -> HullSlicesMetrics -> HullSlicesMetrics
 setPrismaticCoefficientAndClamp prismaticCoefficient hullSlices_ =
     let
         hullSlices : HullSlices.HullSlicesWithDisplacement
@@ -300,7 +300,7 @@ lackenby targetPrismaticCoefficient lengthAtWaterline masterCrossSectionArea are
     lackenby_ 1.0e-3 10 0 -1 1
 
 
-modifyLongitudinalPositionOfEachSlice : HullSlices -> List Float -> HullSlices
+modifyLongitudinalPositionOfEachSlice : HullSlicesMetrics -> List Float -> HullSlicesMetrics
 modifyLongitudinalPositionOfEachSlice hullSlices newXPositions =
     let
         normalize : Float -> Float
@@ -350,7 +350,7 @@ modifyLongitudinalPositionOfEachSlice hullSlices newXPositions =
     { hullSlices | slices = allSlices }
 
 
-initializePrismaticCoefficient : HullSlices -> HullSlices
+initializePrismaticCoefficient : HullSlicesMetrics -> HullSlicesMetrics
 initializePrismaticCoefficient hullSlices =
     let
         p : StringValueInput.FloatInput
@@ -376,7 +376,7 @@ initializePrismaticCoefficient hullSlices =
             { hullSlices | prismaticCoefficient = coeff |> StringValueInput.round_n 2 |> StringValueInput.asFloatIn p }
 
 
-resetOriginalSlicesLongitudinalPositions : HullSlices -> HullSlices
+resetOriginalSlicesLongitudinalPositions : HullSlicesMetrics -> HullSlicesMetrics
 resetOriginalSlicesLongitudinalPositions hullSlices =
     let
         setX : HullSlice -> Float -> HullSlice
@@ -386,7 +386,7 @@ resetOriginalSlicesLongitudinalPositions hullSlices =
     { hullSlices | slices = List.map2 setX hullSlices.slices hullSlices.originalSlicePositions }
 
 
-modifyHullSlicesToMatchTargetPrismaticCoefficient : HullSlices -> HullSlices
+modifyHullSlicesToMatchTargetPrismaticCoefficient : HullSlicesMetrics -> HullSlicesMetrics
 modifyHullSlicesToMatchTargetPrismaticCoefficient hullSlices =
     let
         originalHullSlices : HullSlices.HullSlicesWithDisplacement

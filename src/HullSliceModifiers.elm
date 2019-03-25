@@ -8,7 +8,7 @@ module HullSliceModifiers exposing
     , setPrismaticCoefficient
     )
 
-import HullSlices exposing (HullSlices)
+import HullSlices exposing (HullSlices, HullSlicesMetrics)
 import Lackenby
 import StringValueInput
 
@@ -36,7 +36,7 @@ empty =
         }
 
 
-fillHullSliceMetrics : HullSlices -> HullSlices
+fillHullSliceMetrics : HullSlices -> HullSlicesMetrics
 fillHullSliceMetrics hullSlices =
     let
         extract : HullSlices.HullSlicesWithMetacentre -> HullSlices
@@ -54,29 +54,29 @@ fillHullSliceMetrics hullSlices =
         |> Lackenby.initializePrismaticCoefficient
 
 
-setLengthOverAll : String -> HullSlices -> HullSlices
+setLengthOverAll : String -> HullSlices -> HullSlicesMetrics
 setLengthOverAll loa hullSlices =
     { hullSlices | length = hullSlices.length |> StringValueInput.setString loa } |> fillHullSliceMetrics
 
 
-setBreadth : String -> HullSlices -> HullSlices
+setBreadth : String -> HullSlices -> HullSlicesMetrics
 setBreadth breadth hullSlices =
     { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth }
         |> (\slices -> { slices | ymin = -slices.breadth.value / 2 })
         |> fillHullSliceMetrics
 
 
-setDraught : String -> HullSlices -> HullSlices
+setDraught : String -> HullSlices -> HullSlicesMetrics
 setDraught draught hullSlices =
     { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught } |> fillHullSliceMetrics
 
 
-setDepth : String -> HullSlices -> HullSlices
+setDepth : String -> HullSlices -> HullSlicesMetrics
 setDepth depth hullSlices =
     { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth } |> fillHullSliceMetrics
 
 
-setPrismaticCoefficient : String -> HullSlices -> HullSlices
+setPrismaticCoefficient : String -> HullSlices -> HullSlicesMetrics
 setPrismaticCoefficient prismaticCoefficient hullSlices =
     let
         modifyPrismaticCoeff : HullSlices -> HullSlices

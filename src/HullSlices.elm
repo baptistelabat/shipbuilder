@@ -4,6 +4,7 @@ module HullSlices exposing
     , HullSliceAsZYList
     , HullSliceCentroidAndArea
     , HullSlices
+    , HullSlicesMetrics
     , HullSlicesWithCentroidAreaForEachImmersedSlice(..)
     , HullSlicesWithDisplacement(..)
     , HullSlicesWithExtremePoints(..)
@@ -41,6 +42,31 @@ import StringValueInput
 
 
 type alias HullSlices =
+    { length : StringValueInput.FloatInput
+    , breadth : StringValueInput.FloatInput
+    , depth : StringValueInput.FloatInput
+    , prismaticCoefficient : StringValueInput.FloatInput
+    , xmin : Float
+    , ymin : Float
+    , zmin : Float
+    , slices : List HullSlice
+    , originalSlicePositions : List Float
+    , draught : StringValueInput.FloatInput
+    , blockCoefficient : Float
+    , displacement : Float
+    , centreOfBuoyancy : Float
+    , metacentre : Float
+    , denormalizedSlices : List HullSlice
+    , hullSlicesBeneathFreeSurface :
+        { xmin : Float
+        , xmax : Float
+        , hullSlices : List HullSliceAsZYList
+        }
+    , centroidAreaForEachImmersedSlice : List HullSliceCentroidAndArea
+    }
+
+
+type alias HullSlicesMetrics =
     { length : StringValueInput.FloatInput
     , breadth : StringValueInput.FloatInput
     , depth : StringValueInput.FloatInput
@@ -120,39 +146,39 @@ calculateSliceArea json hullSlice =
 
 
 type HullSlicesWithoutComputations
-    = HullSlicesWithoutComputations HullSlices
+    = HullSlicesWithoutComputations HullSlicesMetrics
 
 
 type HullSlicesWithDenormalizedSlices
-    = HullSlicesWithDenormalizedSlices HullSlices
+    = HullSlicesWithDenormalizedSlices HullSlicesMetrics
 
 
 type HullSlicesWithSlicesBeneathFreeSurface
-    = HullSlicesWithSlicesBeneathFreeSurface HullSlices
+    = HullSlicesWithSlicesBeneathFreeSurface HullSlicesMetrics
 
 
 type HullSlicesWithCentroidAreaForEachImmersedSlice
-    = HullSlicesWithCentroidAreaForEachImmersedSlice HullSlices
+    = HullSlicesWithCentroidAreaForEachImmersedSlice HullSlicesMetrics
 
 
 type HullSlicesWithExtremePoints
-    = HullSlicesWithExtremePoints HullSlices
+    = HullSlicesWithExtremePoints HullSlicesMetrics
 
 
 type HullSlicesWithDisplacement
-    = HullSlicesWithDisplacement HullSlices
+    = HullSlicesWithDisplacement HullSlicesMetrics
 
 
 type HullSlicesWithCentreOfBuoyancy
-    = HullSlicesWithCentreOfBuoyancy HullSlices
+    = HullSlicesWithCentreOfBuoyancy HullSlicesMetrics
 
 
 type HullSlicesWithBlockCoefficient
-    = HullSlicesWithBlockCoefficient HullSlices
+    = HullSlicesWithBlockCoefficient HullSlicesMetrics
 
 
 type HullSlicesWithMetacentre
-    = HullSlicesWithMetacentre HullSlices
+    = HullSlicesWithMetacentre HullSlicesMetrics
 
 
 addDenormalizedSlices : HullSlicesWithoutComputations -> HullSlicesWithDenormalizedSlices
