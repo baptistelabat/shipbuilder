@@ -725,17 +725,12 @@ suite =
             \_ ->
                 let
                     hull =
-                        case
-                            { empty
-                                | hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 100, hullSlices = [] }
-                                , centroidAreaForEachImmersedSlice =
-                                    [ { x = 50, area = 2, centroid = 1 } ]
-                            }
-                                |> HullSlicesMetrics.HullSlicesWithCentroidAreaForEachImmersedSlice
-                                |> HullSlicesMetrics.addExtremePoints
-                        of
-                            HullSlicesMetrics.HullSlicesWithExtremePoints hs ->
-                                hs
+                        { empty
+                            | hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 100, hullSlices = [] }
+                            , centroidAreaForEachImmersedSlice =
+                                [ { x = 50, area = 2, centroid = 1 } ]
+                        }
+                            |> HullSlicesMetrics.addExtremePoints
                 in
                 HullSlicesMetrics.calculateCentroid hull.centroidAreaForEachImmersedSlice
                     |> Expect.within epsAbsolute 100.0

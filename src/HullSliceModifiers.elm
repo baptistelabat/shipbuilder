@@ -39,19 +39,11 @@ empty =
 
 fillHullSliceMetrics : HullSlices -> HullSlicesMetrics
 fillHullSliceMetrics hullSlices =
-    let
-        extract : HullSlicesMetrics.HullSlicesWithMetacentre -> HullSlices
-        extract hs =
-            case hs of
-                HullSlicesMetrics.HullSlicesWithMetacentre hs_ ->
-                    hs_
-    in
     hullSlices
         |> HullSlicesMetrics.addAreaAndDisplacement
         |> HullSlicesMetrics.addCentreOfBuoyancy
         |> HullSlicesMetrics.addBlockCoefficient
         |> HullSlicesMetrics.addMetacentre
-        |> extract
         |> Lackenby.initializePrismaticCoefficient
 
 
@@ -80,7 +72,7 @@ setDepth depth hullSlices =
 setPrismaticCoefficient : String -> HullSlices -> HullSlicesMetrics
 setPrismaticCoefficient prismaticCoefficient hullSlices =
     let
-        modifyPrismaticCoeff : HullSlices -> HullSlices
+        modifyPrismaticCoeff : HullSlicesMetrics -> HullSlicesMetrics
         modifyPrismaticCoeff hs =
             case String.toFloat prismaticCoefficient of
                 Nothing ->
