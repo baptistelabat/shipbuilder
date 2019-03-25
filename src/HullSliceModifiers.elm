@@ -8,7 +8,8 @@ module HullSliceModifiers exposing
     , setPrismaticCoefficient
     )
 
-import HullSlices exposing (HullSlices, HullSlicesMetrics)
+import HullSlices exposing (HullSlices)
+import HullSlicesMetrics exposing (HullSlicesMetrics)
 import Lackenby
 import StringValueInput
 
@@ -39,17 +40,17 @@ empty =
 fillHullSliceMetrics : HullSlices -> HullSlicesMetrics
 fillHullSliceMetrics hullSlices =
     let
-        extract : HullSlices.HullSlicesWithMetacentre -> HullSlices
+        extract : HullSlicesMetrics.HullSlicesWithMetacentre -> HullSlices
         extract hs =
             case hs of
-                HullSlices.HullSlicesWithMetacentre hs_ ->
+                HullSlicesMetrics.HullSlicesWithMetacentre hs_ ->
                     hs_
     in
     hullSlices
-        |> HullSlices.addAreaAndDisplacement
-        |> HullSlices.addCentreOfBuoyancy
-        |> HullSlices.addBlockCoefficient
-        |> HullSlices.addMetacentre
+        |> HullSlicesMetrics.addAreaAndDisplacement
+        |> HullSlicesMetrics.addCentreOfBuoyancy
+        |> HullSlicesMetrics.addBlockCoefficient
+        |> HullSlicesMetrics.addMetacentre
         |> extract
         |> Lackenby.initializePrismaticCoefficient
 

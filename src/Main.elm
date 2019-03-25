@@ -55,6 +55,7 @@ import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
 import HullSlices exposing (HullSlices)
+import HullSlicesMetrics exposing (HullSlicesMetrics)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -2666,7 +2667,7 @@ msg2json model action =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
                         intersectBelowSlicesZY =
-                            HullSlices.intersectBelow zAtDraught_ hullSlices
+                            HullSlicesMetrics.intersectBelow zAtDraught_ hullSlices
                     in
                     Just { tag = "export-submodel", data = EncodersDecoders.encodeSubModel intersectBelowSlicesZY }
 

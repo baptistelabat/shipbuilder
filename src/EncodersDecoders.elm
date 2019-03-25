@@ -10,7 +10,8 @@ module EncodersDecoders exposing
 
 import Dict exposing (Dict)
 import HullSliceModifiers exposing (empty)
-import HullSlices exposing (HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList, HullSlices)
+import HullSlices exposing (HullSlice, HullSlices)
+import HullSlicesMetrics exposing (HullSliceAsAreaXYList, HullSliceAsZYList)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -24,7 +25,7 @@ exportHullSlicesAsAreaXYList config hullSlices =
         horizontalSlices =
             List.map
                 (\z ->
-                    HullSlices.extractHorizontalSliceAtZ z hullSlices
+                    HullSlicesMetrics.extractHorizontalSliceAtZ z hullSlices
                 )
                 config.ldecks
     in
