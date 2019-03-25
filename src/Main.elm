@@ -3318,6 +3318,11 @@ viewModeller model =
     let
         viewSlices : ( String, HullSlices ) -> Maybe (Html Msg)
         viewSlices ( hullReference, slices ) =
+            let
+                hullSlicesMetrics : HullSlicesMetrics
+                hullSlicesMetrics =
+                    HullSliceModifiers.fillHullSliceMetrics slices
+            in
             if model.selectedHullReference == Just hullReference then
                 Just <|
                     div
@@ -3330,11 +3335,11 @@ viewModeller model =
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
-                            , AreaCurve.view slices
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 slices.displacement)
-                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 slices.blockCoefficient)
-                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| slices.centreOfBuoyancy)
-                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 <| slices.metacentre)
+                            , AreaCurve.view hullSlicesMetrics
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 hullSlicesMetrics.displacement)
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 hullSlicesMetrics.blockCoefficient)
+                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 hullSlicesMetrics.centreOfBuoyancy)
+                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 hullSlicesMetrics.metacentre)
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"

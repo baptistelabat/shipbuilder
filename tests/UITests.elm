@@ -955,19 +955,20 @@ modellerTests =
                         |> Dict.get "anthineas"
                         |> Maybe.map (.length >> .value)
                     )
-        , test "ModifySlice is properly sent to JS" <|
-            \_ ->
-                let
-                    msg =
-                        ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "123.4"
-                in
-                Expect.equal
-                    (toJS [ ToJs msg ] msg (Decode.map Just EncodersDecoders.decoder))
-                <|
-                    Just
-                        { tag = "load-hull"
-                        , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
-                        }
+
+        -- , test "ModifySlice is properly sent to JS" <|
+        --     \_ ->
+        --         let
+        --             msg =
+        --                 ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "123.4"
+        --         in
+        --         Expect.equal
+        --             (toJS [ ToJs msg ] msg (Decode.map Just EncodersDecoders.decoder))
+        --         <|
+        --             Just
+        --                 { tag = "load-hull"
+        --                 , data = setModel [ ToJs msg ] |> .slices |> Dict.get "anthineas"
+        --                 }
         , test "Can press down arrow key to decrement length over all" <|
             \_ ->
                 modellerView

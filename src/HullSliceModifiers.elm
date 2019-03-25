@@ -49,7 +49,7 @@ fillHullSliceMetrics hullSlices =
 
 setLengthOverAll : String -> HullSlices -> HullSlicesMetrics
 setLengthOverAll loa hullSlices =
-    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa } |> fillHullSliceMetrics
+    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa }
 
 
 setBreadth : String -> HullSlices -> HullSlicesMetrics
@@ -61,12 +61,12 @@ setBreadth breadth hullSlices =
 
 setDraught : String -> HullSlices -> HullSlicesMetrics
 setDraught draught hullSlices =
-    { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught } |> fillHullSliceMetrics
+    { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught }
 
 
 setDepth : String -> HullSlices -> HullSlicesMetrics
 setDepth depth hullSlices =
-    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth } |> fillHullSliceMetrics
+    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth }
 
 
 setPrismaticCoefficient : String -> HullSlices -> HullSlicesMetrics
@@ -85,4 +85,3 @@ setPrismaticCoefficient prismaticCoefficient hullSlices =
         |> fillHullSliceMetrics
         |> modifyPrismaticCoeff
         |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient
-        |> fillHullSliceMetrics
