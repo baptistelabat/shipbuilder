@@ -6,6 +6,7 @@ module HullSliceModifiers exposing
     , setDraught
     , setLengthOverAll
     , setPrismaticCoefficient
+    , toHullSlices
     )
 
 import HullSlices exposing (HullSlices)
@@ -16,30 +17,74 @@ import StringValueInput
 
 empty : HullSlices
 empty =
-    fillHullSliceMetrics
-        { length = StringValueInput.emptyFloat 1
-        , breadth = StringValueInput.emptyFloat 1
-        , depth = StringValueInput.emptyFloat 1
-        , prismaticCoefficient = StringValueInput.emptyFloat 1
-        , xmin = 0
-        , ymin = 0
-        , zmin = 0
-        , slices = []
-        , originalSlicePositions = []
-        , draught = StringValueInput.emptyFloat 1
-        , denormalizedSlices = []
-        , blockCoefficient = 0
-        , centreOfBuoyancy = 0
-        , displacement = 0
-        , metacentre = 0
-        , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
-        , centroidAreaForEachImmersedSlice = []
-        }
+    { length = StringValueInput.emptyFloat 1
+    , breadth = StringValueInput.emptyFloat 1
+    , depth = StringValueInput.emptyFloat 1
+    , prismaticCoefficient = StringValueInput.emptyFloat 1
+    , xmin = 0
+    , ymin = 0
+    , zmin = 0
+    , slices = []
+    , originalSlicePositions = []
+    , draught = StringValueInput.emptyFloat 1
+    , denormalizedSlices = []
+    , blockCoefficient = 0
+    , centreOfBuoyancy = 0
+    , displacement = 0
+    , metacentre = 0
+    , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
+    , centroidAreaForEachImmersedSlice = []
+    }
+
+
+toHullSlicesMetrics : HullSlices -> HullSlicesMetrics
+toHullSlicesMetrics hullSlices =
+    { length = hullSlices.length
+    , breadth = hullSlices.breadth
+    , depth = hullSlices.depth
+    , prismaticCoefficient = hullSlices.prismaticCoefficient
+    , xmin = hullSlices.xmin
+    , ymin = hullSlices.ymin
+    , zmin = hullSlices.zmin
+    , slices = hullSlices.slices
+    , originalSlicePositions = hullSlices.originalSlicePositions
+    , draught = hullSlices.draught
+    , denormalizedSlices = hullSlices.denormalizedSlices
+    , blockCoefficient = hullSlices.blockCoefficient
+    , centreOfBuoyancy = hullSlices.centreOfBuoyancy
+    , displacement = hullSlices.displacement
+    , metacentre = hullSlices.metacentre
+    , hullSlicesBeneathFreeSurface = hullSlices.hullSlicesBeneathFreeSurface
+    , centroidAreaForEachImmersedSlice = hullSlices.centroidAreaForEachImmersedSlice
+    }
+
+
+toHullSlices : HullSlicesMetrics -> HullSlices
+toHullSlices hullSlicesMetrics =
+    { length = hullSlicesMetrics.length
+    , breadth = hullSlicesMetrics.breadth
+    , depth = hullSlicesMetrics.depth
+    , prismaticCoefficient = hullSlicesMetrics.prismaticCoefficient
+    , xmin = hullSlicesMetrics.xmin
+    , ymin = hullSlicesMetrics.ymin
+    , zmin = hullSlicesMetrics.zmin
+    , slices = hullSlicesMetrics.slices
+    , originalSlicePositions = hullSlicesMetrics.originalSlicePositions
+    , draught = hullSlicesMetrics.draught
+    , denormalizedSlices = hullSlicesMetrics.denormalizedSlices
+    , blockCoefficient = hullSlicesMetrics.blockCoefficient
+    , centreOfBuoyancy = hullSlicesMetrics.centreOfBuoyancy
+    , displacement = hullSlicesMetrics.displacement
+    , metacentre = hullSlicesMetrics.metacentre
+    , hullSlicesBeneathFreeSurface = hullSlicesMetrics.hullSlicesBeneathFreeSurface
+    , centroidAreaForEachImmersedSlice = hullSlicesMetrics.centroidAreaForEachImmersedSlice
+    }
 
 
 fillHullSliceMetrics : HullSlices -> HullSlicesMetrics
 fillHullSliceMetrics hullSlices =
     hullSlices
+        |> toHullSlicesMetrics
         |> HullSlicesMetrics.addAreaAndDisplacement
         |> HullSlicesMetrics.addCentreOfBuoyancy
         |> HullSlicesMetrics.addBlockCoefficient
@@ -47,29 +92,28 @@ fillHullSliceMetrics hullSlices =
         |> Lackenby.initializePrismaticCoefficient
 
 
-setLengthOverAll : String -> HullSlices -> HullSlicesMetrics
+setLengthOverAll : String -> HullSlices -> HullSlices
 setLengthOverAll loa hullSlices =
     { hullSlices | length = hullSlices.length |> StringValueInput.setString loa }
 
 
-setBreadth : String -> HullSlices -> HullSlicesMetrics
+setBreadth : String -> HullSlices -> HullSlices
 setBreadth breadth hullSlices =
     { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth }
         |> (\slices -> { slices | ymin = -slices.breadth.value / 2 })
-        |> fillHullSliceMetrics
 
 
-setDraught : String -> HullSlices -> HullSlicesMetrics
+setDraught : String -> HullSlices -> HullSlices
 setDraught draught hullSlices =
     { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught }
 
 
-setDepth : String -> HullSlices -> HullSlicesMetrics
+setDepth : String -> HullSlices -> HullSlices
 setDepth depth hullSlices =
     { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth }
 
 
-setPrismaticCoefficient : String -> HullSlices -> HullSlicesMetrics
+setPrismaticCoefficient : String -> HullSlices -> HullSlices
 setPrismaticCoefficient prismaticCoefficient hullSlices =
     let
         modifyPrismaticCoeff : HullSlicesMetrics -> HullSlicesMetrics
@@ -85,3 +129,4 @@ setPrismaticCoefficient prismaticCoefficient hullSlices =
         |> fillHullSliceMetrics
         |> modifyPrismaticCoeff
         |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient
+        |> toHullSlices

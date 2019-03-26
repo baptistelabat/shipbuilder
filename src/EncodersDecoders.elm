@@ -9,7 +9,7 @@ module EncodersDecoders exposing
     )
 
 import Dict exposing (Dict)
-import HullSliceModifiers exposing (empty)
+import HullSliceModifiers exposing (empty, fillHullSliceMetrics, toHullSlices)
 import HullSlices exposing (HullSlice, HullSlices)
 import HullSlicesMetrics exposing (HullSliceAsAreaXYList, HullSliceAsZYList)
 import Json.Decode as Decode
@@ -25,7 +25,7 @@ exportHullSlicesAsAreaXYList config hullSlices =
         horizontalSlices =
             List.map
                 (\z ->
-                    HullSlicesMetrics.extractHorizontalSliceAtZ z hullSlices
+                    HullSlicesMetrics.extractHorizontalSliceAtZ z <| fillHullSliceMetrics hullSlices
                 )
                 config.ldecks
     in
@@ -57,7 +57,9 @@ decoder =
                 , originalSlicePositions = List.map .x slices
                 , draught = draught
             }
+                |> fillHullSliceMetrics
                 |> Lackenby.initializePrismaticCoefficient
+                |> toHullSlices
 
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
         helper ( depth, maybeDraught ) =
@@ -82,7 +84,6 @@ decoder =
         |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth" 1) Decode.float)
         |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught" 1) Decode.float) Nothing
         |> Decode.andThen helper
-        |> Decode.map HullSliceModifiers.fillHullSliceMetrics
 
 
 dictDecoder : Decode.Decoder (Dict String HullSlices)

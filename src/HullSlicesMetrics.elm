@@ -84,32 +84,9 @@ type HullSlicesWithMetacentre
     = HullSlicesWithMetacentre HullSlicesMetrics
 
 
-toHullSlicesMetrics : HullSlices -> HullSlicesMetrics
-toHullSlicesMetrics hullSlices =
-    { length = hullSlices.length
-    , breadth = hullSlices.breadth
-    , depth = hullSlices.depth
-    , prismaticCoefficient = hullSlices.prismaticCoefficient
-    , xmin = hullSlices.xmin
-    , ymin = hullSlices.ymin
-    , zmin = hullSlices.zmin
-    , slices = hullSlices.slices
-    , originalSlicePositions = hullSlices.originalSlicePositions
-    , draught = hullSlices.draught
-    , denormalizedSlices = hullSlices.denormalizedSlices
-    , blockCoefficient = hullSlices.blockCoefficient
-    , centreOfBuoyancy = hullSlices.centreOfBuoyancy
-    , displacement = hullSlices.displacement
-    , metacentre = hullSlices.metacentre
-    , hullSlicesBeneathFreeSurface = hullSlices.hullSlicesBeneathFreeSurface
-    , centroidAreaForEachImmersedSlice = hullSlices.centroidAreaForEachImmersedSlice
-    }
-
-
-addAreaAndDisplacement : HullSlices -> HullSlicesMetrics
-addAreaAndDisplacement hullSlices =
-    hullSlices
-        |> toHullSlicesMetrics
+addAreaAndDisplacement : HullSlicesMetrics -> HullSlicesMetrics
+addAreaAndDisplacement hullSlicesMetrics =
+    hullSlicesMetrics
         |> addDenormalizedSlices
         |> addHullSlicesBeneathFreeSurface
         |> addCentroidAreaForEachImmersedSlice
@@ -635,7 +612,7 @@ extractY hsXY =
         |> List.map Tuple.second
 
 
-extractHorizontalSliceAtZ : Float -> HullSlices -> HullSliceAsAreaXYList
+extractHorizontalSliceAtZ : Float -> HullSlicesMetrics -> HullSliceAsAreaXYList
 extractHorizontalSliceAtZ z0 hullSlices =
     let
         hullSlicesBelowZ0 =
@@ -803,7 +780,7 @@ denormalizeHullSlice param hs =
     res
 
 
-intersectBelow : Float -> HullSlices -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
+intersectBelow : Float -> HullSlicesMetrics -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
 intersectBelow z0 hullSlices =
     -- CN List HullSlice supposed denormalized !!!
     let
