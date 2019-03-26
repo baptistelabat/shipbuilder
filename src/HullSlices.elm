@@ -19,17 +19,6 @@ type alias HullSlices =
     , slices : List HullSlice
     , originalSlicePositions : List Float
     , draught : StringValueInput.FloatInput
-    , blockCoefficient : Float
-    , displacement : Float
-    , centreOfBuoyancy : Float
-    , metacentre : Float
-    , denormalizedSlices : List HullSlice
-    , hullSlicesBeneathFreeSurface :
-        { xmin : Float
-        , xmax : Float
-        , hullSlices : List HullSliceAsZYList
-        }
-    , centroidAreaForEachImmersedSlice : List HullSliceCentroidAndArea
     }
 
 
@@ -38,26 +27,6 @@ type alias HullSlice =
     , zmin : Float
     , zmax : Float
     , y : List Float
-    }
-
-
-type alias HullSliceAsZYList =
-    { x : Float
-    , zylist : List ( Float, Float )
-    }
-
-
-type alias HullSliceAsAreaXYList =
-    { z : Float
-    , xy : List ( Float, Float )
-    , area : Float
-    }
-
-
-type alias HullSliceCentroidAndArea =
-    { x : Float
-    , centroid : Float
-    , area : Float
     }
 
 

@@ -4,7 +4,7 @@ import CustomFuzzers exposing (..)
 import EncodersDecoders
 import Expect exposing (..)
 import Fuzz
-import HullSliceModifiers exposing (empty)
+import HullSliceModifiers exposing (empty, emptyMetrics)
 import HullSlices exposing (HullSlices)
 import HullSlicesMetrics exposing (HullSlicesMetrics)
 import Interpolate.Cubic
@@ -691,7 +691,7 @@ suite =
             \_ ->
                 let
                     hull =
-                        { empty
+                        { emptyMetrics
                             | xmin = 0
                             , length = 100 |> StringValueInput.asValueIn (StringValueInput.emptyFloat 1)
                             , denormalizedSlices =
@@ -725,7 +725,7 @@ suite =
             \_ ->
                 let
                     hull =
-                        { empty
+                        { emptyMetrics
                             | hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 100, hullSlices = [] }
                             , centroidAreaForEachImmersedSlice =
                                 [ { x = 50, area = 2, centroid = 1 } ]

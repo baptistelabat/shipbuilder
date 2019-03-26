@@ -1,5 +1,6 @@
 module HullSliceModifiers exposing
     ( empty
+    , emptyMetrics
     , fillHullSliceMetrics
     , setBreadth
     , setDepth
@@ -17,6 +18,21 @@ import StringValueInput
 
 empty : HullSlices
 empty =
+    { length = StringValueInput.emptyFloat 1
+    , breadth = StringValueInput.emptyFloat 1
+    , depth = StringValueInput.emptyFloat 1
+    , prismaticCoefficient = StringValueInput.emptyFloat 1
+    , xmin = 0
+    , ymin = 0
+    , zmin = 0
+    , slices = []
+    , originalSlicePositions = []
+    , draught = StringValueInput.emptyFloat 1
+    }
+
+
+emptyMetrics : HullSlicesMetrics
+emptyMetrics =
     { length = StringValueInput.emptyFloat 1
     , breadth = StringValueInput.emptyFloat 1
     , depth = StringValueInput.emptyFloat 1
@@ -49,13 +65,13 @@ toHullSlicesMetrics hullSlices =
     , slices = hullSlices.slices
     , originalSlicePositions = hullSlices.originalSlicePositions
     , draught = hullSlices.draught
-    , denormalizedSlices = hullSlices.denormalizedSlices
-    , blockCoefficient = hullSlices.blockCoefficient
-    , centreOfBuoyancy = hullSlices.centreOfBuoyancy
-    , displacement = hullSlices.displacement
-    , metacentre = hullSlices.metacentre
-    , hullSlicesBeneathFreeSurface = hullSlices.hullSlicesBeneathFreeSurface
-    , centroidAreaForEachImmersedSlice = hullSlices.centroidAreaForEachImmersedSlice
+    , denormalizedSlices = []
+    , blockCoefficient = 0
+    , centreOfBuoyancy = 0
+    , displacement = 0
+    , metacentre = 0
+    , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
+    , centroidAreaForEachImmersedSlice = []
     }
 
 
@@ -71,13 +87,6 @@ toHullSlices hullSlicesMetrics =
     , slices = hullSlicesMetrics.slices
     , originalSlicePositions = hullSlicesMetrics.originalSlicePositions
     , draught = hullSlicesMetrics.draught
-    , denormalizedSlices = hullSlicesMetrics.denormalizedSlices
-    , blockCoefficient = hullSlicesMetrics.blockCoefficient
-    , centreOfBuoyancy = hullSlicesMetrics.centreOfBuoyancy
-    , displacement = hullSlicesMetrics.displacement
-    , metacentre = hullSlicesMetrics.metacentre
-    , hullSlicesBeneathFreeSurface = hullSlicesMetrics.hullSlicesBeneathFreeSurface
-    , centroidAreaForEachImmersedSlice = hullSlicesMetrics.centroidAreaForEachImmersedSlice
     }
 
 

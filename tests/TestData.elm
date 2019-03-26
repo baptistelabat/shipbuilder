@@ -35,7 +35,6 @@ anthineas =
         |> .slices
         |> Dict.get "anthineas"
         |> Maybe.withDefault empty
-        |> HullSliceModifiers.fillHullSliceMetrics
 
 
 mpov : Float -> HullSlices
@@ -75,7 +74,6 @@ cube =
             ]
         , draught = StringValueInput.floatInput 1 2
     }
-        |> HullSliceModifiers.fillHullSliceMetrics
 
 
 toblerone : Float -> Float -> HullSlices.HullSlices
@@ -106,7 +104,6 @@ toblerone breadth depth =
             ]
         , draught = StringValueInput.floatInput 1 2
     }
-        |> HullSliceModifiers.fillHullSliceMetrics
 
 
 valueToIndentedString : Encode.Value -> String
