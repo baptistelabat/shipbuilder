@@ -55,7 +55,7 @@ import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
 import HullSlices exposing (HullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics, getBlockCoefficient, getCenterOfBuoyancy, getDisplacement, getMetacentre)
+import HullSlicesMetrics exposing (HullSlicesMetrics, getBlockCoefficient, getCenterOfBuoyancy, getDisplacement, getMetacentre, getPrismaticCoefficient)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -3331,7 +3331,7 @@ viewModeller model =
                         , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
                         , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
                         , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
-                        , StringValueInput.view slices.prismaticCoefficient <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
+                        , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
