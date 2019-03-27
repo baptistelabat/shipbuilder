@@ -705,33 +705,22 @@ suite =
                     |> Expect.equal
                         [ { x = 0, y = [ 5, 5, 0 ], zmax = -2, zmin = -6 }
                         ]
-
-        -- , test "intersectBelowSlicesZY" <|
-        --     \_ ->
-        --         let
-        --             hull =
-        --                 { emptyMetrics
-        --                     | xmin = 0
-        --                     , length = 100 |> StringValueInput.asValueIn (StringValueInput.emptyFloat 1)
-        --                     , denormalizedSlices =
-        --                         [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
-        --                         , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
-        --                         , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
-        --                         , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
-        --                         , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
-        --                         ]
-        --                 }
-        --         in
-        --         HullSlicesMetrics.intersectBelow -3 hull
-        --             |> Expect.equal
-        --                 { hullSlices =
-        --                     [ { x = 25, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }
-        --                     , { x = 50, zylist = [ ( -3, 5 ), ( 0, 5 ) ] }
-        --                     , { x = 75, zylist = [ ( -3, 5 ), ( -2.5, 5 ) ] }
-        --                     ]
-        --                 , xmax = 100
-        --                 , xmin = 0
-        --                 }
+        , test "intersectBelowSlicesZY" <|
+            \_ ->
+                let
+                    hull =
+                        TestData.cube |> fillHullSliceMetrics
+                in
+                HullSlicesMetrics.intersectBelow -3 hull
+                    |> Expect.equal
+                        { hullSlices =
+                            [ { x = -1, zylist = [ ( 3, 10 ), ( 6.333333333333334, 10 ), ( 9.666666666666668, 10 ), ( 13, 10 ) ] }
+                            , { x = 99, zylist = [ ( 3, 10 ), ( 6.333333333333334, 10 ), ( 9.666666666666668, 10 ), ( 13, 10 ) ] }
+                            , { x = 199, zylist = [ ( 3, 10 ), ( 6.333333333333334, 10 ), ( 9.666666666666668, 10 ), ( 13, 10 ) ] }
+                            ]
+                        , xmax = 199
+                        , xmin = -1
+                        }
         , test "hullVolume" <|
             \_ ->
                 volume [ { x = 0, area = 0 }, { x = 50, area = 2 }, { x = 100, area = 0 } ]
@@ -740,20 +729,14 @@ suite =
             \_ ->
                 volume [ { x = 0, area = 0 }, { x = 25, area = 5 }, { x = 50, area = 30 }, { x = 75, area = 5 }, { x = 100, area = 0 } ]
                     |> Expect.within epsAbsolute 1000.0
-
-        -- , test "centroidAreaForEachImmersedSlice" <|
-        --     \_ ->
-        --         let
-        --             hull =
-        --                 { emptyMetrics
-        --                     | hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 100, hullSlices = [] }
-        --                     , centroidAreaForEachImmersedSlice =
-        --                         [ { x = 50, area = 2, centroid = 1 } ]
-        --                 }
-        --                     |> HullSlicesMetrics.addExtremePoints
-        --         in
-        --         calculateCentroid hull.centroidAreaForEachImmersedSlice
-        --             |> Expect.within epsAbsolute 100.0
+        , test "centroidAreaForEachImmersedSlice" <|
+            \_ ->
+                let
+                    centroidAreaForEachImmersedSlice =
+                        TestData.cube |> fillHullSliceMetrics |> getCentroidAreaForEachImmersedSlice
+                in
+                calculateCentroid centroidAreaForEachImmersedSlice
+                    |> Expect.within epsAbsolute 48000
         , test "Should store original slice positions" <|
             \_ ->
                 TestData.anthineas.originalSlicePositions
