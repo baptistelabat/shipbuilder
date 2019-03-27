@@ -20,8 +20,8 @@ module TestData exposing
 import Color
 import Dict
 import Html exposing (Html)
-import HullSliceModifiers exposing (empty)
-import HullSlices exposing (HullSlices)
+import HullSliceModifiers
+import HullSlices exposing (HullSlices, emptyHullSlices)
 import Json.Encode as Encode
 import Main exposing (..)
 import Math.Vector3 exposing (..)
@@ -34,7 +34,7 @@ anthineas =
     initialModel
         |> .slices
         |> Dict.get "anthineas"
-        |> Maybe.withDefault empty
+        |> Maybe.withDefault emptyHullSlices
 
 
 mpov : Float -> HullSlices
@@ -42,13 +42,13 @@ mpov draught =
     initialModel
         |> .slices
         |> Dict.get "mpov"
-        |> Maybe.withDefault empty
+        |> Maybe.withDefault emptyHullSlices
         |> HullSliceModifiers.setDraught (String.fromFloat draught)
 
 
 cube : HullSlices.HullSlices
 cube =
-    { empty
+    { emptyHullSlices
         | length = StringValueInput.floatInput 1 200
         , breadth = StringValueInput.floatInput 1 20
         , depth = StringValueInput.floatInput 1 10
@@ -78,7 +78,7 @@ cube =
 
 toblerone : Float -> Float -> HullSlices.HullSlices
 toblerone breadth depth =
-    { empty
+    { emptyHullSlices
         | length = StringValueInput.floatInput 1 200
         , breadth = StringValueInput.floatInput 1 breadth
         , depth = StringValueInput.floatInput 1 depth

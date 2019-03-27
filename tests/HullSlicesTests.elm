@@ -4,9 +4,9 @@ import CustomFuzzers exposing (..)
 import EncodersDecoders
 import Expect exposing (..)
 import Fuzz
-import HullSliceModifiers exposing (empty)
-import HullSlices exposing (HullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics, emptyMetrics, fillHullSliceMetrics, getCentroidAreaForEachImmersedSlice)
+import HullSliceModifiers
+import HullSlices exposing (HullSlices, emptyHullSlices)
+import HullSlicesMetrics exposing (HullSlicesMetrics, emptyHullSlicesMetrics, fillHullSliceMetrics, getCentroidAreaForEachImmersedSlice)
 import HullSlicesUtils
     exposing
         ( area
@@ -79,7 +79,7 @@ testSpline x y =
 
 hullSlices : HullSlices
 hullSlices =
-    Result.withDefault empty (Decode.decodeString EncodersDecoders.decoder TestData.hullSliceJson)
+    Result.withDefault emptyHullSlices (Decode.decodeString EncodersDecoders.decoder TestData.hullSliceJson)
 
 
 makeTriplet : a -> b -> c -> ( a, b, c )
@@ -517,7 +517,7 @@ suite =
             [ test "zmin should be scaled properly" <|
                 \_ ->
                     scale
-                        { empty
+                        { emptyHullSlices
                             | breadth = 10 |> StringValueInput.floatInput 1
                             , depth = 5 |> StringValueInput.floatInput 1
                             , draught = 4 |> StringValueInput.floatInput 1
@@ -534,7 +534,7 @@ suite =
             , test "zmax should be scaled properly" <|
                 \_ ->
                     scale
-                        { empty
+                        { emptyHullSlices
                             | breadth = 10 |> StringValueInput.floatInput 1
                             , depth = 5 |> StringValueInput.floatInput 1
                             , draught = 4 |> StringValueInput.floatInput 1
@@ -551,7 +551,7 @@ suite =
             , test "y should be scaled properly" <|
                 \_ ->
                     scale
-                        { empty
+                        { emptyHullSlices
                             | breadth = 10 |> StringValueInput.floatInput 1
                             , depth = 5 |> StringValueInput.floatInput 1
                             , draught = 4 |> StringValueInput.floatInput 1

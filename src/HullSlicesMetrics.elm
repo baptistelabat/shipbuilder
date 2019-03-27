@@ -2,7 +2,7 @@ module HullSlicesMetrics exposing
     ( HullSlicesMetrics
     , addExtremePoints
     , computePrismaticCoefficient
-    , emptyMetrics
+    , emptyHullSlicesMetrics
     , extractHorizontalSliceAtZ
     , fillHullSliceMetrics
     , getBlockCoefficient
@@ -14,6 +14,7 @@ module HullSlicesMetrics exposing
     , getDraught
     , getHullSlicesBeneathFreeSurface
     , getLength
+    , getMasterCrossSection
     , getMetacentre
     , getOriginalSlicePosition
     , getPrismaticCoefficient
@@ -84,8 +85,8 @@ type HullSlicesMetrics
     = HullSlicesMetrics HullSlicesMetrics_
 
 
-emptyMetrics : HullSlicesMetrics
-emptyMetrics =
+emptyHullSlicesMetrics : HullSlicesMetrics
+emptyHullSlicesMetrics =
     HullSlicesMetrics
         { length = StringValueInput.emptyFloat 1
         , breadth = StringValueInput.emptyFloat 1
@@ -573,13 +574,13 @@ computePrismaticCoefficient hullSlicesMetrics =
             else
                 Just <| displacement / (lengthAtWaterline * masterCrossSection.area)
     in
-    getMasterCrossSection hullSlicesMetrics
+    (getMasterCrossSection <| HullSlicesMetrics hullSlicesMetrics)
         |> Maybe.andThen masterCrossSectionArea2PrismaticCoefficient
 
 
-getMasterCrossSection : HullSlicesMetrics_ -> Maybe HullSliceCentroidAndArea
+getMasterCrossSection : HullSlicesMetrics -> Maybe HullSliceCentroidAndArea
 getMasterCrossSection hullSlicesMetrics =
-    List.Extra.maximumBy .area hullSlicesMetrics.centroidAreaForEachImmersedSlice
+    List.Extra.maximumBy .area <| getCentroidAreaForEachImmersedSlice hullSlicesMetrics
 
 
 extractHorizontalSliceAtZ : Float -> HullSlicesMetrics -> HullSliceAsAreaXYList

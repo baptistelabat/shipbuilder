@@ -3,7 +3,6 @@ module LackenbyTests exposing (suite)
 import CustomFuzzers exposing (..)
 import Expect exposing (..)
 import Fuzz
-import HullSliceModifiers exposing (empty)
 import HullSlices exposing (HullSlices)
 import HullSlicesMetrics exposing (HullSlicesMetrics, fillHullSliceMetrics)
 import HullSlicesUtils exposing (integrate)
@@ -55,7 +54,7 @@ suite =
                     |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6 * 2))
         , test "Can get master cross section of Anthineas" <|
             \_ ->
-                Lackenby.getMasterCrossSection (TestData.anthineas |> fillHullSliceMetrics)
+                HullSlicesMetrics.getMasterCrossSection (TestData.anthineas |> fillHullSliceMetrics)
                     |> Maybe.map .x
                     |> Maybe.withDefault 999999
                     |> Expect.within epsAbsolute 9.133333333

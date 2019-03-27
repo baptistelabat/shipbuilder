@@ -9,8 +9,7 @@ module EncodersDecoders exposing
     )
 
 import Dict exposing (Dict)
-import HullSliceModifiers exposing (empty, toHullSlices)
-import HullSlices exposing (HullSlice, HullSlices)
+import HullSlices exposing (HullSlice, HullSlices, emptyHullSlices)
 import HullSlicesMetrics exposing (fillHullSliceMetrics)
 import HullSlicesUtils exposing (HullSliceAsAreaXYList, HullSliceAsZYList)
 import Json.Decode as Decode
@@ -47,7 +46,7 @@ decoder =
     let
         hullSlicesConstructor : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> HullSlices
         hullSlicesConstructor length breadth depth xmin ymin zmin slices draught =
-            { empty
+            { emptyHullSlices
                 | length = length
                 , breadth = breadth
                 , depth = depth
@@ -58,8 +57,6 @@ decoder =
                 , originalSlicePositions = List.map .x slices
                 , draught = draught
             }
-                |> fillHullSliceMetrics
-                |> toHullSlices
 
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
         helper ( depth, maybeDraught ) =

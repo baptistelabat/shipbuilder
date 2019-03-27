@@ -55,7 +55,16 @@ import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
 import HullSlices exposing (HullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics, getBlockCoefficient, getCenterOfBuoyancy, getDisplacement, getMetacentre, getPrismaticCoefficient)
+import HullSlicesMetrics
+    exposing
+        ( HullSlicesMetrics
+        , fillHullSliceMetrics
+        , getBlockCoefficient
+        , getCenterOfBuoyancy
+        , getDisplacement
+        , getMetacentre
+        , getPrismaticCoefficient
+        )
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -2667,7 +2676,7 @@ msg2json model action =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
                         intersectBelowSlicesZY =
-                            HullSlicesMetrics.intersectBelow zAtDraught_ <| HullSlicesMetrics.fillHullSliceMetrics hullSlices
+                            HullSlicesMetrics.intersectBelow zAtDraught_ <| fillHullSliceMetrics hullSlices
                     in
                     Just { tag = "export-submodel", data = EncodersDecoders.encodeSubModel intersectBelowSlicesZY }
 

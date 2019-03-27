@@ -1,6 +1,5 @@
 module Lackenby exposing
-    ( getMasterCrossSection
-    , lackenby
+    ( lackenby
     , modifyHullSlicesToMatchTargetPrismaticCoefficient
     , setPrismaticCoefficientAndClamp
     )
@@ -67,6 +66,7 @@ import HullSlicesMetrics
         , getCentroidAreaForEachImmersedSlice
         , getHullSlicesBeneathFreeSurface
         , getLength
+        , getMasterCrossSection
         , getPrismaticCoefficient
         , getSlices
         , getXmin
@@ -74,11 +74,6 @@ import HullSlicesMetrics
 import HullSlicesUtils exposing (HullSliceCentroidAndArea, integrate)
 import List.Extra
 import StringValueInput
-
-
-getMasterCrossSection : HullSlicesMetrics -> Maybe HullSliceCentroidAndArea
-getMasterCrossSection hullSlicesMetrics =
-    List.Extra.maximumBy .area <| getCentroidAreaForEachImmersedSlice hullSlicesMetrics
 
 
 shiftAreaCurve : Float -> List ( Float, Float ) -> List ( Float, Float )
