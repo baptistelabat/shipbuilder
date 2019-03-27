@@ -55,7 +55,7 @@ import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
 import HullSlices exposing (HullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics)
+import HullSlicesMetrics exposing (HullSlicesMetrics, getBlockCoefficient, getCenterOfBuoyancy, getDisplacement, getMetacentre)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -3336,10 +3336,10 @@ viewModeller model =
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
                             , AreaCurve.view hullSlicesMetrics
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 hullSlicesMetrics.displacement)
-                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 hullSlicesMetrics.blockCoefficient)
-                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 hullSlicesMetrics.centreOfBuoyancy)
-                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 hullSlicesMetrics.metacentre)
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 <| getDisplacement hullSlicesMetrics)
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 <| getBlockCoefficient hullSlicesMetrics)
+                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| getCenterOfBuoyancy hullSlicesMetrics)
+                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 <| getMetacentre hullSlicesMetrics)
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"

@@ -50,8 +50,8 @@ suite =
     describe "Lackenby"
         [ test "Can calculate prismatic coefficient" <|
             \_ ->
-                HullSlicesMetrics.computePrismaticCoefficient (TestData.mpov 1 |> fillHullSliceMetrics)
-                    |> Maybe.withDefault 999999
+                HullSlicesMetrics.getPrismaticCoefficient (TestData.mpov 1 |> fillHullSliceMetrics)
+                    |> .value
                     |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6 * 2))
         , test "Can get master cross section of Anthineas" <|
             \_ ->

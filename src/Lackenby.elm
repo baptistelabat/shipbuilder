@@ -61,7 +61,16 @@ B_{\alpha}(z) \underset{def}{=} (1-\delta B_{\alpha})\cdot B(z), \alpha<=0
 -}
 
 import HullSlices exposing (HullSlice, HullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics)
+import HullSlicesMetrics
+    exposing
+        ( HullSlicesMetrics
+        , getCentroidAreaForEachImmersedSlice
+        , getHullSlicesBeneathFreeSurface
+        , getLength
+        , getPrismaticCoefficient
+        , getSlices
+        , getXmin
+        )
 import HullSlicesUtils exposing (HullSliceCentroidAndArea, integrate)
 import List.Extra
 import StringValueInput
@@ -69,7 +78,7 @@ import StringValueInput
 
 getMasterCrossSection : HullSlicesMetrics -> Maybe HullSliceCentroidAndArea
 getMasterCrossSection hullSlicesMetrics =
-    List.Extra.maximumBy .area hullSlicesMetrics.centroidAreaForEachImmersedSlice
+    List.Extra.maximumBy .area <| getCentroidAreaForEachImmersedSlice hullSlicesMetrics
 
 
 shiftAreaCurve : Float -> List ( Float, Float ) -> List ( Float, Float )
@@ -151,11 +160,11 @@ setPrismaticCoefficientAndClamp prismaticCoefficient hullSlicesMetrics =
             let
                 lengthAtWaterline : Float
                 lengthAtWaterline =
-                    hullSlicesMetrics.hullSlicesBeneathFreeSurface.xmax - hullSlicesMetrics.hullSlicesBeneathFreeSurface.xmin
+                    (getHullSlicesBeneathFreeSurface hullSlicesMetrics |> .xmax) - (getHullSlicesBeneathFreeSurface hullSlicesMetrics |> .xmin)
 
                 areaCurve : List ( Float, Float )
                 areaCurve =
-                    hullSlicesMetrics.centroidAreaForEachImmersedSlice
+                    getCentroidAreaForEachImmersedSlice hullSlicesMetrics
                         |> List.map (\c -> ( c.x, c.area ))
             in
             clampPrismaticCoefficient prismaticCoefficient lengthAtWaterline masterCrossSectionArea.area areaCurve
@@ -171,11 +180,11 @@ lackenbyHS targetPrismaticCoefficient hullSlicesMetrics =
             let
                 lengthAtWaterline : Float
                 lengthAtWaterline =
-                    hullSlicesMetrics.hullSlicesBeneathFreeSurface.xmax - hullSlicesMetrics.hullSlicesBeneathFreeSurface.xmin
+                    (getHullSlicesBeneathFreeSurface hullSlicesMetrics |> .xmax) - (getHullSlicesBeneathFreeSurface hullSlicesMetrics |> .xmin)
 
                 areaCurve : List ( Float, Float )
                 areaCurve =
-                    hullSlicesMetrics.centroidAreaForEachImmersedSlice
+                    getCentroidAreaForEachImmersedSlice hullSlicesMetrics
                         |> List.map (\c -> ( c.x, c.area ))
             in
             lackenby targetPrismaticCoefficient lengthAtWaterline masterCrossSectionArea.area areaCurve
@@ -253,35 +262,35 @@ modifyLongitudinalPositionOfEachSlice hullSlices hullSlicesMetrics newXPositions
     let
         normalize : Float -> Float
         normalize x =
-            (x - hullSlicesMetrics.xmin) / hullSlicesMetrics.length.value
+            (x - getXmin hullSlicesMetrics) / (getLength hullSlicesMetrics |> .value)
 
         xminOfAreaCurve : Float
         xminOfAreaCurve =
-            hullSlicesMetrics.centroidAreaForEachImmersedSlice
+            getCentroidAreaForEachImmersedSlice hullSlicesMetrics
                 |> List.map (.x >> normalize)
                 |> List.minimum
-                |> Maybe.withDefault hullSlicesMetrics.xmin
+                |> (Maybe.withDefault <| getXmin hullSlicesMetrics)
                 |> StringValueInput.round_n 4
 
         xmaxOfAreaCurve : Float
         xmaxOfAreaCurve =
-            hullSlicesMetrics.centroidAreaForEachImmersedSlice
+            getCentroidAreaForEachImmersedSlice hullSlicesMetrics
                 |> List.map (.x >> normalize)
                 |> List.maximum
-                |> Maybe.withDefault (hullSlicesMetrics.xmin + hullSlicesMetrics.length.value)
+                |> Maybe.withDefault (getXmin hullSlicesMetrics + (getLength hullSlicesMetrics |> .value))
                 |> StringValueInput.round_n 4
 
         slicesBeforeXminOfAreaCurve : List HullSlice
         slicesBeforeXminOfAreaCurve =
-            List.filter (\slice -> StringValueInput.round_n 4 slice.x < xminOfAreaCurve) hullSlicesMetrics.slices
+            List.filter (\slice -> StringValueInput.round_n 4 slice.x < xminOfAreaCurve) <| getSlices hullSlicesMetrics
 
         slicesAfterXmaxOfAreaCurve : List HullSlice
         slicesAfterXmaxOfAreaCurve =
-            List.filter (\slice -> StringValueInput.round_n 4 slice.x > xmaxOfAreaCurve) hullSlicesMetrics.slices
+            List.filter (\slice -> StringValueInput.round_n 4 slice.x > xmaxOfAreaCurve) <| getSlices hullSlicesMetrics
 
         slicesToShift : List HullSlice
         slicesToShift =
-            List.filter (\slice -> (StringValueInput.round_n 4 slice.x >= xminOfAreaCurve) && (StringValueInput.round_n 4 slice.x <= xmaxOfAreaCurve)) hullSlicesMetrics.slices
+            List.filter (\slice -> (StringValueInput.round_n 4 slice.x >= xminOfAreaCurve) && (StringValueInput.round_n 4 slice.x <= xmaxOfAreaCurve)) <| getSlices hullSlicesMetrics
 
         shiftSliceLongitudinalPosition : HullSlice -> Float -> HullSlice
         shiftSliceLongitudinalPosition slice x =
@@ -325,7 +334,7 @@ modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlice
         clampedPrismaticCoefficient =
             case String.toFloat prismaticCoefficient of
                 Nothing ->
-                    hullSlicesMetrics.prismaticCoefficient.value
+                    getPrismaticCoefficient hullSlicesMetrics |> .value
 
                 Just pc ->
                     setPrismaticCoefficientAndClamp pc hullSlicesMetrics

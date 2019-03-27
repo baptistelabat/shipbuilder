@@ -2,8 +2,25 @@ module HullSlicesMetrics exposing
     ( HullSlicesMetrics
     , addExtremePoints
     , computePrismaticCoefficient
+    , emptyMetrics
     , extractHorizontalSliceAtZ
     , fillHullSliceMetrics
+    , getBlockCoefficient
+    , getBreadth
+    , getCenterOfBuoyancy
+    , getCentroidAreaForEachImmersedSlice
+    , getDepth
+    , getDisplacement
+    , getDraught
+    , getHullSlicesBeneathFreeSurface
+    , getLength
+    , getMetacentre
+    , getOriginalSlicePosition
+    , getPrismaticCoefficient
+    , getSlices
+    , getXmin
+    , getYmin
+    , getZmin
     , initializePrismaticCoefficient
     , intersectBelow
     )
@@ -38,7 +55,7 @@ import List.Extra
 import StringValueInput
 
 
-type alias HullSlicesMetrics =
+type alias HullSlicesMetrics_ =
     { length : StringValueInput.FloatInput
     , breadth : StringValueInput.FloatInput
     , depth : StringValueInput.FloatInput
@@ -63,6 +80,245 @@ type alias HullSlicesMetrics =
     }
 
 
+type HullSlicesMetrics
+    = HullSlicesMetrics HullSlicesMetrics_
+
+
+emptyMetrics : HullSlicesMetrics
+emptyMetrics =
+    HullSlicesMetrics
+        { length = StringValueInput.emptyFloat 1
+        , breadth = StringValueInput.emptyFloat 1
+        , depth = StringValueInput.emptyFloat 1
+        , prismaticCoefficient = StringValueInput.emptyFloat 1
+        , xmin = 0
+        , ymin = 0
+        , zmin = 0
+        , slices = []
+        , originalSlicePositions = []
+        , draught = StringValueInput.emptyFloat 1
+        , denormalizedSlices = []
+        , blockCoefficient = 0
+        , centreOfBuoyancy = 0
+        , displacement = 0
+        , metacentre = 0
+        , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
+        , centroidAreaForEachImmersedSlice = []
+        }
+
+
+
+-- GETTERS
+
+
+getBlockCoefficient : HullSlicesMetrics -> Float
+getBlockCoefficient hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.blockCoefficient
+
+
+getDisplacement : HullSlicesMetrics -> Float
+getDisplacement hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.displacement
+
+
+getPrismaticCoefficient : HullSlicesMetrics -> StringValueInput.FloatInput
+getPrismaticCoefficient hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.prismaticCoefficient
+
+
+getCenterOfBuoyancy : HullSlicesMetrics -> Float
+getCenterOfBuoyancy hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.centreOfBuoyancy
+
+
+getMetacentre : HullSlicesMetrics -> Float
+getMetacentre hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.metacentre
+
+
+getXmin : HullSlicesMetrics -> Float
+getXmin hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.xmin
+
+
+getYmin : HullSlicesMetrics -> Float
+getYmin hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.ymin
+
+
+getZmin : HullSlicesMetrics -> Float
+getZmin hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.zmin
+
+
+getLength : HullSlicesMetrics -> StringValueInput.FloatInput
+getLength hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.length
+
+
+getBreadth : HullSlicesMetrics -> StringValueInput.FloatInput
+getBreadth hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.breadth
+
+
+getDepth : HullSlicesMetrics -> StringValueInput.FloatInput
+getDepth hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.depth
+
+
+getDraught : HullSlicesMetrics -> StringValueInput.FloatInput
+getDraught hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.draught
+
+
+getSlices : HullSlicesMetrics -> List HullSlice
+getSlices hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.slices
+
+
+getOriginalSlicePosition : HullSlicesMetrics -> List Float
+getOriginalSlicePosition hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.originalSlicePositions
+
+
+getDenormalizedSlices : HullSlicesMetrics -> List HullSlice
+getDenormalizedSlices hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.denormalizedSlices
+
+
+getCentroidAreaForEachImmersedSlice : HullSlicesMetrics -> List HullSliceCentroidAndArea
+getCentroidAreaForEachImmersedSlice hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.centroidAreaForEachImmersedSlice
+
+
+getHullSlicesBeneathFreeSurface : HullSlicesMetrics -> { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
+getHullSlicesBeneathFreeSurface hullSlicesMetrics =
+    let
+        hs : HullSlicesMetrics_
+        hs =
+            case hullSlicesMetrics of
+                HullSlicesMetrics hs_ ->
+                    hs_
+    in
+    hs.hullSlicesBeneathFreeSurface
+
+
+
+-- FILLING METRICS
+
+
 fillHullSliceMetrics : HullSlices -> HullSlicesMetrics
 fillHullSliceMetrics hullSlices =
     hullSlices
@@ -72,9 +328,10 @@ fillHullSliceMetrics hullSlices =
         |> addBlockCoefficient
         |> addMetacentre
         |> initializePrismaticCoefficient
+        |> HullSlicesMetrics
 
 
-toHullSlicesMetrics : HullSlices -> HullSlicesMetrics
+toHullSlicesMetrics : HullSlices -> HullSlicesMetrics_
 toHullSlicesMetrics hullSlices =
     { length = hullSlices.length
     , breadth = hullSlices.breadth
@@ -96,7 +353,7 @@ toHullSlicesMetrics hullSlices =
     }
 
 
-addAreaAndDisplacement : HullSlicesMetrics -> HullSlicesMetrics
+addAreaAndDisplacement : HullSlicesMetrics_ -> HullSlicesMetrics_
 addAreaAndDisplacement hullSlicesMetrics =
     hullSlicesMetrics
         |> addDenormalizedSlices
@@ -106,7 +363,7 @@ addAreaAndDisplacement hullSlicesMetrics =
         |> addDisplacement
 
 
-addDenormalizedSlices : HullSlicesMetrics -> HullSlicesMetrics
+addDenormalizedSlices : HullSlicesMetrics_ -> HullSlicesMetrics_
 addDenormalizedSlices hullSlicesMetrics =
     let
         denormalizedSlices : List HullSlice
@@ -118,7 +375,7 @@ addDenormalizedSlices hullSlicesMetrics =
     { hullSlicesMetrics | denormalizedSlices = denormalizedSlices }
 
 
-addHullSlicesBeneathFreeSurface : HullSlicesMetrics -> HullSlicesMetrics
+addHullSlicesBeneathFreeSurface : HullSlicesMetrics_ -> HullSlicesMetrics_
 addHullSlicesBeneathFreeSurface hullSlicesMetrics =
     let
         zAtDraught : Float
@@ -127,12 +384,12 @@ addHullSlicesBeneathFreeSurface hullSlicesMetrics =
 
         hullSlicesBeneathFreeSurface : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList }
         hullSlicesBeneathFreeSurface =
-            intersectBelow zAtDraught hullSlicesMetrics
+            intersectBelow zAtDraught <| HullSlicesMetrics hullSlicesMetrics
     in
     { hullSlicesMetrics | hullSlicesBeneathFreeSurface = hullSlicesBeneathFreeSurface }
 
 
-addCentroidAreaForEachImmersedSlice : HullSlicesMetrics -> HullSlicesMetrics
+addCentroidAreaForEachImmersedSlice : HullSlicesMetrics_ -> HullSlicesMetrics_
 addCentroidAreaForEachImmersedSlice hullSlicesMetrics =
     let
         integrateTrapezoidMetricOnSlices : (( Float, Float ) -> ( Float, Float ) -> Float) -> List ( Float, Float ) -> Float
@@ -162,7 +419,7 @@ addCentroidAreaForEachImmersedSlice hullSlicesMetrics =
     { hullSlicesMetrics | centroidAreaForEachImmersedSlice = List.map calculateCentroidArea hullSlicesMetrics.hullSlicesBeneathFreeSurface.hullSlices }
 
 
-addExtremePoints : HullSlicesMetrics -> HullSlicesMetrics
+addExtremePoints : HullSlicesMetrics_ -> HullSlicesMetrics_
 addExtremePoints hullSlicesMetrics =
     let
         xmin =
@@ -200,12 +457,12 @@ addExtremePoints hullSlicesMetrics =
     { hullSlicesMetrics | centroidAreaForEachImmersedSlice = centroidAndAreaWithEndpointsAtZero }
 
 
-addDisplacement : HullSlicesMetrics -> HullSlicesMetrics
+addDisplacement : HullSlicesMetrics_ -> HullSlicesMetrics_
 addDisplacement hullSlicesMetrics =
     { hullSlicesMetrics | displacement = volume hullSlicesMetrics.centroidAreaForEachImmersedSlice }
 
 
-addCentreOfBuoyancy : HullSlicesMetrics -> HullSlicesMetrics
+addCentreOfBuoyancy : HullSlicesMetrics_ -> HullSlicesMetrics_
 addCentreOfBuoyancy hullSlicesMetrics =
     let
         hullCentroid : Float
@@ -223,7 +480,7 @@ addCentreOfBuoyancy hullSlicesMetrics =
     { hullSlicesMetrics | centreOfBuoyancy = centreOfBuoyancy }
 
 
-addBlockCoefficient : HullSlicesMetrics -> HullSlicesMetrics
+addBlockCoefficient : HullSlicesMetrics_ -> HullSlicesMetrics_
 addBlockCoefficient hullSlicesMetrics =
     let
         blockVolume_ : Float
@@ -242,7 +499,7 @@ addBlockCoefficient hullSlicesMetrics =
     { hullSlicesMetrics | blockCoefficient = blockCoefficient }
 
 
-addMetacentre : HullSlicesMetrics -> HullSlicesMetrics
+addMetacentre : HullSlicesMetrics_ -> HullSlicesMetrics_
 addMetacentre hullSlicesMetrics =
     let
         zAtDraught : Float
@@ -251,7 +508,7 @@ addMetacentre hullSlicesMetrics =
 
         horizontalHullSliceAtDraught : HullSliceAsAreaXYList
         horizontalHullSliceAtDraught =
-            extractHorizontalSliceAtZ zAtDraught hullSlicesMetrics
+            extractHorizontalSliceAtZ zAtDraught <| HullSlicesMetrics hullSlicesMetrics
 
         inertialMoment_ : Float
         inertialMoment_ =
@@ -272,7 +529,7 @@ addMetacentre hullSlicesMetrics =
     { hullSlicesMetrics | metacentre = metacentre }
 
 
-initializePrismaticCoefficient : HullSlicesMetrics -> HullSlicesMetrics
+initializePrismaticCoefficient : HullSlicesMetrics_ -> HullSlicesMetrics_
 initializePrismaticCoefficient hullSlicesMetrics =
     let
         p : StringValueInput.FloatInput
@@ -297,7 +554,7 @@ initializePrismaticCoefficient hullSlicesMetrics =
             { hullSlicesMetrics | prismaticCoefficient = coeff |> StringValueInput.round_n 2 |> StringValueInput.asFloatIn p }
 
 
-computePrismaticCoefficient : HullSlicesMetrics -> Maybe Float
+computePrismaticCoefficient : HullSlicesMetrics_ -> Maybe Float
 computePrismaticCoefficient hullSlicesMetrics =
     let
         displacement : Float
@@ -320,7 +577,7 @@ computePrismaticCoefficient hullSlicesMetrics =
         |> Maybe.andThen masterCrossSectionArea2PrismaticCoefficient
 
 
-getMasterCrossSection : HullSlicesMetrics -> Maybe HullSliceCentroidAndArea
+getMasterCrossSection : HullSlicesMetrics_ -> Maybe HullSliceCentroidAndArea
 getMasterCrossSection hullSlicesMetrics =
     List.Extra.maximumBy .area hullSlicesMetrics.centroidAreaForEachImmersedSlice
 
@@ -350,7 +607,7 @@ intersectBelow z0 hullSlices =
     let
         -- filter HullSlice with zmax <= z0
         filterHS =
-            List.filter (\u -> u.zmax > z0 && not (List.isEmpty u.y)) hullSlices.denormalizedSlices
+            List.filter (\u -> u.zmax > z0 && not (List.isEmpty u.y)) <| getDenormalizedSlices hullSlices
 
         toXY_ : HullSlice -> HullSliceAsZYList
         toXY_ hs =
@@ -471,7 +728,7 @@ intersectBelow z0 hullSlices =
                     xmin_
 
         xmin =
-            xMinAtZ hullSlices.xmin hullSlices.denormalizedSlices
+            (xMinAtZ <| getXmin hullSlices) <| getDenormalizedSlices hullSlices
 
         xMaxAtZ : Float -> List HullSlice -> Float
         xMaxAtZ xmax_ listHS_ =
@@ -487,6 +744,6 @@ intersectBelow z0 hullSlices =
                     xmax_
 
         xmax =
-            xMaxAtZ (hullSlices.xmin + hullSlices.length.value) (List.reverse hullSlices.denormalizedSlices)
+            xMaxAtZ (getXmin hullSlices + (getLength hullSlices |> .value)) (List.reverse <| getDenormalizedSlices hullSlices)
     in
     { xmin = xmin, xmax = xmax, hullSlices = lhsXY_AtZ }

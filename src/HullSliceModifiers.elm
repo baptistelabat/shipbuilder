@@ -1,6 +1,5 @@
 module HullSliceModifiers exposing
     ( empty
-    , emptyMetrics
     , setBreadth
     , setDepth
     , setDraught
@@ -10,7 +9,22 @@ module HullSliceModifiers exposing
     )
 
 import HullSlices exposing (HullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics)
+import HullSlicesMetrics
+    exposing
+        ( HullSlicesMetrics
+        , getBreadth
+        , getCentroidAreaForEachImmersedSlice
+        , getDepth
+        , getDraught
+        , getHullSlicesBeneathFreeSurface
+        , getLength
+        , getOriginalSlicePosition
+        , getPrismaticCoefficient
+        , getSlices
+        , getXmin
+        , getYmin
+        , getZmin
+        )
 import Lackenby
 import StringValueInput
 
@@ -30,62 +44,18 @@ empty =
     }
 
 
-emptyMetrics : HullSlicesMetrics
-emptyMetrics =
-    { length = StringValueInput.emptyFloat 1
-    , breadth = StringValueInput.emptyFloat 1
-    , depth = StringValueInput.emptyFloat 1
-    , prismaticCoefficient = StringValueInput.emptyFloat 1
-    , xmin = 0
-    , ymin = 0
-    , zmin = 0
-    , slices = []
-    , originalSlicePositions = []
-    , draught = StringValueInput.emptyFloat 1
-    , denormalizedSlices = []
-    , blockCoefficient = 0
-    , centreOfBuoyancy = 0
-    , displacement = 0
-    , metacentre = 0
-    , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
-    , centroidAreaForEachImmersedSlice = []
-    }
-
-
-toHullSlicesMetrics : HullSlices -> HullSlicesMetrics
-toHullSlicesMetrics hullSlices =
-    { length = hullSlices.length
-    , breadth = hullSlices.breadth
-    , depth = hullSlices.depth
-    , prismaticCoefficient = hullSlices.prismaticCoefficient
-    , xmin = hullSlices.xmin
-    , ymin = hullSlices.ymin
-    , zmin = hullSlices.zmin
-    , slices = hullSlices.slices
-    , originalSlicePositions = hullSlices.originalSlicePositions
-    , draught = hullSlices.draught
-    , denormalizedSlices = []
-    , blockCoefficient = 0
-    , centreOfBuoyancy = 0
-    , displacement = 0
-    , metacentre = 0
-    , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
-    , centroidAreaForEachImmersedSlice = []
-    }
-
-
 toHullSlices : HullSlicesMetrics -> HullSlices
 toHullSlices hullSlicesMetrics =
-    { length = hullSlicesMetrics.length
-    , breadth = hullSlicesMetrics.breadth
-    , depth = hullSlicesMetrics.depth
-    , prismaticCoefficient = hullSlicesMetrics.prismaticCoefficient
-    , xmin = hullSlicesMetrics.xmin
-    , ymin = hullSlicesMetrics.ymin
-    , zmin = hullSlicesMetrics.zmin
-    , slices = hullSlicesMetrics.slices
-    , originalSlicePositions = hullSlicesMetrics.originalSlicePositions
-    , draught = hullSlicesMetrics.draught
+    { length = getLength hullSlicesMetrics
+    , breadth = getBreadth hullSlicesMetrics
+    , depth = getDepth hullSlicesMetrics
+    , prismaticCoefficient = getPrismaticCoefficient hullSlicesMetrics
+    , xmin = getXmin hullSlicesMetrics
+    , ymin = getYmin hullSlicesMetrics
+    , zmin = getZmin hullSlicesMetrics
+    , slices = getSlices hullSlicesMetrics
+    , originalSlicePositions = getOriginalSlicePosition hullSlicesMetrics
+    , draught = getDraught hullSlicesMetrics
     }
 
 
