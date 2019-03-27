@@ -6,7 +6,7 @@ import Expect exposing (..)
 import Fuzz
 import HullSliceModifiers exposing (empty, emptyMetrics)
 import HullSlices exposing (HullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics)
+import HullSlicesMetrics exposing (HullSlicesMetrics, fillHullSliceMetrics)
 import Interpolate.Cubic
 import Json.Decode as Decode
 import StringValueInput
@@ -161,7 +161,7 @@ suite =
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
-                    Expect.equal [ 0, 0.12366816963835184, 0 ] (hullSlices |> HullSliceModifiers.setBreadth "10" |> HullSliceModifiers.fillHullSliceMetrics |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
+                    Expect.equal [ 0, 0.12366816963835184, 0 ] (hullSlices |> HullSliceModifiers.setBreadth "10" |> fillHullSliceMetrics |> .centroidAreaForEachImmersedSlice |> List.map (.area >> (*) 2))
             , describe "Clipper" <|
                 [ test "Clip one interval a--zmin=====zmax--b" <|
                     \_ ->

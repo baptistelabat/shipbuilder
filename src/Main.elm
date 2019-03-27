@@ -2667,7 +2667,7 @@ msg2json model action =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
                         intersectBelowSlicesZY =
-                            HullSlicesMetrics.intersectBelow zAtDraught_ <| HullSliceModifiers.fillHullSliceMetrics hullSlices
+                            HullSlicesMetrics.intersectBelow zAtDraught_ <| HullSlicesMetrics.fillHullSliceMetrics hullSlices
                     in
                     Just { tag = "export-submodel", data = EncodersDecoders.encodeSubModel intersectBelowSlicesZY }
 
@@ -3321,7 +3321,7 @@ viewModeller model =
             let
                 hullSlicesMetrics : HullSlicesMetrics
                 hullSlicesMetrics =
-                    HullSliceModifiers.fillHullSliceMetrics slices
+                    HullSlicesMetrics.fillHullSliceMetrics slices
             in
             if model.selectedHullReference == Just hullReference then
                 Just <|

@@ -9,9 +9,9 @@ module EncodersDecoders exposing
     )
 
 import Dict exposing (Dict)
-import HullSliceModifiers exposing (empty, fillHullSliceMetrics, toHullSlices)
+import HullSliceModifiers exposing (empty, toHullSlices)
 import HullSlices exposing (HullSlice, HullSlices)
-import HullSlicesMetrics exposing (HullSliceAsAreaXYList, HullSliceAsZYList)
+import HullSlicesMetrics exposing (HullSliceAsAreaXYList, HullSliceAsZYList, fillHullSliceMetrics)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -58,7 +58,6 @@ decoder =
                 , draught = draught
             }
                 |> fillHullSliceMetrics
-                |> Lackenby.initializePrismaticCoefficient
                 |> toHullSlices
 
         helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices

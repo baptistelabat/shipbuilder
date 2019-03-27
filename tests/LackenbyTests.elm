@@ -5,7 +5,7 @@ import Expect exposing (..)
 import Fuzz
 import HullSliceModifiers exposing (empty)
 import HullSlices exposing (HullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics)
+import HullSlicesMetrics exposing (HullSlicesMetrics, fillHullSliceMetrics)
 import Lackenby
 import StringValueInput
 import Test exposing (..)
@@ -49,12 +49,12 @@ suite =
     describe "Lackenby"
         [ test "Can calculate prismatic coefficient" <|
             \_ ->
-                Lackenby.computePrismaticCoefficient (TestData.mpov 1 |> HullSliceModifiers.fillHullSliceMetrics |> HullSlicesMetrics.addAreaAndDisplacement)
+                HullSlicesMetrics.computePrismaticCoefficient (TestData.mpov 1 |> fillHullSliceMetrics |> HullSlicesMetrics.addAreaAndDisplacement)
                     |> Maybe.withDefault 999999
                     |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6 * 2))
         , test "Can get master cross section of Anthineas" <|
             \_ ->
-                Lackenby.getMasterCrossSection (TestData.anthineas |> HullSliceModifiers.fillHullSliceMetrics |> HullSlicesMetrics.addAreaAndDisplacement)
+                Lackenby.getMasterCrossSection (TestData.anthineas |> fillHullSliceMetrics |> HullSlicesMetrics.addAreaAndDisplacement)
                     |> Maybe.map .x
                     |> Maybe.withDefault 999999
                     |> Expect.within epsAbsolute 9.133333333

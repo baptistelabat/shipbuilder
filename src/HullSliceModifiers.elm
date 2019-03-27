@@ -1,7 +1,6 @@
 module HullSliceModifiers exposing
     ( empty
     , emptyMetrics
-    , fillHullSliceMetrics
     , setBreadth
     , setDepth
     , setDraught
@@ -90,17 +89,6 @@ toHullSlices hullSlicesMetrics =
     }
 
 
-fillHullSliceMetrics : HullSlices -> HullSlicesMetrics
-fillHullSliceMetrics hullSlices =
-    hullSlices
-        |> toHullSlicesMetrics
-        |> HullSlicesMetrics.addAreaAndDisplacement
-        |> HullSlicesMetrics.addCentreOfBuoyancy
-        |> HullSlicesMetrics.addBlockCoefficient
-        |> HullSlicesMetrics.addMetacentre
-        |> Lackenby.initializePrismaticCoefficient
-
-
 setLengthOverAll : String -> HullSlices -> HullSlices
 setLengthOverAll loa hullSlices =
     { hullSlices | length = hullSlices.length |> StringValueInput.setString loa }
@@ -135,7 +123,7 @@ setPrismaticCoefficient prismaticCoefficient hullSlices =
                     Lackenby.setPrismaticCoefficientAndClamp pc hs
     in
     hullSlices
-        |> fillHullSliceMetrics
+        |> HullSlicesMetrics.fillHullSliceMetrics
         |> modifyPrismaticCoeff
         |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient
         |> toHullSlices

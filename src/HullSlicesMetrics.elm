@@ -18,9 +18,12 @@ module HullSlicesMetrics exposing
     , calculateSliceArea
     , centroidAbscissa
     , clip
+    , computePrismaticCoefficient
     , denormalizeHullSlice
     , denormalizeHullSlices
     , extractHorizontalSliceAtZ
+    , fillHullSliceMetrics
+    , initializePrismaticCoefficient
     , integrate
     , intersectBelow
     , trapezoidCentroid
@@ -32,6 +35,7 @@ module HullSlicesMetrics exposing
 
 import Array
 import HullSlices exposing (HullSlice, HullSlices)
+import List.Extra
 import StringValueInput
 
 
@@ -82,6 +86,39 @@ type alias HullSliceCentroidAndArea =
 
 type HullSlicesWithMetacentre
     = HullSlicesWithMetacentre HullSlicesMetrics
+
+
+fillHullSliceMetrics : HullSlices -> HullSlicesMetrics
+fillHullSliceMetrics hullSlices =
+    hullSlices
+        |> toHullSlicesMetrics
+        |> addAreaAndDisplacement
+        |> addCentreOfBuoyancy
+        |> addBlockCoefficient
+        |> addMetacentre
+        |> initializePrismaticCoefficient
+
+
+toHullSlicesMetrics : HullSlices -> HullSlicesMetrics
+toHullSlicesMetrics hullSlices =
+    { length = hullSlices.length
+    , breadth = hullSlices.breadth
+    , depth = hullSlices.depth
+    , prismaticCoefficient = hullSlices.prismaticCoefficient
+    , xmin = hullSlices.xmin
+    , ymin = hullSlices.ymin
+    , zmin = hullSlices.zmin
+    , slices = hullSlices.slices
+    , originalSlicePositions = hullSlices.originalSlicePositions
+    , draught = hullSlices.draught
+    , denormalizedSlices = []
+    , blockCoefficient = 0
+    , centreOfBuoyancy = 0
+    , displacement = 0
+    , metacentre = 0
+    , hullSlicesBeneathFreeSurface = { xmin = 0, xmax = 0, hullSlices = [] }
+    , centroidAreaForEachImmersedSlice = []
+    }
 
 
 addAreaAndDisplacement : HullSlicesMetrics -> HullSlicesMetrics
@@ -258,6 +295,63 @@ addMetacentre hullSlicesMetrics =
             hullSlicesMetrics.centreOfBuoyancy + bM
     in
     { hullSlicesMetrics | metacentre = metacentre }
+
+
+initializePrismaticCoefficient : HullSlicesMetrics -> HullSlicesMetrics
+initializePrismaticCoefficient hullSlicesMetrics =
+    let
+        p : StringValueInput.FloatInput
+        p =
+            { value = 0
+            , string = ""
+            , unit = "-"
+            , description = "Prismatic coefficient"
+            , nbOfDigits = 2
+            }
+
+        maybePrismatic : Maybe Float
+        maybePrismatic =
+            hullSlicesMetrics
+                |> computePrismaticCoefficient
+    in
+    case maybePrismatic of
+        Nothing ->
+            { hullSlicesMetrics | prismaticCoefficient = p }
+
+        Just coeff ->
+            { hullSlicesMetrics | prismaticCoefficient = coeff |> StringValueInput.round_n 2 |> StringValueInput.asFloatIn p }
+
+
+computePrismaticCoefficient : HullSlicesMetrics -> Maybe Float
+computePrismaticCoefficient hullSlicesMetrics =
+    let
+        displacement : Float
+        displacement =
+            hullSlicesMetrics.displacement
+
+        lengthAtWaterline : Float
+        lengthAtWaterline =
+            hullSlicesMetrics.hullSlicesBeneathFreeSurface.xmax - hullSlicesMetrics.hullSlicesBeneathFreeSurface.xmin
+
+        masterCrossSectionArea2PrismaticCoefficient : HullSliceCentroidAndArea -> Maybe Float
+        masterCrossSectionArea2PrismaticCoefficient masterCrossSection =
+            if lengthAtWaterline * masterCrossSection.area == 0 then
+                Nothing
+
+            else
+                Just <| displacement / (lengthAtWaterline * masterCrossSection.area)
+    in
+    getMasterCrossSection hullSlicesMetrics
+        |> Maybe.andThen masterCrossSectionArea2PrismaticCoefficient
+
+
+
+-- |> masterCrossSectionArea2PrismaticCoefficient
+
+
+getMasterCrossSection : HullSlicesMetrics -> Maybe HullSliceCentroidAndArea
+getMasterCrossSection hullSlicesMetrics =
+    List.Extra.maximumBy .area hullSlicesMetrics.centroidAreaForEachImmersedSlice
 
 
 areaTrapezoid : ( Float, Float ) -> ( Float, Float ) -> Float

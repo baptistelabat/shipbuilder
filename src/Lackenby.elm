@@ -1,7 +1,5 @@
 module Lackenby exposing
-    ( computePrismaticCoefficient
-    , getMasterCrossSection
-    , initializePrismaticCoefficient
+    ( getMasterCrossSection
     , lackenby
     , modifyHullSlicesToMatchTargetPrismaticCoefficient
     , setPrismaticCoefficientAndClamp
@@ -66,33 +64,6 @@ import HullSlices exposing (HullSlice, HullSlices)
 import HullSlicesMetrics exposing (HullSliceCentroidAndArea, HullSlicesMetrics)
 import List.Extra
 import StringValueInput
-
-
-computePrismaticCoefficient : HullSlicesMetrics -> Maybe Float
-computePrismaticCoefficient hullSlicesMetrics =
-    let
-        displacement : Float
-        displacement =
-            hullSlicesMetrics.displacement
-
-        lengthAtWaterline : Float
-        lengthAtWaterline =
-            hullSlicesMetrics.hullSlicesBeneathFreeSurface.xmax - hullSlicesMetrics.hullSlicesBeneathFreeSurface.xmin
-
-        masterCrossSectionArea2PrismaticCoefficient : HullSliceCentroidAndArea -> Maybe Float
-        masterCrossSectionArea2PrismaticCoefficient masterCrossSection =
-            if lengthAtWaterline * masterCrossSection.area == 0 then
-                Nothing
-
-            else
-                Just <| displacement / (lengthAtWaterline * masterCrossSection.area)
-    in
-    getMasterCrossSection hullSlicesMetrics
-        |> Maybe.andThen masterCrossSectionArea2PrismaticCoefficient
-
-
-
--- |> masterCrossSectionArea2PrismaticCoefficient
 
 
 getMasterCrossSection : HullSlicesMetrics -> Maybe HullSliceCentroidAndArea
@@ -331,32 +302,6 @@ modifyLongitudinalPositionOfEachSlice hullSlicesMetrics newXPositions =
     { hullSlicesMetrics | slices = allSlices }
 
 
-initializePrismaticCoefficient : HullSlicesMetrics -> HullSlicesMetrics
-initializePrismaticCoefficient hullSlicesMetrics =
-    let
-        p : StringValueInput.FloatInput
-        p =
-            { value = 0
-            , string = ""
-            , unit = "-"
-            , description = "Prismatic coefficient"
-            , nbOfDigits = 2
-            }
-
-        maybePrismatic : Maybe Float
-        maybePrismatic =
-            hullSlicesMetrics
-                |> HullSlicesMetrics.addAreaAndDisplacement
-                |> computePrismaticCoefficient
-    in
-    case maybePrismatic of
-        Nothing ->
-            { hullSlicesMetrics | prismaticCoefficient = p }
-
-        Just coeff ->
-            { hullSlicesMetrics | prismaticCoefficient = coeff |> StringValueInput.round_n 2 |> StringValueInput.asFloatIn p }
-
-
 resetOriginalSlicesLongitudinalPositions : HullSlicesMetrics -> HullSlicesMetrics
 resetOriginalSlicesLongitudinalPositions hullSlicesMetrics =
     let
@@ -384,4 +329,4 @@ modifyHullSlicesToMatchTargetPrismaticCoefficient hullSlicesMetrics =
     in
     maybeNewXPositions originalHullSlices
         |> Maybe.map (modifyLongitudinalPositionOfEachSlice originalHullSlices)
-        |> Maybe.withDefault (initializePrismaticCoefficient hullSlicesMetrics)
+        |> Maybe.withDefault (HullSlicesMetrics.initializePrismaticCoefficient hullSlicesMetrics)
