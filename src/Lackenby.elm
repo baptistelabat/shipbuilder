@@ -61,7 +61,8 @@ B_{\alpha}(z) \underset{def}{=} (1-\delta B_{\alpha})\cdot B(z), \alpha<=0
 -}
 
 import HullSlices exposing (HullSlice, HullSlices)
-import HullSlicesMetrics exposing (HullSliceCentroidAndArea, HullSlicesMetrics)
+import HullSlicesMetrics exposing (HullSlicesMetrics)
+import HullSlicesUtils exposing (HullSliceCentroidAndArea, integrate)
 import List.Extra
 import StringValueInput
 
@@ -126,7 +127,7 @@ getPrismaticCoefficientBounds lengthAtWaterline masterCrossSectionArea areaCurve
     let
         getPrismaticCoeff : List ( Float, Float ) -> Float
         getPrismaticCoeff curve =
-            curve |> HullSlicesMetrics.integrate |> (*) (1 / (lengthAtWaterline * masterCrossSectionArea))
+            curve |> integrate |> (*) (1 / (lengthAtWaterline * masterCrossSectionArea))
     in
     ( getPrismaticCoeff <| shiftAreaCurve -1 areaCurve, getPrismaticCoeff <| shiftAreaCurve 1 areaCurve )
 
@@ -190,7 +191,7 @@ lackenby targetPrismaticCoefficient lengthAtWaterline masterCrossSectionArea are
             let
                 getPrismaticCoeff : List ( Float, Float ) -> Float
                 getPrismaticCoeff curve =
-                    curve |> HullSlicesMetrics.integrate |> (*) (1 / (lengthAtWaterline * masterCrossSectionArea))
+                    curve |> integrate |> (*) (1 / (lengthAtWaterline * masterCrossSectionArea))
 
                 lowAreaCurve =
                     shiftAreaCurve cLow areaCurve

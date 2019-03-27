@@ -6,6 +6,7 @@ import Fuzz
 import HullSliceModifiers exposing (empty)
 import HullSlices exposing (HullSlices)
 import HullSlicesMetrics exposing (HullSlicesMetrics, fillHullSliceMetrics)
+import HullSlicesUtils exposing (integrate)
 import Lackenby
 import StringValueInput
 import Test exposing (..)
@@ -49,12 +50,12 @@ suite =
     describe "Lackenby"
         [ test "Can calculate prismatic coefficient" <|
             \_ ->
-                HullSlicesMetrics.computePrismaticCoefficient (TestData.mpov 1 |> fillHullSliceMetrics |> HullSlicesMetrics.addAreaAndDisplacement)
+                HullSlicesMetrics.computePrismaticCoefficient (TestData.mpov 1 |> fillHullSliceMetrics)
                     |> Maybe.withDefault 999999
                     |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6 * 2))
         , test "Can get master cross section of Anthineas" <|
             \_ ->
-                Lackenby.getMasterCrossSection (TestData.anthineas |> fillHullSliceMetrics |> HullSlicesMetrics.addAreaAndDisplacement)
+                Lackenby.getMasterCrossSection (TestData.anthineas |> fillHullSliceMetrics)
                     |> Maybe.map .x
                     |> Maybe.withDefault 999999
                     |> Expect.within epsAbsolute 9.133333333
@@ -62,7 +63,7 @@ suite =
             \_ ->
                 Lackenby.lackenby 0.03 69.6 40 [ ( 1, 10 ), ( 3, 30 ), ( 4, 40 ), ( 4.5, 12 ), ( 6, 1 ) ]
                     |> Result.withDefault []
-                    |> HullSlicesMetrics.integrate
+                    |> integrate
                     |> (*) (1 / (69.6 * 40))
                     |> Expect.within (Absolute 1.0e-2) 0.03
         , test "Have same amount of slices before and after updating prismatic coefficient on MPOV" <|

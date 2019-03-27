@@ -1,7 +1,6 @@
 module HullSlices exposing
     ( HullSlice
     , HullSlices
-    , scale
     )
 
 import Array
@@ -27,22 +26,4 @@ type alias HullSlice =
     , zmin : Float
     , zmax : Float
     , y : List Float
-    }
-
-
-scale : HullSlices -> HullSlice -> HullSlice
-scale json hullSlice =
-    let
-        scaleY : Float -> Float
-        scaleY y =
-            y * json.breadth.value + json.ymin
-
-        scaleZ : Float -> Float
-        scaleZ z =
-            z * json.depth.value + json.zmin
-    in
-    { x = hullSlice.x
-    , zmin = scaleZ hullSlice.zmin
-    , zmax = scaleZ hullSlice.zmax
-    , y = List.map scaleY hullSlice.y
     }

@@ -11,7 +11,8 @@ module EncodersDecoders exposing
 import Dict exposing (Dict)
 import HullSliceModifiers exposing (empty, toHullSlices)
 import HullSlices exposing (HullSlice, HullSlices)
-import HullSlicesMetrics exposing (HullSliceAsAreaXYList, HullSliceAsZYList, fillHullSliceMetrics)
+import HullSlicesMetrics exposing (fillHullSliceMetrics)
+import HullSlicesUtils exposing (HullSliceAsAreaXYList, HullSliceAsZYList)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
