@@ -112,18 +112,7 @@ setDepth depth hullSlices =
 
 setPrismaticCoefficient : String -> HullSlices -> HullSlices
 setPrismaticCoefficient prismaticCoefficient hullSlices =
-    let
-        modifyPrismaticCoeff : HullSlicesMetrics -> HullSlicesMetrics
-        modifyPrismaticCoeff hs =
-            case String.toFloat prismaticCoefficient of
-                Nothing ->
-                    hs
-
-                Just pc ->
-                    Lackenby.setPrismaticCoefficientAndClamp pc hs
-    in
     hullSlices
         |> HullSlicesMetrics.fillHullSliceMetrics
-        |> modifyPrismaticCoeff
-        |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient
+        |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient
         |> toHullSlices
