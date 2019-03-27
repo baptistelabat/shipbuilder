@@ -113,6 +113,4 @@ setDepth depth hullSlices =
 setPrismaticCoefficient : String -> HullSlices -> HullSlices
 setPrismaticCoefficient prismaticCoefficient hullSlices =
     hullSlices
-        |> HullSlicesMetrics.fillHullSliceMetrics
         |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient
-        |> toHullSlices

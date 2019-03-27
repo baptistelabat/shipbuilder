@@ -247,8 +247,8 @@ lackenby targetPrismaticCoefficient lengthAtWaterline masterCrossSectionArea are
     lackenby_ 1.0e-3 10 0 -1 1
 
 
-modifyLongitudinalPositionOfEachSlice : HullSlicesMetrics -> List Float -> HullSlicesMetrics
-modifyLongitudinalPositionOfEachSlice hullSlicesMetrics newXPositions =
+modifyLongitudinalPositionOfEachSlice : HullSlices -> HullSlicesMetrics -> List Float -> HullSlices
+modifyLongitudinalPositionOfEachSlice hullSlices hullSlicesMetrics newXPositions =
     let
         normalize : Float -> Float
         normalize x =
@@ -294,27 +294,31 @@ modifyLongitudinalPositionOfEachSlice hullSlicesMetrics newXPositions =
         allSlices =
             slicesBeforeXminOfAreaCurve ++ modifiedSlices ++ slicesAfterXmaxOfAreaCurve
     in
-    { hullSlicesMetrics | slices = allSlices }
+    { hullSlices | slices = allSlices }
 
 
-resetOriginalSlicesLongitudinalPositions : HullSlicesMetrics -> HullSlicesMetrics
-resetOriginalSlicesLongitudinalPositions hullSlicesMetrics =
+resetOriginalSlicesLongitudinalPositions : HullSlices -> HullSlices
+resetOriginalSlicesLongitudinalPositions hullSlices =
     let
         setX : HullSlice -> Float -> HullSlice
         setX hullSlice x =
             { hullSlice | x = x }
     in
-    { hullSlicesMetrics | slices = List.map2 setX hullSlicesMetrics.slices hullSlicesMetrics.originalSlicePositions }
+    { hullSlices | slices = List.map2 setX hullSlices.slices hullSlices.originalSlicePositions }
 
 
-modifyHullSlicesToMatchTargetPrismaticCoefficient : String -> HullSlicesMetrics -> HullSlicesMetrics
-modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlicesMetrics =
+modifyHullSlicesToMatchTargetPrismaticCoefficient : String -> HullSlices -> HullSlices
+modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlices =
     let
+        hullSlicesMetrics : HullSlicesMetrics
+        hullSlicesMetrics =
+            HullSlicesMetrics.fillHullSliceMetrics hullSlices
+
         originalHullSlices : HullSlicesMetrics
         originalHullSlices =
-            hullSlicesMetrics
+            hullSlices
                 |> resetOriginalSlicesLongitudinalPositions
-                |> HullSlicesMetrics.addAreaAndDisplacement
+                |> HullSlicesMetrics.fillHullSliceMetrics
 
         clampedPrismaticCoefficient : Float
         clampedPrismaticCoefficient =
@@ -332,5 +336,5 @@ modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlice
                 |> Maybe.map (List.map Tuple.first)
     in
     maybeNewXPositions originalHullSlices
-        |> Maybe.map (modifyLongitudinalPositionOfEachSlice originalHullSlices)
-        |> Maybe.withDefault (HullSlicesMetrics.initializePrismaticCoefficient hullSlicesMetrics)
+        |> Maybe.map (modifyLongitudinalPositionOfEachSlice hullSlices originalHullSlices)
+        |> Maybe.withDefault hullSlices
