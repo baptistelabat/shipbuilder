@@ -9,7 +9,7 @@ module EncodersDecoders exposing
     )
 
 import Dict exposing (Dict)
-import HullSlices exposing (HullSlice, HullSlices, emptyHullSlices)
+import HullSlices exposing (CustomHullProperties, HullSlice, HullSlices, emptyHullSlices)
 import HullSlicesMetrics exposing (fillHullSliceMetrics)
 import HullSlicesUtils exposing (HullSliceAsAreaXYList, HullSliceAsZYList)
 import Json.Decode as Decode
@@ -41,11 +41,29 @@ hullSliceDecoder =
         |> Pipeline.required "y" (Decode.list Decode.float)
 
 
+decodeCustomHullProperties : Decode.Decoder CustomHullProperties
+decodeCustomHullProperties =
+    Decode.succeed CustomHullProperties
+        |> Pipeline.required "customLength" (Decode.map (StringValueInput.fromNumber "m" "Length over all" 1) Decode.float)
+        |> Pipeline.required "customBreadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth" 1) Decode.float)
+        |> Pipeline.required "customDepth" (Decode.map (StringValueInput.fromNumber "m" "Depth" 1) Decode.float)
+        |> Pipeline.required "customDraught" (Decode.map (StringValueInput.fromNumber "m" "Draught" 1) Decode.float)
+
+
+type alias PreloadedHullSlicesData =
+    { length : StringValueInput.FloatInput
+    , breadth : StringValueInput.FloatInput
+    , depth : StringValueInput.FloatInput
+    , draught : Maybe StringValueInput.FloatInput
+    , customHullProperties : Maybe CustomHullProperties
+    }
+
+
 decoder : Decode.Decoder HullSlices
 decoder =
     let
-        hullSlicesConstructor : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> HullSlices
-        hullSlicesConstructor length breadth depth xmin ymin zmin slices draught =
+        hullSlicesConstructor : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> CustomHullProperties -> HullSlices
+        hullSlicesConstructor length breadth depth xmin ymin zmin slices draught customHullProperties =
             { emptyHullSlices
                 | length = length
                 , breadth = breadth
@@ -56,30 +74,49 @@ decoder =
                 , slices = slices
                 , originalSlicePositions = List.map .x slices
                 , draught = draught
+                , customHullProperties = customHullProperties
             }
 
-        helper : ( StringValueInput.FloatInput, Maybe StringValueInput.FloatInput ) -> Decode.Decoder HullSlices
-        helper ( depth, maybeDraught ) =
+        helper : PreloadedHullSlicesData -> Decode.Decoder HullSlices
+        helper temp =
+            let
+                draughtDecoded =
+                    case temp.draught of
+                        Just justDraught ->
+                            justDraught
+
+                        Nothing ->
+                            StringValueInput.fromNumber "m" "Draught" 1 (temp.depth.value / 5)
+
+                customHullPropertiesDecoded =
+                    case temp.customHullProperties of
+                        Just customHullProperties ->
+                            customHullProperties
+
+                        Nothing ->
+                            { customLength = temp.length
+                            , customBreadth = temp.breadth
+                            , customDepth = temp.depth
+                            , customDraught = draughtDecoded
+                            }
+            in
             Decode.succeed hullSlicesConstructor
-                |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all" 1) Decode.float)
-                |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth" 1) Decode.float)
-                |> Pipeline.hardcoded depth
+                |> Pipeline.hardcoded temp.length
+                |> Pipeline.hardcoded temp.breadth
+                |> Pipeline.hardcoded temp.depth
                 |> Pipeline.required "xmin" Decode.float
                 |> Pipeline.required "ymin" Decode.float
                 |> Pipeline.required "zmin" Decode.float
                 |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
-                |> Pipeline.hardcoded
-                    (case maybeDraught of
-                        Just draught ->
-                            draught
-
-                        Nothing ->
-                            StringValueInput.fromNumber "m" "Draught" 1 (depth.value / 5)
-                    )
+                |> Pipeline.hardcoded draughtDecoded
+                |> Pipeline.hardcoded customHullPropertiesDecoded
     in
-    Decode.succeed Tuple.pair
+    Decode.succeed PreloadedHullSlicesData
+        |> Pipeline.required "length" (Decode.map (StringValueInput.fromNumber "m" "Length over all" 1) Decode.float)
+        |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth" 1) Decode.float)
         |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth" 1) Decode.float)
         |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught" 1) Decode.float) Nothing
+        |> Pipeline.optional "customHullProperties" (Decode.map Just decodeCustomHullProperties) Nothing
         |> Decode.andThen helper
 
 
@@ -114,6 +151,14 @@ encoder hullSlices =
         , ( "ymin", Encode.float hullSlices.ymin )
         , ( "zmin", Encode.float hullSlices.zmin )
         , ( "slices", Encode.list hullSliceEncoder hullSlices.slices )
+        , ( "customHullProperties"
+          , Encode.object
+                [ ( "customLength", Encode.float hullSlices.customHullProperties.customLength.value )
+                , ( "customBreadth", Encode.float hullSlices.customHullProperties.customBreadth.value )
+                , ( "customDepth", Encode.float hullSlices.customHullProperties.customDepth.value )
+                , ( "customDraught", Encode.float hullSlices.customHullProperties.customDraught.value )
+                ]
+          )
         ]
 
 

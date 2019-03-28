@@ -1,5 +1,6 @@
 module HullSlices exposing
-    ( HullSlice
+    ( CustomHullProperties
+    , HullSlice
     , HullSlices
     , emptyHullSlices
     )
@@ -18,6 +19,7 @@ type alias HullSlices =
     , slices : List HullSlice
     , originalSlicePositions : List Float
     , draught : StringValueInput.FloatInput
+    , customHullProperties : CustomHullProperties
     }
 
 
@@ -26,6 +28,14 @@ type alias HullSlice =
     , zmin : Float
     , zmax : Float
     , y : List Float
+    }
+
+
+type alias CustomHullProperties =
+    { customLength : StringValueInput.FloatInput
+    , customBreadth : StringValueInput.FloatInput
+    , customDepth : StringValueInput.FloatInput
+    , customDraught : StringValueInput.FloatInput
     }
 
 
@@ -40,4 +50,10 @@ emptyHullSlices =
     , slices = []
     , originalSlicePositions = []
     , draught = StringValueInput.emptyFloat 1
+    , customHullProperties =
+        { customLength = StringValueInput.emptyFloat 1
+        , customBreadth = StringValueInput.emptyFloat 1
+        , customDepth = StringValueInput.emptyFloat 1
+        , customDraught = StringValueInput.emptyFloat 1
+        }
     }
