@@ -73,11 +73,17 @@ cube =
               }
             ]
         , draught = StringValueInput.floatInput 1 2
+        , customHullProperties =
+            { customLength = StringValueInput.floatInput 1 200
+            , customBreadth = StringValueInput.floatInput 1 20
+            , customDepth = StringValueInput.floatInput 1 10
+            , customDraught = StringValueInput.floatInput 1 2
+            }
     }
 
 
-toblerone : Float -> Float -> HullSlices.HullSlices
-toblerone breadth depth =
+toblerone : Float -> Float -> Float -> HullSlices.HullSlices
+toblerone breadth depth draught =
     { emptyHullSlices
         | length = StringValueInput.floatInput 1 200
         , breadth = StringValueInput.floatInput 1 breadth
@@ -102,7 +108,13 @@ toblerone breadth depth =
               , y = [ 1, 0.75, 0.5 ]
               }
             ]
-        , draught = StringValueInput.floatInput 1 2
+        , draught = StringValueInput.floatInput 1 draught
+        , customHullProperties =
+            { customLength = StringValueInput.floatInput 1 200
+            , customBreadth = StringValueInput.floatInput 1 breadth
+            , customDepth = StringValueInput.floatInput 1 depth
+            , customDraught = StringValueInput.floatInput 1 draught
+            }
     }
 
 

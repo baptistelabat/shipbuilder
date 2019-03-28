@@ -164,13 +164,13 @@ suite =
         , describe "Setters"
             [ test "Can set length over all" <|
                 \_ ->
-                    Expect.equal { value = 1.2, string = "1.2", description = "Length over all", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setLengthOverAll "1.234" hullSlices |> .length)
+                    Expect.equal { value = 1.2, string = "1.2", description = "Length over all", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setLengthOverAll "1.234" hullSlices |> .customHullProperties |> .customLength)
             , test "Can set breadth" <|
                 \_ ->
-                    Expect.equal { value = 13.4, string = "13.4", description = "Breadth", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setBreadth "13.4125" hullSlices |> .breadth)
+                    Expect.equal { value = 13.4, string = "13.4", description = "Breadth", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setBreadth "13.4125" hullSlices |> .customHullProperties |> .customBreadth)
             , test "Can set draught" <|
                 \_ ->
-                    Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setDraught "13.4125" hullSlices |> .draught)
+                    Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setDraught "13.4125" hullSlices |> .customHullProperties |> .customDraught)
             , test "Resizing should not change centering: changing breadth should also change ymin" <|
                 \_ ->
                     (HullSliceModifiers.setBreadth "7" hullSlices |> .ymin)
@@ -463,8 +463,7 @@ suite =
                         \( breadth, depth, draughtDividedByDepth ) ->
                             let
                                 t =
-                                    TestData.toblerone breadth depth
-                                        |> setDraught (draughtDividedByDepth * depth)
+                                    TestData.toblerone breadth depth (draughtDividedByDepth * depth)
 
                                 expectedArea =
                                     draughtDividedByDepth * draughtDividedByDepth * depth * breadth / 2
@@ -492,16 +491,14 @@ suite =
                                 draughtDividedByDepth =
                                     0.00005983669402257387
 
+                                draught =
+                                    draughtDividedByDepth * depth
+
                                 t =
-                                    TestData.toblerone breadth depth
-                                        |> setDraught (draughtDividedByDepth * depth)
+                                    TestData.toblerone breadth depth draught
 
                                 expectedArea =
                                     draughtDividedByDepth * draughtDividedByDepth * depth * breadth / 2
-
-                                setDraught : Float -> { a | draught : StringValueInput.FloatInput } -> { a | draught : StringValueInput.FloatInput }
-                                setDraught val slice =
-                                    { slice | draught = val |> StringValueInput.asValueIn slice.draught }
                             in
                             Expect.all
                                 (List.map
@@ -517,53 +514,27 @@ suite =
             [ test "zmin should be scaled properly" <|
                 \_ ->
                     scale
-                        { emptyHullSlices
-                            | breadth = 10 |> StringValueInput.floatInput 1
-                            , depth = 5 |> StringValueInput.floatInput 1
-                            , draught = 4 |> StringValueInput.floatInput 1
-                            , xmin = -5
-                            , ymin = -89
-                            , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput 1
-                            , slices = []
-                        }
+                        TestData.cube
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .zmin
                         |> Expect.within epsAbsolute
-                            (88 + 0.5 * 5)
+                            (TestData.cube.zmin + 0.5 * TestData.cube.depth.value)
             , test "zmax should be scaled properly" <|
                 \_ ->
                     scale
-                        { emptyHullSlices
-                            | breadth = 10 |> StringValueInput.floatInput 1
-                            , depth = 5 |> StringValueInput.floatInput 1
-                            , draught = 4 |> StringValueInput.floatInput 1
-                            , xmin = -5
-                            , ymin = -89
-                            , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput 1
-                            , slices = []
-                        }
+                        TestData.cube
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .zmax
                         |> Expect.within epsAbsolute
-                            (88 + 0.9 * 5)
+                            (TestData.cube.zmin + 0.9 * TestData.cube.depth.value)
             , test "y should be scaled properly" <|
                 \_ ->
                     scale
-                        { emptyHullSlices
-                            | breadth = 10 |> StringValueInput.floatInput 1
-                            , depth = 5 |> StringValueInput.floatInput 1
-                            , draught = 4 |> StringValueInput.floatInput 1
-                            , xmin = -5
-                            , ymin = -89
-                            , zmin = 88
-                            , length = 456 |> StringValueInput.floatInput 1
-                        }
+                        TestData.cube
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .y
                         |> Expect.equal
-                            [ -89 + 10 * 0.1, -89 + 10 * 0.2, -89 + 10 * 0.5 ]
+                            [ TestData.cube.ymin + TestData.cube.breadth.value * 0.1, TestData.cube.ymin + TestData.cube.breadth.value * 0.2, TestData.cube.ymin + TestData.cube.breadth.value * 0.5 ]
             ]
         , describe "Volume"
             [ test

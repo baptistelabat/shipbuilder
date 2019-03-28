@@ -45,7 +45,6 @@ import HullSlicesUtils
         , extractY
         , getInertialMoment
         , integrate
-        , scale
         , trapezoidCentroid
         , volume
         , zGTrapezoid
@@ -334,16 +333,16 @@ fillHullSliceMetrics hullSlices =
 
 toHullSlicesMetrics : HullSlices -> HullSlicesMetrics_
 toHullSlicesMetrics hullSlices =
-    { length = hullSlices.length
-    , breadth = hullSlices.breadth
-    , depth = hullSlices.depth
+    { length = hullSlices.customHullProperties.customLength
+    , breadth = hullSlices.customHullProperties.customBreadth
+    , depth = hullSlices.customHullProperties.customDepth
     , prismaticCoefficient = StringValueInput.emptyFloat 1
     , xmin = hullSlices.xmin
     , ymin = hullSlices.ymin
     , zmin = hullSlices.zmin
     , slices = hullSlices.slices
     , originalSlicePositions = hullSlices.originalSlicePositions
-    , draught = hullSlices.draught
+    , draught = hullSlices.customHullProperties.customDraught
     , denormalizedSlices = []
     , blockCoefficient = 0
     , centreOfBuoyancy = 0

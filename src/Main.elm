@@ -3336,10 +3336,10 @@ viewModeller model =
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
-                        , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
-                        , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
-                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
+                        [ StringValueInput.view slices.customHullProperties.customLength <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
+                        , StringValueInput.view slices.customHullProperties.customBreadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
+                        , StringValueInput.view slices.customHullProperties.customDepth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
+                        , StringValueInput.view slices.customHullProperties.customDraught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]

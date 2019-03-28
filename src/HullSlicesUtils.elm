@@ -553,7 +553,7 @@ calculateSliceArea : HullSlices -> HullSlice -> Float
 calculateSliceArea json hullSlice =
     -- Multiply by 2 to account for both sides of the hull: otherwise the area is just for the y>0 half-plane
     scale json hullSlice
-        |> area (json.zmin + json.depth.value - json.draught.value) (json.zmin + json.depth.value)
+        |> area (json.zmin + json.customHullProperties.customDepth.value - json.customHullProperties.customDraught.value) (json.zmin + json.customHullProperties.customDepth.value)
         |> (*) 2
 
 
@@ -562,11 +562,11 @@ scale json hullSlice =
     let
         scaleY : Float -> Float
         scaleY y =
-            y * json.breadth.value + json.ymin
+            y * json.customHullProperties.customBreadth.value + json.ymin
 
         scaleZ : Float -> Float
         scaleZ z =
-            z * json.depth.value + json.zmin
+            z * json.customHullProperties.customDepth.value + json.zmin
     in
     { x = hullSlice.x
     , zmin = scaleZ hullSlice.zmin

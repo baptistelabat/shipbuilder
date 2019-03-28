@@ -13,23 +13,50 @@ import StringValueInput
 
 setLengthOverAll : String -> HullSlices -> HullSlices
 setLengthOverAll loa hullSlices =
-    { hullSlices | length = hullSlices.length |> StringValueInput.setString loa }
+    let
+        oldCustomHullProperties =
+            hullSlices.customHullProperties
+
+        newCustomHullProperties =
+            { oldCustomHullProperties | customLength = oldCustomHullProperties.customLength |> StringValueInput.setString loa }
+    in
+    { hullSlices | customHullProperties = newCustomHullProperties }
 
 
 setBreadth : String -> HullSlices -> HullSlices
 setBreadth breadth hullSlices =
-    { hullSlices | breadth = hullSlices.breadth |> StringValueInput.setString breadth }
-        |> (\slices -> { slices | ymin = -slices.breadth.value / 2 })
+    let
+        oldCustomHullProperties =
+            hullSlices.customHullProperties
+
+        newCustomHullProperties =
+            { oldCustomHullProperties | customBreadth = oldCustomHullProperties.customBreadth |> StringValueInput.setString breadth }
+    in
+    { hullSlices | customHullProperties = newCustomHullProperties } |> (\slices -> { slices | ymin = -slices.customHullProperties.customBreadth.value / 2 })
 
 
 setDraught : String -> HullSlices -> HullSlices
 setDraught draught hullSlices =
-    { hullSlices | draught = hullSlices.draught |> StringValueInput.setString draught }
+    let
+        oldCustomHullProperties =
+            hullSlices.customHullProperties
+
+        newCustomHullProperties =
+            { oldCustomHullProperties | customDraught = oldCustomHullProperties.customDraught |> StringValueInput.setString draught }
+    in
+    { hullSlices | customHullProperties = newCustomHullProperties }
 
 
 setDepth : String -> HullSlices -> HullSlices
 setDepth depth hullSlices =
-    { hullSlices | depth = hullSlices.depth |> StringValueInput.setString depth }
+    let
+        oldCustomHullProperties =
+            hullSlices.customHullProperties
+
+        newCustomHullProperties =
+            { oldCustomHullProperties | customDepth = oldCustomHullProperties.customDepth |> StringValueInput.setString depth }
+    in
+    { hullSlices | customHullProperties = newCustomHullProperties }
 
 
 setPrismaticCoefficient : String -> HullSlices -> HullSlices
