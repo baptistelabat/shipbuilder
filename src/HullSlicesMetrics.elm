@@ -16,7 +16,6 @@ module HullSlicesMetrics exposing
     , getLength
     , getMasterCrossSection
     , getMetacentre
-    , getOriginalSlicePosition
     , getPrismaticCoefficient
     , getSlices
     , getXmin
@@ -64,7 +63,6 @@ type alias HullSlicesMetrics_ =
     , ymin : Float
     , zmin : Float
     , slices : List HullSlice
-    , originalSlicePositions : List Float
     , draught : StringValueInput.FloatInput
     , blockCoefficient : Float
     , displacement : Float
@@ -95,7 +93,6 @@ emptyHullSlicesMetrics =
         , ymin = 0
         , zmin = 0
         , slices = []
-        , originalSlicePositions = []
         , draught = StringValueInput.emptyFloat 1
         , denormalizedSlices = []
         , blockCoefficient = 0
@@ -267,18 +264,6 @@ getSlices hullSlicesMetrics =
     hs.slices
 
 
-getOriginalSlicePosition : HullSlicesMetrics -> List Float
-getOriginalSlicePosition hullSlicesMetrics =
-    let
-        hs : HullSlicesMetrics_
-        hs =
-            case hullSlicesMetrics of
-                HullSlicesMetrics hs_ ->
-                    hs_
-    in
-    hs.originalSlicePositions
-
-
 getDenormalizedSlices : HullSlicesMetrics -> List HullSlice
 getDenormalizedSlices hullSlicesMetrics =
     let
@@ -341,7 +326,6 @@ toHullSlicesMetrics hullSlices =
     , ymin = hullSlices.ymin
     , zmin = hullSlices.zmin
     , slices = hullSlices.slices
-    , originalSlicePositions = hullSlices.originalSlicePositions
     , draught = hullSlices.customHullProperties.customDraught
     , denormalizedSlices = []
     , blockCoefficient = 0
