@@ -5,11 +5,10 @@ import EncodersDecoders
 import Expect exposing (..)
 import Fuzz
 import HullSliceModifiers
-import HullSlices exposing (HullSlices, emptyHullSlices)
-import HullSlicesMetrics exposing (HullSlicesMetrics, emptyHullSlicesMetrics, fillHullSliceMetrics, getCentroidAreaForEachImmersedSlice)
-import HullSlicesUtils
+import HullSlices
     exposing
-        ( area
+        ( HullSlices
+        , area
         , areaTrapezoid
         , calculateCentroid
         , calculateSliceArea
@@ -17,6 +16,7 @@ import HullSlicesUtils
         , clip
         , denormalizeHullSlice
         , denormalizeHullSlices
+        , emptyHullSlices
         , integrate
         , scale
         , trapezoidCentroid
@@ -25,6 +25,7 @@ import HullSlicesUtils
         , zTrapezoid
         , zminForEachTrapezoid
         )
+import HullSlicesMetrics exposing (HullSlicesMetrics, emptyHullSlicesMetrics, fillHullSliceMetrics, getCentroidAreaForEachImmersedSlice)
 import Interpolate.Cubic
 import Json.Decode as Decode
 import StringValueInput

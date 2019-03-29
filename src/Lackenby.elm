@@ -59,7 +59,7 @@ B_{\alpha}(z) \underset{def}{=} (1-\delta B_{\alpha})\cdot B(z), \alpha<=0
 
 -}
 
-import HullSlices exposing (HullSlice, HullSlices)
+import HullSlices exposing (HullSlice, HullSliceCentroidAndArea, HullSlices, integrate)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -71,7 +71,6 @@ import HullSlicesMetrics
         , getSlices
         , getXmin
         )
-import HullSlicesUtils exposing (HullSliceCentroidAndArea, integrate)
 import List.Extra
 import StringValueInput
 

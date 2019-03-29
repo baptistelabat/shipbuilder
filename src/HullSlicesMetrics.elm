@@ -26,12 +26,13 @@ module HullSlicesMetrics exposing
     )
 
 import Array
-import HullSlices exposing (HullSlice, HullSlices)
-import HullSlicesUtils
+import HullSlices
     exposing
-        ( HullSliceAsAreaXYList
+        ( HullSlice
+        , HullSliceAsAreaXYList
         , HullSliceAsZYList
         , HullSliceCentroidAndArea
+        , HullSlices
         , area
         , areaTrapezoid
         , blockVolume

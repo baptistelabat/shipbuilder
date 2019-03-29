@@ -3,9 +3,8 @@ module LackenbyTests exposing (suite)
 import CustomFuzzers exposing (..)
 import Expect exposing (..)
 import Fuzz
-import HullSlices exposing (HullSlices)
+import HullSlices exposing (HullSlices, integrate)
 import HullSlicesMetrics exposing (HullSlicesMetrics, fillHullSliceMetrics)
-import HullSlicesUtils exposing (integrate)
 import Lackenby
 import StringValueInput
 import Test exposing (..)
