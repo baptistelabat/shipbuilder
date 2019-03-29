@@ -3310,12 +3310,21 @@ viewModeller model =
 
             else
                 Nothing
+
+        modellerName : String
+        modellerName =
+            case model.selectedHullReference of
+                Just hullname ->
+                    "Modelling " ++ hullname
+
+                Nothing ->
+                    "No hull selected"
     in
     div
         [ class "panel modeller-panel" ]
         (h2
             [ class "modeller-panel-title" ]
-            [ text "Modeller" ]
+            [ text modellerName ]
             :: (model.slices |> Dict.toList |> List.filterMap viewSlices)
         )
 
