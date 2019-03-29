@@ -606,7 +606,7 @@ let loadHull = function (json) {
         hull.sbType = "hull";
         scene.add(hull);
 
-        var zWaterLine = (json.depth + json.zmin) - json.customHullProperties.customDraught;
+        var zWaterLine = (json.customHullProperties.customDepth + json.zmin) - json.customHullProperties.customDraught;
         makeWaterLine(zWaterLine);
 }
 
