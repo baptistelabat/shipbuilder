@@ -54,7 +54,7 @@ import Html.Attributes exposing (accept, class, disabled, download, for, href, i
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
-import HullSlices exposing (HullSlices)
+import HullSlices exposing (HullSlices, setLongitudinalPositionOfEachSlice)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -2763,7 +2763,11 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
+                    let
+                        hullSlicesToConstruct =
+                            setLongitudinalPositionOfEachSlice hullSlices
+                    in
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }

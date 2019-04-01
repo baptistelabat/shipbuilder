@@ -19,6 +19,7 @@ module HullSlices exposing
     , getInertialMoment
     , integrate
     , scale
+    , setLongitudinalPositionOfEachSlice
     , trapezoidCentroid
     , volume
     , zGTrapezoid
@@ -601,6 +602,20 @@ denormalizeHullSlice param hs =
             { x = x, zmin = hs_zmin, zmax = hs_zmax, y = hs_y }
     in
     res
+
+
+setLongitudinalPositionOfEachSlice : HullSlices -> HullSlices
+setLongitudinalPositionOfEachSlice hullSlices =
+    let
+        shiftSliceLongitudinalPosition : HullSlice -> Float -> HullSlice
+        shiftSliceLongitudinalPosition slice newX =
+            { slice | x = newX }
+
+        modifiedSlices : List HullSlice
+        modifiedSlices =
+            List.map2 shiftSliceLongitudinalPosition hullSlices.slices hullSlices.customHullProperties.customHullslicesPosition
+    in
+    { hullSlices | slices = modifiedSlices }
 
 
 calculateSliceArea : HullSlices -> HullSlice -> Float

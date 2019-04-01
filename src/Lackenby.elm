@@ -288,11 +288,13 @@ getLongitudinalPositionOfEachSlice hullSlices hullSlicesMetrics newXPositions =
 resetOriginalSlicesLongitudinalPositions : HullSlices -> HullSlices
 resetOriginalSlicesLongitudinalPositions hullSlices =
     let
-        setX : HullSlice -> Float -> HullSlice
-        setX hullSlice x =
-            { hullSlice | x = x }
+        oldCustomHullProperties =
+            hullSlices.customHullProperties
+
+        newCustomHullProperties =
+            { oldCustomHullProperties | customHullslicesPosition = hullSlices.originalSlicePositions }
     in
-    { hullSlices | slices = List.map2 setX hullSlices.slices hullSlices.originalSlicePositions }
+    { hullSlices | customHullProperties = newCustomHullProperties }
 
 
 modifyHullSlicesToMatchTargetPrismaticCoefficient : String -> HullSlices -> List Float

@@ -45,6 +45,7 @@ import HullSlices
         , extractY
         , getInertialMoment
         , integrate
+        , setLongitudinalPositionOfEachSlice
         , trapezoidCentroid
         , volume
         , zGTrapezoid
@@ -326,7 +327,7 @@ toHullSlicesMetrics hullSlices =
     , xmin = hullSlices.xmin
     , ymin = hullSlices.ymin
     , zmin = hullSlices.zmin
-    , slices = hullSlices.slices
+    , slices = setLongitudinalPositionOfEachSlice hullSlices |> .slices
     , draught = hullSlices.customHullProperties.customDraught
     , denormalizedSlices = []
     , blockCoefficient = 0
