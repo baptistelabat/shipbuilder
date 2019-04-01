@@ -28,11 +28,11 @@ DTMB_5415.json: ../shipBuilder/assets/DTMB_5415.stl mesh2json.py
 	rm DTMB_5415.stl
 
 # ROPAX1.stl is ROPAX.stl with z down
-ROPAX.json: ../shipBuilder/assets/ROPAX1.stl mesh2json.py
-	cp ../shipBuilder/assets/ROPAX1.stl .
+ROPAX.json: ../shipBuilder/assets/ROPAX_retouche1.stl mesh2json.py
+	cp ../shipBuilder/assets/ROPAX_retouche1.stl .
 	docker build -t stl2json .
-	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f ROPAX1.stl -o ROPAX.json -v --nx 10 --ny 10 -d y- --offset 0.1
-	rm ROPAX1.stl
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f ROPAX_retouche1.stl -o ROPAX.json -v --nx 10 --ny 10 -d y- --offset 0.1
+	rm ROPAX_retouche1.stl
 
 clean:
 	rm *.json
