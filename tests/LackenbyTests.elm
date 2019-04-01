@@ -67,7 +67,6 @@ suite =
         , test "Have same amount of slices before and after updating prismatic coefficient on MPOV" <|
             \_ ->
                 Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient "1.5" TestData.anthineas
-                    |> .slices
                     |> List.length
                     |> Expect.equal 10
         ]

@@ -251,8 +251,8 @@ lackenby targetPrismaticCoefficient lengthAtWaterline masterCrossSectionArea are
     lackenby_ 1.0e-3 10 0 -1 1
 
 
-modifyLongitudinalPositionOfEachSlice : HullSlices -> HullSlicesMetrics -> List Float -> HullSlices
-modifyLongitudinalPositionOfEachSlice hullSlices hullSlicesMetrics newXPositions =
+getLongitudinalPositionOfEachSlice : HullSlices -> HullSlicesMetrics -> List Float -> List Float
+getLongitudinalPositionOfEachSlice hullSlices hullSlicesMetrics newXPositions =
     let
         normalize : Float -> Float
         normalize x =
@@ -274,31 +274,19 @@ modifyLongitudinalPositionOfEachSlice hullSlices hullSlicesMetrics newXPositions
                 |> Maybe.withDefault (getXmin hullSlicesMetrics + (getLength hullSlicesMetrics |> .value))
                 |> StringValueInput.round_n 4
 
-        slicesBeforeXminOfAreaCurve : List HullSlice
-        slicesBeforeXminOfAreaCurve =
-            List.filter (\slice -> StringValueInput.round_n 4 slice.x < xminOfAreaCurve) <| getSlices hullSlicesMetrics
+        positionsBeforeXminOfAreaCurve : List Float
+        positionsBeforeXminOfAreaCurve =
+            List.map .x (List.filter (\slice -> StringValueInput.round_n 4 slice.x < xminOfAreaCurve) <| getSlices hullSlicesMetrics)
 
-        slicesAfterXmaxOfAreaCurve : List HullSlice
-        slicesAfterXmaxOfAreaCurve =
-            List.filter (\slice -> StringValueInput.round_n 4 slice.x > xmaxOfAreaCurve) <| getSlices hullSlicesMetrics
+        positionsAfterXmaxOfAreaCurve : List Float
+        positionsAfterXmaxOfAreaCurve =
+            List.map .x (List.filter (\slice -> StringValueInput.round_n 4 slice.x > xmaxOfAreaCurve) <| getSlices hullSlicesMetrics)
 
-        slicesToShift : List HullSlice
-        slicesToShift =
-            List.filter (\slice -> (StringValueInput.round_n 4 slice.x >= xminOfAreaCurve) && (StringValueInput.round_n 4 slice.x <= xmaxOfAreaCurve)) <| getSlices hullSlicesMetrics
-
-        shiftSliceLongitudinalPosition : HullSlice -> Float -> HullSlice
-        shiftSliceLongitudinalPosition slice x =
-            { slice | x = normalize x }
-
-        modifiedSlices : List HullSlice
-        modifiedSlices =
-            List.map2 shiftSliceLongitudinalPosition slicesToShift newXPositions
-
-        allSlices : List HullSlice
-        allSlices =
-            slicesBeforeXminOfAreaCurve ++ modifiedSlices ++ slicesAfterXmaxOfAreaCurve
+        -- slicesToShift : List HullSlice
+        -- slicesToShift =
+        --     List.filter (\slice -> (StringValueInput.round_n 4 slice.x >= xminOfAreaCurve) && (StringValueInput.round_n 4 slice.x <= xmaxOfAreaCurve)) <| getSlices hullSlicesMetrics
     in
-    { hullSlices | slices = allSlices }
+    positionsBeforeXminOfAreaCurve ++ newXPositions ++ positionsAfterXmaxOfAreaCurve
 
 
 resetOriginalSlicesLongitudinalPositions : HullSlices -> HullSlices
@@ -311,7 +299,7 @@ resetOriginalSlicesLongitudinalPositions hullSlices =
     { hullSlices | slices = List.map2 setX hullSlices.slices hullSlices.originalSlicePositions }
 
 
-modifyHullSlicesToMatchTargetPrismaticCoefficient : String -> HullSlices -> HullSlices
+modifyHullSlicesToMatchTargetPrismaticCoefficient : String -> HullSlices -> List Float
 modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlices =
     let
         hullSlicesMetrics : HullSlicesMetrics
@@ -340,5 +328,5 @@ modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlice
                 |> Maybe.map (List.map Tuple.first)
     in
     maybeNewXPositions originalHullSlices
-        |> Maybe.map (modifyLongitudinalPositionOfEachSlice hullSlices originalHullSlices)
-        |> Maybe.withDefault hullSlices
+        |> Maybe.map (getLongitudinalPositionOfEachSlice hullSlices originalHullSlices)
+        |> Maybe.withDefault (List.map .x hullSlices.slices)

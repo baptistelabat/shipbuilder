@@ -6,7 +6,7 @@ module HullSliceModifiers exposing
     , setPrismaticCoefficient
     )
 
-import HullSlices exposing (HullSlices)
+import HullSlices exposing (HullSlice, HullSlices)
 import Lackenby
 import StringValueInput
 
@@ -63,3 +63,22 @@ setPrismaticCoefficient : String -> HullSlices -> HullSlices
 setPrismaticCoefficient prismaticCoefficient hullSlices =
     hullSlices
         |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient
+        |> setLongitudinalPositionOfEachSlice hullSlices
+
+
+setLongitudinalPositionOfEachSlice : HullSlices -> List Float -> HullSlices
+setLongitudinalPositionOfEachSlice hullSlices hullSlicesPosition =
+    let
+        normalize : Float -> Float
+        normalize x =
+            (x - hullSlices.xmin) / hullSlices.length.value
+
+        shiftSliceLongitudinalPosition : HullSlice -> Float -> HullSlice
+        shiftSliceLongitudinalPosition slice x =
+            { slice | x = normalize x }
+
+        modifiedSlices : List HullSlice
+        modifiedSlices =
+            List.map2 shiftSliceLongitudinalPosition hullSlices.slices hullSlicesPosition
+    in
+    { hullSlices | slices = modifiedSlices }
