@@ -19,8 +19,11 @@ setLengthOverAll loa hullSlices =
 
         newCustomHullProperties =
             { oldCustomHullProperties | customLength = oldCustomHullProperties.customLength |> StringValueInput.setString loa }
+
+        updatedHullSlices =
+            { hullSlices | customHullProperties = newCustomHullProperties }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    setLongitudinalPositionOfEachSlice updatedHullSlices updatedHullSlices.customHullProperties.customHullslicesPosition
 
 
 setBreadth : String -> HullSlices -> HullSlices
@@ -31,8 +34,11 @@ setBreadth breadth hullSlices =
 
         newCustomHullProperties =
             { oldCustomHullProperties | customBreadth = oldCustomHullProperties.customBreadth |> StringValueInput.setString breadth }
+
+        updatedHullSlices =
+            { hullSlices | customHullProperties = newCustomHullProperties } |> (\slices -> { slices | ymin = -slices.customHullProperties.customBreadth.value / 2 })
     in
-    { hullSlices | customHullProperties = newCustomHullProperties } |> (\slices -> { slices | ymin = -slices.customHullProperties.customBreadth.value / 2 })
+    setLongitudinalPositionOfEachSlice updatedHullSlices updatedHullSlices.customHullProperties.customHullslicesPosition
 
 
 setDraught : String -> HullSlices -> HullSlices
@@ -43,8 +49,11 @@ setDraught draught hullSlices =
 
         newCustomHullProperties =
             { oldCustomHullProperties | customDraught = oldCustomHullProperties.customDraught |> StringValueInput.setString draught }
+
+        updatedHullSlices =
+            { hullSlices | customHullProperties = newCustomHullProperties }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    setLongitudinalPositionOfEachSlice updatedHullSlices updatedHullSlices.customHullProperties.customHullslicesPosition
 
 
 setDepth : String -> HullSlices -> HullSlices
@@ -55,27 +64,37 @@ setDepth depth hullSlices =
 
         newCustomHullProperties =
             { oldCustomHullProperties | customDepth = oldCustomHullProperties.customDepth |> StringValueInput.setString depth }
+
+        updatedHullSlices =
+            { hullSlices | customHullProperties = newCustomHullProperties }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    setLongitudinalPositionOfEachSlice updatedHullSlices updatedHullSlices.customHullProperties.customHullslicesPosition
 
 
 setPrismaticCoefficient : String -> HullSlices -> HullSlices
 setPrismaticCoefficient prismaticCoefficient hullSlices =
-    hullSlices
-        |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient
-        |> setLongitudinalPositionOfEachSlice hullSlices
+    let
+        hullSlicesPosition =
+            hullSlices |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient
+
+        oldCustomHullProperties =
+            hullSlices.customHullProperties
+
+        newCustomHullProperties =
+            { oldCustomHullProperties | customHullslicesPosition = hullSlicesPosition }
+
+        updatedHullSlices =
+            { hullSlices | customHullProperties = newCustomHullProperties }
+    in
+    setLongitudinalPositionOfEachSlice updatedHullSlices hullSlicesPosition
 
 
 setLongitudinalPositionOfEachSlice : HullSlices -> List Float -> HullSlices
 setLongitudinalPositionOfEachSlice hullSlices hullSlicesPosition =
     let
-        normalize : Float -> Float
-        normalize x =
-            (x - hullSlices.xmin) / hullSlices.length.value
-
         shiftSliceLongitudinalPosition : HullSlice -> Float -> HullSlice
-        shiftSliceLongitudinalPosition slice x =
-            { slice | x = normalize x }
+        shiftSliceLongitudinalPosition slice newX =
+            { slice | x = newX }
 
         modifiedSlices : List HullSlice
         modifiedSlices =

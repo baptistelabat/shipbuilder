@@ -57,6 +57,7 @@ type alias CustomHullProperties =
     , customBreadth : StringValueInput.FloatInput
     , customDepth : StringValueInput.FloatInput
     , customDraught : StringValueInput.FloatInput
+    , customHullslicesPosition : List Float
     }
 
 
@@ -96,6 +97,7 @@ emptyHullSlices =
         , customBreadth = StringValueInput.emptyFloat 1
         , customDepth = StringValueInput.emptyFloat 1
         , customDraught = StringValueInput.emptyFloat 1
+        , customHullslicesPosition = []
         }
     }
 
