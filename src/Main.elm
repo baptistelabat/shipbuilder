@@ -2972,6 +2972,7 @@ viewContent model =
     div [ class "content-wrapper" ]
         [ viewSideMenu model
         , viewWorkspace model
+        , viewCopyright
         ]
 
 
@@ -3103,7 +3104,6 @@ viewPanelMenu : Model -> Html Msg
 viewPanelMenu model =
     div [ class "panel-menu" ]
         [ viewTabs model
-        , viewCopyright
         , viewBuild model
         ]
 

@@ -199,11 +199,13 @@ header .header-menu-item+.header-menu-item {
 }
 
 .copyright-info {
-  width: calc(100% - 8px);
-  font-size: 0.4em;
+  min-width: 200px;
+  font-size: 0.6em;
   color: var(--on-primary-color__muted);
-  margin: 4px;
-  padding: 0;
+  position: absolute;
+  right: 0;
+  left: auto;
+  bottom: 0;
 }
 
 .tab-item {
