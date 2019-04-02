@@ -9,11 +9,11 @@ anthineas.json: ../shipBuilder/assets/anthineas.stl mesh2json.py
 	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f anthineas.stl -o anthineas.json -v --nx 10 --ny 10 -d y- --offset 0.1
 	rm anthineas.stl
 
-OPV.json: ../shipBuilder/assets/OPV.stl mesh2json.py
-	cp ../shipBuilder/assets/OPV.stl .
+OPV.json: ../shipBuilder/assets/OPV2.stl mesh2json.py
+	cp ../shipBuilder/assets/OPV2.stl .
 	docker build -t stl2json .
-	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f OPV.stl -o OPV.json -v --nx 10 --ny 10 -d y- --offset 0.1
-	rm OPV.stl
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f OPV2.stl -o OPV.json -v --nx 10 --ny 10 -d y- --offset 0.1
+	rm OPV2.stl
 
 KCS.json: ../shipBuilder/assets/KCS.stl mesh2json.py
 	cp ../shipBuilder/assets/KCS.stl .
