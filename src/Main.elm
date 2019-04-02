@@ -2951,13 +2951,13 @@ viewHeader model =
             [ class "header-left" ]
             -- groups img and title together for flexbox
             [ img
-                [ src "assets/HOLISHIP_LOGO_Transparent_background.png" ]
+                [ src "assets/NAVAL_GROUP_Logotype_blanc_sur_bleu.png" ]
                 []
             , img
                 [ src "assets/SIREHNA_R.png" ]
                 []
             , img
-                [ src "assets/NAVAL_GROUP_Logotype_blanc_sur_bleu.png" ]
+                [ src "assets/HOLISHIP_LOGO_Transparent_background.png" ]
                 []
             , h1
                 []
