@@ -3100,6 +3100,7 @@ viewPanelMenu : Model -> Html Msg
 viewPanelMenu model =
     div [ class "panel-menu" ]
         [ viewTabs model
+        , viewCopyright
         , viewBuild model
         ]
 
@@ -3176,6 +3177,11 @@ viewTab model tab =
 viewBuild : Model -> Html Msg
 viewBuild model =
     p [ class "build-info" ] [ text model.build ]
+
+
+viewCopyright : Html Msg
+viewCopyright =
+    p [ class "copyright-info" ] [ text "(c) Naval Group / Sirehna 2019 All rights reserved" ]
 
 
 viewPanel : Model -> Html Msg

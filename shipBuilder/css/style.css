@@ -198,6 +198,14 @@ header .header-menu-item+.header-menu-item {
     padding: 0;
 }
 
+.copyright-info {
+  width: calc(100% - 8px);
+  font-size: 0.4em;
+  color: var(--on-primary-color__muted);
+  margin: 4px;
+  padding: 0;
+}
+
 .tab-item {
     display: flex;
     flex-direction: column;
