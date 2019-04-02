@@ -327,4 +327,4 @@ modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlice
     in
     maybeNewXPositions originalHullSlices
         |> Maybe.map (getLongitudinalPositionOfEachSlice hullSlices originalHullSlices)
-        |> Maybe.withDefault (List.map .x hullSlices.slices)
+        |> Maybe.withDefault hullSlices.customHullProperties.customHullslicesPosition
