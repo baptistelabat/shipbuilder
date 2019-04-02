@@ -34,5 +34,11 @@ ROPAX.json: ../shipBuilder/assets/ROPAX_retouche1.stl mesh2json.py
 	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f ROPAX_retouche1.stl -o ROPAX.json -v --nx 10 --ny 10 -d y- --offset 0.1
 	rm ROPAX_retouche1.stl
 
+OSV.json: ../shipBuilder/assets/OSV1.stl mesh2json.py
+	cp ../shipBuilder/assets/OSV1.stl .
+	docker build -t stl2json .
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f OSV1.stl -o OSV.json -v --nx 10 --ny 10 -d y- --offset 0.1
+	rm OSV1.stl
+
 clean:
 	rm *.json
