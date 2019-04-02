@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-all: anthineas.json OPV.json KCS.json DTMB_5415.json ROPAX.json
+all: MPOV.json ROPAX.json OSV.json OPV.json
 
 
 anthineas.json: ../shipBuilder/assets/anthineas.stl mesh2json.py
