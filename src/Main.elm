@@ -2956,6 +2956,9 @@ viewHeader model =
             , img
                 [ src "assets/SIREHNA_R.png" ]
                 []
+            , img
+                [ src "assets/NAVAL_GROUP_Logotype_blanc_sur_bleu.png" ]
+                []
             , h1
                 []
                 [ text "ShipBuilder" ]
