@@ -1,5 +1,6 @@
 module HullSliceModifiers exposing
-    ( setBreadth
+    ( resetSlicesToOriginals
+    , setBreadth
     , setDepth
     , setDraught
     , setLengthOverAll
@@ -7,6 +8,7 @@ module HullSliceModifiers exposing
     )
 
 import HullSlices exposing (HullSlice, HullSlices)
+import HullSlicesMetrics exposing (HullSlicesMetrics, fillHullSliceMetrics, getSlices)
 import Lackenby
 import StringValueInput
 
@@ -72,3 +74,18 @@ setPrismaticCoefficient prismaticCoefficient hullSlices =
             { oldCustomHullProperties | customHullslicesPosition = hullSlicesPosition }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
+
+
+resetSlicesToOriginals : HullSlices -> HullSlices
+resetSlicesToOriginals hullSlices =
+    let
+        originalCustomHullProperties : HullSlices.CustomHullProperties
+        originalCustomHullProperties =
+            { customLength = hullSlices.length
+            , customBreadth = hullSlices.breadth
+            , customDepth = hullSlices.depth
+            , customDraught = hullSlices.draught
+            , customHullslicesPosition = hullSlices.originalSlicePositions
+            }
+    in
+    { hullSlices | customHullProperties = originalCustomHullProperties } |> (\slices -> { slices | ymin = -slices.customHullProperties.customBreadth.value / 2 })
