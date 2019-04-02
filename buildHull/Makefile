@@ -27,7 +27,7 @@ DTMB_5415.json: ../shipBuilder/assets/DTMB_5415.stl mesh2json.py
 	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f DTMB_5415.stl -o DTMB_5415.json -v --nx 10 --ny 10 -d y- --offset 0.1
 	rm DTMB_5415.stl
 
-# ROPAX1.stl is ROPAX.stl with z down
+# ROPAX_retouche1.stl is ROPAX_retouche1.stl with z down
 ROPAX.json: ../shipBuilder/assets/ROPAX_retouche1.stl mesh2json.py
 	cp ../shipBuilder/assets/ROPAX_retouche1.stl .
 	docker build -t stl2json .
