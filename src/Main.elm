@@ -678,7 +678,11 @@ encodeRestoreSaveCmd model =
                             Encode.string ""
 
                         Just hullSlices ->
-                            EncodersDecoders.encoder hullSlices
+                            let
+                                hullSlicesToConstruct =
+                                    setLongitudinalPositionOfEachSlice hullSlices
+                            in
+                            EncodersDecoders.encoder hullSlicesToConstruct
     in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
@@ -2755,7 +2759,11 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
+                    let
+                        hullSlicesToConstruct =
+                            setLongitudinalPositionOfEachSlice hullSlices
+                    in
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
 
         ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
