@@ -17,6 +17,7 @@ module HullSlices exposing
     , emptyHullSlices
     , extractY
     , getInertialMoment
+    , hullSlicesToBuildInJs
     , integrate
     , scale
     , setLongitudinalPositionOfEachSlice
@@ -602,18 +603,35 @@ denormalizeHullSlice param hs =
     res
 
 
-setLongitudinalPositionOfEachSlice : HullSlices -> HullSlices
+setLongitudinalPositionOfEachSlice : HullSlices -> List HullSlice
 setLongitudinalPositionOfEachSlice hullSlices =
     let
         shiftSliceLongitudinalPosition : HullSlice -> Float -> HullSlice
         shiftSliceLongitudinalPosition slice newX =
             { slice | x = newX }
-
-        modifiedSlices : List HullSlice
-        modifiedSlices =
-            List.map2 shiftSliceLongitudinalPosition hullSlices.slices hullSlices.customHullProperties.customHullslicesPosition
     in
-    { hullSlices | slices = modifiedSlices }
+    List.map2 shiftSliceLongitudinalPosition hullSlices.slices hullSlices.customHullProperties.customHullslicesPosition
+
+
+hullSlicesToBuildInJs : HullSlices -> HullSlices
+hullSlicesToBuildInJs hullSlices =
+    { length = hullSlices.customHullProperties.customLength
+    , breadth = hullSlices.customHullProperties.customBreadth
+    , depth = hullSlices.customHullProperties.customDepth
+    , xmin = hullSlices.xmin
+    , ymin = hullSlices.ymin
+    , zmin = hullSlices.zmin
+    , slices = setLongitudinalPositionOfEachSlice hullSlices
+    , originalSlicePositions = []
+    , draught = hullSlices.customHullProperties.customDraught
+    , customHullProperties =
+        { customLength = StringValueInput.emptyFloat 1
+        , customBreadth = StringValueInput.emptyFloat 1
+        , customDepth = StringValueInput.emptyFloat 1
+        , customDraught = StringValueInput.emptyFloat 1
+        , customHullslicesPosition = []
+        }
+    }
 
 
 calculateSliceArea : HullSlices -> HullSlice -> Float

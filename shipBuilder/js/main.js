@@ -464,9 +464,9 @@ let unloadHull = function () {
 }
 
 let buildHullGeometry = function ( json ) {
-    var H = json.customHullProperties.customDepth;
-    var B = json.customHullProperties.customBreadth;
-    var L = json.customHullProperties.customLength;
+    var H = json.depth;
+    var B = json.breadth;
+    var L = json.length;
     var xmin = json['xmin'];
     var ymin = (-json.customHullProperties.customBreadth / 2);
     var zmin = json['zmin'];
@@ -608,7 +608,7 @@ let loadHull = function (json) {
         hull.sbType = "hull";
         scene.add(hull);
 
-        var zWaterLine = (json.customHullProperties.customDepth + json.zmin) - json.customHullProperties.customDraught;
+        var zWaterLine = (json.depth + json.zmin) - json.draught;
         makeWaterLine(zWaterLine);
 }
 

@@ -54,7 +54,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
-import HullSlices exposing (HullSlices, setLongitudinalPositionOfEachSlice)
+import HullSlices exposing (HullSlices, hullSlicesToBuildInJs)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -678,11 +678,7 @@ encodeRestoreSaveCmd model =
                             Encode.string ""
 
                         Just hullSlices ->
-                            let
-                                hullSlicesToConstruct =
-                                    setLongitudinalPositionOfEachSlice hullSlices
-                            in
-                            EncodersDecoders.encoder hullSlicesToConstruct
+                            EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices
     in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
@@ -2763,11 +2759,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    let
-                        hullSlicesToConstruct =
-                            setLongitudinalPositionOfEachSlice hullSlices
-                    in
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
 
         ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
@@ -2775,11 +2767,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    let
-                        hullSlicesToConstruct =
-                            setLongitudinalPositionOfEachSlice hullSlices
-                    in
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
 
         ResetSlice hullReference ->
             case Dict.get hullReference model.slices of
