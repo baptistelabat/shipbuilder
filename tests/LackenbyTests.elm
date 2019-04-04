@@ -3,8 +3,8 @@ module LackenbyTests exposing (suite)
 import CustomFuzzers exposing (..)
 import Expect exposing (..)
 import Fuzz
-import HullSliceModifiers exposing (empty)
-import HullSlices exposing (HullSlices)
+import HullSlices exposing (HullSlices, integrate)
+import HullSlicesMetrics exposing (HullSlicesMetrics, fillHullSliceMetrics)
 import Lackenby
 import StringValueInput
 import Test exposing (..)
@@ -48,12 +48,12 @@ suite =
     describe "Lackenby"
         [ test "Can calculate prismatic coefficient" <|
             \_ ->
-                Lackenby.computePrismaticCoefficient (TestData.mpov 1 |> HullSlices.addAreaAndDisplacement)
-                    |> Maybe.withDefault 999999
+                HullSlicesMetrics.getPrismaticCoefficient (TestData.mpov 1 |> fillHullSliceMetrics)
+                    |> .value
                     |> Expect.within (Absolute 1.0e-2) (48.96 / (1.0035516256104178 * 69.6 * 2))
         , test "Can get master cross section of Anthineas" <|
             \_ ->
-                Lackenby.getMasterCrossSection (TestData.anthineas |> HullSlices.addAreaAndDisplacement)
+                HullSlicesMetrics.getMasterCrossSection (TestData.anthineas |> fillHullSliceMetrics)
                     |> Maybe.map .x
                     |> Maybe.withDefault 999999
                     |> Expect.within epsAbsolute 9.133333333
@@ -61,13 +61,12 @@ suite =
             \_ ->
                 Lackenby.lackenby 0.03 69.6 40 [ ( 1, 10 ), ( 3, 30 ), ( 4, 40 ), ( 4.5, 12 ), ( 6, 1 ) ]
                     |> Result.withDefault []
-                    |> HullSlices.integrate
+                    |> integrate
                     |> (*) (1 / (69.6 * 40))
                     |> Expect.within (Absolute 1.0e-2) 0.03
         , test "Have same amount of slices before and after updating prismatic coefficient on MPOV" <|
             \_ ->
-                Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient (TestData.mpov 1.5)
-                    |> .slices
+                Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient "1.5" TestData.anthineas
                     |> List.length
                     |> Expect.equal 10
         ]

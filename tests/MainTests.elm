@@ -12,6 +12,7 @@ import Html.Attributes as Attributes
 import HullReferences
 import HullSliceModifiers
 import HullSlices
+import HullSlicesMetrics exposing (fillHullSliceMetrics, getBlockCoefficient, getCenterOfBuoyancy, getDisplacement, getMetacentre)
 import Json.Decode as Decode exposing (Decoder, decodeString, decodeValue)
 import Json.Encode as Encode exposing (encode)
 import Main exposing (..)
@@ -604,7 +605,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "1.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.displacement >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getDisplacement >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 1.0 and verify block coefficient" <|
             \_ ->
@@ -612,7 +614,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "1.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getBlockCoefficient >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 1.0 and verify KB" <|
             \_ ->
@@ -620,7 +623,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "1.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getCenterOfBuoyancy >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 1.0 and verify KM" <|
             \_ ->
@@ -628,7 +632,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "1.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getMetacentre >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 2.0 and verify displacement" <|
             \_ ->
@@ -636,7 +641,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "2.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.displacement >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getDisplacement >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 2.0 and verify block coefficient" <|
             \_ ->
@@ -644,7 +650,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "2.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getBlockCoefficient >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 2.0 and verify KB" <|
             \_ ->
@@ -652,7 +659,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "2.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getCenterOfBuoyancy >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 2.0 and verify KM" <|
             \_ ->
@@ -660,7 +668,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "2.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getMetacentre >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 3.0 and verify displacement" <|
             \_ ->
@@ -668,7 +677,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "3.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.displacement >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getDisplacement >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 3.0 and verify block coefficient" <|
             \_ ->
@@ -676,7 +686,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "3.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getBlockCoefficient >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 3.0 and verify KB" <|
             \_ ->
@@ -684,7 +695,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "3.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getCenterOfBuoyancy >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 3.0 and verify KM" <|
             \_ ->
@@ -692,7 +704,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "3.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getMetacentre >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 4.0 and verify displacement" <|
             \_ ->
@@ -700,7 +713,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "4.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.displacement >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getDisplacement >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 4.0 and verify block coefficient" <|
             \_ ->
@@ -708,7 +722,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "4.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getBlockCoefficient >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 4.0 and verify KB" <|
             \_ ->
@@ -716,7 +731,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "4.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getCenterOfBuoyancy >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 4.0 and verify KM" <|
             \_ ->
@@ -724,7 +740,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "4.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getMetacentre >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 5.0 and verify displacement" <|
             \_ ->
@@ -732,7 +749,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "5.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.displacement >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getDisplacement >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 5.0 and verify block coefficient" <|
             \_ ->
@@ -740,7 +758,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "5.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getBlockCoefficient >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 5.0 and verify KB" <|
             \_ ->
@@ -748,7 +767,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "5.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getCenterOfBuoyancy >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 5.0 and verify KM" <|
             \_ ->
@@ -756,7 +776,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "5.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getMetacentre >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 6.0 and verify displacement" <|
             \_ ->
@@ -764,7 +785,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "6.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.displacement >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getDisplacement >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 6.0 and verify block coefficient" <|
             \_ ->
@@ -772,7 +794,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "6.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.blockCoefficient >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getBlockCoefficient >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 6.0 and verify KB" <|
             \_ ->
@@ -780,7 +803,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "6.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.centreOfBuoyancy >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getCenterOfBuoyancy >> StringValueInput.round_n 2)
                     )
         , test "select mpov. set draught to 6.0 and verify KM" <|
             \_ ->
@@ -788,7 +812,8 @@ integrationtestsOnMPOV =
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "mpov" "6.0" ]
                         |> .slices
                         |> Dict.get "mpov"
-                        |> Maybe.map (.metacentre >> StringValueInput.round_n 2)
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map (getMetacentre >> StringValueInput.round_n 2)
                     )
         ]
 
@@ -828,6 +853,27 @@ parseJSONSlices =
                     , 0.742320749879794
                     ]
                 )
+        , test "Can parse 'customLength'" <|
+            testHullSliceDecoding (.customHullProperties >> .customLength >> .value) 22.8
+        , test "Can parse 'customBreadth'" <|
+            testHullSliceDecoding (.customHullProperties >> .customBreadth >> .value) 6.9
+        , test "Can parse 'customDepth'" <|
+            testHullSliceDecoding (.customHullProperties >> .customDepth >> .value) 6.8
+        , test "Can parse 'customDraught'" <|
+            testHullSliceDecoding (.customHullProperties >> .customDraught >> .value) 1.4
+        , test "Can parse 'customHullslicesPosition'" <|
+            testHullSliceDecoding (.customHullProperties >> .customHullslicesPosition)
+                [ 0.00437713372412022
+                , 0.1111111111111111
+                , 0.2222222222222222
+                , 0.3333333333333333
+                , 0.4444444444444444
+                , 0.5555555555555556
+                , 0.6666666666666666
+                , 0.7777777777777778
+                , 0.8888888888888888
+                , 0.9956228662758797
+                ]
         ]
 
 
@@ -866,6 +912,27 @@ encodeJSONTests =
                     , 0.742320749879794
                     ]
                 )
+        , test "Can encode 'customLength'" <|
+            testHullSliceEncoding (.customHullProperties >> .customLength >> .value) 22.8
+        , test "Can encode 'customBreadth'" <|
+            testHullSliceEncoding (.customHullProperties >> .customBreadth >> .value) 6.9
+        , test "Can encode 'customDepth'" <|
+            testHullSliceEncoding (.customHullProperties >> .customDepth >> .value) 6.8
+        , test "Can encode 'customDraught'" <|
+            testHullSliceEncoding (.customHullProperties >> .customDraught >> .value) 1.4
+        , test "Can encode 'customHullslicesPosition'" <|
+            testHullSliceEncoding (.customHullProperties >> .customHullslicesPosition)
+                [ 0.00437713372412022
+                , 0.1111111111111111
+                , 0.2222222222222222
+                , 0.3333333333333333
+                , 0.4444444444444444
+                , 0.5555555555555556
+                , 0.6666666666666666
+                , 0.7777777777777778
+                , 0.8888888888888888
+                , 0.9956228662758797
+                ]
         ]
 
 

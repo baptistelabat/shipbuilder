@@ -3,6 +3,7 @@ module AreaCurve exposing (view)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id)
 import HullSlices exposing (HullSlices)
+import HullSlicesMetrics exposing (HullSlicesMetrics, getCentroidAreaForEachImmersedSlice)
 import LineChart
 import LineChart.Area as Area
 import LineChart.Axis as Axis
@@ -18,12 +19,12 @@ import LineChart.Legends as Legends
 import LineChart.Line as Line
 
 
-view : HullSlices -> Html msg
+view : HullSlicesMetrics -> Html msg
 view slices =
     let
         xys : List ( Float, Float )
         xys =
-            List.map (\c -> ( c.x, c.area )) slices.centroidAreaForEachImmersedSlice
+            List.map (\c -> ( c.x, c.area )) <| getCentroidAreaForEachImmersedSlice slices
     in
     div [ id "area-curve-plot-container" ]
         [ LineChart.viewCustom

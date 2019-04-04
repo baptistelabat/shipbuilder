@@ -54,7 +54,17 @@ import Html.Attributes exposing (accept, class, disabled, download, for, href, i
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
-import HullSlices exposing (HullSlices)
+import HullSlices exposing (HullSlices, setLongitudinalPositionOfEachSlice)
+import HullSlicesMetrics
+    exposing
+        ( HullSlicesMetrics
+        , fillHullSliceMetrics
+        , getBlockCoefficient
+        , getCenterOfBuoyancy
+        , getDisplacement
+        , getMetacentre
+        , getPrismaticCoefficient
+        )
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
@@ -128,7 +138,9 @@ type alias SyncSize =
 
 
 type alias SaveFile =
-    { blocks : List Block
+    { selectedHullReference : Maybe String
+    , hulls : Dict ShipName HullSlices.HullSlices
+    , blocks : List Block
     , coordinatesTransform : List Float
     , partitions : PartitionsData
     , tags : Tags
@@ -139,6 +151,8 @@ type alias SaveFile =
 saveFileDecoderV1 : Decode.Decoder SaveFile
 saveFileDecoderV1 =
     Decode.succeed SaveFile
+        |> Pipeline.optional "selectedHullReference" (Decode.map Just Decode.string) Nothing
+        |> Pipeline.optional "hulls" EncodersDecoders.dictDecoder Dict.empty
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.hardcoded initPartitions
@@ -149,6 +163,8 @@ saveFileDecoderV1 =
 saveFileDecoderV2 : Decode.Decoder SaveFile
 saveFileDecoderV2 =
     Decode.succeed SaveFile
+        |> Pipeline.optional "selectedHullReference" (Decode.map Just Decode.string) Nothing
+        |> Pipeline.optional "hulls" EncodersDecoders.dictDecoder Dict.empty
         |> Pipeline.required "blocks" decodeBlocks
         |> Pipeline.required "coordinatesTransform" (Decode.list Decode.float)
         |> Pipeline.required "partitions" decodePartitions
@@ -585,6 +601,12 @@ restoreSaveInModel model saveFile =
         maybeCoordinatesTransform =
             CoordinatesTransform.fromList saveFile.coordinatesTransform
 
+        savedSelectedHullReference =
+            saveFile.selectedHullReference
+
+        savedHull =
+            saveFile.hulls
+
         savedBlocks =
             listOfBlocksToBlocks saveFile.blocks
 
@@ -609,6 +631,8 @@ restoreSaveInModel model saveFile =
             { cleanModel
               -- resets focused block and selections
                 | currentDate = model.currentDate
+                , selectedHullReference = savedSelectedHullReference
+                , slices = savedHull
                 , blocks = savedBlocks
                 , coordinatesTransform = savedCoordinatesTransform
                 , partitions = partitions
@@ -642,9 +666,28 @@ restoreSaveCmd model =
 
 encodeRestoreSaveCmd : Model -> Encode.Value
 encodeRestoreSaveCmd model =
+    let
+        currentHullSlices =
+            case model.selectedHullReference of
+                Nothing ->
+                    Encode.string ""
+
+                Just hullName ->
+                    case Dict.get hullName model.slices of
+                        Nothing ->
+                            Encode.string ""
+
+                        Just hullSlices ->
+                            let
+                                hullSlicesToConstruct =
+                                    setLongitudinalPositionOfEachSlice hullSlices
+                            in
+                            EncodersDecoders.encoder hullSlicesToConstruct
+    in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
+        , ( "hull", currentHullSlices )
         , ( "blocks", encodeBlocks model.blocks )
         , ( "showingPartitions", Encode.bool model.partitions.showing )
         , ( "decks", encodeComputedPartitions <| computeDecks model.partitions.decks )
@@ -1043,12 +1086,24 @@ encodeModelForSave : Model -> Encode.Value
 encodeModelForSave model =
     Encode.object
         [ ( "version", Encode.int 2 )
+        , ( "selectedHullReference", encodeselectedHullReference model )
+        , ( "hulls", EncodersDecoders.dictEncoder model.slices )
         , ( "blocks", encodeBlocks model.blocks )
         , ( "coordinatesTransform", CoordinatesTransform.encode model.coordinatesTransform )
         , ( "partitions", encodePartitions model.partitions )
         , ( "tags", encodeTags model.tags )
         , ( "customProperties", encodeCustomProperties model.customProperties )
         ]
+
+
+encodeselectedHullReference : Model -> Encode.Value
+encodeselectedHullReference model =
+    case model.selectedHullReference of
+        Just hullName ->
+            Encode.string hullName
+
+        Nothing ->
+            Encode.string ""
 
 
 encodeCustomProperties : List CustomProperty -> Encode.Value
@@ -2625,7 +2680,7 @@ msg2json model action =
                             hullSlices.zmin + hullSlices.depth.value - hullSlices.draught.value
 
                         intersectBelowSlicesZY =
-                            HullSlices.intersectBelow zAtDraught_ hullSlices
+                            HullSlicesMetrics.intersectBelow zAtDraught_ <| fillHullSliceMetrics hullSlices
                     in
                     Just { tag = "export-submodel", data = EncodersDecoders.encodeSubModel intersectBelowSlicesZY }
 
@@ -2704,7 +2759,11 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
+                    let
+                        hullSlicesToConstruct =
+                            setLongitudinalPositionOfEachSlice hullSlices
+                    in
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
 
         ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
@@ -2712,7 +2771,11 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
+                    let
+                        hullSlicesToConstruct =
+                            setLongitudinalPositionOfEachSlice hullSlices
+                    in
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3276,23 +3339,28 @@ viewModeller model =
     let
         viewSlices : ( String, HullSlices ) -> Maybe (Html Msg)
         viewSlices ( hullReference, slices ) =
+            let
+                hullSlicesMetrics : HullSlicesMetrics
+                hullSlicesMetrics =
+                    HullSlicesMetrics.fillHullSliceMetrics slices
+            in
             if model.selectedHullReference == Just hullReference then
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ StringValueInput.view slices.length <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
-                        , StringValueInput.view slices.breadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
-                        , StringValueInput.view slices.depth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
-                        , StringValueInput.view slices.draught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
-                        , StringValueInput.view slices.prismaticCoefficient <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
+                        [ StringValueInput.view slices.customHullProperties.customLength <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
+                        , StringValueInput.view slices.customHullProperties.customBreadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
+                        , StringValueInput.view slices.customHullProperties.customDepth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
+                        , StringValueInput.view slices.customHullProperties.customDraught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
+                        , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
-                            , AreaCurve.view slices
-                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 slices.displacement)
-                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 slices.blockCoefficient)
-                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| slices.centreOfBuoyancy)
-                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 <| slices.metacentre)
+                            , AreaCurve.view hullSlicesMetrics
+                            , viewModellerSimpleKpi "Displacement (m3)" "displacement" (StringValueInput.round_n -1 <| getDisplacement hullSlicesMetrics)
+                            , viewModellerSimpleKpi "Block Coefficient Cb" "block-coefficient" (StringValueInput.round_n 2 <| getBlockCoefficient hullSlicesMetrics)
+                            , viewModellerSimpleKpi "KB" "KB" (StringValueInput.round_n 1 <| getCenterOfBuoyancy hullSlicesMetrics)
+                            , viewModellerSimpleKpi "KM" "KM" (StringValueInput.round_n 1 <| getMetacentre hullSlicesMetrics)
                             , button
                                 [ id "exportCSV"
                                 , value "exportCSV"

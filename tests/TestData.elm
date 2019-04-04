@@ -20,8 +20,8 @@ module TestData exposing
 import Color
 import Dict
 import Html exposing (Html)
-import HullSliceModifiers exposing (empty)
-import HullSlices exposing (HullSlices)
+import HullSliceModifiers
+import HullSlices exposing (HullSlices, emptyHullSlices)
 import Json.Encode as Encode
 import Main exposing (..)
 import Math.Vector3 exposing (..)
@@ -34,8 +34,7 @@ anthineas =
     initialModel
         |> .slices
         |> Dict.get "anthineas"
-        |> Maybe.withDefault empty
-        |> HullSliceModifiers.fillHullSliceMetrics
+        |> Maybe.withDefault emptyHullSlices
 
 
 mpov : Float -> HullSlices
@@ -43,13 +42,13 @@ mpov draught =
     initialModel
         |> .slices
         |> Dict.get "mpov"
-        |> Maybe.withDefault empty
+        |> Maybe.withDefault emptyHullSlices
         |> HullSliceModifiers.setDraught (String.fromFloat draught)
 
 
 cube : HullSlices.HullSlices
 cube =
-    { empty
+    { emptyHullSlices
         | length = StringValueInput.floatInput 1 200
         , breadth = StringValueInput.floatInput 1 20
         , depth = StringValueInput.floatInput 1 10
@@ -74,13 +73,19 @@ cube =
               }
             ]
         , draught = StringValueInput.floatInput 1 2
+        , customHullProperties =
+            { customLength = StringValueInput.floatInput 1 200
+            , customBreadth = StringValueInput.floatInput 1 20
+            , customDepth = StringValueInput.floatInput 1 10
+            , customDraught = StringValueInput.floatInput 1 2
+            , customHullslicesPosition = [ 0, 0.5, 1 ]
+            }
     }
-        |> HullSliceModifiers.fillHullSliceMetrics
 
 
-toblerone : Float -> Float -> HullSlices.HullSlices
-toblerone breadth depth =
-    { empty
+toblerone : Float -> Float -> Float -> HullSlices.HullSlices
+toblerone breadth depth draught =
+    { emptyHullSlices
         | length = StringValueInput.floatInput 1 200
         , breadth = StringValueInput.floatInput 1 breadth
         , depth = StringValueInput.floatInput 1 depth
@@ -104,9 +109,15 @@ toblerone breadth depth =
               , y = [ 1, 0.75, 0.5 ]
               }
             ]
-        , draught = StringValueInput.floatInput 1 2
+        , draught = StringValueInput.floatInput 1 draught
+        , customHullProperties =
+            { customLength = StringValueInput.floatInput 1 200
+            , customBreadth = StringValueInput.floatInput 1 breadth
+            , customDepth = StringValueInput.floatInput 1 depth
+            , customDraught = StringValueInput.floatInput 1 draught
+            , customHullslicesPosition = [ 0, 0.5, 1 ]
+            }
     }
-        |> HullSliceModifiers.fillHullSliceMetrics
 
 
 valueToIndentedString : Encode.Value -> String
@@ -356,6 +367,24 @@ hullSliceJson =
         ],
     "xmin": -1.0,
     "ymin": -3.4467999935150146,
-    "zmin": -6.146999835968018
+    "zmin": -6.146999835968018,
+    "customHullProperties": {
+                "customLength": 22.8,
+                "customBreadth": 6.9,
+                "customDepth": 6.8,
+                "customDraught": 1.4,
+                "customHullslicesPosition": [
+                    0.00437713372412022,
+                    0.1111111111111111,
+                    0.2222222222222222,
+                    0.3333333333333333,
+                    0.4444444444444444,
+                    0.5555555555555556,
+                    0.6666666666666666,
+                    0.7777777777777778,
+                    0.8888888888888888,
+                    0.9956228662758797
+                ]
+          }
     }
     """
