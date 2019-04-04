@@ -686,7 +686,15 @@ p.text-muted {
 
 .modeller-actions {
     display: flex;
+    height: 0px;
     align-items: center;
+}
+
+.reset-button button {
+    font-size: 11px;
+    padding: 5px;
+    padding-left: 7px;
+    padding-right: 7px;
 }
 
 .text-button {

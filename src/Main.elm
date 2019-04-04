@@ -50,7 +50,7 @@ import ExtraEvents exposing (onKeyDown)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
 import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p, sub, text, ul)
-import Html.Attributes exposing (accept, attribute, class, disabled, download, for, href, id, name, placeholder, src, style, title, type_, value)
+import Html.Attributes exposing (accept, attribute, class, disabled, download, for, hidden, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
@@ -3452,10 +3452,11 @@ resetHullSlices model =
         [ class "reset-button" ]
         [ button
             [ id "buttonReset"
-            , disabled isCustom
+            , hidden isCustom
             , onClick <| ToJs <| ResetSlice hullReference
+            , title "Reset parameters to origin"
             ]
-            [ text "reset" ]
+            [ text "Reset" ]
         ]
 
 

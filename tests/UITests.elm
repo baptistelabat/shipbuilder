@@ -1076,7 +1076,7 @@ modellerTests =
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.id "buttonReset" ]
                     |> Query.first
-                    |> Query.has [ Selector.attribute <| Attributes.disabled True ]
+                    |> Query.has [ Selector.attribute <| Attributes.hidden True ]
         , test "Active reset button when customization" <|
             \_ ->
                 setView
@@ -1087,7 +1087,7 @@ modellerTests =
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.id "buttonReset" ]
                     |> Query.first
-                    |> Query.has [ Selector.attribute <| Attributes.disabled False ]
+                    |> Query.has [ Selector.attribute <| Attributes.hidden False ]
         , test "Disabled reset button when no hull selected" <|
             \_ ->
                 setView
@@ -1095,5 +1095,5 @@ modellerTests =
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.id "buttonReset" ]
                     |> Query.first
-                    |> Query.has [ Selector.attribute <| Attributes.disabled True ]
+                    |> Query.has [ Selector.attribute <| Attributes.hidden True ]
         ]
