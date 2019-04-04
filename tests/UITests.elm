@@ -905,7 +905,20 @@ kpiTests =
 
 modellerTests =
     describe "Modeller" <|
-        [ test "Length over all input is present" <|
+        [ test "Title has selected hull's name" <|
+            \_ ->
+                modellerView
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.class "modeller-panel-title" ]
+                    |> Query.has [ Selector.text "anthineas" ]
+        , test "Title display 'No hull' message when no hull selected" <|
+            \_ ->
+                setView
+                    [ ToJs <| SwitchViewMode <| Modeller ]
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.class "modeller-panel-title" ]
+                    |> Query.has [ Selector.text "No hull selected" ]
+        , test "Length over all input is present" <|
             \_ ->
                 modellerView
                     |> Query.fromHtml
