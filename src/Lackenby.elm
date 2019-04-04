@@ -282,7 +282,7 @@ getLongitudinalPositionOfEachSlice hullSlices hullSlicesMetrics newXPositions =
         positionsAfterXmaxOfAreaCurve =
             List.map .x (List.filter (\slice -> StringValueInput.round_n 4 slice.x > xmaxOfAreaCurve) <| getSlices hullSlicesMetrics)
     in
-    (positionsBeforeXminOfAreaCurve ++ newXPositions ++ positionsAfterXmaxOfAreaCurve) |> List.map normalize
+    positionsBeforeXminOfAreaCurve ++ List.map normalize newXPositions ++ positionsAfterXmaxOfAreaCurve
 
 
 resetOriginalSlicesLongitudinalPositions : HullSlices -> HullSlices
