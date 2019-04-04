@@ -3451,7 +3451,8 @@ resetHullSlices model =
     div
         [ class "reset-button" ]
         [ button
-            [ disabled isCustom
+            [ id "buttonReset"
+            , disabled isCustom
             , onClick <| ToJs <| ResetSlice hullReference
             ]
             [ text "reset" ]
