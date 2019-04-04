@@ -49,12 +49,12 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
 
     def test_block_coefficient_changes_with_draught(self):
         self.click_on_hull_studio()
-        self.click_on_hull('anthineas')
+        self.click_on_hull('MPOV')
         self.click_on_modeller()
-        self.assertEqual("0.14", self.get_block_coefficient())
+        self.assertEqual("0.16", self.get_block_coefficient())
         self.driver.find_element_by_id("draught").send_keys(Keys.UP)
         self.driver.find_element_by_id("draught").send_keys(Keys.UP)
-        self.assertEqual("0.4", self.get_block_coefficient())
+        self.assertEqual("0.33", self.get_block_coefficient())
 
     def test_126_calcul_du_kb(self):
         self.click_on_hull_studio()

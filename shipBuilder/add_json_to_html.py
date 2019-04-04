@@ -1,6 +1,6 @@
 import json
 
-names = ['anthineas', 'KCS', 'OPV', 'MPOV']
+names = ['MPOV', 'OPV', 'OSV', 'ROPAX']
 data = {}
 for name in names:
     with open(name + '.json') as f:

@@ -2951,7 +2951,13 @@ viewHeader model =
             [ class "header-left" ]
             -- groups img and title together for flexbox
             [ img
+                [ src "assets/NAVAL_GROUP_Logotype_blanc_sur_bleu.png" ]
+                []
+            , img
                 [ src "assets/SIREHNA_R.png" ]
+                []
+            , img
+                [ src "assets/HOLISHIP_LOGO_Transparent_background.png" ]
                 []
             , h1
                 []
@@ -2966,6 +2972,7 @@ viewContent model =
     div [ class "content-wrapper" ]
         [ viewSideMenu model
         , viewWorkspace model
+        , viewCopyright
         ]
 
 
@@ -3173,6 +3180,11 @@ viewTab model tab =
 viewBuild : Model -> Html Msg
 viewBuild model =
     p [ class "build-info" ] [ text model.build ]
+
+
+viewCopyright : Html Msg
+viewCopyright =
+    p [ class "copyright-info" ] [ text "(c) Naval Group / Sirehna 2019 All rights reserved" ]
 
 
 viewPanel : Model -> Html Msg
