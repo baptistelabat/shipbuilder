@@ -3431,7 +3431,22 @@ resetHullSlices model =
                     True
 
                 Just hullSlices ->
-                    False
+                    if
+                        hullSlices.length.value
+                            == hullSlices.customHullProperties.customLength.value
+                            && hullSlices.breadth.value
+                            == hullSlices.customHullProperties.customBreadth.value
+                            && hullSlices.depth.value
+                            == hullSlices.customHullProperties.customDepth.value
+                            && hullSlices.draught.value
+                            == hullSlices.customHullProperties.customDraught.value
+                            && List.map .x hullSlices.slices
+                            == hullSlices.customHullProperties.customHullslicesPosition
+                    then
+                        True
+
+                    else
+                        False
     in
     div
         [ class "reset-button" ]
