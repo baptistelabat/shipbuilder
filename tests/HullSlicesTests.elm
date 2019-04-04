@@ -177,6 +177,40 @@ suite =
                     (HullSliceModifiers.setBreadth "7" hullSlices |> .ymin)
                         |> Expect.within epsAbsolute -3.5
             ]
+        , describe "Reset"
+            [ test "Can reset length over all" <|
+                \_ ->
+                    Expect.equal { value = 22.8, string = "22.8", description = "Length over all", unit = "m", nbOfDigits = 1 }
+                        (HullSliceModifiers.setLengthOverAll "1" hullSlices
+                            |> HullSliceModifiers.resetSlicesToOriginals
+                            |> .customHullProperties
+                            |> .customLength
+                        )
+            , test "Can reset breadth" <|
+                \_ ->
+                    Expect.equal { value = 6.9, string = "6.9", description = "Breadth", unit = "m", nbOfDigits = 1 }
+                        (HullSliceModifiers.setLengthOverAll "1" hullSlices
+                            |> HullSliceModifiers.resetSlicesToOriginals
+                            |> .customHullProperties
+                            |> .customBreadth
+                        )
+            , test "Can reset depth" <|
+                \_ ->
+                    Expect.equal { value = 6.8, string = "6.8", description = "Depth", unit = "m", nbOfDigits = 1 }
+                        (HullSliceModifiers.setLengthOverAll "1" hullSlices
+                            |> HullSliceModifiers.resetSlicesToOriginals
+                            |> .customHullProperties
+                            |> .customDepth
+                        )
+            , test "Can reset draught" <|
+                \_ ->
+                    Expect.equal { value = 1.4, string = "1.4", description = "Draught", unit = "m", nbOfDigits = 1 }
+                        (HullSliceModifiers.setLengthOverAll "1" hullSlices
+                            |> HullSliceModifiers.resetSlicesToOriginals
+                            |> .customHullProperties
+                            |> .customDraught
+                        )
+            ]
         , describe "Area"
             [ test "Can calculate slice areas" <|
                 \_ ->
