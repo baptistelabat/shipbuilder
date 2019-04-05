@@ -1070,4 +1070,30 @@ modellerTests =
                         |> Dict.get "anthineas"
                         |> Maybe.map (.customHullProperties >> .customDepth >> .value)
                     )
+        , test "Disabled reset button when no customization" <|
+            \_ ->
+                modellerView
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "buttonReset" ]
+                    |> Query.first
+                    |> Query.has [ Selector.attribute <| Attributes.hidden True ]
+        , test "Active reset button when customization" <|
+            \_ ->
+                setView
+                    [ ToJs <| SelectHullReference "anthineas"
+                    , ToJs <| SwitchViewMode <| Modeller
+                    , ToJs <| ModifySlice HullSliceModifiers.setDepth "anthineas" "123.4"
+                    ]
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "buttonReset" ]
+                    |> Query.first
+                    |> Query.has [ Selector.attribute <| Attributes.hidden False ]
+        , test "Disabled reset button when no hull selected" <|
+            \_ ->
+                setView
+                    [ ToJs <| SwitchViewMode <| Modeller ]
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "buttonReset" ]
+                    |> Query.first
+                    |> Query.has [ Selector.attribute <| Attributes.hidden True ]
         ]

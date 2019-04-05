@@ -675,6 +675,28 @@ p.text-muted {
     align-items: center;
 }
 
+.modeller-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: -12px;
+    padding: 12px;
+    position: relative;
+}
+
+.modeller-actions {
+    display: flex;
+    height: 0px;
+    align-items: center;
+}
+
+.reset-button button {
+    font-size: 11px;
+    padding: 5px;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
 .text-button {
     font-size: 9px;
     font-weight: bold;

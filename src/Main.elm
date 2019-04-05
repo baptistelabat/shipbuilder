@@ -50,7 +50,7 @@ import ExtraEvents exposing (onKeyDown)
 import FontAwesome.Regular as FARegular
 import FontAwesome.Solid as FASolid
 import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p, sub, text, ul)
-import Html.Attributes exposing (accept, class, disabled, download, for, href, id, name, placeholder, src, style, title, type_, value)
+import Html.Attributes exposing (accept, attribute, class, disabled, download, for, hidden, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
@@ -1831,6 +1831,7 @@ type ToJsMsg
     | SelectHullReference String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
+    | ResetSlice String
     | SwitchViewMode ViewMode
     | ToggleBlocksVisibility (List Block) Bool
     | TogglePartitions
@@ -2427,6 +2428,9 @@ updateModelToJs msg model =
         ModifySlice modifier hullReference newValue ->
             { model | slices = Dict.update hullReference (Maybe.map <| modifier newValue) model.slices }
 
+        ResetSlice hullReference ->
+            { model | slices = Dict.update hullReference (Maybe.map <| HullSliceModifiers.resetSlicesToOriginals) model.slices }
+
         SetSpacingException partitionType index input ->
             let
                 ( partition, asPartitionInPartitions ) =
@@ -2776,6 +2780,14 @@ msg2json model action =
                             setLongitudinalPositionOfEachSlice hullSlices
                     in
                     Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
+
+        ResetSlice hullReference ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3392,9 +3404,60 @@ viewModeller model =
         [ class "panel modeller-panel" ]
         (h2
             [ class "modeller-panel-title" ]
-            [ text modellerName ]
+            [ text modellerName
+            , div [ class "modeller-actions" ]
+                [ resetHullSlices model ]
+            ]
             :: (model.slices |> Dict.toList |> List.filterMap viewSlices)
         )
+
+
+resetHullSlices : Model -> Html Msg
+resetHullSlices model =
+    let
+        hullReference : String
+        hullReference =
+            case model.selectedHullReference of
+                Just hullName ->
+                    hullName
+
+                Nothing ->
+                    ""
+
+        isCustom : Bool
+        isCustom =
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    True
+
+                Just hullSlices ->
+                    if
+                        hullSlices.length.value
+                            == hullSlices.customHullProperties.customLength.value
+                            && hullSlices.breadth.value
+                            == hullSlices.customHullProperties.customBreadth.value
+                            && hullSlices.depth.value
+                            == hullSlices.customHullProperties.customDepth.value
+                            && hullSlices.draught.value
+                            == hullSlices.customHullProperties.customDraught.value
+                            && List.map .x hullSlices.slices
+                            == hullSlices.customHullProperties.customHullslicesPosition
+                    then
+                        True
+
+                    else
+                        False
+    in
+    div
+        [ class "reset-button" ]
+        [ button
+            [ id "buttonReset"
+            , hidden isCustom
+            , onClick <| ToJs <| ResetSlice hullReference
+            , title "Reset parameters to origin"
+            ]
+            [ text "Reset" ]
+        ]
 
 
 viewKpiStudio : Model -> Html Msg
