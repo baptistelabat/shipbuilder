@@ -107,7 +107,7 @@ decoder =
                 |> Pipeline.hardcoded loadedData.breadth
                 |> Pipeline.hardcoded loadedData.depth
                 |> Pipeline.required "xmin" Decode.float
-                |> Pipeline.required "ymin" Decode.float
+                |> Pipeline.hardcoded (-loadedData.breadth.value / 2)
                 |> Pipeline.required "zmin" Decode.float
                 |> Pipeline.hardcoded loadedData.slices
                 |> Pipeline.hardcoded draughtDecoded

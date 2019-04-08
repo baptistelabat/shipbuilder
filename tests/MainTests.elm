@@ -829,7 +829,7 @@ parseJSONSlices =
         , test "Can parse 'xmin'" <|
             testHullSliceDecoding .xmin -1
         , test "Can parse 'ymin'" <|
-            testHullSliceDecoding .ymin -3.4467999935150146
+            testHullSliceDecoding .ymin -3.45
         , test "Can parse 'zmin'" <|
             testHullSliceDecoding .zmin -6.146999835968018
         , test "Can parse 'slices/x'" <|
@@ -888,7 +888,7 @@ encodeJSONTests =
         , test "Can encode 'xmin'" <|
             testHullSliceEncoding .xmin -1
         , test "Can encode 'ymin'" <|
-            testHullSliceEncoding .ymin -3.4467999935150146
+            testHullSliceEncoding .ymin -3.45
         , test "Can encode 'zmin'" <|
             testHullSliceEncoding .zmin -6.146999835968018
         , test "Can encode 'slices/x'" <|
