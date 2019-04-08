@@ -317,7 +317,7 @@ modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlice
                     getPrismaticCoefficient hullSlicesMetrics |> .value
 
                 Just pc ->
-                    setPrismaticCoefficientAndClamp pc hullSlicesMetrics
+                    setPrismaticCoefficientAndClamp pc originalHullSlices
 
         maybeNewXPositions : HullSlicesMetrics -> Maybe (List Float)
         maybeNewXPositions hs =
