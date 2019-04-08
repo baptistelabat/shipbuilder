@@ -6,6 +6,7 @@ module EncodersDecoders exposing
     , encoder
     , exportHullSlicesAsAreaXYList
     , hullSliceAsAreaXYListEncoder
+    , normalize
     )
 
 import Dict exposing (Dict)

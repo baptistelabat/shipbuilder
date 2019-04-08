@@ -1,7 +1,7 @@
 module HullSlicesTests exposing (suite)
 
 import CustomFuzzers exposing (..)
-import EncodersDecoders
+import EncodersDecoders exposing (normalize)
 import Expect exposing (..)
 import Fuzz
 import HullSliceModifiers
@@ -710,6 +710,18 @@ suite =
                     ]
                     |> Expect.equal
                         [ { x = 0, y = [ 5, 5, 0 ], zmax = -2, zmin = -6 }
+                        ]
+        , test "normalizedSlices" <|
+            \_ ->
+                normalize
+                    [ { x = 0.01, y = [], zmax = 0, zmin = 0 }
+                    , { x = 5, y = [], zmax = 0, zmin = 0 }
+                    , { x = 9.8, y = [], zmax = 0, zmin = 0 }
+                    ]
+                    |> Expect.equal
+                        [ { x = 0, y = [], zmax = 0, zmin = 0 }
+                        , { x = 5 / (9.8 - 0.01), y = [], zmax = 0, zmin = 0 }
+                        , { x = 1, y = [], zmax = 0, zmin = 0 }
                         ]
         , test "intersectBelowSlicesZY" <|
             \_ ->
