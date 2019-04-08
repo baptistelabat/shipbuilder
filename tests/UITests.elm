@@ -12,6 +12,7 @@ import Html.Attributes as Attributes
 import HullReferences
 import HullSliceModifiers
 import HullSlices
+import HullSlicesMetrics exposing (fillHullSliceMetrics, getPrismaticCoefficient)
 import Json.Decode as Decode exposing (Decoder, decodeString, decodeValue)
 import Json.Encode as Encode exposing (encode)
 import Main exposing (..)
@@ -1069,6 +1070,31 @@ modellerTests =
                         |> .slices
                         |> Dict.get "anthineas"
                         |> Maybe.map (.customHullProperties >> .customDepth >> .value)
+                    )
+        , test "Prismatic Coefficient input is present" <|
+            \_ ->
+                modellerView
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "prismatic-coefficient" ]
+                    |> Query.first
+                    |> Query.has [ Selector.attribute <| Attributes.value "0.41" ]
+        , test "Prismatic Coefficient input triggers ModifySlice" <|
+            \_ ->
+                modellerView
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "prismatic-coefficient" ]
+                    |> Query.first
+                    |> Event.simulate (Event.input "0.51")
+                    |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setPrismaticCoefficient "anthineas" "0.51")
+        , test "ModifySlice sets Prismatic Coefficient" <|
+            \_ ->
+                Expect.equal (Just 0.51)
+                    (setModel [ ToJs <| ModifySlice HullSliceModifiers.setPrismaticCoefficient "anthineas" "0.51" ]
+                        |> .slices
+                        |> Dict.get "anthineas"
+                        |> Maybe.map fillHullSliceMetrics
+                        |> Maybe.map getPrismaticCoefficient
+                        |> Maybe.map .value
                     )
         , test "Disabled reset button when no customization" <|
             \_ ->
