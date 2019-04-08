@@ -1,5 +1,7 @@
 module Lackenby exposing
-    ( lackenby
+    ( clampPrismaticCoefficient
+    , getPrismaticCoefficientBounds
+    , lackenby
     , modifyHullSlicesToMatchTargetPrismaticCoefficient
     , setPrismaticCoefficientAndClamp
     )
