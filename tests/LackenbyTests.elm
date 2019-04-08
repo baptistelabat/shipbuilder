@@ -56,7 +56,7 @@ suite =
                 HullSlicesMetrics.getMasterCrossSection (TestData.anthineas |> fillHullSliceMetrics)
                     |> Maybe.map .x
                     |> Maybe.withDefault 999999
-                    |> Expect.within epsAbsolute 9.133333333
+                    |> Expect.within epsAbsolute 9.222826692274515
         , test "Can modify abscicae of area curve to get a given prismatic coefficient" <|
             \_ ->
                 Lackenby.lackenby 0.03 69.6 40 [ ( 1, 10 ), ( 3, 30 ), ( 4, 40 ), ( 4.5, 12 ), ( 6, 1 ) ]
