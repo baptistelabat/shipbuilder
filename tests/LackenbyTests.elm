@@ -64,9 +64,19 @@ suite =
                     |> integrate
                     |> (*) (1 / (69.6 * 40))
                     |> Expect.within (Absolute 1.0e-2) 0.03
-        , test "Have same amount of slices before and after updating prismatic coefficient on MPOV" <|
+        , test "Have same amount of slices before and after updating prismatic coefficient at 1.5 on Anthineas" <|
             \_ ->
                 Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient "1.5" TestData.anthineas
                     |> List.length
-                    |> Expect.equal 10
+                    |> Expect.equal (List.length TestData.anthineas.slices)
+        , test "Have same amount of slices before and after updating prismatic coefficient at 3 on Anthineas" <|
+            \_ ->
+                Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient "3" TestData.anthineas
+                    |> List.length
+                    |> Expect.equal (List.length TestData.anthineas.slices)
+        , test "Have same amount of slices before and after updating prismatic coefficient at 8 on Anthineas" <|
+            \_ ->
+                Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient "8" TestData.anthineas
+                    |> List.length
+                    |> Expect.equal (List.length TestData.anthineas.slices)
         ]
