@@ -93,11 +93,11 @@ emptyHullSlices =
     , originalSlicePositions = []
     , draught = StringValueInput.emptyFloat 1
     , customHullProperties =
-        { customLength = Just (StringValueInput.emptyFloat 1)
-        , customBreadth = Just (StringValueInput.emptyFloat 1)
-        , customDepth = Just (StringValueInput.emptyFloat 1)
-        , customDraught = Just (StringValueInput.emptyFloat 1)
-        , customHullslicesPosition = Just []
+        { customLength = Nothing
+        , customBreadth = Nothing
+        , customDepth = Nothing
+        , customDraught = Nothing
+        , customHullslicesPosition = Nothing
         }
     }
 
