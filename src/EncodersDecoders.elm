@@ -6,7 +6,7 @@ module EncodersDecoders exposing
     , encoder
     , exportHullSlicesAsAreaXYList
     , hullSliceAsAreaXYListEncoder
-    , normalize
+    , normalizeSlicesPosition
     )
 
 import Dict exposing (Dict)
@@ -61,15 +61,15 @@ type alias PreloadedHullSlicesData =
     }
 
 
-normalize : List HullSlice -> List HullSlice
-normalize slices =
+normalizeSlicesPosition : List HullSlice -> List HullSlice
+normalizeSlicesPosition slices =
     let
         xPositions : List Float
         xPositions =
             List.map .x slices
 
-        xfirst : Float
-        xfirst =
+        xFirst : Float
+        xFirst =
             xPositions |> List.head |> Maybe.withDefault 0
 
         xLast : Float
@@ -78,25 +78,25 @@ normalize slices =
 
         xLength : Float
         xLength =
-            xLast - xfirst
+            xLast - xFirst
 
         xPositionsBetweenFirstAndLast : List Float
         xPositionsBetweenFirstAndLast =
             xPositions |> List.tail |> Maybe.withDefault [] |> List.reverse |> List.tail |> Maybe.withDefault [] |> List.reverse
 
-        recalculateXs : Float -> Float
-        recalculateXs x =
+        normalize : Float -> Float
+        normalize x =
             x / xLength
 
-        newSlicesPosition : List Float
-        newSlicesPosition =
-            [ 0 ] ++ List.map recalculateXs xPositionsBetweenFirstAndLast ++ [ 1 ]
+        normalizedSlicesPosition : List Float
+        normalizedSlicesPosition =
+            [ 0 ] ++ List.map normalize xPositionsBetweenFirstAndLast ++ [ 1 ]
 
-        replaceX : Float -> HullSlice -> HullSlice
-        replaceX newX slice =
+        setSlicesPosition : Float -> HullSlice -> HullSlice
+        setSlicesPosition newX slice =
             { slice | x = newX }
     in
-    List.map2 replaceX newSlicesPosition slices
+    List.map2 setSlicesPosition normalizedSlicesPosition slices
 
 
 decoder : Decode.Decoder HullSlices
@@ -120,7 +120,7 @@ decoder =
         helper loadedData =
             let
                 normalizedSlices =
-                    normalize loadedData.slices
+                    normalizeSlicesPosition loadedData.slices
 
                 draughtDecoded =
                     case loadedData.draught of

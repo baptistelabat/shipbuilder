@@ -69,12 +69,12 @@ suite =
                     |> integrate
                     |> (*) (1 / (69.6 * 40))
                     |> Expect.within (Absolute 1.0e-2) 0.03
-        , test "Have same amount of slices before and after updating prismatic coefficient at 1.5 on Anthineas" <|
+        , test "Have same number of slices before and after updating prismatic coefficient at 1.5 on Anthineas" <|
             \_ ->
                 modifyHullSlicesToMatchTargetPrismaticCoefficient "1.5" TestData.anthineas
                     |> List.length
                     |> Expect.equal (List.length TestData.anthineas.slices)
-        , test "Have same amount of slices before and after updating prismatic coefficient at 3 on Anthineas" <|
+        , test "Have same number of slices before and after updating prismatic coefficient at 3 on Anthineas" <|
             \_ ->
                 modifyHullSlicesToMatchTargetPrismaticCoefficient "3" TestData.anthineas
                     |> List.length
@@ -88,7 +88,7 @@ suite =
             \_ ->
                 clampPrismaticCoefficient 0.4 100 50 [ ( 0, 10 ), ( 25, 20 ), ( 50, 30 ), ( 75, 20 ), ( 100, 10 ) ]
                     |> Expect.within epsAbsolute 0.4
-        , test "Can not set prismatic coefficient outside of clamped values" <|
+        , test "Cannot set prismatic coefficient outside of clamped values" <|
             \_ ->
                 clampPrismaticCoefficient 0.5 100 50 [ ( 0, 10 ), ( 25, 20 ), ( 50, 30 ), ( 75, 20 ), ( 100, 10 ) ]
                     |> Expect.notWithin epsAbsolute 0.5

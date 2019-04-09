@@ -1,7 +1,7 @@
 module HullSlicesTests exposing (suite)
 
 import CustomFuzzers exposing (..)
-import EncodersDecoders exposing (normalize)
+import EncodersDecoders exposing (normalizeSlicesPosition)
 import Expect exposing (..)
 import Fuzz
 import HullSliceModifiers
@@ -713,7 +713,7 @@ suite =
                         ]
         , test "normalizedSlices" <|
             \_ ->
-                normalize
+                normalizeSlicesPosition
                     [ { x = 0.01, y = [], zmax = 0, zmin = 0 }
                     , { x = 5, y = [], zmax = 0, zmin = 0 }
                     , { x = 9.8, y = [], zmax = 0, zmin = 0 }
