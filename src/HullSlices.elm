@@ -569,18 +569,18 @@ calculateCentroid lo =
             0
 
 
-denormalizeHullSlices : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> List HullSlice -> List HullSlice
+denormalizeHullSlices : { a | length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float } -> List HullSlice -> List HullSlice
 denormalizeHullSlices param l =
     List.map (denormalizeHullSlice param) l
 
 
-denormalizeHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, ymin : Float, zmin : Float } -> HullSlice -> HullSlice
+denormalizeHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float } -> HullSlice -> HullSlice
 denormalizeHullSlice param hs =
     -- y denormalisé dans intervalle [0,breadth/2]
     let
-        denormalizedY : Float -> Float -> Float -> Float
-        denormalizedY ymin br y =
-            y * br + ymin
+        denormalizedY : Float -> Float -> Float
+        denormalizedY br y =
+            y * br + (-br / 2)
 
         denormalizedZ : Float -> Float -> Float -> Float
         denormalizedZ zmin depth z =
@@ -596,7 +596,7 @@ denormalizeHullSlice param hs =
             denormalizedZ param.zmin param.depth hs.zmax
 
         hs_y =
-            List.map (denormalizedY param.ymin param.breadth) hs.y
+            List.map (denormalizedY param.breadth) hs.y
 
         res =
             { x = x, zmin = hs_zmin, zmax = hs_zmax, y = hs_y }
@@ -631,7 +631,7 @@ scale json hullSlice =
     let
         scaleY : Float -> Float
         scaleY y =
-            y * json.customHullProperties.customBreadth.value + json.ymin
+            y * json.customHullProperties.customBreadth.value + (-json.customHullProperties.customBreadth.value / 2)
 
         scaleZ : Float -> Float
         scaleZ z =

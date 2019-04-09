@@ -466,7 +466,7 @@ let buildHullGeometry = function ( json ) {
     var B = json.customHullProperties.customBreadth;
     var L = json.customHullProperties.customLength;
     var xmin = json['xmin'];
-    var ymin = json['ymin'];
+    var ymin = (-json.customHullProperties.customBreadth / 2);
     var zmin = json['zmin'];
     var slices = json['slices'];
 
