@@ -19,7 +19,6 @@ module HullSlicesMetrics exposing
     , getPrismaticCoefficient
     , getSlices
     , getXmin
-    , getYmin
     , getZmin
     , initializePrismaticCoefficient
     , intersectBelow
@@ -62,7 +61,6 @@ type alias HullSlicesMetrics_ =
     , depth : StringValueInput.FloatInput
     , prismaticCoefficient : StringValueInput.FloatInput
     , xmin : Float
-    , ymin : Float
     , zmin : Float
     , slices : List HullSlice
     , draught : StringValueInput.FloatInput
@@ -92,7 +90,6 @@ emptyHullSlicesMetrics =
         , depth = StringValueInput.emptyFloat 1
         , prismaticCoefficient = StringValueInput.emptyFloat 1
         , xmin = 0
-        , ymin = 0
         , zmin = 0
         , slices = []
         , draught = StringValueInput.emptyFloat 1
@@ -180,18 +177,6 @@ getXmin hullSlicesMetrics =
                     hs_
     in
     hs.xmin
-
-
-getYmin : HullSlicesMetrics -> Float
-getYmin hullSlicesMetrics =
-    let
-        hs : HullSlicesMetrics_
-        hs =
-            case hullSlicesMetrics of
-                HullSlicesMetrics hs_ ->
-                    hs_
-    in
-    hs.ymin
 
 
 getZmin : HullSlicesMetrics -> Float
@@ -325,7 +310,6 @@ toHullSlicesMetrics hullSlices =
     , depth = hullSlices.customHullProperties.customDepth
     , prismaticCoefficient = StringValueInput.emptyFloat 1
     , xmin = hullSlices.xmin
-    , ymin = hullSlices.ymin
     , zmin = hullSlices.zmin
     , slices = setLongitudinalPositionOfEachSlice hullSlices |> .slices
     , draught = hullSlices.customHullProperties.customDraught
@@ -355,7 +339,7 @@ addDenormalizedSlices hullSlicesMetrics =
         denormalizedSlices : List HullSlice
         denormalizedSlices =
             denormalizeHullSlices
-                { length = hullSlicesMetrics.length.value, breadth = hullSlicesMetrics.breadth.value, depth = hullSlicesMetrics.depth.value, xmin = hullSlicesMetrics.xmin, ymin = hullSlicesMetrics.ymin, zmin = hullSlicesMetrics.zmin }
+                { length = hullSlicesMetrics.length.value, breadth = hullSlicesMetrics.breadth.value, depth = hullSlicesMetrics.depth.value, xmin = hullSlicesMetrics.xmin, zmin = hullSlicesMetrics.zmin }
                 hullSlicesMetrics.slices
     in
     { hullSlicesMetrics | denormalizedSlices = denormalizedSlices }
