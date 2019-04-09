@@ -79,6 +79,11 @@ suite =
                 modifyHullSlicesToMatchTargetPrismaticCoefficient "3" TestData.anthineas
                     |> List.length
                     |> Expect.equal (List.length TestData.anthineas.slices)
+        , test "Have same number of slices before and after updating prismatic coefficient at 8 on Anthineas" <|
+            \_ ->
+                modifyHullSlicesToMatchTargetPrismaticCoefficient "8" TestData.anthineas
+                    |> List.length
+                    |> Expect.equal (List.length TestData.anthineas.slices)
         , test "Can Clamp prismatic coefficient" <|
             \_ ->
                 getPrismaticCoefficientBounds 100 50 [ ( 0, 10 ), ( 25, 20 ), ( 50, 30 ), ( 75, 20 ), ( 100, 10 ) ]
