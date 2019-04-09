@@ -852,26 +852,31 @@ parseJSONSlices =
                     ]
                 )
         , test "Can parse 'customLength'" <|
-            testHullSliceDecoding (.customHullProperties >> .customLength >> .value) 22.8
+            testHullSliceDecoding (.customHullProperties >> .customLength >> Maybe.map .value) <|
+                Just 22.8
         , test "Can parse 'customBreadth'" <|
-            testHullSliceDecoding (.customHullProperties >> .customBreadth >> .value) 6.9
+            testHullSliceDecoding (.customHullProperties >> .customBreadth >> Maybe.map .value) <|
+                Just 6.9
         , test "Can parse 'customDepth'" <|
-            testHullSliceDecoding (.customHullProperties >> .customDepth >> .value) 6.8
+            testHullSliceDecoding (.customHullProperties >> .customDepth >> Maybe.map .value) <|
+                Just 6.8
         , test "Can parse 'customDraught'" <|
-            testHullSliceDecoding (.customHullProperties >> .customDraught >> .value) 1.4
+            testHullSliceDecoding (.customHullProperties >> .customDraught >> Maybe.map .value) <|
+                Just 1.4
         , test "Can parse 'customHullslicesPosition'" <|
-            testHullSliceDecoding (.customHullProperties >> .customHullslicesPosition)
-                [ 0.00437713372412022
-                , 0.1111111111111111
-                , 0.2222222222222222
-                , 0.3333333333333333
-                , 0.4444444444444444
-                , 0.5555555555555556
-                , 0.6666666666666666
-                , 0.7777777777777778
-                , 0.8888888888888888
-                , 0.9956228662758797
-                ]
+            testHullSliceDecoding (.customHullProperties >> .customHullslicesPosition) <|
+                Just
+                    [ 0.00437713372412022
+                    , 0.1111111111111111
+                    , 0.2222222222222222
+                    , 0.3333333333333333
+                    , 0.4444444444444444
+                    , 0.5555555555555556
+                    , 0.6666666666666666
+                    , 0.7777777777777778
+                    , 0.8888888888888888
+                    , 0.9956228662758797
+                    ]
         ]
 
 
@@ -909,26 +914,32 @@ encodeJSONTests =
                     ]
                 )
         , test "Can encode 'customLength'" <|
-            testHullSliceEncoding (.customHullProperties >> .customLength >> .value) 22.8
+            testHullSliceEncoding (.customHullProperties >> .customLength >> Maybe.map .value) <|
+                Just 22.8
         , test "Can encode 'customBreadth'" <|
-            testHullSliceEncoding (.customHullProperties >> .customBreadth >> .value) 6.9
+            testHullSliceEncoding (.customHullProperties >> .customBreadth >> Maybe.map .value) <|
+                Just 6.9
         , test "Can encode 'customDepth'" <|
-            testHullSliceEncoding (.customHullProperties >> .customDepth >> .value) 6.8
+            testHullSliceEncoding (.customHullProperties >> .customDepth >> Maybe.map .value) <|
+                Just 6.8
         , test "Can encode 'customDraught'" <|
-            testHullSliceEncoding (.customHullProperties >> .customDraught >> .value) 1.4
+            testHullSliceEncoding (.customHullProperties >> .customDraught >> Maybe.map .value) <|
+                Just 1.4
         , test "Can encode 'customHullslicesPosition'" <|
             testHullSliceEncoding (.customHullProperties >> .customHullslicesPosition)
-                [ 0.00437713372412022
-                , 0.1111111111111111
-                , 0.2222222222222222
-                , 0.3333333333333333
-                , 0.4444444444444444
-                , 0.5555555555555556
-                , 0.6666666666666666
-                , 0.7777777777777778
-                , 0.8888888888888888
-                , 0.9956228662758797
-                ]
+                (Just
+                    [ 0.00437713372412022
+                    , 0.1111111111111111
+                    , 0.2222222222222222
+                    , 0.3333333333333333
+                    , 0.4444444444444444
+                    , 0.5555555555555556
+                    , 0.6666666666666666
+                    , 0.7777777777777778
+                    , 0.8888888888888888
+                    , 0.9956228662758797
+                    ]
+                )
         ]
 
 

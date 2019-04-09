@@ -950,11 +950,15 @@ modellerTests =
                     |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "123.4")
         , test "ModifySlice sets length over all" <|
             \_ ->
-                Expect.equal (Just 123.4)
+                Expect.equal (Just (Just 123.4))
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "123.4" ]
                         |> .slices
                         |> Dict.get "anthineas"
-                        |> Maybe.map (.customHullProperties >> .customLength >> .value)
+                        |> Maybe.map
+                            (.customHullProperties
+                                >> .customLength
+                                >> Maybe.map .value
+                            )
                     )
 
         -- , test "ModifySlice is properly sent to JS" <|
@@ -1003,11 +1007,15 @@ modellerTests =
                     |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setBreadth "anthineas" "123.4")
         , test "ModifySlice sets breadth" <|
             \_ ->
-                Expect.equal (Just 123.4)
+                Expect.equal (Just (Just 123.4))
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setBreadth "anthineas" "123.4" ]
                         |> .slices
                         |> Dict.get "anthineas"
-                        |> Maybe.map (.customHullProperties >> .customBreadth >> .value)
+                        |> Maybe.map
+                            (.customHullProperties
+                                >> .customBreadth
+                                >> Maybe.map .value
+                            )
                     )
         , test "Can press down arrow key to decrement breadth" <|
             \_ ->
@@ -1042,11 +1050,15 @@ modellerTests =
                     |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setDraught "anthineas" "123.4")
         , test "SetDraught sets draught" <|
             \_ ->
-                Expect.equal (Just 123.4)
+                Expect.equal (Just (Just 123.4))
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDraught "anthineas" "123.4" ]
                         |> .slices
                         |> Dict.get "anthineas"
-                        |> Maybe.map (.customHullProperties >> .customDraught >> .value)
+                        |> Maybe.map
+                            (.customHullProperties
+                                >> .customDraught
+                                >> Maybe.map .value
+                            )
                     )
         , test "Depth input is present" <|
             \_ ->
@@ -1065,11 +1077,15 @@ modellerTests =
                     |> Event.expect (ToJs <| ModifySlice HullSliceModifiers.setDepth "anthineas" "123.4")
         , test "ModifySlice sets depth" <|
             \_ ->
-                Expect.equal (Just 123.4)
+                Expect.equal (Just (Just 123.4))
                     (setModel [ ToJs <| ModifySlice HullSliceModifiers.setDepth "anthineas" "123.4" ]
                         |> .slices
                         |> Dict.get "anthineas"
-                        |> Maybe.map (.customHullProperties >> .customDepth >> .value)
+                        |> Maybe.map
+                            (.customHullProperties
+                                >> .customDepth
+                                >> Maybe.map .value
+                            )
                     )
         , test "Prismatic Coefficient input is present" <|
             \_ ->

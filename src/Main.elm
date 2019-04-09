@@ -3348,10 +3348,10 @@ viewModeller model =
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ StringValueInput.view slices.customHullProperties.customLength <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
-                        , StringValueInput.view slices.customHullProperties.customBreadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
-                        , StringValueInput.view slices.customHullProperties.customDepth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
-                        , StringValueInput.view slices.customHullProperties.customDraught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
+                        [ (StringValueInput.view <| Maybe.withDefault slices.length slices.customHullProperties.customLength) <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.breadth slices.customHullProperties.customBreadth) <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.depth slices.customHullProperties.customDepth) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.draught slices.customHullProperties.customDraught) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
@@ -3421,15 +3421,15 @@ resetHullSlices model =
                 Just hullSlices ->
                     if
                         hullSlices.length.value
-                            == hullSlices.customHullProperties.customLength.value
+                            == (Maybe.withDefault hullSlices.length hullSlices.customHullProperties.customLength |> .value)
                             && hullSlices.breadth.value
-                            == hullSlices.customHullProperties.customBreadth.value
+                            == (Maybe.withDefault hullSlices.breadth hullSlices.customHullProperties.customBreadth |> .value)
                             && hullSlices.depth.value
-                            == hullSlices.customHullProperties.customDepth.value
+                            == (Maybe.withDefault hullSlices.depth hullSlices.customHullProperties.customDepth |> .value)
                             && hullSlices.draught.value
-                            == hullSlices.customHullProperties.customDraught.value
+                            == (Maybe.withDefault hullSlices.draught hullSlices.customHullProperties.customDraught |> .value)
                             && List.map .x hullSlices.slices
-                            == hullSlices.customHullProperties.customHullslicesPosition
+                            == Maybe.withDefault (List.map .x hullSlices.slices) hullSlices.customHullProperties.customHullslicesPosition
                     then
                         True
 

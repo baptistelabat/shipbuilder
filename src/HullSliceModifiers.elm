@@ -20,7 +20,11 @@ setLengthOverAll loa hullSlices =
             hullSlices.customHullProperties
 
         newCustomHullProperties =
-            { oldCustomHullProperties | customLength = oldCustomHullProperties.customLength |> StringValueInput.setString loa }
+            { oldCustomHullProperties
+                | customLength =
+                    Just
+                        (hullSlices.length |> StringValueInput.setString loa)
+            }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -32,7 +36,11 @@ setBreadth breadth hullSlices =
             hullSlices.customHullProperties
 
         newCustomHullProperties =
-            { oldCustomHullProperties | customBreadth = oldCustomHullProperties.customBreadth |> StringValueInput.setString breadth }
+            { oldCustomHullProperties
+                | customBreadth =
+                    Just
+                        (hullSlices.breadth |> StringValueInput.setString breadth)
+            }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -44,7 +52,7 @@ setDraught draught hullSlices =
             hullSlices.customHullProperties
 
         newCustomHullProperties =
-            { oldCustomHullProperties | customDraught = oldCustomHullProperties.customDraught |> StringValueInput.setString draught }
+            { oldCustomHullProperties | customDraught = Just (hullSlices.draught |> StringValueInput.setString draught) }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -56,7 +64,7 @@ setDepth depth hullSlices =
             hullSlices.customHullProperties
 
         newCustomHullProperties =
-            { oldCustomHullProperties | customDepth = oldCustomHullProperties.customDepth |> StringValueInput.setString depth }
+            { oldCustomHullProperties | customDepth = Just (hullSlices.depth |> StringValueInput.setString depth) }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -71,7 +79,7 @@ setPrismaticCoefficient prismaticCoefficient hullSlices =
             hullSlices.customHullProperties
 
         newCustomHullProperties =
-            { oldCustomHullProperties | customHullslicesPosition = hullSlicesPosition }
+            { oldCustomHullProperties | customHullslicesPosition = Just hullSlicesPosition }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -81,11 +89,11 @@ resetSlicesToOriginals hullSlices =
     let
         originalCustomHullProperties : HullSlices.CustomHullProperties
         originalCustomHullProperties =
-            { customLength = hullSlices.length
-            , customBreadth = hullSlices.breadth
-            , customDepth = hullSlices.depth
-            , customDraught = hullSlices.draught
-            , customHullslicesPosition = hullSlices.originalSlicePositions
+            { customLength = Just hullSlices.length
+            , customBreadth = Just hullSlices.breadth
+            , customDepth = Just hullSlices.depth
+            , customDraught = Just hullSlices.draught
+            , customHullslicesPosition = Just hullSlices.originalSlicePositions
             }
     in
     { hullSlices | customHullProperties = originalCustomHullProperties }

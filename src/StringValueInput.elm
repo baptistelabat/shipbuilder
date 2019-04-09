@@ -11,6 +11,7 @@ module StringValueInput exposing
     , floatInputDecoder
     , fromInt
     , fromNumber
+    , fromNumberToMaybe
     , round_n
     , setString
     , syncFloatInput
@@ -83,6 +84,15 @@ fromNumber unit description nbOfDigits value =
             round_n nbOfDigits value
     in
     { value = roundedValue, string = String.fromFloat roundedValue, unit = unit, description = description, nbOfDigits = nbOfDigits }
+
+
+fromNumberToMaybe : String -> String -> Int -> Float -> Maybe FloatInput
+fromNumberToMaybe unit description nbOfDigits value =
+    let
+        roundedValue =
+            round_n nbOfDigits value
+    in
+    Just { value = roundedValue, string = String.fromFloat roundedValue, unit = unit, description = description, nbOfDigits = nbOfDigits }
 
 
 floatInput : Int -> Float -> FloatInput
