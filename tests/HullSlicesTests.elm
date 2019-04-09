@@ -172,10 +172,6 @@ suite =
             , test "Can set draught" <|
                 \_ ->
                     Expect.equal { value = 13.4, string = "13.4", description = "Draught", unit = "m", nbOfDigits = 1 } (HullSliceModifiers.setDraught "13.4125" hullSlices |> .customHullProperties |> .customDraught)
-            , test "Resizing should not change centering: changing breadth should also change ymin" <|
-                \_ ->
-                    (HullSliceModifiers.setBreadth "7" hullSlices |> .ymin)
-                        |> Expect.within epsAbsolute -3.5
             ]
         , describe "Reset"
             [ test "Can reset length over all" <|
@@ -564,12 +560,16 @@ suite =
                             (TestData.cube.zmin + 0.9 * TestData.cube.depth.value)
             , test "y should be scaled properly" <|
                 \_ ->
+                    let
+                        ymin =
+                            -TestData.cube.breadth.value / 2
+                    in
                     scale
                         TestData.cube
                         { x = 1, zmin = 0.5, zmax = 0.9, y = [ 0.1, 0.2, 0.5 ] }
                         |> .y
                         |> Expect.equal
-                            [ TestData.cube.ymin + TestData.cube.breadth.value * 0.1, TestData.cube.ymin + TestData.cube.breadth.value * 0.2, TestData.cube.ymin + TestData.cube.breadth.value * 0.5 ]
+                            [ ymin + TestData.cube.breadth.value * 0.1, ymin + TestData.cube.breadth.value * 0.2, ymin + TestData.cube.breadth.value * 0.5 ]
             ]
         , describe "Volume"
             [ test
