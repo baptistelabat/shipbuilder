@@ -943,6 +943,116 @@ encodeJSONTests =
                     , 0.9956228662758797
                     ]
                 )
+        , test "Encoding unchanged hullslices store no custom properties" <|
+            \_ ->
+                let
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (TestData.anthineas |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.equal
+                    { customLength = Nothing
+                    , customBreadth = Nothing
+                    , customDepth = Nothing
+                    , customDraught = Nothing
+                    , customHullslicesPosition = Nothing
+                    }
+                    hullSlicesEncodedThenDecoded.customHullProperties
+        , test "Encoding hullslices with custom length store custom length property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setLengthOverAll "20"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customLength
+        , test "Encoding hullslices with custom breadth store custom breadth property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setBreadth "8"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customBreadth
+        , test "Encoding hullslices with custom depth store custom depth property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setDepth "5"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customDepth
+        , test "Encoding hullslices with custom draught store custom draught property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setDraught "3"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customDraught
+        , test "Encoding hullslices with custom hullslices position store custom hullslices position property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setPrismaticCoefficient "0.5"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customHullslicesPosition
         ]
 
 
