@@ -36,7 +36,6 @@ type alias HullSlices =
     , breadth : StringValueInput.FloatInput
     , depth : StringValueInput.FloatInput
     , xmin : Float
-    , ymin : Float
     , zmin : Float
     , slices : List HullSlice
     , originalSlicePositions : List Float
@@ -88,7 +87,6 @@ emptyHullSlices =
     , breadth = StringValueInput.emptyFloat 1
     , depth = StringValueInput.emptyFloat 1
     , xmin = 0
-    , ymin = 0
     , zmin = 0
     , slices = []
     , originalSlicePositions = []

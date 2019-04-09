@@ -34,7 +34,7 @@ setBreadth breadth hullSlices =
         newCustomHullProperties =
             { oldCustomHullProperties | customBreadth = oldCustomHullProperties.customBreadth |> StringValueInput.setString breadth }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties } |> (\slices -> { slices | ymin = -slices.customHullProperties.customBreadth.value / 2 })
+    { hullSlices | customHullProperties = newCustomHullProperties }
 
 
 setDraught : String -> HullSlices -> HullSlices
@@ -88,4 +88,4 @@ resetSlicesToOriginals hullSlices =
             , customHullslicesPosition = hullSlices.originalSlicePositions
             }
     in
-    { hullSlices | customHullProperties = originalCustomHullProperties } |> (\slices -> { slices | ymin = -slices.customHullProperties.customBreadth.value / 2 })
+    { hullSlices | customHullProperties = originalCustomHullProperties }

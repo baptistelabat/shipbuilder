@@ -63,14 +63,13 @@ type alias PreloadedHullSlicesData =
 decoder : Decode.Decoder HullSlices
 decoder =
     let
-        hullSlicesConstructor : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> CustomHullProperties -> HullSlices
-        hullSlicesConstructor length breadth depth xmin ymin zmin slices draught customHullProperties =
+        hullSlicesConstructor : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> CustomHullProperties -> HullSlices
+        hullSlicesConstructor length breadth depth xmin zmin slices draught customHullProperties =
             { emptyHullSlices
                 | length = length
                 , breadth = breadth
                 , depth = depth
                 , xmin = xmin
-                , ymin = ymin
                 , zmin = zmin
                 , slices = slices
                 , originalSlicePositions = List.map .x slices
@@ -107,7 +106,6 @@ decoder =
                 |> Pipeline.hardcoded loadedData.breadth
                 |> Pipeline.hardcoded loadedData.depth
                 |> Pipeline.required "xmin" Decode.float
-                |> Pipeline.hardcoded (-loadedData.breadth.value / 2)
                 |> Pipeline.required "zmin" Decode.float
                 |> Pipeline.hardcoded loadedData.slices
                 |> Pipeline.hardcoded draughtDecoded
@@ -151,7 +149,6 @@ encoder hullSlices =
         , ( "depth", Encode.float hullSlices.depth.value )
         , ( "draught", Encode.float hullSlices.draught.value )
         , ( "xmin", Encode.float hullSlices.xmin )
-        , ( "ymin", Encode.float hullSlices.ymin )
         , ( "zmin", Encode.float hullSlices.zmin )
         , ( "slices", Encode.list hullSliceEncoder hullSlices.slices )
         , ( "customHullProperties"
