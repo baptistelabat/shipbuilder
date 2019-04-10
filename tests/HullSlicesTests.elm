@@ -206,6 +206,14 @@ suite =
                             |> .customHullProperties
                             |> .customDraught
                         )
+            , test "Can reset slices position" <|
+                \_ ->
+                    Expect.equal Nothing
+                        (HullSliceModifiers.setPrismaticCoefficient "0.5" hullSlices
+                            |> HullSliceModifiers.resetSlicesToOriginals
+                            |> .customHullProperties
+                            |> .customHullslicesPosition
+                        )
             ]
         , describe "Area"
             [ test "Can calculate slice areas" <|
