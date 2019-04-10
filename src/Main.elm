@@ -3281,21 +3281,12 @@ viewSpaceReservationPanel spaceReservationView model =
 
 viewHullStudioPanel : Model -> Html Msg
 viewHullStudioPanel model =
-    case model.selectedHullReference of
-        Just selectedHullReferencePath ->
-            HullReferences.viewHullStudioPanelWithSelection
-                (Dict.keys model.slices)
-                (ToJs << SelectHullReference)
-                (ToJs <| UnselectHullReference)
-                selectedHullReferencePath
-                (importHullSlices model)
-
-        Nothing ->
-            HullReferences.viewHullStudioPanel
-                (Dict.keys model.slices)
-                (ToJs << SelectHullReference)
-                (ToJs <| UnselectHullReference)
-                (importHullSlices model)
+    HullReferences.viewHullStudioPanel
+        (Dict.keys model.slices)
+        (ToJs << SelectHullReference)
+        (ToJs <| UnselectHullReference)
+        model.selectedHullReference
+        (importHullSlices model)
 
 
 importHullSlices : Model -> Html Msg
