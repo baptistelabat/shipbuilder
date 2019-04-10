@@ -20,11 +20,7 @@ setLengthOverAll loa hullSlices =
             hullSlices.customHullProperties
 
         newCustomHullProperties =
-            { oldCustomHullProperties
-                | customLength =
-                    Just
-                        (hullSlices.length |> StringValueInput.setString loa)
-            }
+            { oldCustomHullProperties | customLength = Just (hullSlices.length |> StringValueInput.setString loa) }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -36,11 +32,7 @@ setBreadth breadth hullSlices =
             hullSlices.customHullProperties
 
         newCustomHullProperties =
-            { oldCustomHullProperties
-                | customBreadth =
-                    Just
-                        (hullSlices.breadth |> StringValueInput.setString breadth)
-            }
+            { oldCustomHullProperties | customBreadth = Just (hullSlices.breadth |> StringValueInput.setString breadth) }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -89,11 +81,11 @@ resetSlicesToOriginals hullSlices =
     let
         originalCustomHullProperties : HullSlices.CustomHullProperties
         originalCustomHullProperties =
-            { customLength = Just hullSlices.length
-            , customBreadth = Just hullSlices.breadth
-            , customDepth = Just hullSlices.depth
-            , customDraught = Just hullSlices.draught
-            , customHullslicesPosition = Just hullSlices.originalSlicePositions
+            { customLength = Nothing
+            , customBreadth = Nothing
+            , customDepth = Nothing
+            , customDraught = Nothing
+            , customHullslicesPosition = Nothing
             }
     in
     { hullSlices | customHullProperties = originalCustomHullProperties }
