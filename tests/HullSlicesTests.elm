@@ -165,13 +165,60 @@ suite =
         , describe "Setters"
             [ test "Can set length over all" <|
                 \_ ->
-                    Expect.equal (Just { value = 1.2, string = "1.2", description = "Length over all", unit = "m", nbOfDigits = 1 }) (HullSliceModifiers.setLengthOverAll "1.234" hullSlices |> .customHullProperties |> .customLength)
+                    Expect.equal (Just { value = 1.2, string = "1.2", description = "Length over all", unit = "m", nbOfDigits = 1 })
+                        (HullSliceModifiers.setLengthOverAll "1.234" hullSlices
+                            |> .customHullProperties
+                            |> .customLength
+                        )
+            , test "Set nothing if new length equals original length" <|
+                \_ ->
+                    Expect.equal Nothing
+                        (HullSliceModifiers.setLengthOverAll "22.8" hullSlices
+                            |> .customHullProperties
+                            |> .customLength
+                        )
             , test "Can set breadth" <|
                 \_ ->
-                    Expect.equal (Just { value = 13.4, string = "13.4", description = "Breadth", unit = "m", nbOfDigits = 1 }) (HullSliceModifiers.setBreadth "13.4125" hullSlices |> .customHullProperties |> .customBreadth)
+                    Expect.equal (Just { value = 13.4, string = "13.4", description = "Breadth", unit = "m", nbOfDigits = 1 })
+                        (HullSliceModifiers.setBreadth "13.4125" hullSlices
+                            |> .customHullProperties
+                            |> .customBreadth
+                        )
+            , test "Set nothing if new breadth equals original breadth" <|
+                \_ ->
+                    Expect.equal Nothing
+                        (HullSliceModifiers.setBreadth "6.9" hullSlices
+                            |> .customHullProperties
+                            |> .customBreadth
+                        )
             , test "Can set draught" <|
                 \_ ->
-                    Expect.equal (Just { value = 13.4, string = "13.4", description = "Draught", unit = "m", nbOfDigits = 1 }) (HullSliceModifiers.setDraught "13.4125" hullSlices |> .customHullProperties |> .customDraught)
+                    Expect.equal (Just { value = 13.4, string = "13.4", description = "Draught", unit = "m", nbOfDigits = 1 })
+                        (HullSliceModifiers.setDraught "13.4125" hullSlices
+                            |> .customHullProperties
+                            |> .customDraught
+                        )
+            , test "Set nothing if new draught equals original draught" <|
+                \_ ->
+                    Expect.equal Nothing
+                        (HullSliceModifiers.setDraught "1.4" hullSlices
+                            |> .customHullProperties
+                            |> .customDraught
+                        )
+            , test "Can set depth" <|
+                \_ ->
+                    Expect.equal (Just { value = 13.4, string = "13.4", description = "Depth", unit = "m", nbOfDigits = 1 })
+                        (HullSliceModifiers.setDepth "13.4125" hullSlices
+                            |> .customHullProperties
+                            |> .customDepth
+                        )
+            , test "Set nothing if new depth equals original depth" <|
+                \_ ->
+                    Expect.equal Nothing
+                        (HullSliceModifiers.setDepth "6.8" hullSlices
+                            |> .customHullProperties
+                            |> .customDepth
+                        )
             ]
         , describe "Reset"
             [ test "Can reset length over all" <|
