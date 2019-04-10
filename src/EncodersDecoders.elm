@@ -6,6 +6,7 @@ module EncodersDecoders exposing
     , encoder
     , exportHullSlicesAsAreaXYList
     , hullSliceAsAreaXYListEncoder
+    , normalizeSlicesPosition
     )
 
 import Dict exposing (Dict)
@@ -60,6 +61,44 @@ type alias PreloadedHullSlicesData =
     }
 
 
+normalizeSlicesPosition : List HullSlice -> List HullSlice
+normalizeSlicesPosition slices =
+    let
+        xPositions : List Float
+        xPositions =
+            List.map .x slices
+
+        xFirst : Float
+        xFirst =
+            xPositions |> List.head |> Maybe.withDefault 0
+
+        xLast : Float
+        xLast =
+            List.reverse xPositions |> List.head |> Maybe.withDefault 0
+
+        xLength : Float
+        xLength =
+            xLast - xFirst
+
+        xPositionsBetweenFirstAndLast : List Float
+        xPositionsBetweenFirstAndLast =
+            xPositions |> List.tail |> Maybe.withDefault [] |> List.reverse |> List.tail |> Maybe.withDefault [] |> List.reverse
+
+        normalize : Float -> Float
+        normalize x =
+            x / xLength
+
+        normalizedSlicesPosition : List Float
+        normalizedSlicesPosition =
+            [ 0 ] ++ List.map normalize xPositionsBetweenFirstAndLast ++ [ 1 ]
+
+        setSlicesPosition : Float -> HullSlice -> HullSlice
+        setSlicesPosition newX slice =
+            { slice | x = newX }
+    in
+    List.map2 setSlicesPosition normalizedSlicesPosition slices
+
+
 decoder : Decode.Decoder HullSlices
 decoder =
     let
@@ -80,6 +119,9 @@ decoder =
         helper : PreloadedHullSlicesData -> Decode.Decoder HullSlices
         helper loadedData =
             let
+                normalizedSlices =
+                    normalizeSlicesPosition loadedData.slices
+
                 draughtDecoded =
                     case loadedData.draught of
                         Just justDraught ->
@@ -98,7 +140,7 @@ decoder =
                             , customBreadth = loadedData.breadth
                             , customDepth = loadedData.depth
                             , customDraught = draughtDecoded
-                            , customHullslicesPosition = List.map .x loadedData.slices
+                            , customHullslicesPosition = List.map .x normalizedSlices
                             }
             in
             Decode.succeed hullSlicesConstructor
@@ -107,7 +149,7 @@ decoder =
                 |> Pipeline.hardcoded loadedData.depth
                 |> Pipeline.required "xmin" Decode.float
                 |> Pipeline.required "zmin" Decode.float
-                |> Pipeline.hardcoded loadedData.slices
+                |> Pipeline.hardcoded normalizedSlices
                 |> Pipeline.hardcoded draughtDecoded
                 |> Pipeline.hardcoded customHullPropertiesDecoded
     in

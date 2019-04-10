@@ -831,7 +831,7 @@ parseJSONSlices =
         , test "Can parse 'zmin'" <|
             testHullSliceDecoding .zmin -6.146999835968018
         , test "Can parse 'slices/x'" <|
-            testHullSliceDecoding (.slices >> List.map .x) [ 0.00437713372412022, 0.1111111111111111 ]
+            testHullSliceDecoding (.slices >> List.map .x) [ 0, 1 ]
         , test "Can parse 'slices/zmin'" <|
             testHullSliceDecoding (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
         , test "Can parse 'slices/zmax'" <|
@@ -888,7 +888,7 @@ encodeJSONTests =
         , test "Can encode 'zmin'" <|
             testHullSliceEncoding .zmin -6.146999835968018
         , test "Can encode 'slices/x'" <|
-            testHullSliceEncoding (.slices >> List.map .x) [ 0.00437713372412022, 0.1111111111111111 ]
+            testHullSliceEncoding (.slices >> List.map .x) [ 0, 1 ]
         , test "Can encode 'slices/zmin'" <|
             testHullSliceEncoding (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
         , test "Can encode 'slices/zmax'" <|
