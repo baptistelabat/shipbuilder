@@ -20,12 +20,16 @@ type alias HullReference =
     }
 
 
-viewHullStudioPanelWithSelection : List String -> (String -> msg) -> msg -> String -> Html msg
-viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
+viewHullStudioPanelWithSelection : List String -> (String -> msg) -> msg -> String -> Html msg -> Html msg
+viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath importHullSlices =
     div
         [ class "panel hull-panel"
         ]
-        [ h2 [] [ text "Hull Studio" ]
+        [ h2 [ class "hull-panel-title" ]
+            [ text "Hull Studio"
+            , div [ class "hull-actions" ]
+                [ importHullSlices ]
+            ]
         , viewHullReferencesWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath
         ]
 
@@ -57,12 +61,16 @@ viewHullReferenceWithSelection referenceSelectionMsg selectedHullReference ref =
         ]
 
 
-viewHullStudioPanel : List String -> (String -> msg) -> msg -> Html msg
-viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg =
+viewHullStudioPanel : List String -> (String -> msg) -> msg -> Html msg -> Html msg
+viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg importHullSlices =
     div
         [ class "panel hull-panel"
         ]
-        [ h2 [] [ text "Hull Studio" ]
+        [ h2 [ class "hull-panel-title" ]
+            [ text "Hull Studio"
+            , div [ class "hull-actions" ]
+                [ importHullSlices ]
+            ]
         , viewHullReferences hullRefs referenceSelectionMsg unselectMsg
         ]
 

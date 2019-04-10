@@ -3288,12 +3288,28 @@ viewHullStudioPanel model =
                 (ToJs << SelectHullReference)
                 (ToJs <| UnselectHullReference)
                 selectedHullReferencePath
+                (importHullSlices model)
 
         Nothing ->
             HullReferences.viewHullStudioPanel
                 (Dict.keys model.slices)
                 (ToJs << SelectHullReference)
                 (ToJs <| UnselectHullReference)
+                (importHullSlices model)
+
+
+importHullSlices : Model -> Html Msg
+importHullSlices model =
+    div
+        [ class "import-button" ]
+        [ button
+            [ id "buttonImport"
+
+            --, onClick <| ToJs <|
+            , title "Import a hull library from a save file"
+            ]
+            [ text "Import" ]
+        ]
 
 
 isAccordionOpened : UiState -> String -> Bool

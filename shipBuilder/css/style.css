@@ -690,7 +690,29 @@ p.text-muted {
     align-items: center;
 }
 
+.hull-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: -12px;
+    padding: 12px;
+    position: relative;
+}
+
+.hull-actions {
+    display: flex;
+    height: 0px;
+    align-items: center;
+}
+
 .reset-button button {
+    font-size: 11px;
+    padding: 5px;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.import-button button {
     font-size: 11px;
     padding: 5px;
     padding-left: 7px;
