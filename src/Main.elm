@@ -3283,6 +3283,7 @@ viewHullStudioPanel : Model -> Html Msg
 viewHullStudioPanel model =
     HullReferences.viewHullStudioPanel
         (Dict.keys model.slices)
+        (List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices)
         (ToJs << SelectHullReference)
         (ToJs <| UnselectHullReference)
         model.selectedHullReference

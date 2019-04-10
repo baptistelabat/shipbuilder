@@ -5,6 +5,7 @@ module EncodersDecoders exposing
     , encodeSubModel
     , encoder
     , exportHullSlicesAsAreaXYList
+    , getHashImageForSlices
     , hullSliceAsAreaXYListEncoder
     , normalizeSlicesPosition
     )

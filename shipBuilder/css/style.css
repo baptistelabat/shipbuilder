@@ -451,6 +451,14 @@ li.block-item p.block-uuid, li.hull-reference p.hull-path {
     text-overflow: ellipsis;
 }
 
+li.hull-reference p.hull-hash {
+    font-size: 0.55em;
+    color: var(--on-secondary-color__muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 li.block-item .block-actions {
     flex-direction: column;
     width: 28px;

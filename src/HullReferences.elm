@@ -19,8 +19,8 @@ type alias HullReference =
     }
 
 
-viewHullStudioPanel : List String -> (String -> msg) -> msg -> Maybe String -> Html msg -> Html msg
-viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath importHullSlices =
+viewHullStudioPanel : List String -> List String -> (String -> msg) -> msg -> Maybe String -> Html msg -> Html msg
+viewHullStudioPanel hullRefs hullHashs referenceSelectionMsg unselectMsg selectedHullReferencePath importHullSlices =
     div
         [ class "panel hull-panel"
         ]
@@ -29,12 +29,12 @@ viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg selectedHullRefer
             , div [ class "hull-actions" ]
                 [ importHullSlices ]
             ]
-        , viewHullReferences hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath
+        , viewHullReferences hullRefs hullHashs referenceSelectionMsg unselectMsg selectedHullReferencePath
         ]
 
 
-viewHullReferences : List String -> (String -> msg) -> msg -> Maybe String -> Html msg
-viewHullReferences hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
+viewHullReferences : List String -> List String -> (String -> msg) -> msg -> Maybe String -> Html msg
+viewHullReferences hullRefs hullHashs referenceSelectionMsg unselectMsg selectedHullReferencePath =
     let
         isAHullSelected : Bool
         isAHullSelected =
@@ -47,11 +47,11 @@ viewHullReferences hullRefs referenceSelectionMsg unselectMsg selectedHullRefere
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected unselectMsg
-            :: List.map (viewHullReference referenceSelectionMsg selectedHullReferencePath) hullRefs
+            :: List.map2 (viewHullReference referenceSelectionMsg selectedHullReferencePath) hullRefs hullHashs
 
 
-viewHullReference : (String -> msg) -> Maybe String -> String -> Html msg
-viewHullReference referenceSelectionMsg selectedHullReference ref =
+viewHullReference : (String -> msg) -> Maybe String -> String -> String -> Html msg
+viewHullReference referenceSelectionMsg selectedHullReference ref hash =
     li
         (if ref == Maybe.withDefault "" selectedHullReference then
             [ class "hull-reference hull-reference__selected" ]
@@ -66,6 +66,7 @@ viewHullReference referenceSelectionMsg selectedHullReference ref =
             []
         , div [ class "hull-info-wrapper" ]
             [ p [ class "hull-label" ] [ text ref ]
+            , p [ class "hull-hash" ] [ text hash ]
             ]
         ]
 
