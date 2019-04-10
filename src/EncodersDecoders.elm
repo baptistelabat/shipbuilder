@@ -16,6 +16,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import Lackenby
+import SHA1
 import StringValueInput exposing (FloatInput)
 
 
@@ -271,3 +272,17 @@ encodeSubModel subModel =
         , ( "xmax", Encode.float subModel.xmax )
         , ( "hullSlices", Encode.list encodeHullSliceAsZYList subModel.hullSlices )
         ]
+
+
+getHashImageForSlices : HullSlices -> String
+getHashImageForSlices hullSlice =
+    let
+        hullSliceToString : String
+        hullSliceToString =
+            encoder hullSlice |> Encode.encode 0
+
+        hullSliceDigested : SHA1.Digest
+        hullSliceDigested =
+            SHA1.fromString hullSliceToString
+    in
+    SHA1.toHex hullSliceDigested
