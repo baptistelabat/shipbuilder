@@ -65,8 +65,11 @@ app.ports.toJs.subscribe(function (message) {
         case "init-three":
             initThree(data);
             break;
-        case "read-json-file": // used to read a save file
-            readFile(data);
+        case "read-json-file-open": // used to read a save file
+            readFile("save-data", data);
+            break;
+        case "read-json-file-import": // used to read a save file
+            readFile("import-data", data);
             break;
         case "restore-save":
             restoreSave(data);
@@ -161,7 +164,7 @@ let setObjectOpacityForCurrentMode = function (object) {
 }
 
 
-let readFile = function (inputId) {
+let readFile = function (cmd, inputId) {
     var node = document.getElementById(inputId);
     if (node === null) {
         return;
@@ -175,7 +178,7 @@ let readFile = function (inputId) {
     reader.onload = (function (event) {
         var contents = event.target.result;
         // sends the content of the file to Elm to handle the restoration
-        sendToElm("save-data", JSON.parse(contents));
+        sendToElm(cmd, JSON.parse(contents));
     });
 
     // Connect our FileReader with the file that was selected in our `input` node.

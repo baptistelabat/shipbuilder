@@ -514,6 +514,14 @@ jsMsgToMsg js =
                 Err message ->
                     FromJs <| JSError <| Decode.errorToString message
 
+        "import-data" ->
+            case Decode.decodeValue (decodeVersion |> Decode.andThen decodeSaveFile) js.data of
+                Ok fileContents ->
+                    FromJs <| ImportHullsLibrary fileContents
+
+                Err message ->
+                    FromJs <| JSError <| Decode.errorToString message
+
         "new-block" ->
             case Decode.decodeValue decodeBlock js.data of
                 Ok block ->
@@ -589,6 +597,7 @@ type FromJsMsg
     | JSError String
     | NewBlock Block
     | RestoreSave SaveFile
+    | ImportHullsLibrary SaveFile
     | SynchronizePosition String Position
     | SynchronizePositions (Dict String SyncPosition)
     | SynchronizeSize String Size
@@ -697,6 +706,11 @@ encodeToggleBlocksVisibilityCmd blocks visible =
         [ ( "visible", Encode.bool visible )
         , ( "uuids", Encode.list (Encode.string << .uuid) blocks )
         ]
+
+
+importHullsLibraryiInModel : Model -> SaveFile -> Model
+importHullsLibraryiInModel model saveFile =
+    { model | slices = saveFile.hulls }
 
 
 
@@ -1821,6 +1835,7 @@ type ToJsMsg
     = AddBlock String
     | ChangeBlockColor Block Color
     | OpenSaveFile
+    | OpenHullsLibrary
     | RemoveBlock Block
     | RemoveBlocks (List Block)
     | SelectBlock Block
@@ -2222,6 +2237,14 @@ updateFromJs jsmsg model =
             in
             ( newModel, Cmd.batch [ toJs <| restoreSaveCmd newModel ] )
 
+        ImportHullsLibrary saveFile ->
+            let
+                newModel : Model
+                newModel =
+                    importHullsLibraryiInModel model saveFile
+            in
+            ( newModel, Cmd.none )
+
         Select uuid ->
             let
                 updatedViewMode : ViewMode
@@ -2369,6 +2392,9 @@ updateModelToJs msg model =
             model
 
         OpenSaveFile ->
+            model
+
+        OpenHullsLibrary ->
             model
 
         ChangeBlockColor block newColor ->
@@ -2730,7 +2756,10 @@ msg2json model action =
             Just { tag = "add-block", data = encodeAddBlockCommand label }
 
         OpenSaveFile ->
-            Just { tag = "read-json-file", data = Encode.string "open-save-file" }
+            Just { tag = "read-json-file-open", data = Encode.string "open-save-file" }
+
+        OpenHullsLibrary ->
+            Just { tag = "read-json-file-import", data = Encode.string "import-hull-library" }
 
         RemoveBlock block ->
             Just { tag = "remove-block", data = encodeBlock block }
@@ -3305,7 +3334,7 @@ importHullSlices model =
             , id "import-hull-library"
             , name "import-hull-library"
             , class "hidden-input"
-            , on "change" <| Decode.succeed <| ToJs OpenSaveFile
+            , on "change" <| Decode.succeed <| ToJs OpenHullsLibrary
             ]
             []
         ]
