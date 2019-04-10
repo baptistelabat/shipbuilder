@@ -3420,16 +3420,16 @@ resetHullSlices model =
 
                 Just hullSlices ->
                     if
-                        hullSlices.length.value
-                            == (Maybe.withDefault hullSlices.length hullSlices.customHullProperties.customLength |> .value)
-                            && hullSlices.breadth.value
-                            == (Maybe.withDefault hullSlices.breadth hullSlices.customHullProperties.customBreadth |> .value)
-                            && hullSlices.depth.value
-                            == (Maybe.withDefault hullSlices.depth hullSlices.customHullProperties.customDepth |> .value)
-                            && hullSlices.draught.value
-                            == (Maybe.withDefault hullSlices.draught hullSlices.customHullProperties.customDraught |> .value)
-                            && List.map .x hullSlices.slices
-                            == Maybe.withDefault (List.map .x hullSlices.slices) hullSlices.customHullProperties.customHullslicesPosition
+                        Nothing
+                            == hullSlices.customHullProperties.customLength
+                            && Nothing
+                            == hullSlices.customHullProperties.customBreadth
+                            && Nothing
+                            == hullSlices.customHullProperties.customDepth
+                            && Nothing
+                            == hullSlices.customHullProperties.customDraught
+                            && Nothing
+                            == hullSlices.customHullProperties.customHullslicesPosition
                     then
                         True
 
