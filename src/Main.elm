@@ -3293,14 +3293,21 @@ viewHullStudioPanel model =
 importHullSlices : Model -> Html Msg
 importHullSlices model =
     div
-        [ class "import-button" ]
-        [ button
-            [ id "buttonImport"
-
-            --, onClick <| ToJs <|
-            , title "Import a hull library from a save file"
-            ]
+        [ class "import-item"
+        , title "Import a hull library from a save file"
+        ]
+        [ label
+            [ for "import-hull-library" ]
             [ text "Import" ]
+        , input
+            [ type_ "file"
+            , accept "application/json, .json"
+            , id "import-hull-library"
+            , name "import-hull-library"
+            , class "hidden-input"
+            , on "change" <| Decode.succeed <| ToJs OpenSaveFile
+            ]
+            []
         ]
 
 
