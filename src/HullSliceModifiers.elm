@@ -19,8 +19,16 @@ setLengthOverAll loa hullSlices =
         oldCustomHullProperties =
             hullSlices.customHullProperties
 
+        customLengthUpdated =
+            hullSlices.length |> StringValueInput.setString loa
+
         newCustomHullProperties =
-            { oldCustomHullProperties | customLength = Just (hullSlices.length |> StringValueInput.setString loa) }
+            case customLengthUpdated == hullSlices.length of
+                False ->
+                    { oldCustomHullProperties | customLength = Just customLengthUpdated }
+
+                True ->
+                    { oldCustomHullProperties | customLength = Nothing }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -31,8 +39,16 @@ setBreadth breadth hullSlices =
         oldCustomHullProperties =
             hullSlices.customHullProperties
 
+        customBreadthUpdated =
+            hullSlices.breadth |> StringValueInput.setString breadth
+
         newCustomHullProperties =
-            { oldCustomHullProperties | customBreadth = Just (hullSlices.breadth |> StringValueInput.setString breadth) }
+            case customBreadthUpdated == hullSlices.breadth of
+                False ->
+                    { oldCustomHullProperties | customBreadth = Just customBreadthUpdated }
+
+                True ->
+                    { oldCustomHullProperties | customBreadth = Nothing }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -43,8 +59,16 @@ setDraught draught hullSlices =
         oldCustomHullProperties =
             hullSlices.customHullProperties
 
+        customDraughtUpdated =
+            hullSlices.draught |> StringValueInput.setString draught
+
         newCustomHullProperties =
-            { oldCustomHullProperties | customDraught = Just (hullSlices.draught |> StringValueInput.setString draught) }
+            case customDraughtUpdated == hullSlices.draught of
+                False ->
+                    { oldCustomHullProperties | customDraught = Just customDraughtUpdated }
+
+                True ->
+                    { oldCustomHullProperties | customDraught = Nothing }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -55,8 +79,16 @@ setDepth depth hullSlices =
         oldCustomHullProperties =
             hullSlices.customHullProperties
 
+        customDepthUpdated =
+            hullSlices.depth |> StringValueInput.setString depth
+
         newCustomHullProperties =
-            { oldCustomHullProperties | customDepth = Just (hullSlices.depth |> StringValueInput.setString depth) }
+            case customDepthUpdated == hullSlices.depth of
+                False ->
+                    { oldCustomHullProperties | customDepth = Just customDepthUpdated }
+
+                True ->
+                    { oldCustomHullProperties | customDepth = Nothing }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
@@ -64,14 +96,19 @@ setDepth depth hullSlices =
 setPrismaticCoefficient : String -> HullSlices -> HullSlices
 setPrismaticCoefficient prismaticCoefficient hullSlices =
     let
-        hullSlicesPosition =
-            hullSlices |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient
-
         oldCustomHullProperties =
             hullSlices.customHullProperties
 
+        hullSlicesPosition =
+            hullSlices |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient
+
         newCustomHullProperties =
-            { oldCustomHullProperties | customHullslicesPosition = Just hullSlicesPosition }
+            case hullSlicesPosition == List.map .x hullSlices.slices of
+                False ->
+                    { oldCustomHullProperties | customHullslicesPosition = Just hullSlicesPosition }
+
+                True ->
+                    { oldCustomHullProperties | customHullslicesPosition = Nothing }
     in
     { hullSlices | customHullProperties = newCustomHullProperties }
 
