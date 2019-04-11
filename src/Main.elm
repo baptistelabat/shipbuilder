@@ -710,7 +710,36 @@ encodeToggleBlocksVisibilityCmd blocks visible =
 
 importHullsLibraryiInModel : Model -> SaveFile -> Model
 importHullsLibraryiInModel model saveFile =
-    { model | slices = saveFile.hulls }
+    let
+        renameKey : String -> String
+        renameKey key =
+            let
+                findSingleKey : String -> String
+                findSingleKey originalKey =
+                    case Dict.member originalKey model.slices of
+                        False ->
+                            originalKey
+
+                        True ->
+                            findSingleKey (originalKey ++ " - copy")
+            in
+            findSingleKey key
+
+        insert2 : String -> v -> v -> Dict String v -> Dict String v
+        insert2 key a b =
+            Dict.insert key a << Dict.insert (renameKey key) b
+
+        updatedSlices : Dict ShipName HullSlices.HullSlices
+        updatedSlices =
+            Dict.merge
+                (\key a -> Dict.insert key a)
+                (\key a b -> insert2 key a b)
+                (\key b -> Dict.insert key b)
+                model.slices
+                saveFile.hulls
+                Dict.empty
+    in
+    { model | slices = updatedSlices }
 
 
 
