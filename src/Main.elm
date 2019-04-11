@@ -711,6 +711,10 @@ encodeToggleBlocksVisibilityCmd blocks visible =
 importHullsLibraryiInModel : Model -> SaveFile -> Model
 importHullsLibraryiInModel model saveFile =
     let
+        importedHullsLibrary : Dict String HullSlices
+        importedHullsLibrary =
+            Dict.map (\_ val -> HullSliceModifiers.resetSlicesToOriginals val) saveFile.hulls
+
         renameKey : String -> String
         renameKey key =
             let
@@ -754,7 +758,7 @@ importHullsLibraryiInModel model saveFile =
                 (\key a b -> insert2 key a b)
                 (\key b -> insertIfUnique key b)
                 model.slices
-                saveFile.hulls
+                importedHullsLibrary
                 Dict.empty
     in
     { model | slices = updatedSlices }
