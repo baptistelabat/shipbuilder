@@ -725,16 +725,34 @@ importHullsLibraryiInModel model saveFile =
             in
             findSingleKey key
 
-        insert2 : String -> v -> v -> Dict String v -> Dict String v
+        insertIfUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
+        insertIfUnique key value =
+            let
+                listSHAInDict : List String
+                listSHAInDict =
+                    List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices
+
+                valueSHA : String
+                valueSHA =
+                    EncodersDecoders.getHashImageForSlices value
+            in
+            case List.member valueSHA listSHAInDict of
+                False ->
+                    Dict.insert key value
+
+                True ->
+                    Dict.remove "nonExistentKey"
+
+        insert2 : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
         insert2 key a b =
-            Dict.insert key a << Dict.insert (renameKey key) b
+            Dict.insert key a << insertIfUnique (renameKey key) b
 
         updatedSlices : Dict ShipName HullSlices.HullSlices
         updatedSlices =
             Dict.merge
                 (\key a -> Dict.insert key a)
                 (\key a b -> insert2 key a b)
-                (\key b -> Dict.insert key b)
+                (\key b -> insertIfUnique key b)
                 model.slices
                 saveFile.hulls
                 Dict.empty
