@@ -1162,8 +1162,8 @@ testImportHullSlicesLibrary =
                 { initialModel
                     | slices =
                         Dict.insert "anthineas" TestData.anthineas <|
-                            Dict.insert "anthineas - copy" TestData.anthineas <|
-                                Dict.insert "anthineas - copy - copy" TestData.anthineas Dict.empty
+                            Dict.insert "anthineas - bis" TestData.anthineas <|
+                                Dict.insert "anthineas - bis - bis" TestData.anthineas Dict.empty
                 }
         in
         [ test "Can import new hull" <|
@@ -1182,7 +1182,7 @@ testImportHullSlicesLibrary =
                     )
         , test "Can import new hull with existing name" <|
             \_ ->
-                Expect.equal [ "anthineas", "anthineas - copy" ]
+                Expect.equal [ "anthineas", "anthineas - bis" ]
                     (updateModel
                         [ FromJs <|
                             ImportHullsLibrary <|
@@ -1249,7 +1249,7 @@ testImportHullSlicesLibrary =
                         modelWithCopy
                         |> .slices
                         |> Dict.keys
-                        |> List.member "anthineas - copy - copy - copy"
+                        |> List.member "anthineas - bis - bis - bis"
                     )
         ]
 

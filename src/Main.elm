@@ -727,7 +727,7 @@ importHullsLibraryiInModel model saveFile =
                             originalKey
 
                         True ->
-                            findSingleKey (originalKey ++ " - copy")
+                            findSingleKey (originalKey ++ " - bis")
             in
             findSingleKey key
 
