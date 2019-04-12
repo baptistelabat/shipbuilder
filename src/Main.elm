@@ -2169,8 +2169,8 @@ updateNoJs msg model =
                     case Dict.get hullReference model.slices of
                         Just hullSlicesForRef ->
                             { model
-                                | slices =
-                                    Dict.insert newLabel hullSlicesForRef <| Dict.remove hullReference model.slices
+                                | slices = Dict.insert newLabel hullSlicesForRef <| Dict.remove hullReference model.slices
+                                , selectedHullReference = Just newLabel
                             }
 
                         Nothing ->
