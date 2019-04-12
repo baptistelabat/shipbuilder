@@ -1931,6 +1931,7 @@ type NoJsMsg
     | MoveBlockUp Block
     | NoOp
     | RenameBlock Block String
+    | RenameHull String String
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetCurrentDate Time.Posix
@@ -2160,6 +2161,22 @@ updateNoJs msg model =
 
         RenameBlock blockToRename newLabel ->
             ( updateBlockInModel (renameBlock newLabel blockToRename) model, Cmd.none )
+
+        RenameHull hullReference newLabel ->
+            let
+                updatedModel : Model
+                updatedModel =
+                    case Dict.get hullReference model.slices of
+                        Just hullSlicesForRef ->
+                            { model
+                                | slices =
+                                    Dict.insert newLabel hullSlicesForRef <| Dict.remove hullReference model.slices
+                            }
+
+                        Nothing ->
+                            model
+            in
+            ( updatedModel, Cmd.none )
 
         ToggleAccordion isOpen accordionId ->
             let
@@ -3368,6 +3385,7 @@ hullReferencesMsgs =
     { selectHullMsg = ToJs << SelectHullReference
     , unselectHullMsg = ToJs <| UnselectHullReference
     , openLibraryMsg = ToJs <| OpenHullsLibrary
+    , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
     }
 
 
