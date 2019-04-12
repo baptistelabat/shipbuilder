@@ -10,6 +10,7 @@ port module Main exposing
     , NoJsMsg(..)
     , PartitionType(..)
     , PartitioningView(..)
+    , SaveFile
     , SpaceReservationView(..)
     , ToJsMsg(..)
     , ViewMode(..)
@@ -26,6 +27,7 @@ port module Main exposing
     , initBlock
     , initCmd
     , initModel
+    , initPartitions
     , main
     , msg2json
     , removeBlockFrom
