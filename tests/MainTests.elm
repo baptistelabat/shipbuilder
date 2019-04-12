@@ -3,7 +3,7 @@ module MainTests exposing (ParsedJSData, alt, ctrl, discardCmd, downArrow, keyDo
 import Color
 import Dict
 import DictList exposing (DictList)
-import EncodersDecoders
+import EncodersDecoders exposing (getHashImageForSlices)
 import Expect exposing (Expectation)
 import ExtraEvents exposing (KeyEvent)
 import Fuzz
@@ -134,6 +134,7 @@ suite =
         , parseJSONSlices
         , encodeJSONTests
         , testUpdateCenterOfGravity
+        , testHullSlicesHash
         ]
 
 
@@ -1104,6 +1105,28 @@ testUpdateCenterOfGravity =
                     modelWithTwoBlocks
                     |> .globalCenterOfGravity
                     |> Expect.equal { x = 10, y = 5, z = -5 }
+        ]
+
+
+testHullSlicesHash =
+    describe "Hash HullSlices with SHA1" <|
+        [ test "Can hash a hullSlices" <|
+            \_ ->
+                Expect.equal "8fcfce7a6c8be7fbed3020a9e1cc9aeccb11140d"
+                    (getHashImageForSlices TestData.anthineas)
+        , test "Hash image change when hull change" <|
+            \_ ->
+                Expect.notEqual "8fcfce7a6c8be7fbed3020a9e1cc9aeccb11140d"
+                    (getHashImageForSlices <|
+                        HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
+                    )
+        , test "Can refound Hash when custom hull is reset" <|
+            \_ ->
+                Expect.equal "8fcfce7a6c8be7fbed3020a9e1cc9aeccb11140d"
+                    (getHashImageForSlices <|
+                        HullSliceModifiers.resetSlicesToOriginals <|
+                            HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
+                    )
         ]
 
 
