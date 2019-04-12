@@ -254,7 +254,7 @@ hullStudioTests =
                     |> Query.fromHtml
                     |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
                     |> Query.find [ Selector.class "hull-label" ]
-                    |> Query.has [ Selector.text "anthineas" ]
+                    |> Query.has [ Selector.id "anthineas" ]
         , test "Clicking a hull reference selects it" <|
             \_ ->
                 initialView

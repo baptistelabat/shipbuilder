@@ -78,7 +78,12 @@ viewHullReference selectHullMsg selectedHull ref hash =
             []
             []
         , div [ class "hull-info-wrapper" ]
-            [ p [ class "hull-label" ] [ text ref ]
+            [ input
+                [ class "hull-label"
+                , id ref
+                , value ref
+                ]
+                []
             , p [ class "hull-hash" ] [ text hash ]
             ]
         ]

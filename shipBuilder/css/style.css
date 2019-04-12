@@ -545,12 +545,20 @@ li.block-item__selected .block-info-wrapper, li.hull-reference__selected .hull-i
     padding: 20px 12px;
 }
 
-input.block-label {
+input.block-label, input.hull-label {
     width: 100%;
     border: none;
     border-bottom: 1px solid var(--secondary-color__contrast);
     background-color: transparent;
     color: var(--on-secondary-color);
+}
+
+input.hull-label {
+    font-size: 0.95em;
+}
+
+p.hull-label {
+    font-size: 1.1em;
 }
 
 .blocks-panel h2 {

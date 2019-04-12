@@ -4061,6 +4061,10 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
         ]
 
 
+
+-- VIEW BLOCK
+
+
 viewWholeList : Model -> Html Msg
 viewWholeList model =
     div
