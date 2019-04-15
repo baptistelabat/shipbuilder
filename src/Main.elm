@@ -1902,6 +1902,7 @@ type ToJsMsg
     | RemoveBlocks (List Block)
     | SelectBlock Block
     | SelectHullReference String
+    | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
     | ResetSlice String
@@ -2537,6 +2538,14 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference }
 
+        RemoveHull hullReference ->
+            let
+                updatedSlices : Dict ShipName HullSlices
+                updatedSlices =
+                    Dict.remove hullReference model.slices
+            in
+            { model | selectedHullReference = Nothing, slices = updatedSlices }
+
         UnselectHullReference ->
             { model | selectedHullReference = Nothing }
 
@@ -2882,6 +2891,9 @@ msg2json model action =
 
                 Just hullSlices ->
                     Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
+
+        RemoveHull hullReference ->
+            Just { tag = "unload-hull", data = Encode.null }
 
         ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
@@ -3400,6 +3412,7 @@ hullReferencesMsgs =
     , unselectHullMsg = ToJs <| UnselectHullReference
     , openLibraryMsg = ToJs <| OpenHullsLibrary
     , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
+    , removeHullMsg = ToJs << RemoveHull
     }
 
 

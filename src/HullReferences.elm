@@ -15,6 +15,7 @@ type alias HullReferencesMsgs msg =
     , unselectHullMsg : msg
     , openLibraryMsg : msg
     , renameHullMsg : String -> String -> msg
+    , removeHullMsg : String -> msg
     }
 
 
@@ -91,8 +92,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash =
             ]
         , div
             [ class "hull-action delete-hull"
-
-            --, onClick <| NoJs <| DeleteHull ref
+            , onClick <| hullReferencesMsgs.removeHullMsg ref
             , title "delete this hull from library"
             ]
             [ FASolid.trash [] ]
