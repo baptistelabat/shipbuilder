@@ -136,6 +136,7 @@ suite =
         , testUpdateCenterOfGravity
         , testHullSlicesHash
         , testImportHullSlicesLibrary
+        , testRenameHullInLibrary
         ]
 
 
@@ -1243,6 +1244,25 @@ testImportHullSlicesLibrary =
                         |> .slices
                         |> Dict.keys
                         |> List.member "anthineas - bis - bis - bis"
+                    )
+        ]
+
+
+testRenameHullInLibrary =
+    describe "Rename hull in library" <|
+        [ test "Can rename a hull" <|
+            \_ ->
+                Expect.equal True
+                    (updateModel [ NoJs <| RenameHull "anthineas" "anthineas2" ] initialModel
+                        |> .slices
+                        |> Dict.keys
+                        |> List.member "anthineas2"
+                    )
+        , test "A hull is selected when renamed" <|
+            \_ ->
+                Expect.equal (Just "anthineas2")
+                    (updateModel [ NoJs <| RenameHull "anthineas" "anthineas2" ] initialModel
+                        |> .selectedHullReference
                     )
         ]
 
