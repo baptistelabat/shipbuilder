@@ -1264,6 +1264,14 @@ testRenameHullInLibrary =
                     (updateModel [ NoJs <| RenameHull "anthineas" "anthineas2" ] initialModel
                         |> .selectedHullReference
                     )
+        , test "Cannot rename a hull if the name already exist" <|
+            \_ ->
+                Expect.equal True
+                    (updateModel [ NoJs <| RenameHull "anthineas" "mpov" ] initialModel
+                        |> .slices
+                        |> Dict.keys
+                        |> List.member "anthineas"
+                    )
         ]
 
 
