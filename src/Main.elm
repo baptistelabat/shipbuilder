@@ -2164,14 +2164,28 @@ updateNoJs msg model =
 
         RenameHull hullReference newLabel ->
             let
+                insertIfNameIsUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
+                insertIfNameIsUnique key value dict =
+                    case Dict.member key dict of
+                        False ->
+                            Dict.insert key value dict
+
+                        True ->
+                            Dict.remove "nonExistentKey" dict
+
                 updatedModel : Model
                 updatedModel =
                     case Dict.get hullReference model.slices of
                         Just hullSlicesForRef ->
-                            { model
-                                | slices = Dict.insert newLabel hullSlicesForRef <| Dict.remove hullReference model.slices
-                                , selectedHullReference = Just newLabel
-                            }
+                            case Dict.member newLabel model.slices of
+                                False ->
+                                    { model
+                                        | slices = Dict.insert newLabel hullSlicesForRef <| Dict.remove hullReference model.slices
+                                        , selectedHullReference = Just newLabel
+                                    }
+
+                                True ->
+                                    model
 
                         Nothing ->
                             model
