@@ -55,6 +55,7 @@ shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html
 	docker run -t -u $(shell id -u):$(shell id -g) -v $(shell pwd):/work -w /work uglifyjs elm-compressed.js --mangle --output=elm.min.js
 	rm elm-compressed.js
 	mv elm.min.js shipBuilder/js/elm.min.js
+	sed -i "1i// (c) Naval Group / Sirehna 2019. All rights reserved" shipBuilder/js/elm.min.js
 
 babel:
 	cd babel && make && cd ..
