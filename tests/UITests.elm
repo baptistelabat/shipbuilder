@@ -272,6 +272,15 @@ hullStudioTests =
                     |> Query.find [ Selector.class "hull-label" ]
                     |> Event.simulate (Event.input "a")
                     |> Event.expect (NoJs <| RenameHull "anthineas" "a")
+        , test "Clicking remove button trigger RemoveHull" <|
+            \_ ->
+                setView
+                    [ ToJs <| SelectHullReference "anthineas" ]
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
+                    |> Query.find [ Selector.class "delete-hull" ]
+                    |> Event.simulate Event.click
+                    |> Event.expect (ToJs <| RemoveHull "anthineas")
         ]
 
 
