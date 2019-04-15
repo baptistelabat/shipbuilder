@@ -263,6 +263,15 @@ hullStudioTests =
                     |> Query.index 1
                     |> Event.simulate Event.click
                     |> Event.expect (ToJs <| SelectHullReference "anthineas")
+        , test "Hull-label trigger RenameHull on input" <|
+            \_ ->
+                initialView
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "hull-reference" ]
+                    |> Query.index 1
+                    |> Query.find [ Selector.class "hull-label" ]
+                    |> Event.simulate (Event.input "a")
+                    |> Event.expect (NoJs <| RenameHull "anthineas" "a")
         ]
 
 
