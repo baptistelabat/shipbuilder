@@ -3,6 +3,7 @@ module HullReferences exposing
     , viewHullStudioPanel
     )
 
+import FontAwesome.Solid as FASolid
 import Html exposing (Html, div, h2, input, label, li, p, text, ul)
 import Html.Attributes exposing (accept, attribute, class, disabled, download, for, hidden, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onClick, onInput)
@@ -88,6 +89,13 @@ viewHullReference selectedHull hullReferencesMsgs ref hash =
                 []
             , p [ class "hull-hash" ] [ text hash ]
             ]
+        , div
+            [ class "hull-action delete-hull"
+
+            --, onClick <| NoJs <| DeleteHull ref
+            , title "delete this hull from library"
+            ]
+            [ FASolid.trash [] ]
         ]
 
 
