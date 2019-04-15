@@ -2164,14 +2164,14 @@ updateNoJs msg model =
 
         RenameHull hullReference newLabel ->
             let
-                insertIfNameIsUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
-                insertIfNameIsUnique key value dict =
-                    case Dict.member key dict of
+                refToFocus : String
+                refToFocus =
+                    case Dict.member newLabel model.slices of
                         False ->
-                            Dict.insert key value dict
+                            newLabel
 
                         True ->
-                            Dict.remove "nonExistentKey" dict
+                            hullReference
 
                 updatedModel : Model
                 updatedModel =
@@ -2190,7 +2190,7 @@ updateNoJs msg model =
                         Nothing ->
                             model
             in
-            ( updatedModel, Cmd.none )
+            ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus refToFocus) ] )
 
         ToggleAccordion isOpen accordionId ->
             let
