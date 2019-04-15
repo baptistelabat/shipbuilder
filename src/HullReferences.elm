@@ -26,7 +26,7 @@ viewHullStudioPanel hullRefs hullHashs selectedHull hullReferencesMsgs =
         ]
         [ h2 [ class "hull-panel-title" ]
             [ text "Hull Studio"
-            , div [ class "hull-actions" ]
+            , div [ class "hull-studio-actions" ]
                 [ importHullSlices hullReferencesMsgs.openLibraryMsg ]
             ]
         , viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs
