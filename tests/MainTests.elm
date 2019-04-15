@@ -1275,6 +1275,25 @@ testRenameHullInLibrary =
         ]
 
 
+testDeleteHullInLibrary =
+    describe "Remove hull in library" <|
+        [ test "Can remove an hull" <|
+            \_ ->
+                Expect.equal False
+                    (updateModel [ ToJs <| RemoveHull "anthineas" ] initialModel
+                        |> .slices
+                        |> Dict.keys
+                        |> List.member "anthineas"
+                    )
+        , test "No hull is selected afer a delete" <|
+            \_ ->
+                Expect.equal Nothing
+                    (updateModel [ ToJs <| RemoveHull "anthineas" ] initialModel
+                        |> .selectedHullReference
+                    )
+        ]
+
+
 testField : Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)
 testField decoder json extractor expectedValue =
     \() ->
