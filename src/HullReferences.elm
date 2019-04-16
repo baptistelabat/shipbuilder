@@ -16,6 +16,7 @@ type alias HullReferencesMsgs msg =
     , openLibraryMsg : msg
     , renameHullMsg : String -> String -> msg
     , removeHullMsg : String -> msg
+    , saveAsNewMsg : String -> msg
     }
 
 
@@ -101,7 +102,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
             ]
         , if isHullCustomized then
             div [ class "hull-actions hull-actions__simple" ]
-                [ viewSaveAsNewHullAction ref
+                [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
                 , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
                 ]
 
@@ -121,10 +122,11 @@ viewRemoveHullAction hullReference removeHullMsg =
         [ FASolid.trash [] ]
 
 
-viewSaveAsNewHullAction : String -> Html msg
-viewSaveAsNewHullAction hullReference =
+viewSaveAsNewHullAction : String -> (String -> msg) -> Html msg
+viewSaveAsNewHullAction hullReference saveAsNewMsg =
     div
         [ class "hull-action save-hull"
+        , onClick <| saveAsNewMsg hullReference
         , title "save as a new"
         ]
         [ FASolid.save [] ]

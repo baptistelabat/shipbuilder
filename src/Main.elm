@@ -1934,6 +1934,7 @@ type NoJsMsg
     | NoOp
     | RenameBlock Block String
     | RenameHull String String
+    | SaveAsNewHull String
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetCurrentDate Time.Posix
@@ -2191,6 +2192,31 @@ updateNoJs msg model =
                             model
             in
             ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus refToFocus) ] )
+
+        SaveAsNewHull hullReference ->
+            let
+                newLabel : String
+                newLabel =
+                    renameKey model hullReference
+
+                updatedModel : Model
+                updatedModel =
+                    case Dict.get hullReference model.slices of
+                        Just hullSlicesForRef ->
+                            case Dict.member newLabel model.slices of
+                                False ->
+                                    { model
+                                        | slices = model.slices |> insertIfUnique newLabel (applyCustomPropertiesToHullSlices hullSlicesForRef) model.slices
+                                        , selectedHullReference = Just newLabel
+                                    }
+
+                                True ->
+                                    model
+
+                        Nothing ->
+                            model
+            in
+            ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus newLabel) ] )
 
         ToggleAccordion isOpen accordionId ->
             let
@@ -3412,6 +3438,7 @@ hullReferencesMsgs =
     , openLibraryMsg = ToJs <| OpenHullsLibrary
     , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
     , removeHullMsg = ToJs << RemoveHull
+    , saveAsNewMsg = NoJs << SaveAsNewHull
     }
 
 
