@@ -55,7 +55,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences
 import HullSliceModifiers
-import HullSlices exposing (HullSlices, hullSlicesToBuildInJs)
+import HullSlices exposing (HullSlices, hullSlicesToBuildInJs, isHullCustomized)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
