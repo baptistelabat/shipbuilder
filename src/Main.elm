@@ -709,26 +709,27 @@ encodeToggleBlocksVisibilityCmd blocks visible =
         ]
 
 
+renameKey : Model -> String -> String
+renameKey model key =
+    let
+        findSingleKey : String -> String
+        findSingleKey originalKey =
+            case Dict.member originalKey model.slices of
+                False ->
+                    originalKey
+
+                True ->
+                    findSingleKey (originalKey ++ " - bis")
+    in
+    findSingleKey key
+
+
 importHullsLibraryiInModel : Model -> SaveFile -> Model
 importHullsLibraryiInModel model saveFile =
     let
         importedHullsLibrary : Dict String HullSlices
         importedHullsLibrary =
             Dict.map (\_ val -> HullSliceModifiers.resetSlicesToOriginals val) saveFile.hulls
-
-        renameKey : String -> String
-        renameKey key =
-            let
-                findSingleKey : String -> String
-                findSingleKey originalKey =
-                    case Dict.member originalKey model.slices of
-                        False ->
-                            originalKey
-
-                        True ->
-                            findSingleKey (originalKey ++ " - bis")
-            in
-            findSingleKey key
 
         insertIfUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
         insertIfUnique key value =
@@ -749,7 +750,7 @@ importHullsLibraryiInModel model saveFile =
 
         insertBothWithoutColision : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
         insertBothWithoutColision key a b =
-            Dict.insert key a << insertIfUnique (renameKey key) b
+            Dict.insert key a << insertIfUnique (renameKey model key) b
 
         updatedSlices : Dict ShipName HullSlices.HullSlices
         updatedSlices =
