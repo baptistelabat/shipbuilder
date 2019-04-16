@@ -323,7 +323,9 @@ header .header-menu-item+.header-menu-item {
     overflow: hidden;
 }
 
-ul.blocks, ul.hull-references  {
+/* HULL STUDIO */
+
+ul.hull-references  {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -334,14 +336,135 @@ ul.blocks, ul.hull-references  {
 }
 
 
-li.block-item, .add-block, li.hull-reference {
+li.hull-reference {
+    background-color: var(--secondary-color__accent);
+    margin: 0 -12px;
+    padding: 4px 0;
+    display: flex;
+    border-left-width: 0;
+    border-left-style: solid;
+    border-color: var(--on-primary-color__accent);
+}
+
+li.hull-reference:hover {
+    border-left-width: 6px;
+}
+
+li.hull-reference-none {
+    border-color: var(--secondary-color__contrast);
+}
+
+li.hull-reference__selected {
+    border-left-width: 6px;
+    border-left-style: solid;
+}
+
+li.hull-reference .hull-info-wrapper {
+    padding: 8px 12px;
+    width: 100%;
+    cursor: pointer;
+}
+
+li.hull-reference:hover .hull-info-wrapper  {
+    width: calc(100% - 60px);
+    position: relative;
+}
+
+li.hull-reference:hover .hull-info-wrapper {
+    padding-left: 6px;
+}
+
+li.hull-reference-none:hover .hull-info-wrapper  {
+    width: 100%;
+    position: relative;
+}
+
+li.hull-reference__selected .hull-info-wrapper {
+    padding-left: 6px;
+}
+
+li.hull-reference p {
+    margin: 4px 0;
+}
+
+li.hull-reference p.hull-label {
+    font-size: 1.1em;
+}
+
+li.hull-reference p.hull-path {
+    font-size: 0.65em;
+    color: var(--on-secondary-color__muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+li.hull-reference p.hull-hash {
+    font-size: 0.55em;
+    color: var(--on-secondary-color__muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+input.hull-label {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--secondary-color__contrast);
+    background-color: transparent;
+    color: var(--on-secondary-color);
+    font-size: 0.95em;
+}
+
+li.hull-reference .hull-actions {
+    width: 50px;
+    display: none;
+}
+
+li.hull-reference:hover .hull-actions {
+    display: flex;
+}
+
+li.hull-reference .hull-actions .hull-action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.hull-panel .delete-hull svg
+{
+    height: 16px;
+}
+
+.hull-panel .save-hull svg
+{
+    height: 16px;
+    margin-right: 8px;
+}
+
+/* BLOCK */
+
+ul.blocks  {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 12px -12px -12px;
+    padding: 0 12px;
+}
+
+
+li.block-item, .add-block {
     background-color: var(--secondary-color__accent);
     margin: 0 -12px;
     padding: 4px 0;
     display: flex;
 }
 
-li.block-item, li.hull-reference {
+li.block-item {
     border-left-width: 0;
     border-left-style: solid;
 }
@@ -398,23 +521,13 @@ li.block-item .block-actions .close-contextual-menu {
     color: var(--contrast-color);
 }
 
-li.block-item .block-info-wrapper, li.hull-reference .hull-info-wrapper {
+li.block-item .block-info-wrapper {
     padding: 8px 12px;
     width: 100%;
     cursor: pointer;
 }
 li.block-item:hover .block-info-wrapper {
     width: calc(100% - 28px);
-    position: relative;
-}
-
-li.hull-reference:hover .hull-info-wrapper  {
-    width: calc(100% - 60px);
-    position: relative;
-}
-
-li.hull-reference-none:hover .hull-info-wrapper  {
-    width: 100%;
     position: relative;
 }
 
@@ -458,19 +571,11 @@ li.block-item:hover .block-contextual-menu {
 }
 
 
-li.block-item:hover, li.hull-reference:hover {
+li.block-item:hover {
     border-left-width: 6px;
 }
 
-li.hull-reference {
-    border-color: var(--on-primary-color__accent);
-}
-
-li.hull-reference-none {
-    border-color: var(--secondary-color__contrast);
-}
-
-li.block-item:hover .block-info-wrapper, li.hull-reference:hover .hull-info-wrapper {
+li.block-item:hover .block-info-wrapper {
     padding-left: 6px;
 }
 
@@ -478,28 +583,16 @@ li.block-item:hover .block-actions {
     display: flex;
 }
 
-li.block-item p, li.hull-reference p {
+li.block-item p {
     margin: 4px 0;
 }
 
-li.block-item p.block-uuid, li.hull-reference p.hull-path {
+li.block-item p.block-uuid {
     font-size: 0.65em;
     color: var(--on-secondary-color__muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-li.hull-reference p.hull-hash {
-    font-size: 0.55em;
-    color: var(--on-secondary-color__muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-li.hull-reference:hover .hull-actions {
-    display: flex;
 }
 
 li.block-item .block-actions {
@@ -509,21 +602,7 @@ li.block-item .block-actions {
     justify-content: space-evenly;
 }
 
-li.hull-reference .hull-actions {
-    width: 50px;
-    display: none;
-
-}
-
 li.block-item .block-actions .block-action {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 4px;
-    cursor: pointer;
-}
-
-li.hull-reference .hull-actions .hull-action {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -559,12 +638,11 @@ li.block-item .block-actions .block-action svg {
     }
 }
 
-
-li.block-item__selected, li.hull-reference__selected {
+li.block-item__selected {
     border-left-width: 6px;
     border-left-style: solid;
 }
-li.block-item__selected .block-info-wrapper, li.hull-reference__selected .hull-info-wrapper {
+li.block-item__selected .block-info-wrapper {
     padding-left: 6px;
 }
 
@@ -574,20 +652,12 @@ li.block-item__selected .block-info-wrapper, li.hull-reference__selected .hull-i
     padding: 20px 12px;
 }
 
-input.block-label, input.hull-label {
+input.block-label {
     width: 100%;
     border: none;
     border-bottom: 1px solid var(--secondary-color__contrast);
     background-color: transparent;
     color: var(--on-secondary-color);
-}
-
-input.hull-label {
-    font-size: 0.95em;
-}
-
-p.hull-label {
-    font-size: 1.1em;
 }
 
 .blocks-panel h2 {
@@ -623,18 +693,6 @@ p.hull-label {
     height: 16px;
     width: 20px;
     margin-left: 8px;
-}
-
-
-.hull-panel .delete-hull svg
-{
-    height: 16px;
-}
-
-.hull-panel .save-hull svg
-{
-    height: 16px;
-    margin-right: 8px;
 }
 
 .blocks-panel h2 .selected-blocks-summary {
