@@ -407,6 +407,17 @@ li.block-item:hover .block-info-wrapper {
     width: calc(100% - 28px);
     position: relative;
 }
+
+li.hull-reference:hover .hull-info-wrapper  {
+    width: calc(100% - 60px);
+    position: relative;
+}
+
+li.hull-reference-none:hover .hull-info-wrapper  {
+    width: 100%;
+    position: relative;
+}
+
 li.block-item .block-info-wrapper {
     position: relative;
 }
@@ -487,18 +498,32 @@ li.hull-reference p.hull-hash {
     text-overflow: ellipsis;
 }
 
-li.hull-reference:hover .hull-action {
+li.hull-reference:hover .hull-actions {
     display: flex;
 }
 
-li.block-item .block-actions, li.hull-reference .hull-action {
+li.block-item .block-actions {
     flex-direction: column;
     width: 28px;
     display: none;
     justify-content: space-evenly;
 }
 
+li.hull-reference .hull-actions {
+    width: 50px;
+    display: none;
+
+}
+
 li.block-item .block-actions .block-action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+    cursor: pointer;
+}
+
+li.hull-reference .hull-actions .hull-action {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -603,9 +628,13 @@ p.hull-label {
 
 .hull-panel .delete-hull svg
 {
-    height: 14px;
-    margin-top: 15px;
-    cursor: pointer;
+    height: 16px;
+}
+
+.hull-panel .save-hull svg
+{
+    height: 16px;
+    margin-right: 8px;
 }
 
 .blocks-panel h2 .selected-blocks-summary {

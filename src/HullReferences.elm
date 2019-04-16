@@ -91,12 +91,30 @@ viewHullReference selectedHull hullReferencesMsgs ref hash =
             , p [ class "hull-hash" ] [ text hash ]
             ]
         , div
-            [ class "hull-action delete-hull"
-            , onClick <| hullReferencesMsgs.removeHullMsg ref
-            , title "Delete this hull from library"
+            [ class "hull-actions" ]
+            [ viewSaveAsNewHullAction ref
+            , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
             ]
-            [ FASolid.trash [] ]
         ]
+
+
+viewRemoveHullAction : String -> (String -> msg) -> Html msg
+viewRemoveHullAction hullReference removeHullMsg =
+    div
+        [ class "hull-action delete-hull"
+        , onClick <| removeHullMsg hullReference
+        , title "delete hull from library"
+        ]
+        [ FASolid.trash [] ]
+
+
+viewSaveAsNewHullAction : String -> Html msg
+viewSaveAsNewHullAction hullReference =
+    div
+        [ class "hull-action save-hull"
+        , title "save as a new"
+        ]
+        [ FASolid.save [] ]
 
 
 viewUnselectHullReference : Bool -> msg -> Html msg
