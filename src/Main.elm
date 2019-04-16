@@ -724,6 +724,24 @@ renameKey model key =
     findSingleKey key
 
 
+insertIfUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices -> Dict String HullSlices
+insertIfUnique key value dict =
+    let
+        listSHAInDict : List String
+        listSHAInDict =
+            List.map EncodersDecoders.getHashImageForSlices <| Dict.values dict
+
+        valueSHA : String
+        valueSHA =
+            EncodersDecoders.getHashImageForSlices value
+    in
+    if List.member valueSHA listSHAInDict then
+        identity
+
+    else
+        Dict.insert key value
+
+
 importHullsLibraryiInModel : Model -> SaveFile -> Model
 importHullsLibraryiInModel model saveFile =
     let
@@ -731,26 +749,9 @@ importHullsLibraryiInModel model saveFile =
         importedHullsLibrary =
             Dict.map (\_ val -> HullSliceModifiers.resetSlicesToOriginals val) saveFile.hulls
 
-        insertIfUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
-        insertIfUnique key value =
-            let
-                listSHAInDict : List String
-                listSHAInDict =
-                    List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices
-
-                valueSHA : String
-                valueSHA =
-                    EncodersDecoders.getHashImageForSlices value
-            in
-            if List.member valueSHA listSHAInDict then
-                identity
-
-            else
-                Dict.insert key value
-
         insertBothWithoutColision : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
         insertBothWithoutColision key a b =
-            Dict.insert key a << insertIfUnique (renameKey model key) b
+            Dict.insert key a << insertIfUnique (renameKey model key) b model.slices
 
         updatedSlices : Dict ShipName HullSlices.HullSlices
         updatedSlices =
@@ -761,8 +762,8 @@ importHullsLibraryiInModel model saveFile =
                 ifHullInModelAndInSavedFile =
                     insertBothWithoutColision
 
-                ifHullOnlyInSavedFile =
-                    insertIfUnique
+                ifHullOnlyInSavedFile key value =
+                    insertIfUnique key value model.slices
             in
             Dict.merge
                 ifHullOnlyInModel
