@@ -137,6 +137,7 @@ suite =
         , testHullSlicesHash
         , testImportHullSlicesLibrary
         , testRenameHullInLibrary
+        , testSaveAsNewHullInLibrary
         ]
 
 
@@ -1286,6 +1287,52 @@ testDeleteHullInLibrary =
                 Expect.equal Nothing
                     (updateModel [ ToJs <| RemoveHull "anthineas" ] initialModel
                         |> .selectedHullReference
+                    )
+        ]
+
+
+testSaveAsNewHullInLibrary =
+    describe "Save a customized hull as a new hull in library" <|
+        let
+            modelWithCustomAnthineas : Model
+            modelWithCustomAnthineas =
+                updateModel [ ToJs <| ModifySlice HullSliceModifiers.setLengthOverAll "anthineas" "10" ] initialModel
+        in
+        [ test "Can add as new hull" <|
+            \_ ->
+                Expect.equal True
+                    (updateModel [ NoJs <| SaveAsNewHull "anthineas" ] modelWithCustomAnthineas
+                        |> .slices
+                        |> Dict.keys
+                        |> List.member "anthineas - bis"
+                    )
+        , test "the new hull is the same as the customized hull" <|
+            \_ ->
+                Expect.equal
+                    (Just <|
+                        HullSlices.applyCustomPropertiesToHullSlices <|
+                            HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
+                    )
+                    (updateModel [ NoJs <| SaveAsNewHull "anthineas" ] modelWithCustomAnthineas
+                        |> .slices
+                        |> Dict.get "anthineas - bis"
+                    )
+        , test "the new hull as no custom properties" <|
+            \_ ->
+                Expect.equal (Just False)
+                    (updateModel [ NoJs <| SaveAsNewHull "anthineas" ] modelWithCustomAnthineas
+                        |> .slices
+                        |> Dict.get "anthineas - bis"
+                        |> Maybe.map HullSlices.isHullCustomized
+                    )
+        , test "Cannot add as new hull to identical hull" <|
+            \_ ->
+                Expect.equal False
+                    (updateModel [ NoJs <| SaveAsNewHull "anthineas" ] modelWithCustomAnthineas
+                        |> updateModel [ NoJs <| SaveAsNewHull "anthineas" ]
+                        |> .slices
+                        |> Dict.keys
+                        |> List.member "anthineas - bis - bis"
                     )
         ]
 

@@ -4,6 +4,7 @@ module TestData exposing
     , blockB
     , blockC
     , cube
+    , cubeCustomized
     , flags
     , hullSliceJson
     , hullSliceJsonCustomized
@@ -79,6 +80,42 @@ cube =
             , depth = Just (StringValueInput.floatInput 1 10)
             , draught = Just (StringValueInput.floatInput 1 2)
             , hullslicesPositions = Just [ 0, 0.5, 1 ]
+            }
+    }
+
+
+cubeCustomized : HullSlices.HullSlices
+cubeCustomized =
+    { emptyHullSlices
+        | length = StringValueInput.floatInput 1 200
+        , breadth = StringValueInput.floatInput 1 20
+        , depth = StringValueInput.floatInput 1 10
+        , xmin = -1
+        , zmin = 3
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 1, 1, 1 ]
+              }
+            ]
+        , draught = StringValueInput.floatInput 1 2
+        , customHullProperties =
+            { customLength = Just (StringValueInput.floatInput 1 400)
+            , customBreadth = Just (StringValueInput.floatInput 1 30)
+            , customDepth = Just (StringValueInput.floatInput 1 20)
+            , customDraught = Just (StringValueInput.floatInput 1 1.5)
+            , customHullslicesPosition = Just [ 0, 0.6, 1 ]
             }
     }
 

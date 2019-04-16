@@ -8,6 +8,7 @@ import HullSliceModifiers
 import HullSlices
     exposing
         ( HullSlices
+        , applyCustomPropertiesToHullSlices
         , area
         , areaTrapezoid
         , calculateCentroid
@@ -18,6 +19,7 @@ import HullSlices
         , denormalizeHullSlices
         , emptyHullSlices
         , integrate
+        , isHullCustomized
         , scale
         , trapezoidCentroid
         , volume
@@ -815,4 +817,53 @@ suite =
                 TestData.anthineas.originalSlicePositions
                     |> Expect.equal
                         (List.map .x TestData.anthineas.slices)
+        , test "applyCustomPropertiesToHullSlices" <|
+            \_ ->
+                (HullSlices.applyCustomPropertiesToHullSlices <| TestData.cubeCustomized)
+                    |> Expect.equal
+                        { emptyHullSlices
+                            | length = StringValueInput.floatInput 1 400
+                            , breadth = StringValueInput.floatInput 1 30
+                            , depth = StringValueInput.floatInput 1 20
+                            , xmin = -1
+                            , zmin = 3
+                            , slices =
+                                [ { x = 0
+                                  , zmin = 0
+                                  , zmax = 1
+                                  , y = [ 1, 1, 1, 1 ]
+                                  }
+                                , { x = 0.6
+                                  , zmin = 0
+                                  , zmax = 1
+                                  , y = [ 1, 1, 1, 1 ]
+                                  }
+                                , { x = 1
+                                  , zmin = 0
+                                  , zmax = 1
+                                  , y = [ 1, 1, 1, 1 ]
+                                  }
+                                ]
+                            , originalSlicePositions = [ 0, 0.6, 1 ]
+                            , draught = StringValueInput.floatInput 1 1.5
+                            , customHullProperties =
+                                { customLength = Nothing
+                                , customBreadth = Nothing
+                                , customDepth = Nothing
+                                , customDraught = Nothing
+                                , customHullslicesPosition = Nothing
+                                }
+                        }
+        , test "isHullCustomized on uncustomized hull" <|
+            \_ ->
+                False
+                    |> Expect.equal
+                        (isHullCustomized TestData.anthineas)
+        , test "isHullCustomized on customized hull" <|
+            \_ ->
+                True
+                    |> Expect.equal
+                        (isHullCustomized <|
+                            HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
+                        )
         ]
