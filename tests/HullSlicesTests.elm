@@ -846,12 +846,12 @@ suite =
                                 ]
                             , originalSlicePositions = [ 0, 0.6, 1 ]
                             , draught = StringValueInput.floatInput 1 1.5
-                            , customHullProperties =
-                                { customLength = Nothing
-                                , customBreadth = Nothing
-                                , customDepth = Nothing
-                                , customDraught = Nothing
-                                , customHullslicesPosition = Nothing
+                            , custom =
+                                { length = Nothing
+                                , breadth = Nothing
+                                , depth = Nothing
+                                , draught = Nothing
+                                , hullslicesPositions = Nothing
                                 }
                         }
         , test "isHullCustomized on uncustomized hull" <|
