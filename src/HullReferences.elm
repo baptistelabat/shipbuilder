@@ -1,6 +1,6 @@
 module HullReferences exposing
     ( HullReferencesMsgs
-    , viewHullStudioPanel
+    , viewHullLibraryPanel
     )
 
 import FontAwesome.Solid as FASolid
@@ -20,8 +20,8 @@ type alias HullReferencesMsgs msg =
     }
 
 
-viewHullStudioPanel : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullStudioPanel hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
+viewHullLibraryPanel : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullLibraryPanel hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
     div
         [ class "panel hull-panel"
         ]
