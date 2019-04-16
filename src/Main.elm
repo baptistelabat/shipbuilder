@@ -1607,7 +1607,7 @@ encodeViewMode viewMode =
                 "block"
 
             HullLibrary ->
-                "hull"
+                "library"
 
             Partitioning _ ->
                 "partition"
@@ -3135,7 +3135,7 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Hull", icon = FASolid.ship [], viewMode = HullLibrary }
+    [ { title = "Library", icon = FASolid.ship [], viewMode = HullLibrary }
     , { title = "Partitions", icon = FASolid.bars [], viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone [], viewMode = SpaceReservation WholeList }
     , { title = "KPIs", icon = FASolid.tachometerAlt [], viewMode = KpiStudio }

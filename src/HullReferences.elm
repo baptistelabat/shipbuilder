@@ -26,8 +26,8 @@ viewHullLibraryPanel hullRefs hullHashs isHullsCustomized selectedHull hullRefer
         [ class "panel hull-panel"
         ]
         [ h2 [ class "hull-panel-title" ]
-            [ text "Hull Studio"
-            , div [ class "hull-studio-actions" ]
+            [ text "Hull Library"
+            , div [ class "hull-library-actions" ]
                 [ viewHullImporter hullReferencesMsgs.openLibraryMsg ]
             ]
         , viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs

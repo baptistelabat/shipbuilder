@@ -5,9 +5,9 @@ from selenium.webdriver.common.keys import Keys
 
 class ShipBuilderIntegrationTests(unittest.TestCase):
 
-    def click_on_hull_studio(self):
+    def click_on_hull_library(self):
         self.driver.find_element_by_xpath(
-            ".//p[contains(text(),'Hull')]").click()
+            ".//p[contains(text(),'Library')]").click()
 
     def click_on_modeller(self):
         self.driver.find_element_by_xpath(
@@ -47,7 +47,7 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
         self.assertIsNotNone(self.driver.find_element_by_class_name("panel-menu"))
 
     def test_block_coefficient_changes_with_draught(self):
-        self.click_on_hull_studio()
+        self.click_on_hull_library()
         self.click_on_hull('MPOV')
         self.click_on_modeller()
         self.assertEqual("0.16", self.get_block_coefficient())
@@ -56,7 +56,7 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
         self.assertEqual("0.33", self.get_block_coefficient())
 
     def test_126_calcul_du_kb(self):
-        self.click_on_hull_studio()
+        self.click_on_hull_library()
         self.click_on_hull('MPOV')
         self.click_on_modeller()
         self.assertEqual("150", self.get_block_displacement())
