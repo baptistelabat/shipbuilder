@@ -365,8 +365,13 @@ li.hull-reference .hull-info-wrapper {
     cursor: pointer;
 }
 
-li.hull-reference:hover .hull-info-wrapper  {
+li.hull-reference:hover .hull-info-wrapper__simple  {
     width: calc(100% - 60px);
+    position: relative;
+}
+
+li.hull-reference:hover .hull-info-wrapper__double  {
+    width: calc(100% - 30px);
     position: relative;
 }
 
@@ -417,8 +422,15 @@ input.hull-label {
 }
 
 li.hull-reference .hull-actions {
-    width: 50px;
     display: none;
+}
+
+li.hull-reference .hull-actions__simple {
+    width: 50px;
+}
+
+li.hull-reference .hull-actions__double {
+    width: 25px;
 }
 
 li.hull-reference:hover .hull-actions {

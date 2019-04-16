@@ -3418,6 +3418,7 @@ viewHullStudioPanel model =
     HullReferences.viewHullStudioPanel
         (Dict.keys model.slices)
         (List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices)
+        (List.map HullSlices.isHullCustomized <| Dict.values model.slices)
         model.selectedHullReference
         hullReferencesMsgs
 

@@ -19,8 +19,8 @@ type alias HullReferencesMsgs msg =
     }
 
 
-viewHullStudioPanel : List String -> List String -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullStudioPanel hullRefs hullHashs selectedHull hullReferencesMsgs =
+viewHullStudioPanel : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullStudioPanel hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
     div
         [ class "panel hull-panel"
         ]
@@ -29,7 +29,7 @@ viewHullStudioPanel hullRefs hullHashs selectedHull hullReferencesMsgs =
             , div [ class "hull-studio-actions" ]
                 [ importHullSlices hullReferencesMsgs.openLibraryMsg ]
             ]
-        , viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs
+        , viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs
         ]
 
 
@@ -54,8 +54,8 @@ importHullSlices openLibraryMsg =
         ]
 
 
-viewHullReferences : List String -> List String -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs =
+viewHullReferences : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
     let
         isAHullSelected : Bool
         isAHullSelected =
@@ -63,11 +63,20 @@ viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs =
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
-            :: List.map2 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs
+            :: List.map3 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs isHullsCustomized
 
 
-viewHullReference : Maybe String -> HullReferencesMsgs msg -> String -> String -> Html msg
-viewHullReference selectedHull hullReferencesMsgs ref hash =
+viewHullReference : Maybe String -> HullReferencesMsgs msg -> String -> String -> Bool -> Html msg
+viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
+    let
+        hullWrapperClass : String
+        hullWrapperClass =
+            if isHullCustomized then
+                "hull-info-wrapper hull-info-wrapper__simple"
+
+            else
+                "hull-info-wrapper hull-info-wrapper__double"
+    in
     li
         (if selectedHull == Just ref then
             [ class "hull-reference hull-reference__selected" ]
@@ -80,7 +89,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash =
         [ div
             []
             []
-        , div [ class "hull-info-wrapper" ]
+        , div [ class hullWrapperClass ]
             [ input
                 [ class "hull-label"
                 , id ref
@@ -90,11 +99,15 @@ viewHullReference selectedHull hullReferencesMsgs ref hash =
                 []
             , p [ class "hull-hash" ] [ text hash ]
             ]
-        , div
-            [ class "hull-actions" ]
-            [ viewSaveAsNewHullAction ref
-            , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
-            ]
+        , if isHullCustomized then
+            div [ class "hull-actions hull-actions__simple" ]
+                [ viewSaveAsNewHullAction ref
+                , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
+                ]
+
+          else
+            div [ class "hull-actions hull-actions__double" ]
+                [ viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg ]
         ]
 
 
