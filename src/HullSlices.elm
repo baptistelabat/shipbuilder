@@ -16,7 +16,11 @@ module HullSlices exposing
     , denormalizeHullSlices
     , emptyHullSlices
     , extractY
+    , getBreadth
+    , getDepth
+    , getDraught
     , getInertialMoment
+    , getLength
     , hullSlicesToBuildInJs
     , integrate
     , isHullCustomized
@@ -81,6 +85,46 @@ type alias HullSliceCentroidAndArea =
     , centroid : Float
     , area : Float
     }
+
+
+getLength : HullSlices -> StringValueInput.FloatInput
+getLength hullSlices =
+    case hullSlices.customHullProperties.customLength of
+        Just customLength ->
+            customLength
+
+        Nothing ->
+            hullSlices.length
+
+
+getBreadth : HullSlices -> StringValueInput.FloatInput
+getBreadth hullSlices =
+    case hullSlices.customHullProperties.customBreadth of
+        Just customBreadth ->
+            customBreadth
+
+        Nothing ->
+            hullSlices.breadth
+
+
+getDepth : HullSlices -> StringValueInput.FloatInput
+getDepth hullSlices =
+    case hullSlices.customHullProperties.customDepth of
+        Just customDepth ->
+            customDepth
+
+        Nothing ->
+            hullSlices.depth
+
+
+getDraught : HullSlices -> StringValueInput.FloatInput
+getDraught hullSlices =
+    case hullSlices.customHullProperties.customDraught of
+        Just customDraught ->
+            customDraught
+
+        Nothing ->
+            hullSlices.draught
 
 
 emptyHullSlices : HullSlices
