@@ -1115,18 +1115,11 @@ testHullSlicesHash =
             \_ ->
                 Expect.equal "8fcfce7a6c8be7fbed3020a9e1cc9aeccb11140d"
                     (getHashImageForSlices TestData.anthineas)
-        , test "Hash image change when hull change" <|
-            \_ ->
-                Expect.notEqual "8fcfce7a6c8be7fbed3020a9e1cc9aeccb11140d"
-                    (getHashImageForSlices <|
-                        HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
-                    )
-        , test "Can refound Hash when custom hull is reset" <|
+        , test "Hash image don't change when hull change" <|
             \_ ->
                 Expect.equal "8fcfce7a6c8be7fbed3020a9e1cc9aeccb11140d"
                     (getHashImageForSlices <|
-                        HullSliceModifiers.resetSlicesToOriginals <|
-                            HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
+                        HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
                     )
         ]
 

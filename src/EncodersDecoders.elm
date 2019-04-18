@@ -11,6 +11,7 @@ module EncodersDecoders exposing
     )
 
 import Dict exposing (Dict)
+import HullSliceModifiers exposing (resetSlicesToOriginals)
 import HullSlices exposing (CustomHullProperties, HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList, HullSlices, emptyHullSlices)
 import HullSlicesMetrics exposing (fillHullSliceMetrics)
 import Json.Decode as Decode
@@ -280,7 +281,7 @@ getHashImageForSlices hullSlice =
     let
         hullSliceToString : String
         hullSliceToString =
-            encoder hullSlice |> Encode.encode 0
+            Encode.encode 0 <| encoder <| resetSlicesToOriginals hullSlice
 
         hullSliceDigested : SHA1.Digest
         hullSliceDigested =
