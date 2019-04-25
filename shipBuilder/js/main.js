@@ -1,3 +1,5 @@
+// (c) Naval Group / Sirehna 2019. All rights reserved
+
 'use strict';
 
 const app = Elm.Main.init({node: document.getElementById('elm-app'), flags: flags});
