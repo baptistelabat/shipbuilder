@@ -98,10 +98,11 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
             , p [ class "hull-hash" ] [ text hash ]
             ]
         , if isHullCustomized then
-            div []
+            div [ class "hull-customized" ]
                 [ div [ class "hull-actions hull-actions__custom" ]
                     [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
                     , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
+                    , viewFocusHullAction ref
                     ]
                 , div
                     [ class "hull-custom-icon" ]
@@ -113,7 +114,21 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
 
           else
             div [ class "hull-actions hull-actions__uncustom" ]
-                [ viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg ]
+                [ viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
+                , viewFocusHullAction ref
+                ]
+        ]
+
+
+viewFocusHullAction : String -> Html msg
+viewFocusHullAction ref =
+    div
+        [ class "hull-action focus-hull"
+
+        --, onClick <| ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock block.uuid
+        , title "Focus hull"
+        ]
+        [ FASolid.arrowRight []
         ]
 
 
