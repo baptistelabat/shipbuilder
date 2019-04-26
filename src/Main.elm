@@ -4,6 +4,7 @@ port module Main exposing
     , Blocks
     , Dimension(..)
     , FromJsMsg(..)
+    , HullView(..)
     , JsData
     , Model
     , Msg(..)
@@ -1506,7 +1507,7 @@ initModel flag =
 
         viewMode : ViewMode
         viewMode =
-            HullLibrary
+            Hull HullLibrary
     in
     { build = flag.buildSHA
     , currentDate = Time.millisToPosix 0
@@ -1571,10 +1572,15 @@ initCmd model =
 
 type ViewMode
     = SpaceReservation SpaceReservationView
-    | HullLibrary
+    | Hull HullView
     | Partitioning PartitioningView
     | KpiStudio
     | Modeller
+
+
+type HullView
+    = HullLibrary
+    | HullDetails
 
 
 type SpaceReservationView
@@ -1606,7 +1612,7 @@ encodeViewMode viewMode =
             SpaceReservation _ ->
                 "block"
 
-            HullLibrary ->
+            Hull _ ->
                 "library"
 
             Partitioning _ ->
@@ -3135,7 +3141,7 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Library", icon = FASolid.ship [], viewMode = HullLibrary }
+    [ { title = "Library", icon = FASolid.ship [], viewMode = Hull HullLibrary }
     , { title = "Partitions", icon = FASolid.bars [], viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone [], viewMode = SpaceReservation WholeList }
     , { title = "KPIs", icon = FASolid.tachometerAlt [], viewMode = KpiStudio }
@@ -3333,9 +3339,9 @@ viewModesMatch left right =
                 _ ->
                     False
 
-        HullLibrary ->
+        Hull _ ->
             case right of
-                HullLibrary ->
+                Hull _ ->
                     True
 
                 _ ->
@@ -3401,7 +3407,7 @@ viewPanel model =
         SpaceReservation spaceReservationView ->
             viewSpaceReservationPanel spaceReservationView model
 
-        HullLibrary ->
+        Hull hullView ->
             viewHullLibraryPanel model
 
         Partitioning partitioningView ->

@@ -144,7 +144,7 @@ viewModeTests =
         , test "Hull panel is displayed when switching mode" <|
             \_ ->
                 setView
-                    [ ToJs <| SwitchViewMode <| HullLibrary ]
+                    [ ToJs <| SwitchViewMode <| Hull HullLibrary ]
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "panel" ]
                     |> Query.has [ Selector.class "hull-panel" ]
@@ -196,7 +196,7 @@ viewModeTests =
                     |> Query.findAll [ Selector.class "tab-item" ]
                     |> Query.index 0
                     |> Event.simulate Event.click
-                    |> Event.expect (ToJs <| SwitchViewMode HullLibrary)
+                    |> Event.expect (ToJs <| SwitchViewMode <| Hull HullLibrary)
         , test "The second tab-item triggers Partitioning" <|
             \_ ->
                 initialView
