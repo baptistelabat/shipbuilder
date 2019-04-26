@@ -57,7 +57,7 @@ modellerView : Html Msg
 modellerView =
     setView
         [ ToJs <| SelectHullReference "anthineas"
-        , ToJs <| SwitchViewMode <| Modeller
+        , ToJs <| SwitchViewMode <| Hull HullDetails
         ]
 
 

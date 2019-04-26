@@ -57,7 +57,7 @@ modellerView : Html Msg
 modellerView =
     setView
         [ ToJs <| SelectHullReference "anthineas"
-        , ToJs <| SwitchViewMode <| Modeller
+        , ToJs <| SwitchViewMode <| Hull HullDetails
         ]
 
 
@@ -172,7 +172,7 @@ viewModeTests =
         , test "Modeller panel is displayed when switching mode" <|
             \_ ->
                 setView
-                    [ ToJs <| SwitchViewMode <| Modeller ]
+                    [ ToJs <| SwitchViewMode <| Hull HullDetails ]
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "panel" ]
                     |> Query.has [ Selector.class "modeller-panel" ]
@@ -221,14 +221,6 @@ viewModeTests =
                     |> Query.index 3
                     |> Event.simulate Event.click
                     |> Event.expect (ToJs <| SwitchViewMode KpiStudio)
-        , test "The fourth tab-item triggers Modeller" <|
-            \_ ->
-                initialView
-                    |> Query.fromHtml
-                    |> Query.findAll [ Selector.class "tab-item" ]
-                    |> Query.index 4
-                    |> Event.simulate Event.click
-                    |> Event.expect (ToJs <| SwitchViewMode Modeller)
         ]
 
 
@@ -939,7 +931,7 @@ modellerTests =
         , test "Title display 'No hull' message when no hull selected" <|
             \_ ->
                 setView
-                    [ ToJs <| SwitchViewMode <| Modeller ]
+                    [ ToJs <| SwitchViewMode <| Hull HullDetails ]
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "modeller-panel-title" ]
                     |> Query.has [ Selector.text "No hull selected" ]
@@ -1147,7 +1139,7 @@ modellerTests =
             \_ ->
                 setView
                     [ ToJs <| SelectHullReference "anthineas"
-                    , ToJs <| SwitchViewMode <| Modeller
+                    , ToJs <| SwitchViewMode <| Hull HullDetails
                     , ToJs <| ModifySlice HullSliceModifiers.setDepth "anthineas" "123.4"
                     ]
                     |> Query.fromHtml
@@ -1157,7 +1149,7 @@ modellerTests =
         , test "Disabled reset button when no hull selected" <|
             \_ ->
                 setView
-                    [ ToJs <| SwitchViewMode <| Modeller ]
+                    [ ToJs <| SwitchViewMode <| Hull HullDetails ]
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.id "buttonReset" ]
                     |> Query.first
