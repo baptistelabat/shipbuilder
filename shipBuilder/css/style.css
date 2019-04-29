@@ -1424,17 +1424,16 @@ a.download-kpis svg {
 .sections-list {
     padding: 0;
     list-style: none;
-    margin: 12px 0 12px;
 }
 
-.sections-item {
-    margin-top: 5px;
+.sections-item, .sections-item-title {
+    margin-top: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.sections-item input {
+.sections-item input, .sections-item-title input {
     width: 55px;
     margin-left: 15px;
     text-align: right;

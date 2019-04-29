@@ -3625,28 +3625,48 @@ viewHullSections uiState slices =
 
 viewHullSliceList : List HullSlice -> Html Msg
 viewHullSliceList slices =
-    ul [ class "sections-list" ] <|
-        List.map viewHullSliceCoordinates slices
+    case List.head slices of
+        Nothing ->
+            Html.text ""
 
-
-viewHullSliceCoordinates : HullSlice -> Html Msg
-viewHullSliceCoordinates slice =
-    li
-        [ class "sections-item input-group" ]
-        [ label [] []
-        , ul [ class "sections-list" ] <|
-            List.map viewHullSliceCoordinate <|
-                HullSlices.extractXYZ <|
-                    HullSlices.toHullSliceAsZYList slice
-        ]
+        Just slice ->
+            ul [ class "sections-list" ] <|
+                List.append
+                    [ li
+                        [ class "sections-item-title input-group" ]
+                        [ input
+                            [ type_ "text"
+                            , disabled True
+                            , value "x"
+                            ]
+                            []
+                        , input
+                            [ type_ "text"
+                            , disabled True
+                            , value "y"
+                            ]
+                            []
+                        , input
+                            [ type_ "text"
+                            , disabled True
+                            , value "z"
+                            ]
+                            []
+                        ]
+                    ]
+                <|
+                    (slice
+                        |> HullSlices.toHullSliceAsZYList
+                        |> HullSlices.extractXYZ
+                        |> List.map viewHullSliceCoordinate
+                    )
 
 
 viewHullSliceCoordinate : HullSlices.Coordinate -> Html Msg
 viewHullSliceCoordinate xyz =
     li
         [ class "sections-item input-group" ]
-        [ label [] []
-        , input
+        [ input
             [ type_ "text"
             , disabled True
             , value <| String.fromFloat <| StringValueInput.round_n 2 xyz.x
