@@ -3609,8 +3609,7 @@ viewHullSections uiState slices =
                 [ text "Sections details"
                 , FASolid.angleDown []
                 ]
-
-            --, viewHullSectionsList slices
+            , viewHullSectionsList slices
             ]
 
         else
@@ -3624,26 +3623,25 @@ viewHullSections uiState slices =
             ]
 
 
+viewHullSectionsList : List HullSlice -> Html Msg
+viewHullSectionsList slices =
+    ul [ class "spacing-list" ] <| List.map viewHullSectionsListItem slices
 
--- viewHullSectionsList : List HullSlice -> Html Msg
--- viewHullSectionsList slices =
---     ul [ class "spacing-list" ] <| List.map viewHullSectionsListItem slices
---
---
--- viewHullSectionsListItem : HullSlice -> Html Msg
--- viewHullSectionsListItem slice =
---     li
---         [ class "sections-item input-group" ]
---         [ label
---             []
---             []
---         , input
---             [ type_ "text"
---
---             --, value <| String.fromFloat slice.x
---             ]
---             []
---         ]
+
+viewHullSectionsListItem : HullSlice -> Html Msg
+viewHullSectionsListItem slice =
+    li
+        [ class "sections-item input-group" ]
+        [ label
+            []
+            []
+        , input
+            [ type_ "text"
+
+            --, value <| String.fromFloat slice.x
+            ]
+            []
+        ]
 
 
 viewKpiStudio : Model -> Html Msg
