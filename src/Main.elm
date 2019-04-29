@@ -1906,6 +1906,7 @@ type ToJsMsg
     | RemoveBlocks (List Block)
     | SelectBlock Block
     | SelectHullReference String
+    | SelectSlice String
     | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
@@ -2565,6 +2566,22 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference }
 
+        SelectSlice inputValue ->
+            let
+                olduiState =
+                    model.uiState
+
+                updateUiState : Int -> UiState
+                updateUiState newValue =
+                    { olduiState | selectedSlice = StringValueInput.asIntIn olduiState.selectedSlice newValue }
+            in
+            case String.toInt inputValue of
+                Nothing ->
+                    model
+
+                Just int ->
+                    { model | uiState = updateUiState int }
+
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
 
@@ -2913,6 +2930,9 @@ msg2json model action =
 
                 Just hullSlices ->
                     Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
+
+        SelectSlice _ ->
+            Nothing
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3611,6 +3631,7 @@ viewHullSections uiState slices =
                 [ text "Sections details"
                 , FASolid.angleDown []
                 ]
+            , viewHullSliceSelector uiState.selectedSlice
             , viewHullSliceList slices
             ]
 
@@ -3623,6 +3644,11 @@ viewHullSections uiState slices =
                 , FASolid.angleRight []
                 ]
             ]
+
+
+viewHullSliceSelector : StringValueInput.IntInput -> Html Msg
+viewHullSliceSelector sliceSelector =
+    StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice
 
 
 viewHullSliceList : List HullSlice -> Html Msg
