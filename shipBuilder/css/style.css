@@ -1395,13 +1395,21 @@ a.download-kpis svg {
 .disclaimer {
   font-size: 0.8em;
   color: red;
+  padding-top: 16px;
+  border-top: 1px solid var(--secondary-color__contrast);
 }
 
 .area-curve-plot {
   color: grey;
 }
 
+.sections-details {
+    padding-bottom: 16px;
+}
+
 .sections-details-title {
+    font-style: italic;
+    font-size: 0.9em;
     margin-bottom:  8px;
     display: flex;
     align-items: center;
