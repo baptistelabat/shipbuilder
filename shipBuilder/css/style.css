@@ -1399,5 +1399,40 @@ a.download-kpis svg {
 
 .area-curve-plot {
   color: grey;
+}
 
+.sections-details-title {
+    margin-bottom:  8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.sections-details-title svg {
+    height: 22px;
+}
+
+.sections-list {
+    padding: 0;
+    list-style: none;
+    margin: 4px 0 12px;
+}
+
+.sections-item {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sections-item + .sections-item {
+    border-top: 1px solid #ffffff88;
+    margin-top: 4px;
+    padding-top: 4px;
+}
+
+.sections-item input {
+    width: 100px;
+    text-align: right;
 }

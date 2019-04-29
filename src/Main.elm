@@ -56,7 +56,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences
 import HullSliceModifiers
-import HullSlices exposing (HullSlices, applyCustomPropertiesToHullSlices, isHullCustomized)
+import HullSlices exposing (HullSlice, HullSlices, applyCustomPropertiesToHullSlices, isHullCustomized)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -3503,6 +3503,7 @@ viewModeller model =
                         , (StringValueInput.view <| HullSlices.getDepth slices) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
                         , (StringValueInput.view <| HullSlices.getDraught slices) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
+                        , viewHullSections model.uiState <| HullSlicesMetrics.getSlices hullSlicesMetrics
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
@@ -3593,6 +3594,56 @@ resetHullSlices model =
             ]
             [ text "Reset" ]
         ]
+
+
+viewHullSections : UiState -> List HullSlice -> Html Msg
+viewHullSections uiState slices =
+    div
+        [ class "sections-details" ]
+    <|
+        if isAccordionOpened uiState "hull-sections" then
+            [ p
+                [ class "sections-details-title"
+                , onClick <| NoJs <| ToggleAccordion False <| "hull-sections"
+                ]
+                [ text "Sections details"
+                , FASolid.angleDown []
+                ]
+
+            --, viewHullSectionsList slices
+            ]
+
+        else
+            [ p
+                [ class "sections-details-title"
+                , onClick <| NoJs <| ToggleAccordion True <| "hull-sections"
+                ]
+                [ text "Sections details"
+                , FASolid.angleRight []
+                ]
+            ]
+
+
+
+-- viewHullSectionsList : List HullSlice -> Html Msg
+-- viewHullSectionsList slices =
+--     ul [ class "spacing-list" ] <| List.map viewHullSectionsListItem slices
+--
+--
+-- viewHullSectionsListItem : HullSlice -> Html Msg
+-- viewHullSectionsListItem slice =
+--     li
+--         [ class "sections-item input-group" ]
+--         [ label
+--             []
+--             []
+--         , input
+--             [ type_ "text"
+--
+--             --, value <| String.fromFloat slice.x
+--             ]
+--             []
+--         ]
 
 
 viewKpiStudio : Model -> Html Msg
