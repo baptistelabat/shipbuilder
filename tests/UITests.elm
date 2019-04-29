@@ -284,6 +284,15 @@ hullLibraryTests =
                     |> Query.find [ Selector.class "save-hull" ]
                     |> Event.simulate Event.click
                     |> Event.expect (NoJs <| SaveAsNewHull "anthineas")
+        , test "Clicking 'focus hull' button trigger SwitchViewMode" <|
+            \_ ->
+                setView
+                    [ ToJs <| SelectHullReference "anthineas" ]
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
+                    |> Query.find [ Selector.class "focus-hull" ]
+                    |> Event.simulate Event.click
+                    |> Event.expect (ToJs <| SwitchViewMode <| Hull <| HullDetails)
         ]
 
 
