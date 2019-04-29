@@ -16,6 +16,7 @@ module HullSlices exposing
     , denormalizeHullSlice
     , denormalizeHullSlices
     , emptyHullSlices
+    , extractXYZ
     , extractY
     , getBreadth
     , getDepth
@@ -503,10 +504,20 @@ toHullSliceAsZYList hs =
 
 
 extractY : HullSliceAsZYList -> List Float
-extractY hsXY =
-    hsXY
+extractY hs =
+    hs
         |> .zylist
         |> List.map Tuple.second
+
+
+extractXYZ : HullSliceAsZYList -> List ( Float, Float, Float )
+extractXYZ hs =
+    let
+        extract : ( Float, Float ) -> ( Float, Float, Float )
+        extract zy =
+            ( hs.x, Tuple.second zy, Tuple.first zy )
+    in
+    List.map extract hs.zylist
 
 
 blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> Float
