@@ -840,6 +840,7 @@ decodeTag =
 type alias UiState =
     { accordions : Dict String Bool
     , blockContextualMenu : Maybe String
+    , selectedSlice : StringValueInput.IntInput
     }
 
 
@@ -1524,6 +1525,7 @@ initModel flag =
     , uiState =
         { accordions = Dict.empty
         , blockContextualMenu = Nothing
+        , selectedSlice = StringValueInput.fromInt "" 1
         }
     , tags = []
     , customProperties = []
