@@ -3648,8 +3648,20 @@ viewHullSliceCoordinate xyz =
         [ label [] []
         , input
             [ type_ "text"
-
-            --, value <| String.fromFloat <| xyz.x
+            , disabled True
+            , value <| String.fromFloat <| StringValueInput.round_n 2 xyz.x
+            ]
+            []
+        , input
+            [ type_ "text"
+            , disabled True
+            , value <| String.fromFloat <| StringValueInput.round_n 2 xyz.y
+            ]
+            []
+        , input
+            [ type_ "text"
+            , disabled True
+            , value <| String.fromFloat <| StringValueInput.round_n 2 xyz.z
             ]
             []
         ]

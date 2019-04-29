@@ -1424,23 +1424,23 @@ a.download-kpis svg {
 .sections-list {
     padding: 0;
     list-style: none;
-    margin: 4px 0 12px;
+    margin: 12px 0 12px;
 }
 
 .sections-item {
-    margin: 0;
+    margin-top: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.sections-item + .sections-item {
-    border-top: 1px solid #ffffff88;
-    margin-top: 4px;
-    padding-top: 4px;
+.sections-item input {
+    width: 55px;
+    margin-left: 15px;
+    text-align: right;
 }
 
-.sections-item input {
-    width: 100px;
-    text-align: right;
+.sections-item input:disabled {
+    background: var(--secondary-color__accent);
+    box-shadow: 0 0 5px -3px var(--shadow-color);
 }
