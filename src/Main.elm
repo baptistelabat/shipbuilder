@@ -3632,7 +3632,7 @@ viewHullSections uiState slices =
                 , FASolid.angleDown []
                 ]
             , viewHullSliceSelector uiState.selectedSlice
-            , viewHullSliceList slices
+            , viewHullSliceList slices uiState.selectedSlice.value
             ]
 
         else
@@ -3651,9 +3651,13 @@ viewHullSliceSelector sliceSelector =
     StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice
 
 
-viewHullSliceList : List HullSlice -> Html Msg
-viewHullSliceList slices =
-    case List.head slices of
+viewHullSliceList : List HullSlice -> Int -> Html Msg
+viewHullSliceList slices sliceSelected =
+    let
+        maybeSlice =
+            List.head <| List.drop (sliceSelected - 1) slices
+    in
+    case maybeSlice of
         Nothing ->
             Html.text ""
 
