@@ -3609,7 +3609,7 @@ viewHullSections uiState slices =
                 [ text "Sections details"
                 , FASolid.angleDown []
                 ]
-            , viewHullSectionsList slices
+            , viewHullSliceList slices
             ]
 
         else
@@ -3623,22 +3623,33 @@ viewHullSections uiState slices =
             ]
 
 
-viewHullSectionsList : List HullSlice -> Html Msg
-viewHullSectionsList slices =
-    ul [ class "spacing-list" ] <| List.map viewHullSectionsListItem slices
+viewHullSliceList : List HullSlice -> Html Msg
+viewHullSliceList slices =
+    ul [ class "sections-list" ] <|
+        List.map viewHullSliceCoordinates slices
 
 
-viewHullSectionsListItem : HullSlice -> Html Msg
-viewHullSectionsListItem slice =
+viewHullSliceCoordinates : HullSlice -> Html Msg
+viewHullSliceCoordinates slice =
     li
         [ class "sections-item input-group" ]
-        [ label
-            []
-            []
+        [ label [] []
+        , ul [ class "sections-list" ] <|
+            List.map viewHullSliceCoordinate <|
+                HullSlices.extractXYZ <|
+                    HullSlices.toHullSliceAsZYList slice
+        ]
+
+
+viewHullSliceCoordinate : HullSlices.Coordinate -> Html Msg
+viewHullSliceCoordinate xyz =
+    li
+        [ class "sections-item input-group" ]
+        [ label [] []
         , input
             [ type_ "text"
 
-            --, value <| String.fromFloat slice.x
+            --, value <| String.fromFloat <| xyz.x
             ]
             []
         ]
