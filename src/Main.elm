@@ -1906,7 +1906,7 @@ type ToJsMsg
     | RemoveBlocks (List Block)
     | SelectBlock Block
     | SelectHullReference String
-    | SelectSlice String
+    | SelectSlice Int String
     | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
@@ -2566,7 +2566,7 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference }
 
-        SelectSlice inputValue ->
+        SelectSlice maxSelector inputValue ->
             let
                 olduiState =
                     model.uiState
@@ -2580,7 +2580,12 @@ updateModelToJs msg model =
                     model
 
                 Just int ->
-                    { model | uiState = updateUiState int }
+                    case int == 0 || int > maxSelector of
+                        True ->
+                            model
+
+                        False ->
+                            { model | uiState = updateUiState int }
 
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
@@ -2931,7 +2936,7 @@ msg2json model action =
                 Just hullSlices ->
                     Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
 
-        SelectSlice _ ->
+        SelectSlice _ _ ->
             Nothing
 
         RemoveHull hullReference ->
@@ -3631,7 +3636,7 @@ viewHullSections uiState slices =
                 [ text "Sections details"
                 , FASolid.angleDown []
                 ]
-            , viewHullSliceSelector uiState.selectedSlice
+            , viewHullSliceSelector uiState.selectedSlice <| List.length slices
             , viewHullSliceList slices uiState.selectedSlice.value
             ]
 
@@ -3646,9 +3651,9 @@ viewHullSections uiState slices =
             ]
 
 
-viewHullSliceSelector : StringValueInput.IntInput -> Html Msg
-viewHullSliceSelector sliceSelector =
-    StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice
+viewHullSliceSelector : StringValueInput.IntInput -> Int -> Html Msg
+viewHullSliceSelector sliceSelector maxSelector =
+    StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice maxSelector
 
 
 viewHullSliceList : List HullSlice -> Int -> Html Msg

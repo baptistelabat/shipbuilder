@@ -1434,8 +1434,7 @@ a.download-kpis svg {
 }
 
 .sections-item input, .sections-item-title input {
-    width: 55px;
-    margin-left: 15px;
+    width: 60px;
     text-align: right;
 }
 
