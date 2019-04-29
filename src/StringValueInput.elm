@@ -2,6 +2,7 @@ module StringValueInput exposing
     ( FloatInput
     , IntInput
     , asFloatIn
+    , asIntIn
     , asStringIn
     , asValueIn
     , decodeSpacingExceptions
@@ -17,6 +18,7 @@ module StringValueInput exposing
     , syncFloatInput
     , syncIntInput
     , view
+    , viewIntInput
     )
 
 import Dict exposing (Dict)
@@ -152,13 +154,18 @@ asFloatIn input value =
     { input | value = value, string = String.fromFloat value }
 
 
+asIntIn : IntInput -> Int -> IntInput
+asIntIn input value =
+    { input | value = value, string = String.fromInt value }
+
+
 asStringIn : { a | value : b, string : String } -> String -> { a | value : b, string : String }
 asStringIn numberInput string =
     { numberInput | string = string }
 
 
-makeID : FloatInput -> String
-makeID var =
+makeID : String -> String
+makeID description =
     let
         isAlphanumeric : Char -> Bool
         isAlphanumeric char =
@@ -168,7 +175,7 @@ makeID var =
         alphanumeric =
             "abcdefghijklmnopqrstuvxwyz0123456789-_"
     in
-    var.description
+    description
         |> String.toLower
         |> String.split " "
         |> String.join "-"
@@ -199,7 +206,7 @@ view floatInput_ onChange =
     let
         generatedID : String
         generatedID =
-            makeID floatInput_
+            makeID floatInput_.description
     in
     div
         [ class "input-group" ]
@@ -211,6 +218,28 @@ view floatInput_ onChange =
             , id generatedID
             , value floatInput_.string
             , ExtraEvents.onKeyDown floatInput_.nbOfDigits floatInput_.string onChange
+            , onInput onChange
+            ]
+            []
+        ]
+
+
+viewIntInput : IntInput -> (String -> msg) -> Html msg
+viewIntInput intInput_ onChange =
+    let
+        generatedID : String
+        generatedID =
+            makeID intInput_.description
+    in
+    div
+        [ class "input-group" ]
+        [ label
+            [ for generatedID ]
+            [ text intInput_.description ]
+        , input
+            [ type_ "number"
+            , value intInput_.string
+            , Html.Attributes.min "0"
             , onInput onChange
             ]
             []
