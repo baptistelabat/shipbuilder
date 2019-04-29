@@ -26,6 +26,7 @@ module HullSlices exposing
     , isHullCustomized
     , scale
     , setLongitudinalPositionOfEachSlice
+    , toHullSliceAsZYList
     , trapezoidCentroid
     , volume
     , zGTrapezoid
@@ -470,6 +471,35 @@ getInertialMoment o =
                     0
     in
     inertialMoment
+
+
+toHullSliceAsZYList : HullSlice -> HullSliceAsZYList
+toHullSliceAsZYList hs =
+    let
+        zmax =
+            hs.zmax
+
+        zmin =
+            hs.zmin
+
+        y =
+            hs.y
+
+        dz : Float
+        dz =
+            (zmax - zmin) / (toFloat <| max 1 <| List.length y - 1)
+
+        acc : ( Int, Float ) -> ( Float, Float )
+        acc ( idx, y_ ) =
+            ( zmin + toFloat idx * dz, y_ )
+
+        lst =
+            y
+                |> Array.fromList
+                |> Array.toIndexedList
+                |> List.map acc
+    in
+    { x = hs.x, zylist = lst }
 
 
 extractY : HullSliceAsZYList -> List Float
