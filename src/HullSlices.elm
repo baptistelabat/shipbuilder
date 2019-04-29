@@ -1,5 +1,6 @@
 module HullSlices exposing
-    ( CustomHullProperties
+    ( Coordinate
+    , CustomHullProperties
     , HullSlice
     , HullSliceAsAreaXYList
     , HullSliceAsZYList
@@ -86,6 +87,13 @@ type alias HullSliceCentroidAndArea =
     { x : Float
     , centroid : Float
     , area : Float
+    }
+
+
+type alias Coordinate =
+    { x : Float
+    , y : Float
+    , z : Float
     }
 
 
@@ -510,12 +518,12 @@ extractY hs =
         |> List.map Tuple.second
 
 
-extractXYZ : HullSliceAsZYList -> List ( Float, Float, Float )
+extractXYZ : HullSliceAsZYList -> List Coordinate
 extractXYZ hs =
     let
-        extract : ( Float, Float ) -> ( Float, Float, Float )
+        extract : ( Float, Float ) -> Coordinate
         extract zy =
-            ( hs.x, Tuple.second zy, Tuple.first zy )
+            { x = hs.x, y = Tuple.second zy, z = Tuple.first zy }
     in
     List.map extract hs.zylist
 
