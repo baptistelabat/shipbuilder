@@ -1907,6 +1907,7 @@ type ToJsMsg
     | SelectBlock Block
     | SelectHullReference String
     | SelectSlice String Int String
+    | ToggleSections Bool String
     | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
@@ -2587,6 +2588,18 @@ updateModelToJs msg model =
                         False ->
                             { model | uiState = updateUiState int }
 
+        ToggleSections isOpen _ ->
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState | accordions = Dict.insert "hull-sections" isOpen uiState.accordions }
+            in
+            { model | uiState = newUiState }
+
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
 
@@ -2948,6 +2961,24 @@ msg2json model action =
 
                         Just slice ->
                             Just { tag = "highlight-slice", data = EncodersDecoders.hullSliceWithSpaceParametersEncoder slice slices }
+
+        ToggleSections isOpen hullReference ->
+            case isOpen of
+                False ->
+                    Just { tag = "hide-highlight", data = Encode.null }
+
+                True ->
+                    case Dict.get hullReference model.slices of
+                        Nothing ->
+                            Nothing
+
+                        Just slices ->
+                            case List.head <| List.drop (model.uiState.selectedSlice.value - 1) slices.slices of
+                                Nothing ->
+                                    Nothing
+
+                                Just slice ->
+                                    Just { tag = "highlight-slice", data = EncodersDecoders.hullSliceWithSpaceParametersEncoder slice slices }
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3641,7 +3672,7 @@ viewHullSections uiState hullReference slices =
         if isAccordionOpened uiState "hull-sections" then
             [ p
                 [ class "sections-details-title"
-                , onClick <| NoJs <| ToggleAccordion False <| "hull-sections"
+                , onClick <| ToJs <| ToggleSections False hullReference
                 ]
                 [ text "Sections details"
                 , FASolid.angleDown []
@@ -3653,7 +3684,7 @@ viewHullSections uiState hullReference slices =
         else
             [ p
                 [ class "sections-details-title"
-                , onClick <| NoJs <| ToggleAccordion True <| "hull-sections"
+                , onClick <| ToJs <| ToggleSections True hullReference
                 ]
                 [ text "Sections details"
                 , FASolid.angleRight []

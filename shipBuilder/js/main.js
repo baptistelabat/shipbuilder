@@ -86,6 +86,9 @@ app.ports.toJs.subscribe(function (message) {
         case "highlight-slice":
             highlightSlice(data);
             break;
+        case "hide-highlight":
+            deleteHighlight();
+            break;
         case "make-bulkheads":
             makeBulkheads(data);
             break;
