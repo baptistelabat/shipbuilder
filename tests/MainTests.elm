@@ -1335,6 +1335,45 @@ testSaveAsNewHullInLibrary =
         ]
 
 
+testSections =
+    describe "Test functions on hull sections" <|
+        [ test "Can toggle open sections" <|
+            \_ ->
+                Expect.equal True
+                    (updateModel [ ToJs <| ToggleSections True "anthineas" ] initialModel
+                        |> .uiState
+                        |> .accordions
+                        |> Dict.get "hull-sections"
+                        |> Maybe.withDefault False
+                    )
+        , test "Can toggle close sections" <|
+            \_ ->
+                Expect.equal False
+                    (updateModel [ ToJs <| ToggleSections False "anthineas" ] initialModel
+                        |> .uiState
+                        |> .accordions
+                        |> Dict.get "hull-sections"
+                        |> Maybe.withDefault True
+                    )
+        , test "Can select a slice" <|
+            \_ ->
+                Expect.equal 5
+                    (updateModel [ ToJs <| SelectSlice "anthineas" 10 "5" ] initialModel
+                        |> .uiState
+                        |> .selectedSlice
+                        |> .value
+                    )
+        , test "Cannot select a slice greater than slices length" <|
+            \_ ->
+                Expect.equal 5
+                    (updateModel [ ToJs <| SelectSlice "anthineas" 10 "11" ] initialModel
+                        |> .uiState
+                        |> .selectedSlice
+                        |> .value
+                    )
+        ]
+
+
 testField : Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)
 testField decoder json extractor expectedValue =
     \() ->
