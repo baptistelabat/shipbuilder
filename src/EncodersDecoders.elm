@@ -247,11 +247,12 @@ encoder hullSlices =
         ]
 
 
-encoderWithSelectedSlice : Int -> HullSlices -> Encode.Value
-encoderWithSelectedSlice selectedSlice hullSlices =
+encoderWithSelectedSlice : Int -> Bool -> HullSlices -> Encode.Value
+encoderWithSelectedSlice selectedSlice showSelectedSlice hullSlices =
     Encode.object
         [ ( "hullSlices", encoder hullSlices )
         , ( "selectedSlice", Encode.int selectedSlice )
+        , ( "showSelectedSlice", Encode.bool showSelectedSlice )
         ]
 
 

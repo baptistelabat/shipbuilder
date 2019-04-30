@@ -632,9 +632,15 @@ let loadHull = function (json) {
         var zWaterLine = (hullSlices.depth + hullSlices.zmin) - hullSlices.draught;
         makeWaterLine(zWaterLine);
 
+        //Delete previous highlights
+        deleteHighlight();
+
         //display highlighted slice
-        var highlightedSlice = hullSlices.slices[json.selectedSlice-1];
-        highlightSlice (highlightedSlice, hullSlices.depth, hullSlices.breadth, hullSlices.length, hullSlices.xmin, hullSlices.zmin)
+        if (json.showSelectedSlice) {
+          var highlightedSlice = hullSlices.slices[json.selectedSlice-1];
+          highlightSlice (highlightedSlice, hullSlices.depth, hullSlices.breadth, hullSlices.length, hullSlices.xmin, hullSlices.zmin)
+        }
+
 }
 
 let deleteHighlight = function () {
@@ -648,9 +654,6 @@ let deleteHighlight = function () {
 }
 
 let highlightSlice = function (slice, depth, breadth, length, xmin, zmin) {
-  //Delete previous highlights
-  deleteHighlight();
-
   //space parameters
   var H = depth;
   var B = breadth;

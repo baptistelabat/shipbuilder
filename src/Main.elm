@@ -2964,7 +2964,7 @@ msg2json model action =
                     Just
                         { tag = "load-hull"
                         , data =
-                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value <|
+                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value False <|
                                 applyCustomPropertiesToHullSlices hullSlices
                         }
 
@@ -2977,7 +2977,7 @@ msg2json model action =
                     Just
                         { tag = "load-hull"
                         , data =
-                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value <|
+                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value True <|
                                 applyCustomPropertiesToHullSlices hullSlices
                         }
 
@@ -2990,7 +2990,7 @@ msg2json model action =
                     Just
                         { tag = "load-hull"
                         , data =
-                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value <|
+                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value isOpen <|
                                 applyCustomPropertiesToHullSlices hullSlices
                         }
 
@@ -3006,7 +3006,7 @@ msg2json model action =
                     Just
                         { tag = "load-hull"
                         , data =
-                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value <|
+                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value True <|
                                 applyCustomPropertiesToHullSlices hullSlices
                         }
 
@@ -3018,7 +3018,7 @@ msg2json model action =
                 Just hullSlices ->
                     Just
                         { tag = "load-hull"
-                        , data = EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value hullSlices
+                        , data = EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value True hullSlices
                         }
 
         UnselectHullReference ->
