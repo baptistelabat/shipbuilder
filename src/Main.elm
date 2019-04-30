@@ -1906,7 +1906,7 @@ type ToJsMsg
     | RemoveBlocks (List Block)
     | SelectBlock Block
     | SelectHullReference String
-    | SelectSlice Int String
+    | SelectSlice String Int String
     | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
@@ -2566,7 +2566,7 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference }
 
-        SelectSlice maxSelector inputValue ->
+        SelectSlice hullReference maxSelector inputValue ->
             let
                 olduiState =
                     model.uiState
@@ -2936,8 +2936,18 @@ msg2json model action =
                 Just hullSlices ->
                     Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
 
-        SelectSlice _ _ ->
-            Nothing
+        SelectSlice hullReference _ _ ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just slices ->
+                    case List.head <| List.drop (model.uiState.selectedSlice.value - 1) slices.slices of
+                        Nothing ->
+                            Nothing
+
+                        Just slice ->
+                            Just { tag = "highlight-slice", data = EncodersDecoders.hullSliceWithSpaceParametersEncoder slice slices }
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3530,7 +3540,7 @@ viewModeller model =
                         , (StringValueInput.view <| HullSlices.getDepth slices) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
                         , (StringValueInput.view <| HullSlices.getDraught slices) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
-                        , viewHullSections model.uiState <| HullSlicesMetrics.getSlices hullSlicesMetrics
+                        , viewHullSections model.uiState hullReference <| HullSlicesMetrics.getSlices hullSlicesMetrics
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
@@ -3623,8 +3633,8 @@ resetHullSlices model =
         ]
 
 
-viewHullSections : UiState -> List HullSlice -> Html Msg
-viewHullSections uiState slices =
+viewHullSections : UiState -> String -> List HullSlice -> Html Msg
+viewHullSections uiState hullReference slices =
     div
         [ class "sections-details" ]
     <|
@@ -3636,7 +3646,7 @@ viewHullSections uiState slices =
                 [ text "Sections details"
                 , FASolid.angleDown []
                 ]
-            , viewHullSliceSelector uiState.selectedSlice <| List.length slices
+            , viewHullSliceSelector uiState.selectedSlice hullReference <| List.length slices
             , viewHullSliceList slices uiState.selectedSlice.value
             ]
 
@@ -3651,9 +3661,9 @@ viewHullSections uiState slices =
             ]
 
 
-viewHullSliceSelector : StringValueInput.IntInput -> Int -> Html Msg
-viewHullSliceSelector sliceSelector maxSelector =
-    StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice maxSelector
+viewHullSliceSelector : StringValueInput.IntInput -> String -> Int -> Html Msg
+viewHullSliceSelector sliceSelector hullReference maxSelector =
+    StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector
 
 
 viewHullSliceList : List HullSlice -> Int -> Html Msg

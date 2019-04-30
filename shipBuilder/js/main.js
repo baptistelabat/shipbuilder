@@ -83,6 +83,9 @@ app.ports.toJs.subscribe(function (message) {
         case "unload-hull": // remove the hull model in the scene
             unloadHull();
             break;
+        case "highlight-slice":
+            highlightSlice(data);
+            break;
         case "make-bulkheads":
             makeBulkheads(data);
             break;
@@ -620,6 +623,74 @@ let loadHull = function (json) {
 
         var zWaterLine = (json.depth + json.zmin) - json.draught;
         makeWaterLine(zWaterLine);
+}
+
+let deleteHighlight = function () {
+    const oldHighlights = scene.children.filter(child =>
+        child.sbType
+        && child.sbType === "modeller"
+        && child.modellerType
+        && child.modellerType === "highlightSlice"
+    );
+    oldHighlights.forEach(oldHighlight => removeFromScene(oldHighlight));
+}
+
+let highlightSlice = function (data) {
+  //Delete previous highlights
+  deleteHighlight();
+
+  //space parameters
+  var H = data.depth;
+  var B = data.breadth;
+  var L = data.length;
+  var xmin = data['xmin'];
+  var ymin = (-data.breadth / 2);
+  var zmin = data['zmin'];
+
+  //add margin between highlight and hull
+  const margin = 0.005;
+
+  //slice parameters
+  var x = data.slice['x'];
+  var ny = data.slice['y'].length;
+  var zmin_slice = data.slice['zmin'] - margin;
+  var zmax_slice = data.slice['zmax'] + margin;
+  var dz = (zmax_slice - zmin_slice) / (ny-1);
+
+  //complete slice by symmetry
+  var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
+  var ys = make_symmetric(data.slice['y']);
+
+  var geometry = new THREE.Geometry();
+
+  //add vertices to geometry
+  for (var i = 0 ; i < ny ; i++)
+  {
+      var y = ys[i];
+      var z = zmin_slice + dz*i;
+      geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin+margin*B,z*H+zmin ));
+  }
+  for (var i = 0 ; i < ny ; i++)
+  {
+      var y = ys[i+ny];
+      var z = zmax_slice - dz*i;
+      geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin-margin*B,z*H+zmin ));
+  }
+
+  // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
+  const shipVertices = geometry.vertices;
+  geometry.vertices = shipVertices.map(vertex => {
+      return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
+  });
+
+  const colorRed = new THREE.Color(1, 0.5, 0.5); // red
+  const material = new THREE.LineBasicMaterial({ color: colorRed, linewidth: 1, side: THREE.DoubleSide });
+
+  const sliceToConstruct = new THREE.LineLoop(geometry, material);
+  sliceToConstruct.sbType = "modeller";
+  sliceToConstruct.modellerType = "highlightSlice";
+
+  scene.add(sliceToConstruct);
 }
 
 let hullVolume = function (json) {
