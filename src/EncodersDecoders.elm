@@ -9,7 +9,6 @@ module EncodersDecoders exposing
     , getHashImageForSlices
     , hullSliceAsAreaXYListEncoder
     , hullSliceEncoder
-    , hullSliceWithSpaceParametersEncoder
     , normalizeSlicesPosition
     )
 
@@ -284,18 +283,6 @@ encodeSubModel subModel =
         [ ( "xmin", Encode.float subModel.xmin )
         , ( "xmax", Encode.float subModel.xmax )
         , ( "hullSlices", Encode.list encodeHullSliceAsZYList subModel.hullSlices )
-        ]
-
-
-hullSliceWithSpaceParametersEncoder : HullSlice -> HullSlices -> Encode.Value
-hullSliceWithSpaceParametersEncoder hullSlice hullSlices =
-    Encode.object
-        [ ( "slice", hullSliceEncoder hullSlice )
-        , ( "depth", Encode.float <| .value <| Maybe.withDefault hullSlices.depth hullSlices.customHullProperties.customDepth )
-        , ( "breadth", Encode.float <| .value <| Maybe.withDefault hullSlices.breadth hullSlices.customHullProperties.customBreadth )
-        , ( "length", Encode.float <| .value <| Maybe.withDefault hullSlices.length hullSlices.customHullProperties.customLength )
-        , ( "xmin", Encode.float hullSlices.xmin )
-        , ( "zmin", Encode.float hullSlices.zmin )
         ]
 
 
