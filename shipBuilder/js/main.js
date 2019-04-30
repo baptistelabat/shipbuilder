@@ -594,10 +594,12 @@ let loadHull = function (json) {
         // there can only be one hull in the scene so remove the current one, if any
         unloadHull();
 
+        var hullSlices = json['hullSlices'];
+
         const hullColor = new THREE.Color(3/255, 146/255, 255/255); // light blue
         // the STL loader returns a bufferGeometry. We can't read its vertices and faces
         // we need to convert it to an "actual" geometry to access these
-        const geometry = buildHullGeometry(json);
+        const geometry = buildHullGeometry(hullSlices);
         const volume = calcVolume(geometry);
 
         const shipVertices = geometry.vertices;
@@ -626,8 +628,13 @@ let loadHull = function (json) {
         hull.sbType = "hull";
         scene.add(hull);
 
-        var zWaterLine = (json.depth + json.zmin) - json.draught;
+        //dispaly water line
+        var zWaterLine = (hullSlices.depth + hullSlices.zmin) - hullSlices.draught;
         makeWaterLine(zWaterLine);
+
+        //display highlighted slice
+        var highlightedSlice = hullSlices.slices[json.selectedSlice-1];
+        highlightSlice (highlightedSlice, hullSlices.depth, hullSlices.breadth, hullSlices.length, hullSlices.xmin, hullSlices.zmin)
 }
 
 let deleteHighlight = function () {
@@ -640,31 +647,29 @@ let deleteHighlight = function () {
     oldHighlights.forEach(oldHighlight => removeFromScene(oldHighlight));
 }
 
-let highlightSlice = function (data) {
+let highlightSlice = function (slice, depth, breadth, length, xmin, zmin) {
   //Delete previous highlights
   deleteHighlight();
 
   //space parameters
-  var H = data.depth;
-  var B = data.breadth;
-  var L = data.length;
-  var xmin = data['xmin'];
-  var ymin = (-data.breadth / 2);
-  var zmin = data['zmin'];
+  var H = depth;
+  var B = breadth;
+  var L = length;
+  var ymin = (-breadth / 2);
 
   //add margin between highlight and hull
   const margin = 0.005;
 
   //slice parameters
-  var x = data.slice['x'];
-  var ny = data.slice['y'].length;
-  var zmin_slice = data.slice['zmin'] - margin;
-  var zmax_slice = data.slice['zmax'] + margin;
+  var x = slice['x'];
+  var ny = slice['y'].length / 2;
+  var zmin_slice = slice['zmin'] - margin;
+  var zmax_slice = slice['zmax'] + margin;
   var dz = (zmax_slice - zmin_slice) / (ny-1);
 
   //complete slice by symmetry
   var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
-  var ys = make_symmetric(data.slice['y']);
+  var ys = slice['y'];
 
   var geometry = new THREE.Geometry();
 

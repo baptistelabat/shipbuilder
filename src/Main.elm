@@ -2961,38 +2961,38 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value <|
+                                applyCustomPropertiesToHullSlices hullSlices
+                        }
 
         SelectSlice hullReference _ _ ->
             case Dict.get hullReference model.slices of
                 Nothing ->
                     Nothing
 
-                Just slices ->
-                    case List.head <| List.drop (model.uiState.selectedSlice.value - 1) slices.slices of
-                        Nothing ->
-                            Nothing
-
-                        Just slice ->
-                            Just { tag = "highlight-slice", data = EncodersDecoders.hullSliceWithSpaceParametersEncoder slice slices }
+                Just hullSlices ->
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value <|
+                                applyCustomPropertiesToHullSlices hullSlices
+                        }
 
         ToggleSections isOpen hullReference ->
-            case isOpen of
-                False ->
-                    Just { tag = "hide-highlight", data = Encode.null }
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
 
-                True ->
-                    case Dict.get hullReference model.slices of
-                        Nothing ->
-                            Nothing
-
-                        Just slices ->
-                            case List.head <| List.drop (model.uiState.selectedSlice.value - 1) slices.slices of
-                                Nothing ->
-                                    Nothing
-
-                                Just slice ->
-                                    Just { tag = "highlight-slice", data = EncodersDecoders.hullSliceWithSpaceParametersEncoder slice slices }
+                Just hullSlices ->
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value <|
+                                applyCustomPropertiesToHullSlices hullSlices
+                        }
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3003,7 +3003,12 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value <|
+                                applyCustomPropertiesToHullSlices hullSlices
+                        }
 
         ResetSlice hullReference ->
             case Dict.get hullReference model.slices of
@@ -3011,7 +3016,10 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
+                    Just
+                        { tag = "load-hull"
+                        , data = EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value hullSlices
+                        }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
