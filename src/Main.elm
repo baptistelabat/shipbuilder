@@ -1525,7 +1525,7 @@ initModel flag =
     , uiState =
         { accordions = Dict.empty
         , blockContextualMenu = Nothing
-        , selectedSlice = StringValueInput.fromInt "" 1
+        , selectedSlice = StringValueInput.fromInt "section-selector" 1
         }
     , tags = []
     , customProperties = []

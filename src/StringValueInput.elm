@@ -234,10 +234,11 @@ viewIntInput intInput_ onChange =
     div
         [ class "input-group" ]
         [ label
-            [ for generatedID ]
-            [ text intInput_.description ]
+            []
+            []
         , input
             [ type_ "number"
+            , id generatedID
             , value intInput_.string
             , Html.Attributes.min "0"
             , onInput onChange

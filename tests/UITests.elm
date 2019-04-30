@@ -61,6 +61,15 @@ modellerView =
         ]
 
 
+modellerViewWithSectionExpand : Html Msg
+modellerViewWithSectionExpand =
+    setView
+        [ ToJs <| SelectHullReference "anthineas"
+        , ToJs <| SwitchViewMode <| Hull HullDetails
+        , ToJs <| ToggleSections True "anthineas"
+        ]
+
+
 downArrow : KeyEvent -> ( String, Encode.Value )
 downArrow =
     keyDown 40
@@ -1163,4 +1172,34 @@ modellerTests =
                     |> Query.findAll [ Selector.id "buttonReset" ]
                     |> Query.first
                     |> Query.has [ Selector.attribute <| Attributes.hidden True ]
+        , test "Section details is present" <|
+            \_ ->
+                modellerView
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "sections-details-title" ]
+                    |> Query.first
+                    |> Query.has [ Selector.attribute <| Attributes.class "sections-details-title" ]
+        , test "Section details is triggers ToggleSections" <|
+            \_ ->
+                modellerView
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "sections-details-title" ]
+                    |> Query.first
+                    |> Event.simulate Event.click
+                    |> Event.expect (ToJs <| ToggleSections True "anthineas")
+        , test "Section selector is present" <|
+            \_ ->
+                modellerViewWithSectionExpand
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "section-selector" ]
+                    |> Query.first
+                    |> Query.has [ Selector.attribute <| Attributes.id "section-selector" ]
+        , test "Section selector is triggers SelectSlice" <|
+            \_ ->
+                modellerViewWithSectionExpand
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "section-selector" ]
+                    |> Query.first
+                    |> Event.simulate (Event.input "5")
+                    |> Event.expect (ToJs <| SelectSlice "anthineas" 10 "5")
         ]
