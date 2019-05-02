@@ -689,7 +689,10 @@ encodeRestoreSaveCmd model =
                             Encode.string ""
 
                         Just hullSlices ->
-                            EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
     in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
