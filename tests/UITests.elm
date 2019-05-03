@@ -312,6 +312,34 @@ hullLibraryTests =
                     |> Query.find [ Selector.class "focus-hull" ]
                     |> Event.simulate Event.click
                     |> Event.expect (ToJs <| SwitchViewMode <| Hull <| HullDetails)
+        , test "Hull library as an input for setting new hull's name" <|
+            \_ ->
+                initialView
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-add" ] ]
+                    |> Query.has [ Selector.class "hull-label-add" ]
+        , test "Changing new hull's name trigger SaveNewHullName" <|
+            \_ ->
+                initialView
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-add" ] ]
+                    |> Query.find [ Selector.class "hull-label-add" ]
+                    |> Event.simulate (Event.input "a")
+                    |> Event.expect (NoJs <| SaveNewHullName "a")
+        , test "Hull library as a button for creating a new hull" <|
+            \_ ->
+                initialView
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-add" ] ]
+                    |> Query.has [ Selector.class "create-hull" ]
+        , test "Clicking 'create hull' button trigger CreateHull" <|
+            \_ ->
+                initialView
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.classes [ "hull-reference", "hull-reference-add" ] ]
+                    |> Query.find [ Selector.class "create-hull" ]
+                    |> Event.simulate Event.click
+                    |> Event.expect (ToJs <| CreateHull)
         ]
 
 
