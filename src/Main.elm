@@ -2775,13 +2775,27 @@ updateModelToJs msg model =
                 updatedSlices : String -> Dict ShipName HullSlices
                 updatedSlices hullReference =
                     Dict.insert hullReference HullSlices.emptyHullSlices model.slices
+
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState
+                        | newHullName = Nothing
+                    }
             in
             case maybeHullReference of
                 Nothing ->
                     model
 
                 Just hullReference ->
-                    { model | selectedHullReference = Just hullReference, slices = updatedSlices hullReference }
+                    { model
+                        | selectedHullReference = Just hullReference
+                        , slices = updatedSlices hullReference
+                        , uiState = newUiState
+                    }
 
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
