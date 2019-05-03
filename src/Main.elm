@@ -2603,6 +2603,7 @@ updateModelToJs msg model =
                 newUiState =
                     { uiState
                         | accordions = Dict.insert "hull-sections" isOpen uiState.accordions
+                        , selectedSlice = StringValueInput.asIntIn uiState.selectedSlice 1
                         , showSelectedSlice = isOpen
                     }
             in
