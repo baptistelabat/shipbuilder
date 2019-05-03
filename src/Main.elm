@@ -3906,7 +3906,7 @@ viewHullSlicesDetails uiState hullReference hullslices =
                 [ text "Slices details"
                 , FASolid.angleDown []
                 ]
-            , viewHullSliceSelector uiState hullReference <| List.length hullslices.slices
+            , viewHullSliceSelector uiState hullReference hullslices.slices
             , viewHullSliceList hullslices uiState.selectedSlice.value
             ]
 
@@ -3921,12 +3921,30 @@ viewHullSlicesDetails uiState hullReference hullslices =
             ]
 
 
-viewHullSliceSelector : UiState -> String -> Int -> Html Msg
-viewHullSliceSelector uiState hullReference maxSelector =
+viewHullSliceSelector : UiState -> String -> List HullSlice -> Html Msg
+viewHullSliceSelector uiState hullReference slices =
+    let
+        sliceSelector =
+            case List.isEmpty slices of
+                True ->
+                    div
+                        [ class "input-group slices-message" ]
+                        [ label [] [ text "slice no." ]
+                        , input
+                            [ type_ "text"
+                            , disabled True
+                            , value "No slices"
+                            ]
+                            []
+                        ]
+
+                False ->
+                    StringValueInput.viewIntInput uiState.selectedSlice <| ToJs << SelectSlice hullReference (List.length slices)
+    in
     div [] <|
         [ div
             [ class "slices-selector" ]
-            [ StringValueInput.viewIntInput uiState.selectedSlice <| ToJs << SelectSlice hullReference maxSelector
+            [ sliceSelector
             , viewHullSliceImportButton uiState
             , viewHiddenInputToPasteClipboard
             ]
