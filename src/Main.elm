@@ -2791,11 +2791,16 @@ updateModelToJs msg model =
                     model
 
                 Just hullReference ->
-                    { model
-                        | selectedHullReference = Just hullReference
-                        , slices = updatedSlices hullReference
-                        , uiState = newUiState
-                    }
+                    case Dict.member hullReference model.slices of
+                        True ->
+                            model
+
+                        False ->
+                            { model
+                                | selectedHullReference = Just hullReference
+                                , slices = updatedSlices hullReference
+                                , uiState = newUiState
+                            }
 
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
@@ -3180,7 +3185,7 @@ msg2json model action =
             loadHullJsData model hullReference
 
         CreateHull ->
-            case model.uiState.newHullName of
+            case model.selectedHullReference of
                 Nothing ->
                     Nothing
 
