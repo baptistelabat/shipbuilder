@@ -2774,7 +2774,7 @@ updateModelToJs msg model =
 
                 updatedSlices : String -> Dict ShipName HullSlices
                 updatedSlices hullReference =
-                    Dict.insert hullReference HullSlices.emptyHullSlices model.slices
+                    model.slices |> insertIfUnique hullReference HullSlices.emptyHullSlices model.slices
 
                 uiState : UiState
                 uiState =
