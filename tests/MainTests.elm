@@ -140,6 +140,7 @@ suite =
         , testSaveAsNewHullInLibrary
         , testReadFromClipboard
         , testPasteFromClipboard
+        , testCreateNewHull
         ]
 
 
@@ -1473,6 +1474,89 @@ testPasteFromClipboard =
                                 |> Maybe.map .custom
                             )
             ]
+        ]
+
+
+testCreateNewHull =
+    describe "Create a new empty hull in library" <|
+        let
+            initialUiState : UiState
+            initialUiState =
+                initialModel.uiState
+
+            updateUiState : String -> UiState
+            updateUiState newName =
+                { initialUiState | newHullName = Just newName }
+
+            modelWithSavedNewHullName : Model
+            modelWithSavedNewHullName =
+                { initialModel | uiState = updateUiState "newHullTest" }
+
+            modelWithEmptyHullSlices : Model
+            modelWithEmptyHullSlices =
+                { modelWithSavedNewHullName | slices = Dict.insert "emptyHullSlices" HullSlices.emptyHullSlices initialModel.slices }
+
+            modelWithExistingNewName : Model
+            modelWithExistingNewName =
+                { initialModel | uiState = updateUiState "anthineas" }
+        in
+        [ test "Can save new hull name in model" <|
+            \_ ->
+                Expect.equal (Just "newHullTest")
+                    (updateModel [ NoJs <| SaveNewHullName "newHullTest" ] initialModel
+                        |> .uiState
+                        |> .newHullName
+                    )
+        , test "Cannot create an hull with empty name" <|
+            \_ ->
+                Expect.equal
+                    (initialModel
+                        |> .slices
+                        |> Dict.keys
+                        |> List.length
+                    )
+                    (updateModel [ ToJs <| CreateHull ] initialModel
+                        |> .slices
+                        |> Dict.keys
+                        |> List.length
+                    )
+        , test "Can create a new hull" <|
+            \_ ->
+                Expect.equal True
+                    (updateModel [ ToJs <| CreateHull ] modelWithSavedNewHullName
+                        |> .slices
+                        |> Dict.keys
+                        |> List.member "newHullTest"
+                    )
+        , test "The new hull is empty" <|
+            \_ ->
+                Expect.equal (Just HullSlices.emptyHullSlices)
+                    (updateModel [ ToJs <| CreateHull ] modelWithSavedNewHullName
+                        |> .slices
+                        |> Dict.get "newHullTest"
+                    )
+        , test "Cannot create a hull if it is not unique" <|
+            \_ ->
+                Expect.equal False
+                    (updateModel [ ToJs <| CreateHull ] modelWithEmptyHullSlices
+                        |> .slices
+                        |> Dict.keys
+                        |> List.member "newHullTest"
+                    )
+        , test "Cannot create a hull if its name already exist" <|
+            \_ ->
+                Expect.notEqual (Just HullSlices.emptyHullSlices)
+                    (updateModel [ ToJs <| CreateHull ] modelWithExistingNewName
+                        |> .slices
+                        |> Dict.get "anthineas"
+                    )
+        , test "Clear stored name in model when hull is created" <|
+            \_ ->
+                Expect.equal Nothing
+                    (updateModel [ ToJs <| CreateHull ] modelWithSavedNewHullName
+                        |> .uiState
+                        |> .newHullName
+                    )
         ]
 
 

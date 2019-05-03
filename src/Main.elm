@@ -14,6 +14,7 @@ port module Main exposing
     , SaveFile
     , SpaceReservationView(..)
     , ToJsMsg(..)
+    , UiState
     , ViewMode(..)
     , addBlockTo
     , asHeightInSize
