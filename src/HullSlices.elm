@@ -19,6 +19,7 @@ module HullSlices exposing
     , getInertialMoment
     , hullSlicesToBuildInJs
     , integrate
+    , isHullCustomized
     , scale
     , setLongitudinalPositionOfEachSlice
     , trapezoidCentroid
@@ -636,6 +637,26 @@ hullSlicesToBuildInJs hullSlices =
         , hullslicesPositions = Just []
         }
     }
+
+
+isHullCustomized : HullSlices -> Bool
+isHullCustomized hullSlices =
+    if
+        Nothing
+            == hullSlices.custom.length
+            && Nothing
+            == hullSlices.custom.breadth
+            && Nothing
+            == hullSlices.custom.depth
+            && Nothing
+            == hullSlices.custom.draught
+            && Nothing
+            == hullSlices.custom.hullslicesPositions
+    then
+        False
+
+    else
+        True
 
 
 calculateSliceArea : HullSlices -> HullSlice -> Float

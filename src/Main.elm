@@ -3412,35 +3412,20 @@ resetHullSlices model =
                 Nothing ->
                     ""
 
-        isCustom : Bool
-        isCustom =
+        isResetButtonDisplayed : Bool
+        isResetButtonDisplayed =
             case Dict.get hullReference model.slices of
                 Nothing ->
                     True
 
                 Just hullSlices ->
-                    if
-                        Nothing
-                            == hullSlices.custom.length
-                            && Nothing
-                            == hullSlices.custom.breadth
-                            && Nothing
-                            == hullSlices.custom.depth
-                            && Nothing
-                            == hullSlices.custom.draught
-                            && Nothing
-                            == hullSlices.custom.hullslicesPositions
-                    then
-                        True
-
-                    else
-                        False
+                    not <| HullSlices.isHullCustomized hullSlices
     in
     div
         [ class "reset-button" ]
         [ button
             [ id "buttonReset"
-            , hidden isCustom
+            , hidden isResetButtonDisplayed
             , onClick <| ToJs <| ResetSlice hullReference
             , title "Reset parameters to origin"
             ]
