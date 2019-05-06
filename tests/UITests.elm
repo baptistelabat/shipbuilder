@@ -70,6 +70,16 @@ modellerViewWithSlicesDetailsExpanded =
         ]
 
 
+modellerReadyToReadClipboard : Html Msg
+modellerReadyToReadClipboard =
+    setView
+        [ ToJs <| SelectHullReference "anthineas"
+        , ToJs <| SwitchViewMode <| Hull HullDetails
+        , ToJs <| ToggleSections True "anthineas"
+        , ToJs <| ReadClipboard
+        ]
+
+
 downArrow : KeyEvent -> ( String, Encode.Value )
 downArrow =
     keyDown 40
@@ -1198,4 +1208,35 @@ modellerTests =
                     |> Query.first
                     |> Event.simulate (Event.input "5")
                     |> Event.expect (ToJs <| SelectSlice "anthineas" 10 "5")
+        , test "Button 'slice import' is present" <|
+            \_ ->
+                modellerViewWithSectionExpand
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.attribute <| Attributes.id "sections-import" ]
+        , test "Button 'slice import' triggers ReadClipboard" <|
+            \_ ->
+                modellerViewWithSectionExpand
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "sections-import" ]
+                    |> Query.first
+                    |> Event.simulate Event.click
+                    |> Event.expect (ToJs <| ReadClipboard)
+        , test "Button 'slice import' display a message prompting to paste clipboard" <|
+            \_ ->
+                modellerReadyToReadClipboard
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.attribute <| Attributes.class "sections-import-message" ]
+        , test "Button 'slice import' display a button 'cancel section import" <|
+            \_ ->
+                modellerReadyToReadClipboard
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.attribute <| Attributes.id "sections-import-close" ]
+        , test "Button 'cancel slice import' triggers CancelReadClipboard" <|
+            \_ ->
+                modellerReadyToReadClipboard
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "sections-import-close" ]
+                    |> Query.first
+                    |> Event.simulate Event.click
+                    |> Event.expect (NoJs <| CancelReadClipboard)
         ]
