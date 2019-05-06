@@ -3866,6 +3866,7 @@ viewHiddenInputToPasteClipboard =
             [ type_ "text"
             , id "slices-clipboard-receiver"
             , value ""
+            , onBlur <| NoJs <| CancelReadClipboard
             ]
             []
         ]
