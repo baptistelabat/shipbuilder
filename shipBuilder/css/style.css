@@ -16,6 +16,11 @@
     --on-secondary-color__accent: hsl(222, 20%, 20%);
     --on-secondary-color__muted: hsl(222, 20%, 60%);
 
+    --tertiary-color: hsl(11, 80%, 60%);
+    --tertiary-color__accent: hsl(11, 80%, 50%);
+
+    --on-tertiary-color: white;
+
     --contrast-color: hsl(222, 20%, 20%);
     --on-contrast-color: white;
 
@@ -1415,7 +1420,7 @@ a.download-kpis svg {
 
 .disclaimer {
   font-size: 0.8em;
-  color: red;
+  color: var(--tertiary-color);
   padding-top: 20px;
   border-top: 1px solid var(--secondary-color__contrast);
 }
@@ -1481,22 +1486,58 @@ a.download-kpis svg {
     margin-bottom: -15px;
 }
 
-.slices-import {
+.slices-import, .slices-import-active  {
     display: flex;
     align-items: center;
-    width: 40px;
-    height: 32px;
-    margin-top: 36px;
+    margin-top: 4px;
     margin-left: 10px;
 }
 
-.slices-import svg{
+.slices-import  {
+    width: 40px;
+    height: 32px;
+}
+
+.slices-import-close  {
+    width: 35px;
+    height: 32px;
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+}
+
+.slices-import-close:hover  {
+    background: var(--tertiary-color__accent);
+}
+
+.slices-import-close:active  {
+    background: var(--tertiary-color__accent);
+}
+
+.slices-import svg, .slices-import-close svg {
     width: 15px;
     height: 15px;
     margin-left : 4px;
 }
 
-.sections-clipboard-receiver {
+.slices-import-message, .slices-import-close {
+    display: flex;
+    align-items: center;
+    background: var(--tertiary-color);
+    color: var(--on-tertiary-color);
+}
+
+.slices-import-message {
+    width: 90px;
+    height: 32px;
+    font-size: 0.7em;
+    padding-left: 10px;
+    margin-right: 1px;
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+
+}
+
+.slices-clipboard-receiver {
     width: 0px;
     overflow: hidden;
 }

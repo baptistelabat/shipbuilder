@@ -3789,7 +3789,7 @@ viewHullSlicesDetails uiState hullReference hullslices =
                 [ text "Slices details"
                 , FASolid.angleDown []
                 ]
-            , viewHullSliceSelector uiState.selectedSlice hullReference <| List.length hullslices.slices
+            , viewHullSliceSelector uiState hullReference <| List.length hullslices.slices
             , viewHullSliceList hullslices uiState.selectedSlice.value
             ]
 
@@ -3804,32 +3804,56 @@ viewHullSlicesDetails uiState hullReference hullslices =
             ]
 
 
-viewHullSliceSelector : StringValueInput.IntInput -> String -> Int -> Html Msg
-viewHullSliceSelector sliceSelector hullReference maxSelector =
+viewHullSliceSelector : UiState -> String -> Int -> Html Msg
+viewHullSliceSelector uiState hullReference maxSelector =
     div [] <|
         [ div
             [ class "slices-actions" ]
-            [ StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector
-            , p
-                [ class "as-button slices-import"
-                , id "slices-import"
-                , title "Paste list of sections from clipboard"
-                , onClick <| ToJs <| ReadClipboard
-                ]
-                [ FASolid.externalLinkAlt [] ]
+            [ StringValueInput.viewIntInput uiState.selectedSlice <| ToJs << SelectSlice hullReference maxSelector
+            , viewHullSliceImportButton uiState
             , viewHiddenInputToPasteClipboard
             ]
         ]
 
 
+viewHullSliceImportButton : UiState -> Html Msg
+viewHullSliceImportButton uiState =
+    if uiState.waitToPasteClipBoard then
+        div
+            [ class "slices-import-active"
+            , id "slices-import-active"
+            ]
+            [ div
+                [ class "slices-import-message" ]
+                [ text "press ctrl+v to import" ]
+            , div
+                [ class "as-button slices-import-close"
+                , id "slices-import-close"
+                , title "Cancel the import"
+
+                --, onClick <| ToJs <| CancelReadClipboard
+                ]
+                [ FASolid.times [] ]
+            ]
+
+    else
+        div
+            [ class "as-button slices-import"
+            , id "slices-import"
+            , title "Paste list of slices from clipboard"
+            , onClick <| ToJs <| ReadClipboard
+            ]
+            [ FASolid.externalLinkAlt [] ]
+
+
 viewHiddenInputToPasteClipboard : Html Msg
 viewHiddenInputToPasteClipboard =
     div
-        [ class "sections-clipboard-receiver" ]
+        [ class "slices-clipboard-receiver" ]
         [ label [] []
         , input
             [ type_ "text"
-            , id "sections-clipboard-receiver"
+            , id "slices-clipboard-receiver"
             , value ""
             ]
             []

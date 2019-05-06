@@ -212,7 +212,7 @@ function handlePaste (e) {
 }
 
 let readClipboard = function (cmd, inputId) {
-    var pasteTarget = document.getElementById("sections-clipboard-receiver");
+    var pasteTarget = document.getElementById("slices-clipboard-receiver");
     pasteTarget.focus();
     pasteTarget.addEventListener('paste', handlePaste);
 }
@@ -707,7 +707,7 @@ let buildSliceGeometry = function (slice, depth, breadth, length, xmin, zmin) {
 let displayHighlightedSlice = function (slice, depth, breadth, length, xmin, zmin) {
 
   var geometry = buildSliceGeometry(slice, depth, breadth, length, xmin, zmin);
-  const colorRed = new THREE.Color(1, 0.5, 0.5); // red
+  const colorRed = new THREE.Color("hsl(11, 80%, 60%)"); // red
   const material = new THREE.LineBasicMaterial({ color: colorRed, linewidth: 1, side: THREE.DoubleSide });
 
   const sliceToConstruct = new THREE.LineLoop(geometry, material);
