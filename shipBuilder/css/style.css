@@ -1495,3 +1495,8 @@ a.download-kpis svg {
     height: 15px;
     margin-left : 4px;
 }
+
+.sections-clipboard-receiver {
+    width: 0px;
+    overflow: hidden;
+}

@@ -3800,7 +3800,22 @@ viewHullSliceSelector sliceSelector hullReference maxSelector =
                 , onClick <| ToJs <| ReadClipboard
                 ]
                 [ FASolid.externalLinkAlt [] ]
+            , viewHiddenInputToPasteClipboard
             ]
+        ]
+
+
+viewHiddenInputToPasteClipboard : Html Msg
+viewHiddenInputToPasteClipboard =
+    div
+        [ class "sections-clipboard-receiver" ]
+        [ label [] []
+        , input
+            [ type_ "text"
+            , id "sections-clipboard-receiver"
+            , value ""
+            ]
+            []
         ]
 
 
