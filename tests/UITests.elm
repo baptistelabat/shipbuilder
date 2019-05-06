@@ -1176,8 +1176,6 @@ modellerTests =
             \_ ->
                 modellerView
                     |> Query.fromHtml
-                    |> Query.findAll [ Selector.class "sections-details-title" ]
-                    |> Query.first
                     |> Query.has [ Selector.attribute <| Attributes.class "sections-details-title" ]
         , test "Section details is triggers ToggleSections" <|
             \_ ->
@@ -1191,8 +1189,6 @@ modellerTests =
             \_ ->
                 modellerViewWithSectionExpand
                     |> Query.fromHtml
-                    |> Query.findAll [ Selector.id "section-selector" ]
-                    |> Query.first
                     |> Query.has [ Selector.attribute <| Attributes.id "section-selector" ]
         , test "Section selector is triggers SelectSlice" <|
             \_ ->
