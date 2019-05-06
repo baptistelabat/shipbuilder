@@ -955,8 +955,8 @@ modellerTests =
                         |> .slices
                         |> Dict.get "anthineas"
                         |> Maybe.map
-                            (.customHullProperties
-                                >> .customLength
+                            (.custom
+                                >> .length
                                 >> Maybe.map .value
                             )
                     )
@@ -1012,8 +1012,8 @@ modellerTests =
                         |> .slices
                         |> Dict.get "anthineas"
                         |> Maybe.map
-                            (.customHullProperties
-                                >> .customBreadth
+                            (.custom
+                                >> .breadth
                                 >> Maybe.map .value
                             )
                     )
@@ -1055,8 +1055,8 @@ modellerTests =
                         |> .slices
                         |> Dict.get "anthineas"
                         |> Maybe.map
-                            (.customHullProperties
-                                >> .customDraught
+                            (.custom
+                                >> .draught
                                 >> Maybe.map .value
                             )
                     )
@@ -1082,8 +1082,8 @@ modellerTests =
                         |> .slices
                         |> Dict.get "anthineas"
                         |> Maybe.map
-                            (.customHullProperties
-                                >> .customDepth
+                            (.custom
+                                >> .depth
                                 >> Maybe.map .value
                             )
                     )

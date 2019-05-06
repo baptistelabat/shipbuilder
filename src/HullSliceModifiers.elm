@@ -17,7 +17,7 @@ setLengthOverAll : String -> HullSlices -> HullSlices
 setLengthOverAll loa hullSlices =
     let
         oldCustomHullProperties =
-            hullSlices.customHullProperties
+            hullSlices.custom
 
         customLengthUpdated =
             hullSlices.length |> StringValueInput.setString loa
@@ -25,19 +25,19 @@ setLengthOverAll loa hullSlices =
         newCustomHullProperties =
             case customLengthUpdated == hullSlices.length of
                 False ->
-                    { oldCustomHullProperties | customLength = Just customLengthUpdated }
+                    { oldCustomHullProperties | length = Just customLengthUpdated }
 
                 True ->
-                    { oldCustomHullProperties | customLength = Nothing }
+                    { oldCustomHullProperties | length = Nothing }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    { hullSlices | custom = newCustomHullProperties }
 
 
 setBreadth : String -> HullSlices -> HullSlices
 setBreadth breadth hullSlices =
     let
         oldCustomHullProperties =
-            hullSlices.customHullProperties
+            hullSlices.custom
 
         customBreadthUpdated =
             hullSlices.breadth |> StringValueInput.setString breadth
@@ -45,19 +45,19 @@ setBreadth breadth hullSlices =
         newCustomHullProperties =
             case customBreadthUpdated == hullSlices.breadth of
                 False ->
-                    { oldCustomHullProperties | customBreadth = Just customBreadthUpdated }
+                    { oldCustomHullProperties | breadth = Just customBreadthUpdated }
 
                 True ->
-                    { oldCustomHullProperties | customBreadth = Nothing }
+                    { oldCustomHullProperties | breadth = Nothing }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    { hullSlices | custom = newCustomHullProperties }
 
 
 setDraught : String -> HullSlices -> HullSlices
 setDraught draught hullSlices =
     let
         oldCustomHullProperties =
-            hullSlices.customHullProperties
+            hullSlices.custom
 
         customDraughtUpdated =
             hullSlices.draught |> StringValueInput.setString draught
@@ -65,19 +65,19 @@ setDraught draught hullSlices =
         newCustomHullProperties =
             case customDraughtUpdated == hullSlices.draught of
                 False ->
-                    { oldCustomHullProperties | customDraught = Just customDraughtUpdated }
+                    { oldCustomHullProperties | draught = Just customDraughtUpdated }
 
                 True ->
-                    { oldCustomHullProperties | customDraught = Nothing }
+                    { oldCustomHullProperties | draught = Nothing }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    { hullSlices | custom = newCustomHullProperties }
 
 
 setDepth : String -> HullSlices -> HullSlices
 setDepth depth hullSlices =
     let
         oldCustomHullProperties =
-            hullSlices.customHullProperties
+            hullSlices.custom
 
         customDepthUpdated =
             hullSlices.depth |> StringValueInput.setString depth
@@ -85,19 +85,19 @@ setDepth depth hullSlices =
         newCustomHullProperties =
             case customDepthUpdated == hullSlices.depth of
                 False ->
-                    { oldCustomHullProperties | customDepth = Just customDepthUpdated }
+                    { oldCustomHullProperties | depth = Just customDepthUpdated }
 
                 True ->
-                    { oldCustomHullProperties | customDepth = Nothing }
+                    { oldCustomHullProperties | depth = Nothing }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    { hullSlices | custom = newCustomHullProperties }
 
 
 setPrismaticCoefficient : String -> HullSlices -> HullSlices
 setPrismaticCoefficient prismaticCoefficient hullSlices =
     let
         oldCustomHullProperties =
-            hullSlices.customHullProperties
+            hullSlices.custom
 
         hullSlicesPosition =
             hullSlices |> Lackenby.modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient
@@ -105,12 +105,12 @@ setPrismaticCoefficient prismaticCoefficient hullSlices =
         newCustomHullProperties =
             case hullSlicesPosition == List.map .x hullSlices.slices of
                 False ->
-                    { oldCustomHullProperties | customHullslicesPosition = Just hullSlicesPosition }
+                    { oldCustomHullProperties | hullslicesPositions = Just hullSlicesPosition }
 
                 True ->
-                    { oldCustomHullProperties | customHullslicesPosition = Nothing }
+                    { oldCustomHullProperties | hullslicesPositions = Nothing }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    { hullSlices | custom = newCustomHullProperties }
 
 
 resetSlicesToOriginals : HullSlices -> HullSlices
@@ -118,11 +118,11 @@ resetSlicesToOriginals hullSlices =
     let
         originalCustomHullProperties : HullSlices.CustomHullProperties
         originalCustomHullProperties =
-            { customLength = Nothing
-            , customBreadth = Nothing
-            , customDepth = Nothing
-            , customDraught = Nothing
-            , customHullslicesPosition = Nothing
+            { length = Nothing
+            , breadth = Nothing
+            , depth = Nothing
+            , draught = Nothing
+            , hullslicesPositions = Nothing
             }
     in
-    { hullSlices | customHullProperties = originalCustomHullProperties }
+    { hullSlices | custom = originalCustomHullProperties }

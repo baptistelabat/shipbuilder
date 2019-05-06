@@ -852,20 +852,20 @@ parseJSONSlices =
                     , 0.742320749879794
                     ]
                 )
-        , test "Can parse 'customLength'" <|
-            testHullSliceDecoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customLength >> Maybe.map .value) <|
+        , test "Can parse 'custom length'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .length >> Maybe.map .value) <|
                 Just 20
-        , test "Can parse 'customBreadth'" <|
-            testHullSliceDecoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customBreadth >> Maybe.map .value) <|
+        , test "Can parse 'custom breadth'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .breadth >> Maybe.map .value) <|
                 Just 5
-        , test "Can parse 'customDepth'" <|
-            testHullSliceDecoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customDepth >> Maybe.map .value) <|
+        , test "Can parse 'custom depth'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .depth >> Maybe.map .value) <|
                 Just 12
-        , test "Can parse 'customDraught'" <|
-            testHullSliceDecoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customDraught >> Maybe.map .value) <|
+        , test "Can parse 'custom draught'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .draught >> Maybe.map .value) <|
                 Just 3
-        , test "Can parse 'customHullslicesPosition'" <|
-            testHullSliceDecoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customHullslicesPosition) <|
+        , test "Can parse 'custom hullslicesPositions'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .hullslicesPositions) <|
                 Just
                     [ 0.00437713372412022
                     , 0.05
@@ -915,22 +915,21 @@ encodeJSONTests =
                     , 0.742320749879794
                     ]
                 )
-        , test "Can encode 'customLength'" <|
-            testHullSliceEncoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customLength >> Maybe.map .value) <|
+        , test "Can encode 'custom length'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .length >> Maybe.map .value) <|
                 Just 20
-        , test "Can encode 'customBreadth'" <|
-            testHullSliceEncoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customBreadth >> Maybe.map .value) <|
+        , test "Can encode 'custom breadth'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .breadth >> Maybe.map .value) <|
                 Just 5
-        , test "Can encode 'customDepth'" <|
-            testHullSliceEncoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customDepth >> Maybe.map .value) <|
+        , test "Can encode 'custom depth'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .depth >> Maybe.map .value) <|
                 Just 12
-        , test "Can encode 'customDraught'" <|
-            testHullSliceEncoding TestData.hullSliceJsonCustomized (.customHullProperties >> .customDraught >> Maybe.map .value) <|
+        , test "Can encode 'custom draught'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .draught >> Maybe.map .value) <|
                 Just 3
-        , test "Can encode 'customHullslicesPosition'" <|
-            testHullSliceEncoding TestData.hullSliceJsonCustomized
-                (.customHullProperties >> .customHullslicesPosition)
-                (Just
+        , test "Can encode 'custom hullslicesPositions'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .hullslicesPositions) <|
+                Just
                     [ 0.00437713372412022
                     , 0.05
                     , 0.1
@@ -942,7 +941,6 @@ encodeJSONTests =
                     , 0.95
                     , 0.9956228662758797
                     ]
-                )
         , test "Encoding unchanged hullslices store no custom properties" <|
             \_ ->
                 let
@@ -956,13 +954,13 @@ encodeJSONTests =
                                 HullSlices.emptyHullSlices
                 in
                 Expect.equal
-                    { customLength = Nothing
-                    , customBreadth = Nothing
-                    , customDepth = Nothing
-                    , customDraught = Nothing
-                    , customHullslicesPosition = Nothing
+                    { length = Nothing
+                    , breadth = Nothing
+                    , depth = Nothing
+                    , draught = Nothing
+                    , hullslicesPositions = Nothing
                     }
-                    hullSlicesEncodedThenDecoded.customHullProperties
+                    hullSlicesEncodedThenDecoded.custom
         , test "Encoding hullslices with custom length store custom length property" <|
             \_ ->
                 let
@@ -980,7 +978,7 @@ encodeJSONTests =
                             Err _ ->
                                 HullSlices.emptyHullSlices
                 in
-                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customLength
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.length
         , test "Encoding hullslices with custom breadth store custom breadth property" <|
             \_ ->
                 let
@@ -998,7 +996,7 @@ encodeJSONTests =
                             Err _ ->
                                 HullSlices.emptyHullSlices
                 in
-                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customBreadth
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.breadth
         , test "Encoding hullslices with custom depth store custom depth property" <|
             \_ ->
                 let
@@ -1016,7 +1014,7 @@ encodeJSONTests =
                             Err _ ->
                                 HullSlices.emptyHullSlices
                 in
-                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customDepth
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.depth
         , test "Encoding hullslices with custom draught store custom draught property" <|
             \_ ->
                 let
@@ -1034,7 +1032,7 @@ encodeJSONTests =
                             Err _ ->
                                 HullSlices.emptyHullSlices
                 in
-                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customDraught
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.draught
         , test "Encoding hullslices with custom hullslices position store custom hullslices position property" <|
             \_ ->
                 let
@@ -1052,7 +1050,7 @@ encodeJSONTests =
                             Err _ ->
                                 HullSlices.emptyHullSlices
                 in
-                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.customHullProperties.customHullslicesPosition
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.hullslicesPositions
         ]
 
 

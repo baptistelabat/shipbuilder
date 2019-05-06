@@ -3348,10 +3348,10 @@ viewModeller model =
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ (StringValueInput.view <| Maybe.withDefault slices.length slices.customHullProperties.customLength) <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
-                        , (StringValueInput.view <| Maybe.withDefault slices.breadth slices.customHullProperties.customBreadth) <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
-                        , (StringValueInput.view <| Maybe.withDefault slices.depth slices.customHullProperties.customDepth) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
-                        , (StringValueInput.view <| Maybe.withDefault slices.draught slices.customHullProperties.customDraught) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
+                        [ (StringValueInput.view <| Maybe.withDefault slices.length slices.custom.length) <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.breadth slices.custom.breadth) <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.depth slices.custom.depth) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.draught slices.custom.draught) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
@@ -3421,15 +3421,15 @@ resetHullSlices model =
                 Just hullSlices ->
                     if
                         Nothing
-                            == hullSlices.customHullProperties.customLength
+                            == hullSlices.custom.length
                             && Nothing
-                            == hullSlices.customHullProperties.customBreadth
+                            == hullSlices.custom.breadth
                             && Nothing
-                            == hullSlices.customHullProperties.customDepth
+                            == hullSlices.custom.depth
                             && Nothing
-                            == hullSlices.customHullProperties.customDraught
+                            == hullSlices.custom.draught
                             && Nothing
-                            == hullSlices.customHullProperties.customHullslicesPosition
+                            == hullSlices.custom.hullslicesPositions
                     then
                         True
 

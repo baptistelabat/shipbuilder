@@ -73,12 +73,12 @@ cube =
               }
             ]
         , draught = StringValueInput.floatInput 1 2
-        , customHullProperties =
-            { customLength = Just (StringValueInput.floatInput 1 200)
-            , customBreadth = Just (StringValueInput.floatInput 1 20)
-            , customDepth = Just (StringValueInput.floatInput 1 10)
-            , customDraught = Just (StringValueInput.floatInput 1 2)
-            , customHullslicesPosition = Just [ 0, 0.5, 1 ]
+        , custom =
+            { length = Just (StringValueInput.floatInput 1 200)
+            , breadth = Just (StringValueInput.floatInput 1 20)
+            , depth = Just (StringValueInput.floatInput 1 10)
+            , draught = Just (StringValueInput.floatInput 1 2)
+            , hullslicesPositions = Just [ 0, 0.5, 1 ]
             }
     }
 
@@ -109,12 +109,12 @@ toblerone breadth depth draught =
               }
             ]
         , draught = StringValueInput.floatInput 1 draught
-        , customHullProperties =
-            { customLength = Just (StringValueInput.floatInput 1 200)
-            , customBreadth = Just (StringValueInput.floatInput 1 breadth)
-            , customDepth = Just (StringValueInput.floatInput 1 depth)
-            , customDraught = Just (StringValueInput.floatInput 1 draught)
-            , customHullslicesPosition = Just [ 0, 0.5, 1 ]
+        , custom =
+            { length = Just (StringValueInput.floatInput 1 200)
+            , breadth = Just (StringValueInput.floatInput 1 breadth)
+            , depth = Just (StringValueInput.floatInput 1 depth)
+            , draught = Just (StringValueInput.floatInput 1 draught)
+            , hullslicesPositions = Just [ 0, 0.5, 1 ]
             }
     }
 
@@ -367,12 +367,12 @@ hullSliceJson =
     "xmin": -1.0,
     "ymin": -3.4467999935150146,
     "zmin": -6.146999835968018,
-    "customHullProperties": {
-                "customLength": 22.8,
-                "customBreadth": 6.9,
-                "customDepth": 6.8,
-                "customDraught": 1.4,
-                "customHullslicesPosition": [
+    "custom": {
+                "length": 22.8,
+                "breadth": 6.9,
+                "depth": 6.8,
+                "draught": 1.4,
+                "hullslicesPositions": [
                     0.00437713372412022,
                     0.1111111111111111,
                     0.2222222222222222,
@@ -435,12 +435,12 @@ hullSliceJsonCustomized =
     "xmin": -1.0,
     "ymin": -3.4467999935150146,
     "zmin": -6.146999835968018,
-    "customHullProperties": {
-                "customLength": 20,
-                "customBreadth": 5,
-                "customDepth": 12,
-                "customDraught": 3,
-                "customHullslicesPosition": [
+    "custom": {
+                "length": 20,
+                "breadth": 5,
+                "depth": 12,
+                "draught": 3,
+                "hullslicesPositions": [
                     0.00437713372412022,
                     0.05,
                     0.1,

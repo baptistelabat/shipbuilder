@@ -291,12 +291,12 @@ resetOriginalSlicesLongitudinalPositions : HullSlices -> HullSlices
 resetOriginalSlicesLongitudinalPositions hullSlices =
     let
         oldCustomHullProperties =
-            hullSlices.customHullProperties
+            hullSlices.custom
 
         newCustomHullProperties =
-            { oldCustomHullProperties | customHullslicesPosition = Just hullSlices.originalSlicePositions }
+            { oldCustomHullProperties | hullslicesPositions = Just hullSlices.originalSlicePositions }
     in
-    { hullSlices | customHullProperties = newCustomHullProperties }
+    { hullSlices | custom = newCustomHullProperties }
 
 
 modifyHullSlicesToMatchTargetPrismaticCoefficient : String -> HullSlices -> List Float
@@ -329,4 +329,4 @@ modifyHullSlicesToMatchTargetPrismaticCoefficient prismaticCoefficient hullSlice
     in
     maybeNewXPositions originalHullSlices
         |> Maybe.map (getLongitudinalPositionOfEachSlice hullSlices originalHullSlices)
-        |> Maybe.withDefault (Maybe.withDefault (List.map .x hullSlices.slices) hullSlices.customHullProperties.customHullslicesPosition)
+        |> Maybe.withDefault (Maybe.withDefault (List.map .x hullSlices.slices) hullSlices.custom.hullslicesPositions)

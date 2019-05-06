@@ -41,7 +41,7 @@ type alias HullSlices =
     , slices : List HullSlice
     , originalSlicePositions : List Float
     , draught : StringValueInput.FloatInput
-    , customHullProperties : CustomHullProperties
+    , custom : CustomHullProperties
     }
 
 
@@ -54,11 +54,11 @@ type alias HullSlice =
 
 
 type alias CustomHullProperties =
-    { customLength : Maybe StringValueInput.FloatInput
-    , customBreadth : Maybe StringValueInput.FloatInput
-    , customDepth : Maybe StringValueInput.FloatInput
-    , customDraught : Maybe StringValueInput.FloatInput
-    , customHullslicesPosition : Maybe (List Float)
+    { length : Maybe StringValueInput.FloatInput
+    , breadth : Maybe StringValueInput.FloatInput
+    , depth : Maybe StringValueInput.FloatInput
+    , draught : Maybe StringValueInput.FloatInput
+    , hullslicesPositions : Maybe (List Float)
     }
 
 
@@ -92,12 +92,12 @@ emptyHullSlices =
     , slices = []
     , originalSlicePositions = []
     , draught = StringValueInput.emptyFloat 1
-    , customHullProperties =
-        { customLength = Nothing
-        , customBreadth = Nothing
-        , customDepth = Nothing
-        , customDraught = Nothing
-        , customHullslicesPosition = Nothing
+    , custom =
+        { length = Nothing
+        , breadth = Nothing
+        , depth = Nothing
+        , draught = Nothing
+        , hullslicesPositions = Nothing
         }
     }
 
@@ -610,7 +610,7 @@ setLongitudinalPositionOfEachSlice hullSlices =
         shiftSliceLongitudinalPosition slice newX =
             { slice | x = newX }
     in
-    case hullSlices.customHullProperties.customHullslicesPosition of
+    case hullSlices.custom.hullslicesPositions of
         Just customPosition ->
             List.map2 shiftSliceLongitudinalPosition hullSlices.slices customPosition
 
@@ -620,20 +620,20 @@ setLongitudinalPositionOfEachSlice hullSlices =
 
 hullSlicesToBuildInJs : HullSlices -> HullSlices
 hullSlicesToBuildInJs hullSlices =
-    { length = Maybe.withDefault hullSlices.length hullSlices.customHullProperties.customLength
-    , breadth = Maybe.withDefault hullSlices.breadth hullSlices.customHullProperties.customBreadth
-    , depth = Maybe.withDefault hullSlices.depth hullSlices.customHullProperties.customDepth
+    { length = Maybe.withDefault hullSlices.length hullSlices.custom.length
+    , breadth = Maybe.withDefault hullSlices.breadth hullSlices.custom.breadth
+    , depth = Maybe.withDefault hullSlices.depth hullSlices.custom.depth
     , xmin = hullSlices.xmin
     , zmin = hullSlices.zmin
     , slices = setLongitudinalPositionOfEachSlice hullSlices
     , originalSlicePositions = []
-    , draught = Maybe.withDefault hullSlices.draught hullSlices.customHullProperties.customDraught
-    , customHullProperties =
-        { customLength = Just <| StringValueInput.emptyFloat 1
-        , customBreadth = Just <| StringValueInput.emptyFloat 1
-        , customDepth = Just <| StringValueInput.emptyFloat 1
-        , customDraught = Just <| StringValueInput.emptyFloat 1
-        , customHullslicesPosition = Just []
+    , draught = Maybe.withDefault hullSlices.draught hullSlices.custom.draught
+    , custom =
+        { length = Just <| StringValueInput.emptyFloat 1
+        , breadth = Just <| StringValueInput.emptyFloat 1
+        , depth = Just <| StringValueInput.emptyFloat 1
+        , draught = Just <| StringValueInput.emptyFloat 1
+        , hullslicesPositions = Just []
         }
     }
 
@@ -644,11 +644,11 @@ calculateSliceArea json hullSlice =
     let
         depth : StringValueInput.FloatInput
         depth =
-            Maybe.withDefault json.depth json.customHullProperties.customDepth
+            Maybe.withDefault json.depth json.custom.depth
 
         draught : StringValueInput.FloatInput
         draught =
-            Maybe.withDefault json.draught json.customHullProperties.customDraught
+            Maybe.withDefault json.draught json.custom.draught
     in
     scale json hullSlice
         |> area (json.zmin + depth.value - draught.value) (json.zmin + depth.value)
@@ -660,11 +660,11 @@ scale json hullSlice =
     let
         depth : StringValueInput.FloatInput
         depth =
-            Maybe.withDefault json.depth json.customHullProperties.customDepth
+            Maybe.withDefault json.depth json.custom.depth
 
         breadth : StringValueInput.FloatInput
         breadth =
-            Maybe.withDefault json.breadth json.customHullProperties.customBreadth
+            Maybe.withDefault json.breadth json.custom.breadth
 
         scaleY : Float -> Float
         scaleY y =

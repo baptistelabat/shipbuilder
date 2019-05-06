@@ -44,11 +44,11 @@ hullSliceDecoder =
 decodeCustomHullProperties : Decode.Decoder CustomHullProperties
 decodeCustomHullProperties =
     Decode.succeed CustomHullProperties
-        |> Pipeline.optional "customLength" (Decode.map (StringValueInput.fromNumberToMaybe "m" "Length over all" 1) Decode.float) Nothing
-        |> Pipeline.optional "customBreadth" (Decode.map (StringValueInput.fromNumberToMaybe "m" "Breadth" 1) Decode.float) Nothing
-        |> Pipeline.optional "customDepth" (Decode.map (StringValueInput.fromNumberToMaybe "m" "Depth" 1) Decode.float) Nothing
-        |> Pipeline.optional "customDraught" (Decode.map (StringValueInput.fromNumberToMaybe "m" "Draught" 1) Decode.float) Nothing
-        |> Pipeline.optional "customHullslicesPosition" (Decode.map Just (Decode.list Decode.float)) Nothing
+        |> Pipeline.optional "length" (Decode.map (StringValueInput.fromNumberToMaybe "m" "Length over all" 1) Decode.float) Nothing
+        |> Pipeline.optional "breadth" (Decode.map (StringValueInput.fromNumberToMaybe "m" "Breadth" 1) Decode.float) Nothing
+        |> Pipeline.optional "depth" (Decode.map (StringValueInput.fromNumberToMaybe "m" "Depth" 1) Decode.float) Nothing
+        |> Pipeline.optional "draught" (Decode.map (StringValueInput.fromNumberToMaybe "m" "Draught" 1) Decode.float) Nothing
+        |> Pipeline.optional "hullslicesPositions" (Decode.map Just (Decode.list Decode.float)) Nothing
 
 
 type alias PreloadedHullSlicesData =
@@ -57,7 +57,7 @@ type alias PreloadedHullSlicesData =
     , depth : StringValueInput.FloatInput
     , draught : Maybe StringValueInput.FloatInput
     , slices : List HullSlice
-    , customHullProperties : Maybe CustomHullProperties
+    , custom : Maybe CustomHullProperties
     }
 
 
@@ -103,7 +103,7 @@ decoder : Decode.Decoder HullSlices
 decoder =
     let
         hullSlicesConstructor : StringValueInput.FloatInput -> StringValueInput.FloatInput -> StringValueInput.FloatInput -> Float -> Float -> List HullSlice -> StringValueInput.FloatInput -> CustomHullProperties -> HullSlices
-        hullSlicesConstructor length breadth depth xmin zmin slices draught customHullProperties =
+        hullSlicesConstructor length breadth depth xmin zmin slices draught custom =
             { emptyHullSlices
                 | length = length
                 , breadth = breadth
@@ -113,7 +113,7 @@ decoder =
                 , slices = slices
                 , originalSlicePositions = List.map .x slices
                 , draught = draught
-                , customHullProperties = customHullProperties
+                , custom = custom
             }
 
         helper : PreloadedHullSlicesData -> Decode.Decoder HullSlices
@@ -131,16 +131,16 @@ decoder =
                             StringValueInput.fromNumber "m" "Draught" 1 (loadedData.depth.value / 5)
 
                 customHullPropertiesDecoded =
-                    case loadedData.customHullProperties of
-                        Just customHullProperties ->
-                            customHullProperties
+                    case loadedData.custom of
+                        Just custom ->
+                            custom
 
                         Nothing ->
-                            { customLength = Nothing
-                            , customBreadth = Nothing
-                            , customDepth = Nothing
-                            , customDraught = Nothing
-                            , customHullslicesPosition = Nothing
+                            { length = Nothing
+                            , breadth = Nothing
+                            , depth = Nothing
+                            , draught = Nothing
+                            , hullslicesPositions = Nothing
                             }
             in
             Decode.succeed hullSlicesConstructor
@@ -159,7 +159,7 @@ decoder =
         |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth" 1) Decode.float)
         |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught" 1) Decode.float) Nothing
         |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
-        |> Pipeline.optional "customHullProperties" (Decode.map Just decodeCustomHullProperties) Nothing
+        |> Pipeline.optional "custom" (Decode.map Just decodeCustomHullProperties) Nothing
         |> Decode.andThen helper
 
 
@@ -198,11 +198,11 @@ encoder hullSlices =
     let
         customHullPropertiesList : List ( String, MaybeCustomProperties )
         customHullPropertiesList =
-            [ ( "customLength", MaybeCustomPropertiesFloat hullSlices.customHullProperties.customLength )
-            , ( "customBreadth", MaybeCustomPropertiesFloat hullSlices.customHullProperties.customBreadth )
-            , ( "customDepth", MaybeCustomPropertiesFloat hullSlices.customHullProperties.customDepth )
-            , ( "customDraught", MaybeCustomPropertiesFloat hullSlices.customHullProperties.customDraught )
-            , ( "customHullslicesPosition", MaybeCustomPropertiesList hullSlices.customHullProperties.customHullslicesPosition )
+            [ ( "length", MaybeCustomPropertiesFloat hullSlices.custom.length )
+            , ( "breadth", MaybeCustomPropertiesFloat hullSlices.custom.breadth )
+            , ( "depth", MaybeCustomPropertiesFloat hullSlices.custom.depth )
+            , ( "draught", MaybeCustomPropertiesFloat hullSlices.custom.draught )
+            , ( "hullslicesPositions", MaybeCustomPropertiesList hullSlices.custom.hullslicesPositions )
             ]
 
         filterCustomHullProperties : ( String, MaybeCustomProperties ) -> Maybe ( String, CustomProperties )
@@ -251,7 +251,7 @@ encoder hullSlices =
         , ( "xmin", Encode.float hullSlices.xmin )
         , ( "zmin", Encode.float hullSlices.zmin )
         , ( "slices", Encode.list hullSliceEncoder hullSlices.slices )
-        , ( "customHullProperties", Encode.object encodedHullProperties )
+        , ( "custom", Encode.object encodedHullProperties )
         ]
 
 
