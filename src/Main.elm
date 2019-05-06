@@ -2402,6 +2402,13 @@ updateFromJs jsmsg model =
 
         PasteClipBoard updatedSlices ->
             let
+                olduiState =
+                    model.uiState
+
+                updateUiState : Bool -> UiState
+                updateUiState isWaiting =
+                    { olduiState | waitToPasteClipBoard = isWaiting }
+
                 updateHullslices : Maybe HullSlices.HullSlices -> Maybe HullSlices.HullSlices
                 updateHullslices maybeHullslices =
                     case maybeHullslices of
@@ -2418,7 +2425,7 @@ updateFromJs jsmsg model =
             in
             case model.selectedHullReference of
                 Just hullRef ->
-                    ( { model | slices = updateHullDict hullRef }, Cmd.none )
+                    ( { model | slices = updateHullDict hullRef, uiState = updateUiState False }, Cmd.none )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -2576,7 +2583,15 @@ updateModelToJs msg model =
             model
 
         ReadClipboard ->
-            model
+            let
+                olduiState =
+                    model.uiState
+
+                updateUiState : Bool -> UiState
+                updateUiState isWaiting =
+                    { olduiState | waitToPasteClipBoard = isWaiting }
+            in
+            { model | uiState = updateUiState True }
 
         ChangeBlockColor block newColor ->
             case getBlockByUUID block.uuid model.blocks of
