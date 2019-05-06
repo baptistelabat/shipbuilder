@@ -869,6 +869,7 @@ type alias UiState =
     , blockContextualMenu : Maybe String
     , selectedSlice : StringValueInput.IntInput
     , showSelectedSlice : Bool
+    , waitToPasteClipBoard : Bool
     }
 
 
@@ -1555,6 +1556,7 @@ initModel flag =
         , blockContextualMenu = Nothing
         , selectedSlice = StringValueInput.fromInt "slice number" 1
         , showSelectedSlice = False
+        , waitToPasteClipBoard = False
         }
     , tags = []
     , customProperties = []
