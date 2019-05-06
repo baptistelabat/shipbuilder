@@ -1972,6 +1972,7 @@ type NoJsMsg
     | RenameBlock Block String
     | RenameHull String String
     | SaveAsNewHull String
+    | CancelReadClipboard
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetCurrentDate Time.Posix
@@ -2253,6 +2254,17 @@ updateNoJs msg model =
                             model
             in
             ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus newLabel) ] )
+
+        CancelReadClipboard ->
+            let
+                olduiState =
+                    model.uiState
+
+                updateUiState : Bool -> UiState
+                updateUiState isWaiting =
+                    { olduiState | waitToPasteClipBoard = isWaiting }
+            in
+            ( { model | uiState = updateUiState False }, Cmd.none )
 
         ToggleAccordion isOpen accordionId ->
             let
@@ -3830,8 +3842,7 @@ viewHullSliceImportButton uiState =
                 [ class "as-button slices-import-close"
                 , id "slices-import-close"
                 , title "Cancel the import"
-
-                --, onClick <| ToJs <| CancelReadClipboard
+                , onClick <| NoJs <| CancelReadClipboard
                 ]
                 [ FASolid.times [] ]
             ]
