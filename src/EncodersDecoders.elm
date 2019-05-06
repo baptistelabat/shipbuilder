@@ -188,61 +188,48 @@ type CustomProperties
     | CustomPropertiesList (List Float)
 
 
-type MaybeCustomProperties
-    = MaybeCustomPropertiesFloat (Maybe FloatInput)
-    | MaybeCustomPropertiesList (Maybe (List Float))
+encodeMaybeFloatInput : ( String, Maybe FloatInput ) -> Maybe ( String, CustomProperties )
+encodeMaybeFloatInput ( name, maybeVal ) =
+    Maybe.map (\val -> ( name, CustomPropertiesFloat val )) maybeVal
+
+
+encodeMaybeListFloat : ( String, Maybe (List Float) ) -> Maybe ( String, CustomProperties )
+encodeMaybeListFloat ( name, maybeVal ) =
+    Maybe.map (\val -> ( name, CustomPropertiesList val )) maybeVal
+
+
+customHullPropertiesList : HullSlices -> List (Maybe ( String, CustomProperties ))
+customHullPropertiesList hullSlices =
+    [ encodeMaybeFloatInput ( "length", hullSlices.custom.length )
+    , encodeMaybeFloatInput ( "breadth", hullSlices.custom.breadth )
+    , encodeMaybeFloatInput ( "depth", hullSlices.custom.depth )
+    , encodeMaybeFloatInput ( "draught", hullSlices.custom.draught )
+    , encodeMaybeListFloat ( "hullslicesPositions", hullSlices.custom.hullslicesPositions )
+    ]
+
+
+encodeCustomProperty : CustomProperties -> Encode.Value
+encodeCustomProperty customProperty =
+    case customProperty of
+        CustomPropertiesFloat propertiesFloat ->
+            Encode.float propertiesFloat.value
+
+        CustomPropertiesList propertiesList ->
+            Encode.list Encode.float propertiesList
+
+
+toKeyValue : ( String, CustomProperties ) -> ( String, Encode.Value )
+toKeyValue =
+    Tuple.mapSecond encodeCustomProperty
+
+
+encodeCustomProperties : HullSlices -> Encode.Value
+encodeCustomProperties hullSlices =
+    Encode.object <| List.filterMap (Maybe.map toKeyValue) <| customHullPropertiesList hullSlices
 
 
 encoder : HullSlices -> Encode.Value
 encoder hullSlices =
-    let
-        customHullPropertiesList : List ( String, MaybeCustomProperties )
-        customHullPropertiesList =
-            [ ( "length", MaybeCustomPropertiesFloat hullSlices.custom.length )
-            , ( "breadth", MaybeCustomPropertiesFloat hullSlices.custom.breadth )
-            , ( "depth", MaybeCustomPropertiesFloat hullSlices.custom.depth )
-            , ( "draught", MaybeCustomPropertiesFloat hullSlices.custom.draught )
-            , ( "hullslicesPositions", MaybeCustomPropertiesList hullSlices.custom.hullslicesPositions )
-            ]
-
-        filterCustomHullProperties : ( String, MaybeCustomProperties ) -> Maybe ( String, CustomProperties )
-        filterCustomHullProperties ( nameProperties, maybeProperties ) =
-            case maybeProperties of
-                MaybeCustomPropertiesList maybePropertiesList ->
-                    case maybePropertiesList of
-                        Just value ->
-                            Just ( nameProperties, CustomPropertiesList value )
-
-                        Nothing ->
-                            Nothing
-
-                MaybeCustomPropertiesFloat maybePropertiesFloat ->
-                    case maybePropertiesFloat of
-                        Just value ->
-                            Just ( nameProperties, CustomPropertiesFloat value )
-
-                        Nothing ->
-                            Nothing
-
-        extractCustomHullProperties : List ( String, MaybeCustomProperties ) -> List ( String, CustomProperties )
-        extractCustomHullProperties list =
-            list
-                |> List.map filterCustomHullProperties
-                |> List.filterMap (\x -> x)
-
-        encodeCustomHullProperties : ( String, CustomProperties ) -> ( String, Encode.Value )
-        encodeCustomHullProperties ( nameProperties, properties ) =
-            case properties of
-                CustomPropertiesList propertiesList ->
-                    ( nameProperties, Encode.list Encode.float propertiesList )
-
-                CustomPropertiesFloat propertiesFloat ->
-                    ( nameProperties, Encode.float propertiesFloat.value )
-
-        encodedHullProperties : List ( String, Encode.Value )
-        encodedHullProperties =
-            List.map encodeCustomHullProperties <| extractCustomHullProperties customHullPropertiesList
-    in
     Encode.object
         [ ( "length", Encode.float hullSlices.length.value )
         , ( "breadth", Encode.float hullSlices.breadth.value )
@@ -251,7 +238,7 @@ encoder hullSlices =
         , ( "xmin", Encode.float hullSlices.xmin )
         , ( "zmin", Encode.float hullSlices.zmin )
         , ( "slices", Encode.list hullSliceEncoder hullSlices.slices )
-        , ( "custom", Encode.object encodedHullProperties )
+        , ( "custom", encodeCustomProperties hullSlices )
         ]
 
 
