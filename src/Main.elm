@@ -2413,31 +2413,37 @@ updateFromJs jsmsg model =
             ( newModel, Cmd.none )
 
         PasteClipBoard updatedSlices ->
-            let
-                olduiState =
-                    model.uiState
-
-                updateUiState : Bool -> UiState
-                updateUiState isWaiting =
-                    { olduiState | waitToPasteClipBoard = isWaiting }
-
-                updateHullslices : Maybe HullSlices.HullSlices -> Maybe HullSlices.HullSlices
-                updateHullslices maybeHullslices =
-                    case maybeHullslices of
-                        Just hullslices ->
-                            Just { hullslices | slices = updatedSlices }
-
-                        Nothing ->
-                            Just
-                                HullSlices.emptyHullSlices
-
-                updateHullDict : String -> Dict ShipName HullSlices.HullSlices
-                updateHullDict hullRef =
-                    Dict.update hullRef updateHullslices model.slices
-            in
             case model.selectedHullReference of
                 Just hullRef ->
-                    ( { model | slices = updateHullDict hullRef, uiState = updateUiState False }, Cmd.none )
+                    let
+                        olduiState =
+                            model.uiState
+
+                        updateUiState : Bool -> UiState
+                        updateUiState isWaiting =
+                            { olduiState | waitToPasteClipBoard = isWaiting }
+
+                        updateHullslices : HullSlices -> HullSlices
+                        updateHullslices hullslices =
+                            { hullslices | slices = updatedSlices }
+
+                        updatedModel : Model
+                        updatedModel =
+                            { model
+                                | slices = Dict.update hullRef (Maybe.map <| updateHullslices) model.slices
+                                , uiState = updateUiState False
+                            }
+
+                        loadhullCmd : Cmd msg
+                        loadhullCmd =
+                            case loadHullJsData updatedModel hullRef of
+                                Just jsData ->
+                                    toJs jsData
+
+                                Nothing ->
+                                    Cmd.none
+                    in
+                    ( updatedModel, loadhullCmd )
 
                 Nothing ->
                     ( model, Cmd.none )
