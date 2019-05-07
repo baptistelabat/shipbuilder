@@ -2944,6 +2944,23 @@ sendCmdToJs model msg =
             Cmd.none
 
 
+loadHullJsData : Model -> String -> Maybe JsData
+loadHullJsData model hullReference =
+    case Dict.get hullReference model.slices of
+        Nothing ->
+            Nothing
+
+        Just hullSlices ->
+            Just
+                { tag = "load-hull"
+                , data =
+                    applyCustomPropertiesToHullSlices hullSlices
+                        |> EncodersDecoders.encoderWithSelectedSlice
+                            model.uiState.selectedSlice.value
+                            model.uiState.showSelectedSlice
+                }
+
+
 msg2json : Model -> ToJsMsg -> Maybe JsData
 msg2json model action =
     case action of
@@ -3046,67 +3063,19 @@ msg2json model action =
                     { tag = "add-block-to-selection", data = encodeBlock block }
 
         SelectHullReference hullReference ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just
-                        { tag = "load-hull"
-                        , data =
-                            applyCustomPropertiesToHullSlices hullSlices
-                                |> EncodersDecoders.encoderWithSelectedSlice
-                                    model.uiState.selectedSlice.value
-                                    model.uiState.showSelectedSlice
-                        }
+            loadHullJsData model hullReference
 
         SelectSlice hullReference _ _ ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just
-                        { tag = "load-hull"
-                        , data =
-                            applyCustomPropertiesToHullSlices hullSlices
-                                |> EncodersDecoders.encoderWithSelectedSlice
-                                    model.uiState.selectedSlice.value
-                                    model.uiState.showSelectedSlice
-                        }
+            loadHullJsData model hullReference
 
         ToggleSlicesDetails isOpen hullReference ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just
-                        { tag = "load-hull"
-                        , data =
-                            applyCustomPropertiesToHullSlices hullSlices
-                                |> EncodersDecoders.encoderWithSelectedSlice
-                                    model.uiState.selectedSlice.value
-                                    model.uiState.showSelectedSlice
-                        }
+            loadHullJsData model hullReference
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
 
         ModifySlice _ hullReference _ ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just
-                        { tag = "load-hull"
-                        , data =
-                            applyCustomPropertiesToHullSlices hullSlices
-                                |> EncodersDecoders.encoderWithSelectedSlice
-                                    model.uiState.selectedSlice.value
-                                    model.uiState.showSelectedSlice
-                        }
+            loadHullJsData model hullReference
 
         ResetSlice hullReference ->
             case Dict.get hullReference model.slices of
