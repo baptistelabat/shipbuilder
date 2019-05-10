@@ -821,23 +821,24 @@ integrationtestsOnMPOV =
 parseJSONSlices =
     describe "Parse JSON slices"
         [ test "Can parse 'length'" <|
-            testHullSliceDecoding (.length >> .value) 22.8
+            testHullSliceDecoding TestData.hullSliceJson (.length >> .value) 22.8
         , test "Can parse 'breadth'" <|
-            testHullSliceDecoding (.breadth >> .value) 6.9
+            testHullSliceDecoding TestData.hullSliceJson (.breadth >> .value) 6.9
         , test "Can parse 'depth'" <|
-            testHullSliceDecoding (.depth >> .value) 6.8
+            testHullSliceDecoding TestData.hullSliceJson (.depth >> .value) 6.8
         , test "Can parse 'xmin'" <|
-            testHullSliceDecoding .xmin -1
+            testHullSliceDecoding TestData.hullSliceJson .xmin -1
         , test "Can parse 'zmin'" <|
-            testHullSliceDecoding .zmin -6.146999835968018
+            testHullSliceDecoding TestData.hullSliceJson .zmin -6.146999835968018
         , test "Can parse 'slices/x'" <|
-            testHullSliceDecoding (.slices >> List.map .x) [ 0, 1 ]
+            testHullSliceDecoding TestData.hullSliceJson (.slices >> List.map .x) [ 0, 1 ]
         , test "Can parse 'slices/zmin'" <|
-            testHullSliceDecoding (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
+            testHullSliceDecoding TestData.hullSliceJson (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
         , test "Can parse 'slices/zmax'" <|
-            testHullSliceDecoding (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
+            testHullSliceDecoding TestData.hullSliceJson (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
         , test "Can parse 'slices/y'" <|
-            testHullSliceDecoding (.slices >> List.map .y >> List.head)
+            testHullSliceDecoding TestData.hullSliceJson
+                (.slices >> List.map .y >> List.head)
                 (Just
                     [ 0.964899527258786
                     , 0.9648943694688346
@@ -851,50 +852,56 @@ parseJSONSlices =
                     , 0.742320749879794
                     ]
                 )
-        , test "Can parse 'customLength'" <|
-            testHullSliceDecoding (.customHullProperties >> .customLength >> .value) 22.8
-        , test "Can parse 'customBreadth'" <|
-            testHullSliceDecoding (.customHullProperties >> .customBreadth >> .value) 6.9
-        , test "Can parse 'customDepth'" <|
-            testHullSliceDecoding (.customHullProperties >> .customDepth >> .value) 6.8
-        , test "Can parse 'customDraught'" <|
-            testHullSliceDecoding (.customHullProperties >> .customDraught >> .value) 1.4
-        , test "Can parse 'customHullslicesPosition'" <|
-            testHullSliceDecoding (.customHullProperties >> .customHullslicesPosition)
-                [ 0.00437713372412022
-                , 0.1111111111111111
-                , 0.2222222222222222
-                , 0.3333333333333333
-                , 0.4444444444444444
-                , 0.5555555555555556
-                , 0.6666666666666666
-                , 0.7777777777777778
-                , 0.8888888888888888
-                , 0.9956228662758797
-                ]
+        , test "Can parse 'custom length'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .length >> Maybe.map .value) <|
+                Just 20
+        , test "Can parse 'custom breadth'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .breadth >> Maybe.map .value) <|
+                Just 5
+        , test "Can parse 'custom depth'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .depth >> Maybe.map .value) <|
+                Just 12
+        , test "Can parse 'custom draught'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .draught >> Maybe.map .value) <|
+                Just 3
+        , test "Can parse 'custom hullslicesPositions'" <|
+            testHullSliceDecoding TestData.hullSliceJsonCustomized (.custom >> .hullslicesPositions) <|
+                Just
+                    [ 0.00437713372412022
+                    , 0.05
+                    , 0.1
+                    , 0.25
+                    , 0.37
+                    , 0.5555555555555556
+                    , 0.73
+                    , 0.8
+                    , 0.95
+                    , 0.9956228662758797
+                    ]
         ]
 
 
 encodeJSONTests =
     describe "Encode JSON slices"
         [ test "Can encode 'length'" <|
-            testHullSliceEncoding (.length >> .value) 22.8
+            testHullSliceEncoding TestData.hullSliceJson (.length >> .value) 22.8
         , test "Can encode 'breadth'" <|
-            testHullSliceEncoding (.breadth >> .value) 6.9
+            testHullSliceEncoding TestData.hullSliceJson (.breadth >> .value) 6.9
         , test "Can encode 'depth'" <|
-            testHullSliceEncoding (.depth >> .value) 6.8
+            testHullSliceEncoding TestData.hullSliceJson (.depth >> .value) 6.8
         , test "Can encode 'xmin'" <|
-            testHullSliceEncoding .xmin -1
+            testHullSliceEncoding TestData.hullSliceJson .xmin -1
         , test "Can encode 'zmin'" <|
-            testHullSliceEncoding .zmin -6.146999835968018
+            testHullSliceEncoding TestData.hullSliceJson .zmin -6.146999835968018
         , test "Can encode 'slices/x'" <|
-            testHullSliceEncoding (.slices >> List.map .x) [ 0, 1 ]
+            testHullSliceEncoding TestData.hullSliceJson (.slices >> List.map .x) [ 0, 1 ]
         , test "Can encode 'slices/zmin'" <|
-            testHullSliceEncoding (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
+            testHullSliceEncoding TestData.hullSliceJson (.slices >> List.map .zmin) [ 0.31587930659489755, 0.07246874145311905 ]
         , test "Can encode 'slices/zmax'" <|
-            testHullSliceEncoding (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
+            testHullSliceEncoding TestData.hullSliceJson (.slices >> List.map .zmax) [ 0.5298349579969897, 0.9851376673994297 ]
         , test "Can encode 'slices/y'" <|
-            testHullSliceEncoding (.slices >> List.map .y >> List.head)
+            testHullSliceEncoding TestData.hullSliceJson
+                (.slices >> List.map .y >> List.head)
                 (Just
                     [ 0.964899527258786
                     , 0.9648943694688346
@@ -908,28 +915,163 @@ encodeJSONTests =
                     , 0.742320749879794
                     ]
                 )
-        , test "Can encode 'customLength'" <|
-            testHullSliceEncoding (.customHullProperties >> .customLength >> .value) 22.8
-        , test "Can encode 'customBreadth'" <|
-            testHullSliceEncoding (.customHullProperties >> .customBreadth >> .value) 6.9
-        , test "Can encode 'customDepth'" <|
-            testHullSliceEncoding (.customHullProperties >> .customDepth >> .value) 6.8
-        , test "Can encode 'customDraught'" <|
-            testHullSliceEncoding (.customHullProperties >> .customDraught >> .value) 1.4
-        , test "Can encode 'customHullslicesPosition'" <|
-            testHullSliceEncoding (.customHullProperties >> .customHullslicesPosition)
-                [ 0.00437713372412022
-                , 0.1111111111111111
-                , 0.2222222222222222
-                , 0.3333333333333333
-                , 0.4444444444444444
-                , 0.5555555555555556
-                , 0.6666666666666666
-                , 0.7777777777777778
-                , 0.8888888888888888
-                , 0.9956228662758797
-                ]
+        , test "Can encode 'custom length'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .length >> Maybe.map .value) <|
+                Just 20
+        , test "Can encode 'custom breadth'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .breadth >> Maybe.map .value) <|
+                Just 5
+        , test "Can encode 'custom depth'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .depth >> Maybe.map .value) <|
+                Just 12
+        , test "Can encode 'custom draught'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .draught >> Maybe.map .value) <|
+                Just 3
+        , test "Can encode 'custom hullslicesPositions'" <|
+            testHullSliceEncoding TestData.hullSliceJsonCustomized (.custom >> .hullslicesPositions) <|
+                Just
+                    [ 0.00437713372412022
+                    , 0.05
+                    , 0.1
+                    , 0.25
+                    , 0.37
+                    , 0.5555555555555556
+                    , 0.73
+                    , 0.8
+                    , 0.95
+                    , 0.9956228662758797
+                    ]
+        , test "Encoding unchanged hullslices store no custom properties" <|
+            \_ ->
+                let
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (TestData.anthineas |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.equal
+                    { length = Nothing
+                    , breadth = Nothing
+                    , depth = Nothing
+                    , draught = Nothing
+                    , hullslicesPositions = Nothing
+                    }
+                    hullSlicesEncodedThenDecoded.custom
+        , test "Encoding hullslices with custom length store custom length property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setLengthOverAll "20"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.length
+        , test "Encoding hullslices with custom breadth store custom breadth property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setBreadth "8"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.breadth
+        , test "Encoding hullslices with custom depth store custom depth property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setDepth "5"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.depth
+        , test "Encoding hullslices with custom draught store custom draught property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setDraught "3"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.draught
+        , test "Encoding hullslices with custom hullslices position store custom hullslices position property" <|
+            \_ ->
+                let
+                    customizedHullSlices : HullSlices.HullSlices
+                    customizedHullSlices =
+                        TestData.anthineas
+                            |> HullSliceModifiers.setPrismaticCoefficient "0.5"
+
+                    hullSlicesEncodedThenDecoded : HullSlices.HullSlices
+                    hullSlicesEncodedThenDecoded =
+                        case Decode.decodeString EncodersDecoders.decoder (customizedHullSlices |> (encode 0 << EncodersDecoders.encoder)) of
+                            Ok c ->
+                                c
+
+                            Err _ ->
+                                HullSlices.emptyHullSlices
+                in
+                Expect.notEqual Nothing hullSlicesEncodedThenDecoded.custom.hullslicesPositions
         ]
+
+
+testHullSliceEncoding : String -> (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSliceEncoding slicesToTest =
+    let
+        json : String
+        json =
+            case Result.map (encode 0 << EncodersDecoders.encoder) (decodeString EncodersDecoders.decoder slicesToTest) of
+                Err e ->
+                    Decode.errorToString e
+
+                Ok s ->
+                    s
+    in
+    testField EncodersDecoders.decoder json
+
+
+testHullSliceDecoding : String -> (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
+testHullSliceDecoding slicesToTest =
+    testField EncodersDecoders.decoder slicesToTest
 
 
 testUpdateCenterOfGravity =
@@ -963,26 +1105,6 @@ testUpdateCenterOfGravity =
                     |> .globalCenterOfGravity
                     |> Expect.equal { x = 10, y = 5, z = -5 }
         ]
-
-
-testHullSliceEncoding : (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
-testHullSliceEncoding =
-    let
-        json : String
-        json =
-            case Result.map (encode 0 << EncodersDecoders.encoder) (decodeString EncodersDecoders.decoder TestData.hullSliceJson) of
-                Err e ->
-                    Decode.errorToString e
-
-                Ok s ->
-                    s
-    in
-    testField EncodersDecoders.decoder json
-
-
-testHullSliceDecoding : (HullSlices.HullSlices -> b) -> b -> (() -> Expect.Expectation)
-testHullSliceDecoding =
-    testField EncodersDecoders.decoder TestData.hullSliceJson
 
 
 testField : Decode.Decoder a -> String -> (a -> b) -> b -> (() -> Expect.Expectation)

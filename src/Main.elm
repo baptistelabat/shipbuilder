@@ -54,7 +54,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences exposing (HullReferences)
 import HullSliceModifiers
-import HullSlices exposing (HullSlices, setLongitudinalPositionOfEachSlice)
+import HullSlices exposing (HullSlices, hullSlicesToBuildInJs)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -678,11 +678,7 @@ encodeRestoreSaveCmd model =
                             Encode.string ""
 
                         Just hullSlices ->
-                            let
-                                hullSlicesToConstruct =
-                                    setLongitudinalPositionOfEachSlice hullSlices
-                            in
-                            EncodersDecoders.encoder hullSlicesToConstruct
+                            EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices
     in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
@@ -2763,11 +2759,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    let
-                        hullSlicesToConstruct =
-                            setLongitudinalPositionOfEachSlice hullSlices
-                    in
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
 
         ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
@@ -2775,11 +2767,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    let
-                        hullSlicesToConstruct =
-                            setLongitudinalPositionOfEachSlice hullSlices
-                    in
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlicesToConstruct }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
 
         ResetSlice hullReference ->
             case Dict.get hullReference model.slices of
@@ -3360,10 +3348,10 @@ viewModeller model =
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ StringValueInput.view slices.customHullProperties.customLength <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
-                        , StringValueInput.view slices.customHullProperties.customBreadth <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
-                        , StringValueInput.view slices.customHullProperties.customDepth <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
-                        , StringValueInput.view slices.customHullProperties.customDraught <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
+                        [ (StringValueInput.view <| Maybe.withDefault slices.length slices.custom.length) <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.breadth slices.custom.breadth) <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.depth slices.custom.depth) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
+                        , (StringValueInput.view <| Maybe.withDefault slices.draught slices.custom.draught) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
@@ -3424,35 +3412,20 @@ resetHullSlices model =
                 Nothing ->
                     ""
 
-        isCustom : Bool
-        isCustom =
+        isResetButtonDisplayed : Bool
+        isResetButtonDisplayed =
             case Dict.get hullReference model.slices of
                 Nothing ->
                     True
 
                 Just hullSlices ->
-                    if
-                        hullSlices.length.value
-                            == hullSlices.customHullProperties.customLength.value
-                            && hullSlices.breadth.value
-                            == hullSlices.customHullProperties.customBreadth.value
-                            && hullSlices.depth.value
-                            == hullSlices.customHullProperties.customDepth.value
-                            && hullSlices.draught.value
-                            == hullSlices.customHullProperties.customDraught.value
-                            && List.map .x hullSlices.slices
-                            == hullSlices.customHullProperties.customHullslicesPosition
-                    then
-                        True
-
-                    else
-                        False
+                    not <| HullSlices.isHullCustomized hullSlices
     in
     div
         [ class "reset-button" ]
         [ button
             [ id "buttonReset"
-            , hidden isCustom
+            , hidden isResetButtonDisplayed
             , onClick <| ToJs <| ResetSlice hullReference
             , title "Reset parameters to origin"
             ]

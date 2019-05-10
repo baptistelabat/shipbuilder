@@ -6,6 +6,7 @@ module TestData exposing
     , cube
     , flags
     , hullSliceJson
+    , hullSliceJsonCustomized
     , initialModel
     , initialView
     , mpov
@@ -72,12 +73,12 @@ cube =
               }
             ]
         , draught = StringValueInput.floatInput 1 2
-        , customHullProperties =
-            { customLength = StringValueInput.floatInput 1 200
-            , customBreadth = StringValueInput.floatInput 1 20
-            , customDepth = StringValueInput.floatInput 1 10
-            , customDraught = StringValueInput.floatInput 1 2
-            , customHullslicesPosition = [ 0, 0.5, 1 ]
+        , custom =
+            { length = Just (StringValueInput.floatInput 1 200)
+            , breadth = Just (StringValueInput.floatInput 1 20)
+            , depth = Just (StringValueInput.floatInput 1 10)
+            , draught = Just (StringValueInput.floatInput 1 2)
+            , hullslicesPositions = Just [ 0, 0.5, 1 ]
             }
     }
 
@@ -108,12 +109,12 @@ toblerone breadth depth draught =
               }
             ]
         , draught = StringValueInput.floatInput 1 draught
-        , customHullProperties =
-            { customLength = StringValueInput.floatInput 1 200
-            , customBreadth = StringValueInput.floatInput 1 breadth
-            , customDepth = StringValueInput.floatInput 1 depth
-            , customDraught = StringValueInput.floatInput 1 draught
-            , customHullslicesPosition = [ 0, 0.5, 1 ]
+        , custom =
+            { length = Just (StringValueInput.floatInput 1 200)
+            , breadth = Just (StringValueInput.floatInput 1 breadth)
+            , depth = Just (StringValueInput.floatInput 1 depth)
+            , draught = Just (StringValueInput.floatInput 1 draught)
+            , hullslicesPositions = Just [ 0, 0.5, 1 ]
             }
     }
 
@@ -366,12 +367,12 @@ hullSliceJson =
     "xmin": -1.0,
     "ymin": -3.4467999935150146,
     "zmin": -6.146999835968018,
-    "customHullProperties": {
-                "customLength": 22.8,
-                "customBreadth": 6.9,
-                "customDepth": 6.8,
-                "customDraught": 1.4,
-                "customHullslicesPosition": [
+    "custom": {
+                "length": 22.8,
+                "breadth": 6.9,
+                "depth": 6.8,
+                "draught": 1.4,
+                "hullslicesPositions": [
                     0.00437713372412022,
                     0.1111111111111111,
                     0.2222222222222222,
@@ -381,6 +382,74 @@ hullSliceJson =
                     0.6666666666666666,
                     0.7777777777777778,
                     0.8888888888888888,
+                    0.9956228662758797
+                ]
+          }
+    }
+    """
+
+
+hullSliceJsonCustomized : String
+hullSliceJsonCustomized =
+    """
+    {
+    "length": 22.84600067138672,
+    "breadth": 6.8935699462890625,
+    "depth": 6.83698582649231,
+    "slices": [
+        {
+            "x": 0.00437713372412022,
+            "y": [
+                0.964899527258786,
+                0.9648943694688346,
+                0.9629765202249831,
+                0.9592250480632435,
+                0.955473575901504,
+                0.9502377948034448,
+                0.9394176761317832,
+                0.9282437133662546,
+                0.9102579602794127,
+                0.742320749879794
+            ],
+            "zmin": 0.31587930659489755,
+            "zmax": 0.5298349579969897
+        },
+        {
+            "x": 0.1111111111111111,
+            "y": [
+                0.9569840388381782,
+                0.9718894073773259,
+                0.976951106789423,
+                0.9765144025278825,
+                0.9593856710989374,
+                0.9151973999533979,
+                0.5041787633977366,
+                0.5034056128817148,
+                0.5027638369183798,
+                0.5008173052731562
+            ],
+            "zmin": 0.07246874145311905,
+            "zmax": 0.9851376673994297
+        }
+        ],
+    "xmin": -1.0,
+    "ymin": -3.4467999935150146,
+    "zmin": -6.146999835968018,
+    "custom": {
+                "length": 20,
+                "breadth": 5,
+                "depth": 12,
+                "draught": 3,
+                "hullslicesPositions": [
+                    0.00437713372412022,
+                    0.05,
+                    0.1,
+                    0.25,
+                    0.37,
+                    0.5555555555555556,
+                    0.73,
+                    0.8,
+                    0.95,
                     0.9956228662758797
                 ]
           }
