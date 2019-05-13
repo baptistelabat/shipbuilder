@@ -1113,11 +1113,11 @@ testHullSlicesHash =
     describe "Hash HullSlices with SHA1" <|
         [ test "Can hash a hullSlices" <|
             \_ ->
-                Expect.equal "8fcfce7a6c8be7fbed3020a9e1cc9aeccb11140d"
+                Expect.equal "e77c706831037c5fe8f7a49de13c28a48fd2713c"
                     (getHashImageForSlices TestData.anthineas)
         , test "Hash image don't change when hull change" <|
             \_ ->
-                Expect.equal "8fcfce7a6c8be7fbed3020a9e1cc9aeccb11140d"
+                Expect.equal "e77c706831037c5fe8f7a49de13c28a48fd2713c"
                     (getHashImageForSlices <|
                         HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
                     )
