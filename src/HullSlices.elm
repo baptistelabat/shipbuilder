@@ -16,7 +16,11 @@ module HullSlices exposing
     , denormalizeHullSlices
     , emptyHullSlices
     , extractY
+    , getBreadth
+    , getDepth
+    , getDraught
     , getInertialMoment
+    , getLength
     , hullSlicesToBuildInJs
     , integrate
     , isHullCustomized
@@ -81,6 +85,26 @@ type alias HullSliceCentroidAndArea =
     , centroid : Float
     , area : Float
     }
+
+
+getLength : HullSlices -> StringValueInput.FloatInput
+getLength hullSlices =
+    Maybe.withDefault hullSlices.length hullSlices.custom.length
+
+
+getBreadth : HullSlices -> StringValueInput.FloatInput
+getBreadth hullSlices =
+    Maybe.withDefault hullSlices.breadth hullSlices.custom.breadth
+
+
+getDepth : HullSlices -> StringValueInput.FloatInput
+getDepth hullSlices =
+    Maybe.withDefault hullSlices.depth hullSlices.custom.depth
+
+
+getDraught : HullSlices -> StringValueInput.FloatInput
+getDraught hullSlices =
+    Maybe.withDefault hullSlices.draught hullSlices.custom.draught
 
 
 emptyHullSlices : HullSlices
@@ -621,9 +645,9 @@ setLongitudinalPositionOfEachSlice hullSlices =
 
 hullSlicesToBuildInJs : HullSlices -> HullSlices
 hullSlicesToBuildInJs hullSlices =
-    { length = Maybe.withDefault hullSlices.length hullSlices.custom.length
-    , breadth = Maybe.withDefault hullSlices.breadth hullSlices.custom.breadth
-    , depth = Maybe.withDefault hullSlices.depth hullSlices.custom.depth
+    { length = getLength hullSlices
+    , breadth = getBreadth hullSlices
+    , depth = getDepth hullSlices
     , xmin = hullSlices.xmin
     , zmin = hullSlices.zmin
     , slices = setLongitudinalPositionOfEachSlice hullSlices
@@ -662,17 +686,8 @@ isHullCustomized hullSlices =
 calculateSliceArea : HullSlices -> HullSlice -> Float
 calculateSliceArea json hullSlice =
     -- Multiply by 2 to account for both sides of the hull: otherwise the area is just for the y>0 half-plane
-    let
-        depth : StringValueInput.FloatInput
-        depth =
-            Maybe.withDefault json.depth json.custom.depth
-
-        draught : StringValueInput.FloatInput
-        draught =
-            Maybe.withDefault json.draught json.custom.draught
-    in
     scale json hullSlice
-        |> area (json.zmin + depth.value - draught.value) (json.zmin + depth.value)
+        |> area (json.zmin + (.value <| getDepth json) - (.value <| getDraught json)) (json.zmin + (.value <| getDepth json))
         |> (*) 2
 
 
@@ -689,11 +704,11 @@ scale json hullSlice =
 
         scaleY : Float -> Float
         scaleY y =
-            y * breadth.value + (-breadth.value / 2)
+            y * (.value <| getBreadth json) + ((negate <| .value <| getBreadth json) / 2)
 
         scaleZ : Float -> Float
         scaleZ z =
-            z * depth.value + json.zmin
+            z * (.value <| getDepth json) + json.zmin
     in
     { x = hullSlice.x
     , zmin = scaleZ hullSlice.zmin

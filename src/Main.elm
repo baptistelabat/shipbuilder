@@ -3348,10 +3348,10 @@ viewModeller model =
                 Just <|
                     div
                         [ id "slices-inputs" ]
-                        [ (StringValueInput.view <| Maybe.withDefault slices.length slices.custom.length) <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
-                        , (StringValueInput.view <| Maybe.withDefault slices.breadth slices.custom.breadth) <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
-                        , (StringValueInput.view <| Maybe.withDefault slices.depth slices.custom.depth) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
-                        , (StringValueInput.view <| Maybe.withDefault slices.draught slices.custom.draught) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
+                        [ (StringValueInput.view <| HullSlices.getLength slices) <| ToJs << ModifySlice HullSliceModifiers.setLengthOverAll hullReference
+                        , (StringValueInput.view <| HullSlices.getBreadth slices) <| ToJs << ModifySlice HullSliceModifiers.setBreadth hullReference
+                        , (StringValueInput.view <| HullSlices.getDepth slices) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
+                        , (StringValueInput.view <| HullSlices.getDraught slices) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]

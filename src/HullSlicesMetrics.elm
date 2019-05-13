@@ -305,14 +305,14 @@ fillHullSliceMetrics hullSlices =
 
 toHullSlicesMetrics : HullSlices -> HullSlicesMetrics_
 toHullSlicesMetrics hullSlices =
-    { length = Maybe.withDefault hullSlices.length hullSlices.custom.length
-    , breadth = Maybe.withDefault hullSlices.breadth hullSlices.custom.breadth
-    , depth = Maybe.withDefault hullSlices.depth hullSlices.custom.depth
+    { length = HullSlices.getLength hullSlices
+    , breadth = HullSlices.getBreadth hullSlices
+    , depth = HullSlices.getDepth hullSlices
     , prismaticCoefficient = StringValueInput.emptyFloat 1
     , xmin = hullSlices.xmin
     , zmin = hullSlices.zmin
     , slices = setLongitudinalPositionOfEachSlice hullSlices
-    , draught = Maybe.withDefault hullSlices.draught hullSlices.custom.draught
+    , draught = HullSlices.getDraught hullSlices
     , denormalizedSlices = []
     , blockCoefficient = 0
     , centreOfBuoyancy = 0
