@@ -3361,36 +3361,21 @@ viewSpaceReservationPanel spaceReservationView model =
             viewWholeList model
 
 
+hullReferencesMsgs : HullReferences.HullReferencesMsgs Msg
+hullReferencesMsgs =
+    { selectHullMsg = ToJs << SelectHullReference
+    , unselectHullMsg = ToJs <| UnselectHullReference
+    , openLibraryMsg = ToJs <| OpenHullsLibrary
+    }
+
+
 viewHullStudioPanel : Model -> Html Msg
 viewHullStudioPanel model =
     HullReferences.viewHullStudioPanel
         (Dict.keys model.slices)
         (List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices)
-        (ToJs << SelectHullReference)
-        (ToJs <| UnselectHullReference)
         model.selectedHullReference
-        (importHullSlices model)
-
-
-importHullSlices : Model -> Html Msg
-importHullSlices model =
-    div
-        [ class "import-item"
-        , title "Import a hull library from a save file"
-        ]
-        [ label
-            [ for "import-hull-library" ]
-            [ text "Import" ]
-        , input
-            [ type_ "file"
-            , accept "application/json, .json"
-            , id "import-hull-library"
-            , name "import-hull-library"
-            , class "hidden-input"
-            , on "change" <| Decode.succeed <| ToJs OpenHullsLibrary
-            ]
-            []
-        ]
+        hullReferencesMsgs
 
 
 isAccordionOpened : UiState -> String -> Bool
