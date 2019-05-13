@@ -1176,12 +1176,12 @@ modellerTests =
             \_ ->
                 modellerView
                     |> Query.fromHtml
-                    |> Query.has [ Selector.attribute <| Attributes.class "sections-details-title" ]
+                    |> Query.has [ Selector.attribute <| Attributes.class "section-details-title" ]
         , test "Section details is triggers ToggleSections" <|
             \_ ->
                 modellerView
                     |> Query.fromHtml
-                    |> Query.findAll [ Selector.class "sections-details-title" ]
+                    |> Query.findAll [ Selector.class "section-details-title" ]
                     |> Query.first
                     |> Event.simulate Event.click
                     |> Event.expect (ToJs <| ToggleSections True "anthineas")

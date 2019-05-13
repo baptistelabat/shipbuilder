@@ -3708,14 +3708,14 @@ resetHullSlices model =
 viewHullSections : UiState -> String -> List HullSlice -> Html Msg
 viewHullSections uiState hullReference slices =
     div
-        [ class "sections-details" ]
+        [ class "section-details" ]
     <|
         if isAccordionOpened uiState "hull-sections" then
             [ p
-                [ class "sections-details-title"
+                [ class "section-details-title"
                 , onClick <| ToJs <| ToggleSections False hullReference
                 ]
-                [ text "Sections details"
+                [ text "Section details"
                 , FASolid.angleDown []
                 ]
             , viewHullSliceSelector uiState.selectedSlice hullReference <| List.length slices
@@ -3724,10 +3724,10 @@ viewHullSections uiState hullReference slices =
 
         else
             [ p
-                [ class "sections-details-title"
+                [ class "section-details-title"
                 , onClick <| ToJs <| ToggleSections True hullReference
                 ]
-                [ text "Sections details"
+                [ text "Section details"
                 , FASolid.angleRight []
                 ]
             ]

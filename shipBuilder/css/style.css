@@ -1403,11 +1403,11 @@ a.download-kpis svg {
   color: grey;
 }
 
-.sections-details {
+.section-details {
     padding-bottom: 16px;
 }
 
-.sections-details-title {
+.section-details-title {
     font-style: italic;
     font-size: 0.9em;
     margin-bottom:  8px;
@@ -1417,7 +1417,7 @@ a.download-kpis svg {
     cursor: pointer;
 }
 
-.sections-details-title svg {
+.section-details-title svg {
     height: 22px;
 }
 
