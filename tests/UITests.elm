@@ -1189,12 +1189,12 @@ modellerTests =
             \_ ->
                 modellerViewWithSectionExpand
                     |> Query.fromHtml
-                    |> Query.has [ Selector.attribute <| Attributes.id "section-selector" ]
+                    |> Query.has [ Selector.attribute <| Attributes.id "section-number" ]
         , test "Section selector is triggers SelectSlice" <|
             \_ ->
                 modellerViewWithSectionExpand
                     |> Query.fromHtml
-                    |> Query.findAll [ Selector.id "section-selector" ]
+                    |> Query.findAll [ Selector.id "section-number" ]
                     |> Query.first
                     |> Event.simulate (Event.input "5")
                     |> Event.expect (ToJs <| SelectSlice "anthineas" 10 "5")

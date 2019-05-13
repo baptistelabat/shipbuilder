@@ -1395,7 +1395,7 @@ a.download-kpis svg {
 .disclaimer {
   font-size: 0.8em;
   color: red;
-  padding-top: 16px;
+  padding-top: 20px;
   border-top: 1px solid var(--secondary-color__contrast);
 }
 
@@ -1404,13 +1404,15 @@ a.download-kpis svg {
 }
 
 .section-details {
-    padding-bottom: 16px;
+    border-top: 1px solid var(--secondary-color__contrast);
+    margin-top : 25px;
+    margin-bottom: 25px;
 }
 
 .section-details-title {
-    font-style: italic;
-    font-size: 0.9em;
-    margin-bottom:  8px;
+    font-size: 1em;
+    margin-bottom:  15px;
+    margin-left: 5px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1419,6 +1421,15 @@ a.download-kpis svg {
 
 .section-details-title svg {
     height: 22px;
+}
+
+.section-selector input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+.section-selector input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; /* Chrome */
+    margin: 0;
 }
 
 .sections-list {

@@ -1529,7 +1529,7 @@ initModel flag =
     , uiState =
         { accordions = Dict.empty
         , blockContextualMenu = Nothing
-        , selectedSlice = StringValueInput.fromInt "section-selector" 1
+        , selectedSlice = StringValueInput.fromInt "section number" 1
         , showSelectedSlice = False
         }
     , tags = []
@@ -3735,7 +3735,9 @@ viewHullSections uiState hullReference slices =
 
 viewHullSliceSelector : StringValueInput.IntInput -> String -> Int -> Html Msg
 viewHullSliceSelector sliceSelector hullReference maxSelector =
-    StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector
+    div
+        [ class "section-selector" ]
+        [ StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector ]
 
 
 viewHullSliceList : List HullSlice -> Int -> Html Msg

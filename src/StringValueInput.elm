@@ -234,8 +234,8 @@ viewIntInput intInput_ onChange =
     div
         [ class "input-group" ]
         [ label
-            []
-            []
+            [ for generatedID ]
+            [ text <| intInput_.description ]
         , input
             [ type_ "number"
             , id generatedID
