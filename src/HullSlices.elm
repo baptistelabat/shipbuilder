@@ -89,42 +89,22 @@ type alias HullSliceCentroidAndArea =
 
 getLength : HullSlices -> StringValueInput.FloatInput
 getLength hullSlices =
-    case hullSlices.custom.length of
-        Just customLength ->
-            customLength
-
-        Nothing ->
-            hullSlices.length
+    Maybe.withDefault hullSlices.length hullSlices.custom.length
 
 
 getBreadth : HullSlices -> StringValueInput.FloatInput
 getBreadth hullSlices =
-    case hullSlices.custom.breadth of
-        Just customBreadth ->
-            customBreadth
-
-        Nothing ->
-            hullSlices.breadth
+    Maybe.withDefault hullSlices.breadth hullSlices.custom.breadth
 
 
 getDepth : HullSlices -> StringValueInput.FloatInput
 getDepth hullSlices =
-    case hullSlices.custom.depth of
-        Just customDepth ->
-            customDepth
-
-        Nothing ->
-            hullSlices.depth
+    Maybe.withDefault hullSlices.depth hullSlices.custom.depth
 
 
 getDraught : HullSlices -> StringValueInput.FloatInput
 getDraught hullSlices =
-    case hullSlices.custom.draught of
-        Just customDraught ->
-            customDraught
-
-        Nothing ->
-            hullSlices.draught
+    Maybe.withDefault hullSlices.draught hullSlices.custom.draught
 
 
 emptyHullSlices : HullSlices
