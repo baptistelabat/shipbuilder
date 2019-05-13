@@ -3612,7 +3612,7 @@ viewModeller model =
                         , (StringValueInput.view <| HullSlices.getDepth slices) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
                         , (StringValueInput.view <| HullSlices.getDraught slices) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
-                        , viewHullSections model.uiState hullReference <| HullSlicesMetrics.getSlices hullSlicesMetrics
+                        , viewHullSections model.uiState hullReference slices
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
@@ -3705,8 +3705,8 @@ resetHullSlices model =
         ]
 
 
-viewHullSections : UiState -> String -> List HullSlice -> Html Msg
-viewHullSections uiState hullReference slices =
+viewHullSections : UiState -> String -> HullSlices -> Html Msg
+viewHullSections uiState hullReference hullslices =
     div
         [ class "section-details" ]
     <|
@@ -3718,8 +3718,8 @@ viewHullSections uiState hullReference slices =
                 [ text "Section details"
                 , FASolid.angleDown []
                 ]
-            , viewHullSliceSelector uiState.selectedSlice hullReference <| List.length slices
-            , viewHullSliceList slices uiState.selectedSlice.value
+            , viewHullSliceSelector uiState.selectedSlice hullReference <| List.length hullslices.slices
+            , viewHullSliceList hullslices uiState.selectedSlice.value
             ]
 
         else
@@ -3740,13 +3740,21 @@ viewHullSliceSelector sliceSelector hullReference maxSelector =
         [ StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector ]
 
 
-viewHullSliceList : List HullSlice -> Int -> Html Msg
-viewHullSliceList slices sliceSelected =
+viewHullSliceList : HullSlices -> Int -> Html Msg
+viewHullSliceList hullslices sliceSelected =
     let
-        maybeSlice =
-            List.head <| List.drop (sliceSelected - 1) slices
+        slices =
+            HullSlices.setLongitudinalPositionOfEachSlice hullslices
+
+        metrics =
+            { length = .value <| HullSlices.getLength hullslices
+            , breadth = .value <| HullSlices.getBreadth hullslices
+            , depth = .value <| HullSlices.getDepth hullslices
+            , xmin = hullslices.xmin
+            , zmin = hullslices.zmin
+            }
     in
-    case maybeSlice of
+    case List.head <| List.drop (sliceSelected - 1) slices of
         Nothing ->
             Html.text ""
 
@@ -3775,8 +3783,8 @@ viewHullSliceList slices sliceSelected =
                             []
                         ]
                     ]
-                <|
                     (slice
+                        |> HullSlices.denormalizeHullSlice metrics
                         |> HullSlices.toHullSliceAsZYList
                         |> HullSlices.extractXYZ
                         |> List.map viewHullSliceCoordinate
@@ -3802,7 +3810,7 @@ viewHullSliceCoordinate xyz =
         , input
             [ type_ "text"
             , disabled True
-            , value <| String.fromFloat <| StringValueInput.round_n 2 xyz.z
+            , value <| String.fromFloat <| negate <| StringValueInput.round_n 2 xyz.z
             ]
             []
         ]
