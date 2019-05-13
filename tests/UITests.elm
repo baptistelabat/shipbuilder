@@ -1199,12 +1199,12 @@ modellerTests =
             \_ ->
                 modellerViewWithSlicesDetailsExpanded
                     |> Query.fromHtml
-                    |> Query.has [ Selector.attribute <| Attributes.id "slice-number" ]
+                    |> Query.has [ Selector.attribute <| Attributes.id "slice-no" ]
         , test "Entering a number in slice number input selects the corresponding slice" <|
             \_ ->
                 modellerViewWithSlicesDetailsExpanded
                     |> Query.fromHtml
-                    |> Query.findAll [ Selector.id "slice-number" ]
+                    |> Query.findAll [ Selector.id "slice-no" ]
                     |> Query.first
                     |> Event.simulate (Event.input "5")
                     |> Event.expect (ToJs <| SelectSlice "anthineas" 10 "5")

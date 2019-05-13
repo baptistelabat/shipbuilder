@@ -1554,7 +1554,7 @@ initModel flag =
     , uiState =
         { accordions = Dict.empty
         , blockContextualMenu = Nothing
-        , selectedSlice = StringValueInput.fromInt "slice number" 1
+        , selectedSlice = StringValueInput.fromInt "slice no." 1
         , showSelectedSlice = False
         , waitToPasteClipBoard = False
         }
@@ -3795,7 +3795,7 @@ viewHullSliceSelector : UiState -> String -> Int -> Html Msg
 viewHullSliceSelector uiState hullReference maxSelector =
     div [] <|
         [ div
-            [ class "slices-actions" ]
+            [ class "slices-selector" ]
             [ StringValueInput.viewIntInput uiState.selectedSlice <| ToJs << SelectSlice hullReference maxSelector
             , viewHullSliceImportButton uiState
             , viewHiddenInputToPasteClipboard

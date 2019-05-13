@@ -1448,7 +1448,14 @@ a.download-kpis svg {
     height: 22px;
 }
 
-.slices-selector input[type="number"] {
+.slices-selector {
+    display: flex;
+    align-items: center;
+    margin-top : -15px;
+    margin-bottom : -10px;
+}
+
+.section-selector input[type="number"] {
     -moz-appearance: textfield; /* Firefox */
 }
 
@@ -1479,17 +1486,10 @@ a.download-kpis svg {
     box-shadow: 0 0 5px -3px var(--shadow-color);
 }
 
-.slices-actions {
-    display: flex;
-    align-items: center;
-    margin-top: -15px;
-    margin-bottom: -15px;
-}
-
 .slices-import, .slices-import-active  {
     display: flex;
     align-items: center;
-    margin-top: 4px;
+    margin-top: 20px;
     margin-left: 10px;
 }
 
@@ -1527,10 +1527,11 @@ a.download-kpis svg {
 }
 
 .slices-import-message {
-    width: 90px;
+    width: 80px;
     height: 32px;
     font-size: 0.7em;
     padding-left: 10px;
+    padding-right: 10px;
     margin-right: 1px;
     border-bottom-left-radius: 4px;
     border-top-left-radius: 4px;
