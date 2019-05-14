@@ -207,8 +207,7 @@ function handlePaste (e) {
 
     document.activeElement.blur()
 
-    var dataToElm = '{ "type" : "sections", "slices" : '+ pastedData +' }';
-    sendToElm("paste-clipboard", JSON.parse(dataToElm));
+    sendToElm("paste-clipboard", pastedData);
 }
 
 let readClipboard = function (cmd, inputId) {

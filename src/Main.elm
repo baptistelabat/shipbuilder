@@ -481,6 +481,11 @@ keyupToMsg keyCode =
             NoJs NoOp
 
 
+formatClipboardData : String -> String
+formatClipboardData data =
+    "{\"type\":\"sections\",\n \"sections\":" ++ data ++ "\n}"
+
+
 jsMsgToMsg : JsData -> Msg
 jsMsgToMsg js =
     case js.tag of
@@ -525,9 +530,14 @@ jsMsgToMsg js =
                     FromJs <| JSError <| Decode.errorToString message
 
         "paste-clipboard" ->
-            case Decode.decodeValue (Decode.field "slices" EncodersDecoders.hullSlicesDecoder) js.data of
-                Ok clipboardData ->
-                    FromJs <| PasteClipBoard clipboardData
+            case Decode.decodeValue Decode.string js.data of
+                Ok dataString ->
+                    case Decode.decodeString (Decode.field "sections" EncodersDecoders.hullSlicesDecoder) <| formatClipboardData dataString of
+                        Ok slices ->
+                            FromJs <| PasteClipBoard slices
+
+                        Err message ->
+                            FromJs <| JSError <| Decode.errorToString message
 
                 Err message ->
                     FromJs <| JSError <| Decode.errorToString message
