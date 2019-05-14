@@ -29,7 +29,7 @@ type alias HullReferencesMsgs msg =
 
 
 viewHullStudioPanel : List String -> List String -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullStudioPanel hullRefs hullHashs selectedHullReferencePath hullReferencesMsgs =
+viewHullStudioPanel hullRefs hullHashs selectedHull hullReferencesMsgs =
     div
         [ class "panel hull-panel"
         ]
@@ -38,7 +38,7 @@ viewHullStudioPanel hullRefs hullHashs selectedHullReferencePath hullReferencesM
             , div [ class "hull-actions" ]
                 [ importHullSlices hullReferencesMsgs.openLibraryMsg ]
             ]
-        , viewHullReferences hullRefs hullHashs selectedHullReferencePath hullReferencesMsgs
+        , viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs
         ]
 
 
@@ -64,21 +64,21 @@ importHullSlices openLibraryMsg =
 
 
 viewHullReferences : List String -> List String -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullReferences hullRefs hullHashs selectedHullReferencePath hullReferencesMsgs =
+viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs =
     let
         isAHullSelected : Bool
         isAHullSelected =
-            selectedHullReferencePath /= Nothing
+            selectedHull /= Nothing
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
-            :: List.map2 (viewHullReference hullReferencesMsgs.selectHullMsg selectedHullReferencePath) hullRefs hullHashs
+            :: List.map2 (viewHullReference hullReferencesMsgs.selectHullMsg selectedHull) hullRefs hullHashs
 
 
 viewHullReference : (String -> msg) -> Maybe String -> String -> String -> Html msg
-viewHullReference selectHullMsg selectedHullReference ref hash =
+viewHullReference selectHullMsg selectedHull ref hash =
     li
-        (if selectedHullReference == Just ref then
+        (if selectedHull == Just ref then
             [ class "hull-reference hull-reference__selected" ]
 
          else
