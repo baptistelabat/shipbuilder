@@ -282,9 +282,5 @@ getHashImageForSlices hullSlice =
         hullSliceToString : String
         hullSliceToString =
             Encode.encode 0 <| encoder <| resetSlicesToOriginals hullSlice
-
-        hullSliceDigested : SHA1.Digest
-        hullSliceDigested =
-            SHA1.fromString hullSliceToString
     in
-    SHA1.toHex hullSliceDigested
+    SHA1.toHex <| SHA1.fromString hullSliceToString
