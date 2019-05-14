@@ -748,15 +748,15 @@ importHullsLibraryiInModel model saveFile =
                 True ->
                     Dict.remove "nonExistentKey"
 
-        insert2 : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
-        insert2 key a b =
+        insertBothWithoutColision : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
+        insertBothWithoutColision key a b =
             Dict.insert key a << insertIfUnique (renameKey key) b
 
         updatedSlices : Dict ShipName HullSlices.HullSlices
         updatedSlices =
             Dict.merge
                 (\key a -> Dict.insert key a)
-                (\key a b -> insert2 key a b)
+                (\key a b -> insertBothWithoutColision key a b)
                 (\key b -> insertIfUnique key b)
                 model.slices
                 importedHullsLibrary
