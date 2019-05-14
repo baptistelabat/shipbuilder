@@ -1,7 +1,5 @@
 module HullReferences exposing
-    ( HullReference
-    , HullReferences
-    , HullReferencesMsgs
+    ( HullReferencesMsgs
     , viewHullStudioPanel
     )
 
@@ -9,16 +7,6 @@ import Html exposing (Html, div, h2, input, label, li, p, text, ul)
 import Html.Attributes exposing (accept, attribute, class, disabled, download, for, hidden, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onClick)
 import Json.Decode as Decode
-
-
-type alias HullReferences =
-    List HullReference
-
-
-type alias HullReference =
-    { label : String
-    , path : String
-    }
 
 
 type alias HullReferencesMsgs msg =

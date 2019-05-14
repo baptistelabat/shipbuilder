@@ -22,7 +22,6 @@ port module Main exposing
     , asYInPosition
     , asZInPosition
     , encodeInitThreeCommand
-    , hullReferences
     , init
     , initBlock
     , initCmd
@@ -54,7 +53,7 @@ import FontAwesome.Solid as FASolid
 import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p, sub, text, ul)
 import Html.Attributes exposing (accept, attribute, class, disabled, download, for, hidden, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
-import HullReferences exposing (HullReferences)
+import HullReferences
 import HullSliceModifiers
 import HullSlices exposing (HullSlices, hullSlicesToBuildInJs)
 import HullSlicesMetrics
@@ -3070,13 +3069,6 @@ tabItems =
     , { title = "Blocks", icon = FARegular.clone [], viewMode = SpaceReservation WholeList }
     , { title = "KPIs", icon = FASolid.tachometerAlt [], viewMode = KpiStudio }
     , { title = "Modeller", icon = FASolid.clone [], viewMode = Modeller }
-    ]
-
-
-hullReferences : HullReferences
-hullReferences =
-    [ { label = "Anthineas", path = "assets/anthineas.stl" }
-    , { label = "OPV", path = "assets/OPV.stl" }
     ]
 
 
