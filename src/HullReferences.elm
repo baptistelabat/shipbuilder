@@ -68,12 +68,7 @@ viewHullReferences hullRefs hullHashs selectedHullReferencePath hullReferencesMs
     let
         isAHullSelected : Bool
         isAHullSelected =
-            case selectedHullReferencePath of
-                Just hullname ->
-                    True
-
-                Nothing ->
-                    False
+            selectedHullReferencePath /= Nothing
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
@@ -83,7 +78,7 @@ viewHullReferences hullRefs hullHashs selectedHullReferencePath hullReferencesMs
 viewHullReference : (String -> msg) -> Maybe String -> String -> String -> Html msg
 viewHullReference selectHullMsg selectedHullReference ref hash =
     li
-        (if ref == Maybe.withDefault "" selectedHullReference then
+        (if selectedHullReference == Just ref then
             [ class "hull-reference hull-reference__selected" ]
 
          else
