@@ -56,7 +56,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences
 import HullSliceModifiers
-import HullSlices exposing (HullSlice, HullSlices, applyCustomPropertiesToHullSlices, isHullCustomized)
+import HullSlices exposing (HullSlice, HullSlices, XYZ, applyCustomPropertiesToHullSlices, isHullCustomized)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -459,6 +459,19 @@ keyDecoder =
     Decode.field "key" Decode.string
 
 
+coordinatesXYZDecoder : Decode.Decoder (List XYZ)
+coordinatesXYZDecoder =
+    Decode.list coordinateXYZDecoder
+
+
+coordinateXYZDecoder : Decode.Decoder XYZ
+coordinateXYZDecoder =
+    Decode.succeed XYZ
+        |> Pipeline.required "x" Decode.float
+        |> Pipeline.required "y" Decode.float
+        |> Pipeline.required "z" Decode.float
+
+
 keydownToMsg : String -> Msg
 keydownToMsg keyCode =
     case keyCode of
@@ -532,9 +545,9 @@ jsMsgToMsg js =
         "paste-clipboard" ->
             case Decode.decodeValue Decode.string js.data of
                 Ok dataString ->
-                    case Decode.decodeString (Decode.field "sections" EncodersDecoders.hullSlicesDecoder) <| formatClipboardData dataString of
-                        Ok slices ->
-                            FromJs <| PasteClipBoard slices
+                    case Decode.decodeString (Decode.field "sections" coordinatesXYZDecoder) <| formatClipboardData dataString of
+                        Ok coordinates ->
+                            FromJs <| PasteClipBoard coordinates
 
                         Err message ->
                             FromJs <| JSError <| Decode.errorToString message
@@ -618,7 +631,7 @@ type FromJsMsg
     | NewBlock Block
     | RestoreSave SaveFile
     | ImportHullsLibrary SaveFile
-    | PasteClipBoard (List HullSlice)
+    | PasteClipBoard (List XYZ)
     | SynchronizePosition String Position
     | SynchronizePositions (Dict String SyncPosition)
     | SynchronizeSize String Size
@@ -2407,7 +2420,7 @@ updateFromJs jsmsg model =
             in
             ( newModel, Cmd.none )
 
-        PasteClipBoard updatedSlices ->
+        PasteClipBoard coordinates ->
             case model.selectedHullReference of
                 Just hullRef ->
                     let
@@ -2420,7 +2433,7 @@ updateFromJs jsmsg model =
 
                         updateHullslices : HullSlices -> HullSlices
                         updateHullslices hullslices =
-                            { hullslices | slices = updatedSlices }
+                            { hullslices | slices = HullSlices.fromCoordinates coordinates }
 
                         updatedModel : Model
                         updatedModel =

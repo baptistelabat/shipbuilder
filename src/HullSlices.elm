@@ -19,6 +19,7 @@ module HullSlices exposing
     , emptyHullSlices
     , extractXYZ
     , extractY
+    , fromCoordinates
     , getBreadth
     , getDepth
     , getDraught
