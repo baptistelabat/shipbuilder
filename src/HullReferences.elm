@@ -46,7 +46,7 @@ importHullSlices : msg -> Html msg
 importHullSlices openLibraryMsg =
     div
         [ class "import-item"
-        , title "Import a hull library from a save file"
+        , title "Import hull library from file"
         ]
         [ label
             [ for "import-hull-library" ]
