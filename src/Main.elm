@@ -754,10 +754,20 @@ importHullsLibraryiInModel model saveFile =
 
         updatedSlices : Dict ShipName HullSlices.HullSlices
         updatedSlices =
+            let
+                ifHullOnlyInModel =
+                    Dict.insert
+
+                ifHullInModelAndInSavedFile =
+                    insertBothWithoutColision
+
+                ifHullOnlyInSavedFile =
+                    insertIfUnique
+            in
             Dict.merge
-                (\key a -> Dict.insert key a)
-                (\key a b -> insertBothWithoutColision key a b)
-                (\key b -> insertIfUnique key b)
+                ifHullOnlyInModel
+                ifHullInModelAndInSavedFile
+                ifHullOnlyInSavedFile
                 model.slices
                 importedHullsLibrary
                 Dict.empty
