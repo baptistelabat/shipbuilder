@@ -482,6 +482,15 @@ getInertialMoment o =
     inertialMoment
 
 
+fromHullSliceAsZYList : HullSliceAsZYList -> HullSlice
+fromHullSliceAsZYList hsZYs =
+    { x = hsZYs.x
+    , zmin = Maybe.withDefault 0 <| List.minimum <| List.map Tuple.first hsZYs.zylist
+    , zmax = Maybe.withDefault 1 <| List.maximum <| List.map Tuple.first hsZYs.zylist
+    , y = List.map Tuple.second hsZYs.zylist
+    }
+
+
 toHullSliceAsZYList : HullSlice -> HullSliceAsZYList
 toHullSliceAsZYList hs =
     let
