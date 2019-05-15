@@ -27,6 +27,7 @@ module HullSlices exposing
     , getLength
     , integrate
     , isHullCustomized
+    , normalizeHullSlices
     , scale
     , setLongitudinalPositionOfEachSlice
     , toHullSliceAsZYList
@@ -691,6 +692,86 @@ calculateCentroid lo =
 
         _ ->
             0
+
+
+getSpaceParametersFromHullSlices : List HullSlice -> Maybe { length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float }
+getSpaceParametersFromHullSlices hullSliceList =
+    let
+        maybeXmin =
+            List.minimum <| List.map .x hullSliceList
+
+        maybeXmax =
+            List.maximum <| List.map .x hullSliceList
+
+        maybeZmin =
+            List.minimum <| List.map .zmin hullSliceList
+
+        maybeZmax =
+            List.maximum <| List.map .zmax hullSliceList
+
+        maybeYmin =
+            List.minimum <| List.concat <| List.map .y hullSliceList
+
+        maybeYmax =
+            List.maximum <| List.concat <| List.map .y hullSliceList
+
+        maybeLength =
+            Maybe.map2 (-) maybeXmax maybeXmin
+
+        maybeBreadth =
+            Maybe.map2 (*) (Just 2) (Maybe.map2 (-) maybeYmax maybeYmin)
+
+        maybeDepth =
+            Maybe.map2 (-) maybeZmax maybeZmin
+
+        addSpaceParameters length breadth draught xmin zmin =
+            { length = length
+            , breadth = breadth
+            , depth = draught
+            , xmin = xmin
+            , zmin = zmin
+            }
+    in
+    Maybe.map5 addSpaceParameters maybeLength maybeBreadth maybeDepth maybeXmin maybeZmin
+
+
+normalizeHullSlices : List HullSlice -> Maybe (List HullSlice)
+normalizeHullSlices hullSliceList =
+    case getSpaceParametersFromHullSlices hullSliceList of
+        Just param ->
+            Just <| List.map (normalizeHullSlice param) hullSliceList
+
+        Nothing ->
+            Nothing
+
+
+normalizeHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float } -> HullSlice -> HullSlice
+normalizeHullSlice param hs =
+    let
+        normalizedY : Float -> Float -> Float
+        normalizedY br y =
+            (y / (br / 2)) / 2 + 0.5
+
+        normalizedZ : Float -> Float -> Float -> Float
+        normalizedZ zmin depth z =
+            z / depth - zmin
+
+        x =
+            hs.x / param.length - param.xmin
+
+        hs_zmin =
+            normalizedZ param.zmin param.depth hs.zmin
+
+        hs_zmax =
+            normalizedZ param.zmin param.depth hs.zmax
+
+        hs_y =
+            List.map (normalizedY param.breadth) hs.y
+
+        res =
+            { x = x, zmin = hs_zmin, zmax = hs_zmax, y = hs_y }
+    in
+    res
 
 
 denormalizeHullSlices : { a | length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float } -> List HullSlice -> List HullSlice
