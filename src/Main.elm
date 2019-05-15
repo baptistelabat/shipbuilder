@@ -10,6 +10,7 @@ port module Main exposing
     , NoJsMsg(..)
     , PartitionType(..)
     , PartitioningView(..)
+    , SaveFile
     , SpaceReservationView(..)
     , ToJsMsg(..)
     , ViewMode(..)
@@ -21,11 +22,11 @@ port module Main exposing
     , asYInPosition
     , asZInPosition
     , encodeInitThreeCommand
-    , hullReferences
     , init
     , initBlock
     , initCmd
     , initModel
+    , initPartitions
     , main
     , msg2json
     , removeBlockFrom
@@ -52,7 +53,7 @@ import FontAwesome.Solid as FASolid
 import Html exposing (Html, a, button, div, h1, h2, h3, img, input, label, li, p, sub, text, ul)
 import Html.Attributes exposing (accept, attribute, class, disabled, download, for, hidden, href, id, name, placeholder, src, style, title, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
-import HullReferences exposing (HullReferences)
+import HullReferences
 import HullSliceModifiers
 import HullSlices exposing (HullSlices, hullSlicesToBuildInJs)
 import HullSlicesMetrics
@@ -514,6 +515,14 @@ jsMsgToMsg js =
                 Err message ->
                     FromJs <| JSError <| Decode.errorToString message
 
+        "import-data" ->
+            case Decode.decodeValue (decodeVersion |> Decode.andThen decodeSaveFile) js.data of
+                Ok fileContents ->
+                    FromJs <| ImportHullsLibrary fileContents
+
+                Err message ->
+                    FromJs <| JSError <| Decode.errorToString message
+
         "new-block" ->
             case Decode.decodeValue decodeBlock js.data of
                 Ok block ->
@@ -589,6 +598,7 @@ type FromJsMsg
     | JSError String
     | NewBlock Block
     | RestoreSave SaveFile
+    | ImportHullsLibrary SaveFile
     | SynchronizePosition String Position
     | SynchronizePositions (Dict String SyncPosition)
     | SynchronizeSize String Size
@@ -697,6 +707,72 @@ encodeToggleBlocksVisibilityCmd blocks visible =
         [ ( "visible", Encode.bool visible )
         , ( "uuids", Encode.list (Encode.string << .uuid) blocks )
         ]
+
+
+importHullsLibraryiInModel : Model -> SaveFile -> Model
+importHullsLibraryiInModel model saveFile =
+    let
+        importedHullsLibrary : Dict String HullSlices
+        importedHullsLibrary =
+            Dict.map (\_ val -> HullSliceModifiers.resetSlicesToOriginals val) saveFile.hulls
+
+        renameKey : String -> String
+        renameKey key =
+            let
+                findSingleKey : String -> String
+                findSingleKey originalKey =
+                    case Dict.member originalKey model.slices of
+                        False ->
+                            originalKey
+
+                        True ->
+                            findSingleKey (originalKey ++ " - bis")
+            in
+            findSingleKey key
+
+        insertIfUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
+        insertIfUnique key value =
+            let
+                listSHAInDict : List String
+                listSHAInDict =
+                    List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices
+
+                valueSHA : String
+                valueSHA =
+                    EncodersDecoders.getHashImageForSlices value
+            in
+            case List.member valueSHA listSHAInDict of
+                False ->
+                    Dict.insert key value
+
+                True ->
+                    Dict.remove "nonExistentKey"
+
+        insertBothWithoutColision : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
+        insertBothWithoutColision key a b =
+            Dict.insert key a << insertIfUnique (renameKey key) b
+
+        updatedSlices : Dict ShipName HullSlices.HullSlices
+        updatedSlices =
+            let
+                ifHullOnlyInModel =
+                    Dict.insert
+
+                ifHullInModelAndInSavedFile =
+                    insertBothWithoutColision
+
+                ifHullOnlyInSavedFile =
+                    insertIfUnique
+            in
+            Dict.merge
+                ifHullOnlyInModel
+                ifHullInModelAndInSavedFile
+                ifHullOnlyInSavedFile
+                model.slices
+                importedHullsLibrary
+                Dict.empty
+    in
+    { model | slices = updatedSlices }
 
 
 
@@ -1821,6 +1897,7 @@ type ToJsMsg
     = AddBlock String
     | ChangeBlockColor Block Color
     | OpenSaveFile
+    | OpenHullsLibrary
     | RemoveBlock Block
     | RemoveBlocks (List Block)
     | SelectBlock Block
@@ -2222,6 +2299,14 @@ updateFromJs jsmsg model =
             in
             ( newModel, Cmd.batch [ toJs <| restoreSaveCmd newModel ] )
 
+        ImportHullsLibrary saveFile ->
+            let
+                newModel : Model
+                newModel =
+                    importHullsLibraryiInModel model saveFile
+            in
+            ( newModel, Cmd.none )
+
         Select uuid ->
             let
                 updatedViewMode : ViewMode
@@ -2369,6 +2454,9 @@ updateModelToJs msg model =
             model
 
         OpenSaveFile ->
+            model
+
+        OpenHullsLibrary ->
             model
 
         ChangeBlockColor block newColor ->
@@ -2730,7 +2818,10 @@ msg2json model action =
             Just { tag = "add-block", data = encodeAddBlockCommand label }
 
         OpenSaveFile ->
-            Just { tag = "read-json-file", data = Encode.string "open-save-file" }
+            Just { tag = "read-json-file-open", data = Encode.string "open-save-file" }
+
+        OpenHullsLibrary ->
+            Just { tag = "read-json-file-import", data = Encode.string "import-hull-library" }
 
         RemoveBlock block ->
             Just { tag = "remove-block", data = encodeBlock block }
@@ -2988,13 +3079,6 @@ tabItems =
     , { title = "Blocks", icon = FARegular.clone [], viewMode = SpaceReservation WholeList }
     , { title = "KPIs", icon = FASolid.tachometerAlt [], viewMode = KpiStudio }
     , { title = "Modeller", icon = FASolid.clone [], viewMode = Modeller }
-    ]
-
-
-hullReferences : HullReferences
-hullReferences =
-    [ { label = "Anthineas", path = "assets/anthineas.stl" }
-    , { label = "OPV", path = "assets/OPV.stl" }
     ]
 
 
@@ -3279,21 +3363,21 @@ viewSpaceReservationPanel spaceReservationView model =
             viewWholeList model
 
 
+hullReferencesMsgs : HullReferences.HullReferencesMsgs Msg
+hullReferencesMsgs =
+    { selectHullMsg = ToJs << SelectHullReference
+    , unselectHullMsg = ToJs <| UnselectHullReference
+    , openLibraryMsg = ToJs <| OpenHullsLibrary
+    }
+
+
 viewHullStudioPanel : Model -> Html Msg
 viewHullStudioPanel model =
-    case model.selectedHullReference of
-        Just selectedHullReferencePath ->
-            HullReferences.viewHullStudioPanelWithSelection
-                (Dict.keys model.slices)
-                (ToJs << SelectHullReference)
-                (ToJs <| UnselectHullReference)
-                selectedHullReferencePath
-
-        Nothing ->
-            HullReferences.viewHullStudioPanel
-                (Dict.keys model.slices)
-                (ToJs << SelectHullReference)
-                (ToJs <| UnselectHullReference)
+    HullReferences.viewHullStudioPanel
+        (Dict.keys model.slices)
+        (List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices)
+        model.selectedHullReference
+        hullReferencesMsgs
 
 
 isAccordionOpened : UiState -> String -> Bool

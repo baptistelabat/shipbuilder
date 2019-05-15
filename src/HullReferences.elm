@@ -1,51 +1,77 @@
 module HullReferences exposing
-    ( HullReference
-    , HullReferences
+    ( HullReferencesMsgs
     , viewHullStudioPanel
-    , viewHullStudioPanelWithSelection
     )
 
-import Html exposing (Html, div, h2, li, p, text, ul)
-import Html.Attributes exposing (class, id)
-import Html.Events exposing (onClick)
+import Html exposing (Html, div, h2, input, label, li, p, text, ul)
+import Html.Attributes exposing (accept, attribute, class, disabled, download, for, hidden, href, id, name, placeholder, src, style, title, type_, value)
+import Html.Events exposing (on, onClick)
+import Json.Decode as Decode
 
 
-type alias HullReferences =
-    List HullReference
-
-
-type alias HullReference =
-    { label : String
-    , path : String
+type alias HullReferencesMsgs msg =
+    { selectHullMsg : String -> msg
+    , unselectHullMsg : msg
+    , openLibraryMsg : msg
     }
 
 
-viewHullStudioPanelWithSelection : List String -> (String -> msg) -> msg -> String -> Html msg
-viewHullStudioPanelWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
+viewHullStudioPanel : List String -> List String -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullStudioPanel hullRefs hullHashs selectedHull hullReferencesMsgs =
     div
         [ class "panel hull-panel"
         ]
-        [ h2 [] [ text "Hull Studio" ]
-        , viewHullReferencesWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath
+        [ h2 [ class "hull-panel-title" ]
+            [ text "Hull Studio"
+            , div [ class "hull-actions" ]
+                [ importHullSlices hullReferencesMsgs.openLibraryMsg ]
+            ]
+        , viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs
         ]
 
 
-viewHullReferencesWithSelection : List String -> (String -> msg) -> msg -> String -> Html msg
-viewHullReferencesWithSelection hullRefs referenceSelectionMsg unselectMsg selectedHullReferencePath =
+importHullSlices : msg -> Html msg
+importHullSlices openLibraryMsg =
+    div
+        [ class "import-item"
+        , title "Import hull library from file"
+        ]
+        [ label
+            [ for "import-hull-library" ]
+            [ text "Import" ]
+        , input
+            [ type_ "file"
+            , accept "application/json, .json"
+            , id "import-hull-library"
+            , name "import-hull-library"
+            , class "hidden-input"
+            , on "change" <| Decode.succeed <| openLibraryMsg
+            ]
+            []
+        ]
+
+
+viewHullReferences : List String -> List String -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs =
+    let
+        isAHullSelected : Bool
+        isAHullSelected =
+            selectedHull /= Nothing
+    in
     ul [ class "hull-references" ] <|
-        viewUnselectHullReference True unselectMsg
-            :: List.map (viewHullReferenceWithSelection referenceSelectionMsg selectedHullReferencePath) hullRefs
+        viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
+            :: List.map2 (viewHullReference hullReferencesMsgs.selectHullMsg selectedHull) hullRefs hullHashs
 
 
-viewHullReferenceWithSelection : (String -> msg) -> String -> String -> Html msg
-viewHullReferenceWithSelection referenceSelectionMsg selectedHullReference ref =
+viewHullReference : (String -> msg) -> Maybe String -> String -> String -> Html msg
+viewHullReference selectHullMsg selectedHull ref hash =
     li
-        (if ref == selectedHullReference then
+        (if selectedHull == Just ref then
             [ class "hull-reference hull-reference__selected" ]
 
          else
             [ class "hull-reference"
-            , onClick <| referenceSelectionMsg ref
+            , onClick <| selectHullMsg ref
             ]
         )
         [ div
@@ -53,45 +79,17 @@ viewHullReferenceWithSelection referenceSelectionMsg selectedHullReference ref =
             []
         , div [ class "hull-info-wrapper" ]
             [ p [ class "hull-label" ] [ text ref ]
+            , p [ class "hull-hash" ] [ text hash ]
             ]
-        ]
-
-
-viewHullStudioPanel : List String -> (String -> msg) -> msg -> Html msg
-viewHullStudioPanel hullRefs referenceSelectionMsg unselectMsg =
-    div
-        [ class "panel hull-panel"
-        ]
-        [ h2 [] [ text "Hull Studio" ]
-        , viewHullReferences hullRefs referenceSelectionMsg unselectMsg
-        ]
-
-
-viewHullReferences : List String -> (String -> msg) -> msg -> Html msg
-viewHullReferences hullRefs referenceSelectionMsg unselectMsg =
-    ul [ class "hull-references" ] <|
-        viewUnselectHullReference False unselectMsg
-            :: List.map (viewHullReference referenceSelectionMsg) hullRefs
-
-
-viewHullReference : (String -> msg) -> String -> Html msg
-viewHullReference referenceSelectionMsg ref =
-    li [ class "hull-reference", onClick <| referenceSelectionMsg ref ]
-        [ div [ class "hull-info-wrapper" ]
-            [ p [ class "hull-label", id (String.append "id-hull-panel-" ref) ] [ text ref ]
-            ]
-
-        -- [ p [ class "hull-label", id "id-hull-panel-TOTO" ] [ text ref ]
-        -- ]
         ]
 
 
 viewUnselectHullReference : Bool -> msg -> Html msg
-viewUnselectHullReference isAHullSelected unselectMsg =
+viewUnselectHullReference isAHullSelected unselectHullMsg =
     li
         (if isAHullSelected then
             [ class "hull-reference"
-            , onClick <| unselectMsg
+            , onClick <| unselectHullMsg
             ]
 
          else

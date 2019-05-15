@@ -3,7 +3,7 @@ module MainTests exposing (ParsedJSData, alt, ctrl, discardCmd, downArrow, keyDo
 import Color
 import Dict
 import DictList exposing (DictList)
-import EncodersDecoders
+import EncodersDecoders exposing (getHashImageForSlices)
 import Expect exposing (Expectation)
 import ExtraEvents exposing (KeyEvent)
 import Fuzz
@@ -134,6 +134,8 @@ suite =
         , parseJSONSlices
         , encodeJSONTests
         , testUpdateCenterOfGravity
+        , testHullSlicesHash
+        , testImportHullSlicesLibrary
         ]
 
 
@@ -1104,6 +1106,144 @@ testUpdateCenterOfGravity =
                     modelWithTwoBlocks
                     |> .globalCenterOfGravity
                     |> Expect.equal { x = 10, y = 5, z = -5 }
+        ]
+
+
+testHullSlicesHash =
+    describe "Hash HullSlices with SHA1" <|
+        [ test "Can hash a hullSlices" <|
+            \_ ->
+                Expect.equal "e77c706831037c5fe8f7a49de13c28a48fd2713c"
+                    (getHashImageForSlices TestData.anthineas)
+        , test "Hash image doesn't change when hull changes" <|
+            \_ ->
+                Expect.equal "e77c706831037c5fe8f7a49de13c28a48fd2713c"
+                    (getHashImageForSlices <|
+                        HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
+                    )
+        ]
+
+
+testImportHullSlicesLibrary =
+    describe "Import hulls library from save file" <|
+        let
+            emptySaveFile : SaveFile
+            emptySaveFile =
+                { selectedHullReference = Nothing
+                , hulls = Dict.empty
+                , blocks = []
+                , coordinatesTransform = []
+                , partitions = initPartitions
+                , tags = []
+                , customProperties = []
+                }
+
+            createSaveFileWithHull : String -> HullSlices.HullSlices -> SaveFile
+            createSaveFileWithHull hullName hull =
+                { emptySaveFile | hulls = Dict.insert hullName hull Dict.empty }
+
+            changeHullLength : HullSlices.HullSlices -> HullSlices.HullSlices
+            changeHullLength hull =
+                { hull | length = StringValueInput.floatInput 1 10 }
+
+            modelWithOnlyAnthineas : Model
+            modelWithOnlyAnthineas =
+                { initialModel | slices = Dict.insert "anthineas" TestData.anthineas Dict.empty }
+
+            modelWithCopy : Model
+            modelWithCopy =
+                { initialModel
+                    | slices =
+                        Dict.insert "anthineas" TestData.anthineas <|
+                            Dict.insert "anthineas - bis" TestData.anthineas <|
+                                Dict.insert "anthineas - bis - bis" TestData.anthineas Dict.empty
+                }
+        in
+        [ test "Can import new hull" <|
+            \_ ->
+                Expect.equal [ "anthineas", "mpov" ]
+                    (updateModel
+                        [ FromJs <|
+                            ImportHullsLibrary <|
+                                createSaveFileWithHull
+                                    "mpov"
+                                    (TestData.mpov 1)
+                        ]
+                        modelWithOnlyAnthineas
+                        |> .slices
+                        |> Dict.keys
+                    )
+        , test "Can import new hull with existing name" <|
+            \_ ->
+                Expect.equal [ "anthineas", "anthineas - bis" ]
+                    (updateModel
+                        [ FromJs <|
+                            ImportHullsLibrary <|
+                                createSaveFileWithHull
+                                    "anthineas"
+                                    (changeHullLength TestData.anthineas)
+                        ]
+                        modelWithOnlyAnthineas
+                        |> .slices
+                        |> Dict.keys
+                    )
+        , test "Cannot import existing hull" <|
+            \_ ->
+                Expect.equal [ "anthineas" ]
+                    (updateModel
+                        [ FromJs <|
+                            ImportHullsLibrary <|
+                                createSaveFileWithHull
+                                    "anthineas"
+                                    TestData.anthineas
+                        ]
+                        modelWithOnlyAnthineas
+                        |> .slices
+                        |> Dict.keys
+                    )
+        , test "Cannot import existing hull with custom properties" <|
+            \_ ->
+                Expect.equal [ "anthineas" ]
+                    (updateModel
+                        [ FromJs <|
+                            ImportHullsLibrary <|
+                                createSaveFileWithHull
+                                    "anthineas"
+                                    (HullSliceModifiers.setLengthOverAll "10" TestData.anthineas)
+                        ]
+                        modelWithOnlyAnthineas
+                        |> .slices
+                        |> Dict.keys
+                    )
+        , test "Cannot import existing hull with different name" <|
+            \_ ->
+                Expect.equal [ "anthineas" ]
+                    (updateModel
+                        [ FromJs <|
+                            ImportHullsLibrary <|
+                                createSaveFileWithHull
+                                    "anthineas2"
+                                    TestData.anthineas
+                        ]
+                        modelWithOnlyAnthineas
+                        |> .slices
+                        |> Dict.keys
+                    )
+        , test "Can rename hull correctly when copy already exist" <|
+            \_ ->
+                Expect.equal True
+                    (updateModel
+                        [ FromJs <|
+                            ImportHullsLibrary <|
+                                createSaveFileWithHull
+                                    "anthineas"
+                                    (changeHullLength TestData.anthineas)
+                        ]
+                        modelWithCopy
+                        |> .slices
+                        |> Dict.keys
+                        |> List.member "anthineas - bis - bis - bis"
+                    )
         ]
 
 

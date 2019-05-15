@@ -5,17 +5,20 @@ module EncodersDecoders exposing
     , encodeSubModel
     , encoder
     , exportHullSlicesAsAreaXYList
+    , getHashImageForSlices
     , hullSliceAsAreaXYListEncoder
     , normalizeSlicesPosition
     )
 
 import Dict exposing (Dict)
+import HullSliceModifiers exposing (resetSlicesToOriginals)
 import HullSlices exposing (CustomHullProperties, HullSlice, HullSliceAsAreaXYList, HullSliceAsZYList, HullSlices, emptyHullSlices)
 import HullSlicesMetrics exposing (fillHullSliceMetrics)
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
 import Lackenby
+import SHA1
 import StringValueInput exposing (FloatInput)
 
 
@@ -271,3 +274,13 @@ encodeSubModel subModel =
         , ( "xmax", Encode.float subModel.xmax )
         , ( "hullSlices", Encode.list encodeHullSliceAsZYList subModel.hullSlices )
         ]
+
+
+getHashImageForSlices : HullSlices -> String
+getHashImageForSlices hullSlice =
+    let
+        hullSliceToString : String
+        hullSliceToString =
+            Encode.encode 0 <| encoder <| resetSlicesToOriginals hullSlice
+    in
+    SHA1.toHex <| SHA1.fromString hullSliceToString

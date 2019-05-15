@@ -234,11 +234,6 @@ viewModeTests =
 
 hullStudioTests =
     describe "HullStudio" <|
-        let
-            hullRef : HullReferences.HullReference
-            hullRef =
-                Maybe.withDefault { path = "tests/assets", label = "Test asset" } <| List.head hullReferences
-        in
         [ test "None selected by default" <|
             \_ ->
                 initialView
