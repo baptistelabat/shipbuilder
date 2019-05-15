@@ -25,6 +25,7 @@ module HullSlices exposing
     , getDraught
     , getInertialMoment
     , getLength
+    , getSpaceParametersFromHullSlices
     , integrate
     , isHullCustomized
     , normalizeHullSlices
@@ -744,14 +745,9 @@ getSpaceParametersFromHullSlices hullSliceList =
     Maybe.map5 addSpaceParameters maybeLength maybeBreadth maybeDepth maybeXmin maybeZmin
 
 
-normalizeHullSlices : List HullSlice -> Maybe (List HullSlice)
-normalizeHullSlices hullSliceList =
-    case getSpaceParametersFromHullSlices hullSliceList of
-        Just param ->
-            Just <| List.map (normalizeHullSlice param) hullSliceList
-
-        Nothing ->
-            Nothing
+normalizeHullSlices : List HullSlice -> SpaceParameters -> List HullSlice
+normalizeHullSlices hullSliceList param =
+    List.map (normalizeHullSlice param) hullSliceList
 
 
 normalizeHullSlice : SpaceParameters -> HullSlice -> HullSlice

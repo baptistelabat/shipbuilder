@@ -2433,10 +2433,16 @@ updateFromJs jsmsg model =
 
                         updateSlices : HullSlices -> List HullSlice
                         updateSlices hullslices =
-                            coordinates
-                                |> HullSlices.fromCoordinates
-                                |> HullSlices.normalizeHullSlices
-                                |> Maybe.withDefault hullslices.slices
+                            let
+                                denormalizedSlices =
+                                    HullSlices.fromCoordinates coordinates
+                            in
+                            case HullSlices.getSpaceParametersFromHullSlices denormalizedSlices of
+                                Just param ->
+                                    HullSlices.normalizeHullSlices denormalizedSlices param
+
+                                Nothing ->
+                                    hullslices.slices
 
                         updateHullslices : HullSlices -> HullSlices
                         updateHullslices hullslices =
