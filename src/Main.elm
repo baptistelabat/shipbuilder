@@ -2433,7 +2433,13 @@ updateFromJs jsmsg model =
 
                         updateHullslices : HullSlices -> HullSlices
                         updateHullslices hullslices =
-                            { hullslices | slices = HullSlices.fromCoordinates coordinates }
+                            { hullslices
+                                | slices =
+                                    coordinates
+                                        |> HullSlices.fromCoordinates
+                                        |> HullSlices.normalizeHullSlices
+                                        |> Maybe.withDefault hullslices.slices
+                            }
 
                         updatedModel : Model
                         updatedModel =
