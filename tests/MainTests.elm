@@ -1115,7 +1115,7 @@ testHullSlicesHash =
             \_ ->
                 Expect.equal "e77c706831037c5fe8f7a49de13c28a48fd2713c"
                     (getHashImageForSlices TestData.anthineas)
-        , test "Hash image don't change when hull change" <|
+        , test "Hash image doesn't change when hull changes" <|
             \_ ->
                 Expect.equal "e77c706831037c5fe8f7a49de13c28a48fd2713c"
                     (getHashImageForSlices <|
