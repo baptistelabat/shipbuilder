@@ -2431,25 +2431,31 @@ updateFromJs jsmsg model =
                         updateUiState isWaiting =
                             { olduiState | waitToPasteClipBoard = isWaiting }
 
-                        updateSlices : HullSlices -> List HullSlice
-                        updateSlices hullslices =
+                        updateHullslices : HullSlices -> HullSlices
+                        updateHullslices hullslices =
                             let
                                 denormalizedSlices =
                                     HullSlices.fromCoordinates coordinates
                             in
                             case HullSlices.getSpaceParametersFromHullSlices denormalizedSlices of
                                 Just param ->
-                                    HullSlices.normalizeHullSlices denormalizedSlices param
+                                    let
+                                        normalizedSlices =
+                                            HullSlices.normalizeHullSlices denormalizedSlices param
+                                    in
+                                    { hullslices
+                                        | length = StringValueInput.asFloatIn hullslices.length param.length
+                                        , breadth = StringValueInput.asFloatIn hullslices.breadth param.breadth
+                                        , depth = StringValueInput.asFloatIn hullslices.depth param.depth
+                                        , xmin = param.xmin
+                                        , zmin = param.zmin
+                                        , slices = normalizedSlices
+                                        , originalSlicePositions = List.map .x normalizedSlices
+                                    }
+                                        |> HullSliceModifiers.resetSlicesToOriginals
 
                                 Nothing ->
-                                    hullslices.slices
-
-                        updateHullslices : HullSlices -> HullSlices
-                        updateHullslices hullslices =
-                            { hullslices
-                                | slices = updateSlices hullslices
-                                , originalSlicePositions = List.map .x <| updateSlices hullslices
-                            }
+                                    hullslices
 
                         updatedModel : Model
                         updatedModel =
