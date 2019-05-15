@@ -494,9 +494,31 @@ keyupToMsg keyCode =
             NoJs NoOp
 
 
-formatClipboardData : String -> String
+formatClipboardData : String -> Encode.Value
 formatClipboardData data =
-    "{\"type\":\"sections\",\n \"sections\":" ++ data ++ "\n}"
+    let
+        listCoordinate : List (List Float)
+        listCoordinate =
+            data
+                |> String.split "\n"
+                |> List.map (String.split "\t")
+                |> List.map (List.filterMap String.toFloat)
+                |> List.filter (not << List.isEmpty)
+
+        encodeCoordinate : List Float -> Encode.Value
+        encodeCoordinate coordinate =
+            Encode.object
+                [ ( "x", Encode.float <| Maybe.withDefault 0 <| List.head coordinate )
+                , ( "y", Encode.float <| Maybe.withDefault 0 <| List.head <| List.drop 1 coordinate )
+                , ( "z", Encode.float <| Maybe.withDefault 0 <| List.head <| List.drop 2 coordinate )
+                ]
+
+        encodeCoordinates : Encode.Value
+        encodeCoordinates =
+            Encode.list encodeCoordinate listCoordinate
+    in
+    Encode.object
+        [ ( "coordinates", encodeCoordinates ) ]
 
 
 jsMsgToMsg : JsData -> Msg
@@ -545,7 +567,7 @@ jsMsgToMsg js =
         "paste-clipboard" ->
             case Decode.decodeValue Decode.string js.data of
                 Ok dataString ->
-                    case Decode.decodeString (Decode.field "sections" coordinatesXYZDecoder) <| formatClipboardData dataString of
+                    case Decode.decodeValue (Decode.field "coordinates" coordinatesXYZDecoder) <| formatClipboardData dataString of
                         Ok coordinates ->
                             FromJs <| PasteClipBoard coordinates
 
