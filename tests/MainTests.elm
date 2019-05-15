@@ -1258,13 +1258,13 @@ testRenameHullInLibrary =
                         |> Dict.keys
                         |> List.member "anthineas2"
                     )
-        , test "A hull is selected when renamed" <|
+        , test "Renaming a hull select it" <|
             \_ ->
                 Expect.equal (Just "anthineas2")
                     (updateModel [ NoJs <| RenameHull "anthineas" "anthineas2" ] initialModel
                         |> .selectedHullReference
                     )
-        , test "Cannot rename a hull if the name already exist" <|
+        , test "Cannot rename a hull with an existing name" <|
             \_ ->
                 Expect.equal True
                     (updateModel [ NoJs <| RenameHull "anthineas" "mpov" ] initialModel
@@ -1285,7 +1285,7 @@ testDeleteHullInLibrary =
                         |> Dict.keys
                         |> List.member "anthineas"
                     )
-        , test "No hull is selected afer a delete" <|
+        , test "No hull selected after a delete" <|
             \_ ->
                 Expect.equal Nothing
                     (updateModel [ ToJs <| RemoveHull "anthineas" ] initialModel
