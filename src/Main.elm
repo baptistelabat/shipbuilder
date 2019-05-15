@@ -505,6 +505,10 @@ formatClipboardData data =
                 |> List.map (List.filterMap String.toFloat)
                 |> List.filter (not << List.isEmpty)
 
+        controlFormat : Bool
+        controlFormat =
+            List.all ((==) 3) <| List.map List.length listCoordinate
+
         encodeCoordinate : List Float -> Encode.Value
         encodeCoordinate coordinate =
             Encode.object
@@ -515,7 +519,11 @@ formatClipboardData data =
 
         encodeCoordinates : Encode.Value
         encodeCoordinates =
-            Encode.list encodeCoordinate listCoordinate
+            if controlFormat then
+                Encode.list encodeCoordinate listCoordinate
+
+            else
+                Encode.null
     in
     Encode.object
         [ ( "coordinates", encodeCoordinates ) ]
