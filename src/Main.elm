@@ -714,12 +714,11 @@ renameKey model key =
     let
         findSingleKey : String -> String
         findSingleKey originalKey =
-            case Dict.member originalKey model.slices of
-                False ->
-                    originalKey
+            if not <| Dict.member originalKey model.slices then
+                originalKey
 
-                True ->
-                    findSingleKey (originalKey ++ " - bis")
+            else
+                findSingleKey (originalKey ++ " - bis")
     in
     findSingleKey key
 
