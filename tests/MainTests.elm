@@ -1274,7 +1274,7 @@ testRenameHullInLibrary =
 
 testDeleteHullInLibrary =
     describe "Remove hull in library" <|
-        [ test "Can remove an hull" <|
+        [ test "Can remove a hull" <|
             \_ ->
                 updateModel [ ToJs <| RemoveHull "anthineas" ] initialModel
                     |> .slices
