@@ -87,10 +87,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
             , onClick <| hullReferencesMsgs.selectHullMsg ref
             ]
         )
-        [ div
-            []
-            []
-        , div [ class hullWrapperClass ]
+        [ div [ class hullWrapperClass ]
             [ input
                 [ class "hull-label"
                 , id ref
