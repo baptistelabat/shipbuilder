@@ -272,7 +272,7 @@ hullStudioTests =
                     |> Query.find [ Selector.class "hull-label" ]
                     |> Event.simulate (Event.input "a")
                     |> Event.expect (NoJs <| RenameHull "anthineas" "a")
-        , test "Clicking 'remove' button trigger RemoveHull" <|
+        , test "Clicking 'remove' button triggers RemoveHull" <|
             \_ ->
                 setView
                     [ ToJs <| SelectHullReference "anthineas" ]
@@ -281,7 +281,7 @@ hullStudioTests =
                     |> Query.find [ Selector.class "delete-hull" ]
                     |> Event.simulate Event.click
                     |> Event.expect (ToJs <| RemoveHull "anthineas")
-        , test "Clicking 'save as new' button trigger SaveAsNewHull" <|
+        , test "Clicking 'save as new' button triggers SaveAsNewHull" <|
             \_ ->
                 setView
                     [ ToJs <| SelectHullReference "anthineas"
