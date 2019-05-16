@@ -817,7 +817,7 @@ suite =
                 TestData.anthineas.originalSlicePositions
                     |> Expect.equal
                         (List.map .x TestData.anthineas.slices)
-        , test "applyCustomPropertiesToHullSlices" <|
+        , test "Apply custom properties to hullSlices" <|
             \_ ->
                 (HullSlices.applyCustomPropertiesToHullSlices <| TestData.cubeCustomized)
                     |> Expect.equal
@@ -854,12 +854,12 @@ suite =
                                 , hullslicesPositions = Nothing
                                 }
                         }
-        , test "isHullCustomized on uncustomized hull" <|
+        , test "Can know if a hull isn't customized" <|
             \_ ->
                 False
                     |> Expect.equal
                         (isHullCustomized TestData.anthineas)
-        , test "isHullCustomized on customized hull" <|
+        , test "Can know if a hull is customized" <|
             \_ ->
                 True
                     |> Expect.equal
