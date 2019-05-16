@@ -361,7 +361,7 @@ li.hull-reference__selected {
 
 li.hull-reference .hull-info-wrapper {
     padding: 8px 12px;
-    width: 100%;
+    width: calc(100% - 15px);
     cursor: pointer;
 }
 
@@ -419,6 +419,19 @@ input.hull-label {
     background-color: transparent;
     color: var(--on-secondary-color);
     font-size: 0.95em;
+}
+
+li.hull-reference .hull-custom-icon {
+    width: 15px;
+}
+
+li.hull-reference:hover .hull-custom-icon {
+    display: none;
+}
+
+li.hull-reference .hull-custom-icon svg {
+    height: 8px;
+    color: hsl(1, 50%, 50%);
 }
 
 li.hull-reference .hull-actions {

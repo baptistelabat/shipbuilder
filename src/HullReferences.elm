@@ -98,9 +98,14 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
             , p [ class "hull-hash" ] [ text hash ]
             ]
         , if isHullCustomized then
-            div [ class "hull-actions hull-actions__simple" ]
-                [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
-                , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
+            div []
+                [ div [ class "hull-actions hull-actions__simple" ]
+                    [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
+                    , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
+                    ]
+                , div
+                    [ class "hull-custom-icon" ]
+                    [ FASolid.asterisk [] ]
                 ]
 
           else
