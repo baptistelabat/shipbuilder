@@ -114,7 +114,7 @@ viewRemoveHullAction hullReference removeHullMsg =
     div
         [ class "hull-action delete-hull"
         , onClick <| removeHullMsg hullReference
-        , title "delete hull from library"
+        , title "Delete hull from library"
         ]
         [ FASolid.trash [] ]
 
@@ -124,7 +124,7 @@ viewSaveAsNewHullAction hullReference saveAsNewMsg =
     div
         [ class "hull-action save-hull"
         , onClick <| saveAsNewMsg hullReference
-        , title "save as a new"
+        , title "Save as a new"
         ]
         [ FASolid.save [] ]
 
