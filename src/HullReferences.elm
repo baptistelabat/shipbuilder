@@ -73,10 +73,10 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
         hullWrapperClass : String
         hullWrapperClass =
             if isHullCustomized then
-                "hull-info-wrapper hull-info-wrapper__simple"
+                "hull-info-wrapper hull-info-wrapper__custom"
 
             else
-                "hull-info-wrapper hull-info-wrapper__double"
+                "hull-info-wrapper hull-info-wrapper__uncustom"
     in
     li
         (if selectedHull == Just ref then
@@ -99,7 +99,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
             ]
         , if isHullCustomized then
             div []
-                [ div [ class "hull-actions hull-actions__simple" ]
+                [ div [ class "hull-actions hull-actions__custom" ]
                     [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
                     , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
                     ]
@@ -109,7 +109,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
                 ]
 
           else
-            div [ class "hull-actions hull-actions__double" ]
+            div [ class "hull-actions hull-actions__uncustom" ]
                 [ viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg ]
         ]
 

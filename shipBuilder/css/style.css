@@ -361,16 +361,15 @@ li.hull-reference__selected {
 
 li.hull-reference .hull-info-wrapper {
     padding: 8px 12px;
-    width: calc(100% - 15px);
     cursor: pointer;
 }
 
-li.hull-reference:hover .hull-info-wrapper__simple  {
+li.hull-reference .hull-info-wrapper__custom {
     width: calc(100% - 60px);
     position: relative;
 }
 
-li.hull-reference:hover .hull-info-wrapper__double  {
+li.hull-reference:hover .hull-info-wrapper__uncustom  {
     width: calc(100% - 30px);
     position: relative;
 }
@@ -422,7 +421,9 @@ input.hull-label {
 }
 
 li.hull-reference .hull-custom-icon {
-    width: 15px;
+    color: hsl(1, 50%, 50%);
+    font-size: 0.6em;
+    width: 75px;
 }
 
 li.hull-reference:hover .hull-custom-icon {
@@ -430,19 +431,20 @@ li.hull-reference:hover .hull-custom-icon {
 }
 
 li.hull-reference .hull-custom-icon svg {
-    height: 8px;
+    height: 7px;
     color: hsl(1, 50%, 50%);
+    margin-left: 5px;
 }
 
 li.hull-reference .hull-actions {
     display: none;
 }
 
-li.hull-reference .hull-actions__simple {
+li.hull-reference .hull-actions__custom {
     width: 50px;
 }
 
-li.hull-reference .hull-actions__double {
+li.hull-reference .hull-actions__uncustom {
     width: 25px;
 }
 
