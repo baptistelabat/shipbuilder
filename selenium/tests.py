@@ -14,8 +14,7 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
             ".//p[contains(text(),'Modeller')]").click()
 
     def click_on_hull(self, hull_name):
-        self.driver.find_element_by_xpath(
-            ".//p[contains(text(),'" + hull_name + "')]").click()
+        self.driver.find_element_by_id(hull_name).click()
 
     def get_block_coefficient(self):
         return self.driver.find_element_by_xpath(

@@ -741,12 +741,11 @@ importHullsLibraryiInModel model saveFile =
                 valueSHA =
                     EncodersDecoders.getHashImageForSlices value
             in
-            case List.member valueSHA listSHAInDict of
-                False ->
-                    Dict.insert key value
+            if List.member valueSHA listSHAInDict then
+                identity
 
-                True ->
-                    Dict.remove "nonExistentKey"
+            else
+                Dict.insert key value
 
         insertBothWithoutColision : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
         insertBothWithoutColision key a b =
@@ -1902,6 +1901,7 @@ type ToJsMsg
     | RemoveBlocks (List Block)
     | SelectBlock Block
     | SelectHullReference String
+    | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
     | ResetSlice String
@@ -1931,6 +1931,7 @@ type NoJsMsg
     | MoveBlockUp Block
     | NoOp
     | RenameBlock Block String
+    | RenameHull String String
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetCurrentDate Time.Posix
@@ -2160,6 +2161,34 @@ updateNoJs msg model =
 
         RenameBlock blockToRename newLabel ->
             ( updateBlockInModel (renameBlock newLabel blockToRename) model, Cmd.none )
+
+        RenameHull hullReference newLabel ->
+            let
+                refToFocus : String
+                refToFocus =
+                    if not <| Dict.member newLabel model.slices then
+                        newLabel
+
+                    else
+                        hullReference
+
+                updatedModel : Model
+                updatedModel =
+                    case Dict.get hullReference model.slices of
+                        Just hullSlicesForRef ->
+                            if not <| Dict.member newLabel model.slices then
+                                { model
+                                    | slices = Dict.insert newLabel hullSlicesForRef <| Dict.remove hullReference model.slices
+                                    , selectedHullReference = Just newLabel
+                                }
+
+                            else
+                                model
+
+                        Nothing ->
+                            model
+            in
+            ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus refToFocus) ] )
 
         ToggleAccordion isOpen accordionId ->
             let
@@ -2506,6 +2535,14 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference }
 
+        RemoveHull hullReference ->
+            let
+                updatedSlices : Dict ShipName HullSlices
+                updatedSlices =
+                    Dict.remove hullReference model.slices
+            in
+            { model | selectedHullReference = Nothing, slices = updatedSlices }
+
         UnselectHullReference ->
             { model | selectedHullReference = Nothing }
 
@@ -2851,6 +2888,9 @@ msg2json model action =
 
                 Just hullSlices ->
                     Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
+
+        RemoveHull hullReference ->
+            Just { tag = "unload-hull", data = Encode.null }
 
         ModifySlice _ hullReference _ ->
             case Dict.get hullReference model.slices of
@@ -3368,6 +3408,8 @@ hullReferencesMsgs =
     { selectHullMsg = ToJs << SelectHullReference
     , unselectHullMsg = ToJs <| UnselectHullReference
     , openLibraryMsg = ToJs <| OpenHullsLibrary
+    , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
+    , removeHullMsg = ToJs << RemoveHull
     }
 
 
@@ -4059,6 +4101,10 @@ viewBulkheads isDefiningOrigin isDetailsOpen bulkheads =
             , viewPartitionSpacingDetails Bulkhead isDetailsOpen bulkheads
             ]
         ]
+
+
+
+-- VIEW BLOCK
 
 
 viewWholeList : Model -> Html Msg

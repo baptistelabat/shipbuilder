@@ -419,8 +419,7 @@ let makeDecks = function (decks) {
     })
 }
 
-let makeWaterLine = function (zPosition) {
-    // delete old water line
+let deleteWaterline = function () {
     const oldWaterLines = scene.children.filter(child =>
         child.sbType
         && child.sbType === "modeller"
@@ -428,6 +427,11 @@ let makeWaterLine = function (zPosition) {
         && child.modellerType === "waterLine"
     );
     oldWaterLines.forEach(oldWaterLine => removeFromScene(oldWaterLine));
+}
+
+let makeWaterLine = function (zPosition) {
+    // delete old water line
+    deleteWaterline ();
 
     const color = new THREE.Color(0.5, 0.5, 1); // green
 
@@ -464,6 +468,9 @@ let unloadHull = function () {
     if (previousHull) {
         removeFromScene(previousHull);
     }
+
+    // delete old water line
+    deleteWaterline();
 }
 
 let buildHullGeometry = function ( json ) {

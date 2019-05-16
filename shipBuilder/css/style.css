@@ -487,7 +487,11 @@ li.hull-reference p.hull-hash {
     text-overflow: ellipsis;
 }
 
-li.block-item .block-actions {
+li.hull-reference:hover .hull-action {
+    display: flex;
+}
+
+li.block-item .block-actions, li.hull-reference .hull-action {
     flex-direction: column;
     width: 28px;
     display: none;
@@ -545,12 +549,20 @@ li.block-item__selected .block-info-wrapper, li.hull-reference__selected .hull-i
     padding: 20px 12px;
 }
 
-input.block-label {
+input.block-label, input.hull-label {
     width: 100%;
     border: none;
     border-bottom: 1px solid var(--secondary-color__contrast);
     background-color: transparent;
     color: var(--on-secondary-color);
+}
+
+input.hull-label {
+    font-size: 0.95em;
+}
+
+p.hull-label {
+    font-size: 1.1em;
 }
 
 .blocks-panel h2 {
@@ -586,6 +598,14 @@ input.block-label {
     height: 16px;
     width: 20px;
     margin-left: 8px;
+}
+
+
+.hull-panel .delete-hull svg
+{
+    height: 14px;
+    margin-top: 15px;
+    cursor: pointer;
 }
 
 .blocks-panel h2 .selected-blocks-summary {

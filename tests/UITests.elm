@@ -254,7 +254,7 @@ hullStudioTests =
                     |> Query.fromHtml
                     |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
                     |> Query.find [ Selector.class "hull-label" ]
-                    |> Query.has [ Selector.text "anthineas" ]
+                    |> Query.has [ Selector.id "anthineas" ]
         , test "Clicking a hull reference selects it" <|
             \_ ->
                 initialView
@@ -263,6 +263,24 @@ hullStudioTests =
                     |> Query.index 1
                     |> Event.simulate Event.click
                     |> Event.expect (ToJs <| SelectHullReference "anthineas")
+        , test "Hull-label trigger RenameHull on input" <|
+            \_ ->
+                initialView
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "hull-reference" ]
+                    |> Query.index 1
+                    |> Query.find [ Selector.class "hull-label" ]
+                    |> Event.simulate (Event.input "a")
+                    |> Event.expect (NoJs <| RenameHull "anthineas" "a")
+        , test "Clicking remove button trigger RemoveHull" <|
+            \_ ->
+                setView
+                    [ ToJs <| SelectHullReference "anthineas" ]
+                    |> Query.fromHtml
+                    |> Query.find [ Selector.classes [ "hull-reference", "hull-reference__selected" ] ]
+                    |> Query.find [ Selector.class "delete-hull" ]
+                    |> Event.simulate Event.click
+                    |> Event.expect (ToJs <| RemoveHull "anthineas")
         ]
 
 

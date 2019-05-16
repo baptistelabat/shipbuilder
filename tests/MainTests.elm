@@ -136,6 +136,7 @@ suite =
         , testUpdateCenterOfGravity
         , testHullSlicesHash
         , testImportHullSlicesLibrary
+        , testRenameHullInLibrary
         ]
 
 
@@ -1231,18 +1232,60 @@ testImportHullSlicesLibrary =
                     )
         , test "Can rename hull correctly when copy already exist" <|
             \_ ->
-                Expect.equal True
-                    (updateModel
-                        [ FromJs <|
-                            ImportHullsLibrary <|
-                                createSaveFileWithHull
-                                    "anthineas"
-                                    (changeHullLength TestData.anthineas)
-                        ]
-                        modelWithCopy
-                        |> .slices
-                        |> Dict.keys
-                        |> List.member "anthineas - bis - bis - bis"
+                updateModel
+                    [ FromJs <|
+                        ImportHullsLibrary <|
+                            createSaveFileWithHull
+                                "anthineas"
+                                (changeHullLength TestData.anthineas)
+                    ]
+                    modelWithCopy
+                    |> .slices
+                    |> Dict.keys
+                    |> List.member "anthineas - bis - bis - bis"
+                    |> Expect.true "Expected renamed hull to be in hull library"
+        ]
+
+
+testRenameHullInLibrary =
+    describe "Rename hull in library" <|
+        [ test "Can rename a hull" <|
+            \_ ->
+                updateModel [ NoJs <| RenameHull "anthineas" "anthineas2" ] initialModel
+                    |> .slices
+                    |> Dict.keys
+                    |> List.member "anthineas2"
+                    |> Expect.true "Expected renamed hull to be in hull library"
+        , test "Renaming a hull selects it" <|
+            \_ ->
+                Expect.equal (Just "anthineas2")
+                    (updateModel [ NoJs <| RenameHull "anthineas" "anthineas2" ] initialModel
+                        |> .selectedHullReference
+                    )
+        , test "Cannot rename a hull with an existing name" <|
+            \_ ->
+                updateModel [ NoJs <| RenameHull "anthineas" "mpov" ] initialModel
+                    |> .slices
+                    |> Dict.keys
+                    |> List.member "anthineas"
+                    |> Expect.true "Expected renamed hull to be in hull library"
+        ]
+
+
+testDeleteHullInLibrary =
+    describe "Remove hull in library" <|
+        [ test "Can remove a hull" <|
+            \_ ->
+                updateModel [ ToJs <| RemoveHull "anthineas" ] initialModel
+                    |> .slices
+                    |> Dict.keys
+                    |> List.member "anthineas"
+                    |> Expect.false "Expected removed hull to not be in hull library"
+        , test "No hull selected after a delete" <|
+            \_ ->
+                Expect.equal Nothing
+                    (updateModel [ ToJs <| RemoveHull "anthineas" ] initialModel
+                        |> .selectedHullReference
                     )
         ]
 

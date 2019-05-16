@@ -3,9 +3,10 @@ module HullReferences exposing
     , viewHullStudioPanel
     )
 
+import FontAwesome.Solid as FASolid
 import Html exposing (Html, div, h2, input, label, li, p, text, ul)
 import Html.Attributes exposing (accept, attribute, class, disabled, download, for, hidden, href, id, name, placeholder, src, style, title, type_, value)
-import Html.Events exposing (on, onClick)
+import Html.Events exposing (on, onClick, onInput)
 import Json.Decode as Decode
 
 
@@ -13,6 +14,8 @@ type alias HullReferencesMsgs msg =
     { selectHullMsg : String -> msg
     , unselectHullMsg : msg
     , openLibraryMsg : msg
+    , renameHullMsg : String -> String -> msg
+    , removeHullMsg : String -> msg
     }
 
 
@@ -60,27 +63,39 @@ viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs =
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
-            :: List.map2 (viewHullReference hullReferencesMsgs.selectHullMsg selectedHull) hullRefs hullHashs
+            :: List.map2 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs
 
 
-viewHullReference : (String -> msg) -> Maybe String -> String -> String -> Html msg
-viewHullReference selectHullMsg selectedHull ref hash =
+viewHullReference : Maybe String -> HullReferencesMsgs msg -> String -> String -> Html msg
+viewHullReference selectedHull hullReferencesMsgs ref hash =
     li
         (if selectedHull == Just ref then
             [ class "hull-reference hull-reference__selected" ]
 
          else
             [ class "hull-reference"
-            , onClick <| selectHullMsg ref
+            , onClick <| hullReferencesMsgs.selectHullMsg ref
             ]
         )
         [ div
             []
             []
         , div [ class "hull-info-wrapper" ]
-            [ p [ class "hull-label" ] [ text ref ]
+            [ input
+                [ class "hull-label"
+                , id ref
+                , value ref
+                , onInput <| hullReferencesMsgs.renameHullMsg ref
+                ]
+                []
             , p [ class "hull-hash" ] [ text hash ]
             ]
+        , div
+            [ class "hull-action delete-hull"
+            , onClick <| hullReferencesMsgs.removeHullMsg ref
+            , title "Delete this hull from library"
+            ]
+            [ FASolid.trash [] ]
         ]
 
 
