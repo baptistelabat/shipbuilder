@@ -86,31 +86,8 @@ cube =
 
 cubeCustomized : HullSlices.HullSlices
 cubeCustomized =
-    { emptyHullSlices
-        | length = StringValueInput.floatInput 1 200
-        , breadth = StringValueInput.floatInput 1 20
-        , depth = StringValueInput.floatInput 1 10
-        , xmin = -1
-        , zmin = 3
-        , slices =
-            [ { x = 0
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            , { x = 0.5
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            , { x = 1
-              , zmin = 0
-              , zmax = 1
-              , y = [ 1, 1, 1, 1 ]
-              }
-            ]
-        , draught = StringValueInput.floatInput 1 2
-        , custom =
+    { cube
+        | custom =
             { length = Just (StringValueInput.floatInput 1 400)
             , breadth = Just (StringValueInput.floatInput 1 30)
             , depth = Just (StringValueInput.floatInput 1 20)
