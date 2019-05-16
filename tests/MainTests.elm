@@ -1234,11 +1234,9 @@ testImportHullSlicesLibrary =
         , test "Can rename hull correctly when copy already exist" <|
             \_ ->
                 updateModel
-                    [ FromJs <|
-                        ImportHullsLibrary <|
-                            createSaveFileWithHull
-                                "anthineas"
-                                (changeHullLength TestData.anthineas)
+                    [ createSaveFileWithHull "anthineas" (changeHullLength TestData.anthineas)
+                        |> ImportHullsLibrary
+                        |> FromJs
                     ]
                     modelWithCopy
                     |> .slices
