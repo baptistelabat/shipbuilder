@@ -93,7 +93,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash =
         , div
             [ class "hull-action delete-hull"
             , onClick <| hullReferencesMsgs.removeHullMsg ref
-            , title "delete this hull from library"
+            , title "Delete this hull from library"
             ]
             [ FASolid.trash [] ]
         ]
