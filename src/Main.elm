@@ -741,12 +741,11 @@ importHullsLibraryiInModel model saveFile =
                 valueSHA =
                     EncodersDecoders.getHashImageForSlices value
             in
-            case List.member valueSHA listSHAInDict of
-                False ->
-                    Dict.insert key value
+            if List.member valueSHA listSHAInDict then
+                identity
 
-                True ->
-                    \dict -> dict
+            else
+                Dict.insert key value
 
         insertBothWithoutColision : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
         insertBothWithoutColision key a b =
