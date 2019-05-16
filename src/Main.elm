@@ -2563,12 +2563,7 @@ updateModelToJs msg model =
             { model | selectedHullReference = Just hullReference }
 
         RemoveHull hullReference ->
-            let
-                updatedSlices : Dict ShipName HullSlices
-                updatedSlices =
-                    Dict.remove hullReference model.slices
-            in
-            { model | selectedHullReference = Nothing, slices = updatedSlices }
+            { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
 
         UnselectHullReference ->
             { model | selectedHullReference = Nothing }
