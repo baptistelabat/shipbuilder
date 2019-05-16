@@ -902,6 +902,30 @@ suite =
                                 , { x = 5 / (9.8 - 0.01), y = [], zmax = 0, zmin = 0 }
                                 , { x = 1, y = [], zmax = 0, zmin = 0 }
                                 ]
+                , test "Can normalize a slice with dimension parameters" <|
+                    \_ ->
+                        HullSlices.normalizeHullSlice
+                            { length = 100, breadth = 20, depth = 10, xmin = 0, zmin = 0 }
+                            { x = 50, zmin = 0, zmax = 5, y = [ 10, 8, 6, 0 ] }
+                            |> Expect.equal
+                                { x = 0.5, zmin = 0, zmax = 0.5, y = [ 1, 0.9, 0.8, 0.5 ] }
+                , test "Can normalize slices with dimension parameters" <|
+                    \_ ->
+                        HullSlices.normalizeHullSlices
+                            [ { x = 0, zmin = 0, zmax = 0, y = [ 0, 0, 0, 0 ] }
+                            , { x = 25, zmin = 0, zmax = 5, y = [ 10, 8, 6, 0 ] }
+                            , { x = 50, zmin = 0, zmax = 10, y = [ 10, 8, 6, 0 ] }
+                            , { x = 75, zmin = 0, zmax = 5, y = [ 10, 8, 6, 0 ] }
+                            , { x = 100, zmin = 0, zmax = 0, y = [ 0, 0, 0, 0 ] }
+                            ]
+                            { length = 100, breadth = 20, depth = 10, xmin = 0, zmin = 0 }
+                            |> Expect.equal
+                                [ { x = 0, zmin = 0, zmax = 0, y = [ 0.5, 0.5, 0.5, 0.5 ] }
+                                , { x = 0.25, zmin = 0, zmax = 0.5, y = [ 1, 0.9, 0.8, 0.5 ] }
+                                , { x = 0.5, zmin = 0, zmax = 1, y = [ 1, 0.9, 0.8, 0.5 ] }
+                                , { x = 0.75, zmin = 0, zmax = 0.5, y = [ 1, 0.9, 0.8, 0.5 ] }
+                                , { x = 1, zmin = 0, zmax = 0, y = [ 0.5, 0.5, 0.5, 0.5 ] }
+                                ]
                 ]
             ]
         , describe "HullSlices custom properties"

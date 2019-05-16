@@ -30,6 +30,7 @@ module HullSlices exposing
     , getSpaceParametersFromHullSlices
     , integrate
     , isHullCustomized
+    , normalizeHullSlice
     , normalizeHullSlices
     , scale
     , setLongitudinalPositionOfEachSlice
