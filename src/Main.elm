@@ -746,7 +746,7 @@ importHullsLibraryiInModel model saveFile =
                     Dict.insert key value
 
                 True ->
-                    Dict.remove "nonExistentKey"
+                    \dict -> dict
 
         insertBothWithoutColision : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
         insertBothWithoutColision key a b =
