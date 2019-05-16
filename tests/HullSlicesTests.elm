@@ -827,13 +827,13 @@ suite =
                             |> List.take 1
                         )
         , describe "HullSlices denormalization/normalization"
-            [ describe "denormalization"
-                [ test "denormalizeHullSlice" <|
+            [ describe "Denormalization"
+                [ test "DenormalizeHullSlice" <|
                     \_ ->
                         compareHs
                             { x = 0, zmin = -4.8, zmax = -0.6, y = [ 2, 1, 0 ] }
                             (denormalizeHullSlice hs_param hs0)
-                , test "denormalizedSlicesT3" <|
+                , test "DenormalizedSlicesT3" <|
                     \_ ->
                         denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
                             [ { x = 0, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
@@ -849,7 +849,7 @@ suite =
                                 , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
                                 , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
                                 ]
-                , test "denormalizedSlicesT1" <|
+                , test "DenormalizedSlicesT1" <|
                     \_ ->
                         denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
                             [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
@@ -859,7 +859,7 @@ suite =
                                 [ { x = 0, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
                                 , { x = 100, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
                                 ]
-                , test "denormalizedSlicesT4" <|
+                , test "DenormalizedSlicesT4" <|
                     \_ ->
                         denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
                             [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 0.8, zmin = 0.4 }
@@ -889,7 +889,7 @@ suite =
                             |> Expect.equal
                                 (Just { length = 100, breadth = 20, depth = 10, xmin = 0, zmin = 0 })
                 ]
-            , describe "normalization"
+            , describe "Normalization"
                 [ test "Can normalize Slices position between 0 and 1" <|
                     \_ ->
                         normalizeSlicesPosition
