@@ -11,6 +11,7 @@ module TestData exposing
     , initialModel
     , initialView
     , mpov
+    , simpleHull
     , toblerone
     , valueToIndentedString
     , viewport
@@ -170,12 +171,12 @@ simpleHull =
             ]
         , originalSlicePositions = [ 0, 0.25, 0.5, 0.75, 1 ]
         , draught = StringValueInput.floatInput 1 5
-        , customHullProperties =
-            { customLength = Nothing
-            , customBreadth = Nothing
-            , customDepth = Nothing
-            , customDraught = Nothing
-            , customHullslicesPosition = Nothing
+        , custom =
+            { length = Nothing
+            , breadth = Nothing
+            , depth = Nothing
+            , draught = Nothing
+            , hullslicesPositions = Nothing
             }
     }
 
