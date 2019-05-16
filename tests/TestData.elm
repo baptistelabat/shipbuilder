@@ -133,6 +133,53 @@ toblerone breadth depth draught =
     }
 
 
+simpleHull : HullSlices.HullSlices
+simpleHull =
+    { emptyHullSlices
+        | length = StringValueInput.floatInput 1 100
+        , breadth = StringValueInput.floatInput 1 20
+        , depth = StringValueInput.floatInput 1 10
+        , xmin = 0
+        , zmin = 0
+        , slices =
+            [ { x = 0
+              , zmin = 0
+              , zmax = 0
+              , y = [ 0.5, 0.5, 0.5, 0.5 ]
+              }
+            , { x = 0.25
+              , zmin = 0
+              , zmax = 0.8
+              , y = [ 1, 0.9, 0.8, 0.5 ]
+              }
+            , { x = 0.5
+              , zmin = 0
+              , zmax = 1
+              , y = [ 1, 0.9, 0.8, 0.5 ]
+              }
+            , { x = 0.75
+              , zmin = 0
+              , zmax = 0.8
+              , y = [ 1, 0.9, 0.8, 0.5 ]
+              }
+            , { x = 1
+              , zmin = 0
+              , zmax = 0
+              , y = [ 0.5, 0.5, 0.5, 0.5 ]
+              }
+            ]
+        , originalSlicePositions = [ 0, 0.25, 0.5, 0.75, 1 ]
+        , draught = StringValueInput.floatInput 1 5
+        , customHullProperties =
+            { customLength = Nothing
+            , customBreadth = Nothing
+            , customDepth = Nothing
+            , customDraught = Nothing
+            , customHullslicesPosition = Nothing
+            }
+    }
+
+
 valueToIndentedString : Encode.Value -> String
 valueToIndentedString json =
     Encode.encode 4 json
