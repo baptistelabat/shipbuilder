@@ -55,7 +55,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences
 import HullSliceModifiers
-import HullSlices exposing (HullSlices, hullSlicesToBuildInJs, isHullCustomized)
+import HullSlices exposing (HullSlices, applyCustomPropertiesToHullSlices, isHullCustomized)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -688,7 +688,7 @@ encodeRestoreSaveCmd model =
                             Encode.string ""
 
                         Just hullSlices ->
-                            EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices
+                            EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices
     in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
@@ -2887,7 +2887,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -2898,7 +2898,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
 
         ResetSlice hullReference ->
             case Dict.get hullReference model.slices of

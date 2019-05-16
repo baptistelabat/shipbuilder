@@ -5,6 +5,7 @@ module HullSlices exposing
     , HullSliceAsZYList
     , HullSliceCentroidAndArea
     , HullSlices
+    , applyCustomPropertiesToHullSlices
     , area
     , areaTrapezoid
     , blockVolume
@@ -21,7 +22,6 @@ module HullSlices exposing
     , getDraught
     , getInertialMoment
     , getLength
-    , hullSlicesToBuildInJs
     , integrate
     , isHullCustomized
     , scale
@@ -643,8 +643,8 @@ setLongitudinalPositionOfEachSlice hullSlices =
             hullSlices.slices
 
 
-hullSlicesToBuildInJs : HullSlices -> HullSlices
-hullSlicesToBuildInJs hullSlices =
+applyCustomPropertiesToHullSlices : HullSlices -> HullSlices
+applyCustomPropertiesToHullSlices hullSlices =
     { length = getLength hullSlices
     , breadth = getBreadth hullSlices
     , depth = getDepth hullSlices
