@@ -762,9 +762,10 @@ suite =
                 \_ ->
                     let
                         x2Test =
-                            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            [ 0.25, 0.25, 0.25, 0.25 ]
                     in
-                    List.head TestData.anthineas.slices
+                    List.drop 1 TestData.simpleHull.slices
+                        |> List.head
                         |> Maybe.map toHullSliceAsZYList
                         |> Maybe.map extractXYZ
                         |> Maybe.map (List.map .x)
@@ -775,19 +776,10 @@ suite =
                 \_ ->
                     let
                         y2Test =
-                            [ 0.964899527258786
-                            , 0.9648943694688346
-                            , 0.9629765202249831
-                            , 0.9592250480632435
-                            , 0.955473575901504
-                            , 0.9502377948034448
-                            , 0.9394176761317832
-                            , 0.9282437133662546
-                            , 0.9102579602794127
-                            , 0.742320749879794
-                            ]
+                            [ 1, 0.9, 0.8, 0.5 ]
                     in
-                    List.head TestData.anthineas.slices
+                    List.drop 1 TestData.simpleHull.slices
+                        |> List.head
                         |> Maybe.map toHullSliceAsZYList
                         |> Maybe.map extractXYZ
                         |> Maybe.map (List.map .y)
@@ -798,19 +790,10 @@ suite =
                 \_ ->
                     let
                         z2Test =
-                            [ 0.31587930659489755
-                            , 0.33965215675068555
-                            , 0.36342500690647356
-                            , 0.3871978570622616
-                            , 0.4109707072180496
-                            , 0.43474355737383763
-                            , 0.45851640752962564
-                            , 0.48228925768541364
-                            , 0.5060621078412016
-                            , 0.5298349579969897
-                            ]
+                            [ 0, 0.26666666666666666, 0.5333333333333333, 0.8 ]
                     in
-                    List.head TestData.anthineas.slices
+                    List.drop 1 TestData.simpleHull.slices
+                        |> List.head
                         |> Maybe.map toHullSliceAsZYList
                         |> Maybe.map extractXYZ
                         |> Maybe.map (List.map .z)
