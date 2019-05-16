@@ -2203,15 +2203,14 @@ updateNoJs msg model =
                 updatedModel =
                     case Dict.get hullReference model.slices of
                         Just hullSlicesForRef ->
-                            case Dict.member newLabel model.slices of
-                                False ->
-                                    { model
-                                        | slices = model.slices |> insertIfUnique newLabel (applyCustomPropertiesToHullSlices hullSlicesForRef) model.slices
-                                        , selectedHullReference = Just newLabel
-                                    }
+                            if not <| Dict.member newLabel model.slices then
+                                { model
+                                    | slices = model.slices |> insertIfUnique newLabel (applyCustomPropertiesToHullSlices hullSlicesForRef) model.slices
+                                    , selectedHullReference = Just newLabel
+                                }
 
-                                True ->
-                                    model
+                            else
+                                model
 
                         Nothing ->
                             model
