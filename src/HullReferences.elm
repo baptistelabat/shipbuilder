@@ -28,14 +28,14 @@ viewHullStudioPanel hullRefs hullHashs isHullsCustomized selectedHull hullRefere
         [ h2 [ class "hull-panel-title" ]
             [ text "Hull Studio"
             , div [ class "hull-studio-actions" ]
-                [ importHullSlices hullReferencesMsgs.openLibraryMsg ]
+                [ viewImportHullSlices hullReferencesMsgs.openLibraryMsg ]
             ]
         , viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs
         ]
 
 
-importHullSlices : msg -> Html msg
-importHullSlices openLibraryMsg =
+viewImportHullSlices : msg -> Html msg
+viewImportHullSlices openLibraryMsg =
     div
         [ class "import-item"
         , title "Import hull library from file"
