@@ -1256,7 +1256,7 @@ testRenameHullInLibrary =
                     |> Dict.keys
                     |> List.member "anthineas2"
                     |> Expect.true "Expected renamed hull to be in hull library"
-        , test "Renaming a hull select it" <|
+        , test "Renaming a hull selects it" <|
             \_ ->
                 Expect.equal (Just "anthineas2")
                     (updateModel [ NoJs <| RenameHull "anthineas" "anthineas2" ] initialModel
