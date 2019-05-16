@@ -856,14 +856,12 @@ suite =
                         }
         , test "Can know if a hull isn't customized" <|
             \_ ->
-                False
-                    |> Expect.equal
-                        (isHullCustomized TestData.anthineas)
+                TestData.anthineas
+                    |> isHullCustomized
+                    |> Expect.false "Expected hull to not be customized"
         , test "Can know if a hull is customized" <|
             \_ ->
-                True
-                    |> Expect.equal
-                        (isHullCustomized <|
-                            HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
-                        )
+                HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
+                    |> isHullCustomized
+                    |> Expect.true "Expected hull to be customized"
         ]
