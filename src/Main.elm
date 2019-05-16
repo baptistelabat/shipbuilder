@@ -2167,26 +2167,24 @@ updateNoJs msg model =
             let
                 refToFocus : String
                 refToFocus =
-                    case Dict.member newLabel model.slices of
-                        False ->
-                            newLabel
+                    if not <| Dict.member newLabel model.slices then
+                        newLabel
 
-                        True ->
-                            hullReference
+                    else
+                        hullReference
 
                 updatedModel : Model
                 updatedModel =
                     case Dict.get hullReference model.slices of
                         Just hullSlicesForRef ->
-                            case Dict.member newLabel model.slices of
-                                False ->
-                                    { model
-                                        | slices = Dict.insert newLabel hullSlicesForRef <| Dict.remove hullReference model.slices
-                                        , selectedHullReference = Just newLabel
-                                    }
+                            if not <| Dict.member newLabel model.slices then
+                                { model
+                                    | slices = Dict.insert newLabel hullSlicesForRef <| Dict.remove hullReference model.slices
+                                    , selectedHullReference = Just newLabel
+                                }
 
-                                True ->
-                                    model
+                            else
+                                model
 
                         Nothing ->
                             model
