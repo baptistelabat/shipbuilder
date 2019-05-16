@@ -867,7 +867,7 @@ suite =
                             |> Expect.equal
                                 [ { x = 0, y = [ 5, 5, 0 ], zmax = -2, zmin = -6 }
                                 ]
-                , test "get dimension parameters from list of slices" <|
+                , test "Get dimension parameters from list of slices" <|
                     \_ ->
                         HullSlices.getParamFromDenormalizedSlices
                             [ { x = 0
@@ -890,7 +890,7 @@ suite =
                                 (Just { length = 100, breadth = 20, depth = 10, xmin = 0, zmin = 0 })
                 ]
             , describe "normalization"
-                [ test "normalizedSlices" <|
+                [ test "Can normalize Slices position between 0 and 1" <|
                     \_ ->
                         normalizeSlicesPosition
                             [ { x = 0.01, y = [], zmax = 0, zmin = 0 }
