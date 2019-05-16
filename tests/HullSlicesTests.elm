@@ -741,6 +741,21 @@ suite =
                             |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) z2Test
                             |> expectAll
                 ]
+            , test "Can transform HullSliceAsZYList in HullSlice  " <|
+                \_ ->
+                    (Just <|
+                        HullSlices.fromHullSliceAsZYList
+                            { x = 0.25
+                            , zylist =
+                                [ ( 0, 1 )
+                                , ( 0.26666666666666666, 0.9 )
+                                , ( 0.5333333333333333, 0.8 )
+                                , ( 0.8, 0.5 )
+                                ]
+                            }
+                    )
+                        |> Expect.equal
+                            (List.head <| List.drop 1 TestData.simpleHull.slices)
             ]
         , describe "Coordinates test"
             [ test "Can extract X position of each point of a slice" <|

@@ -20,6 +20,7 @@ module HullSlices exposing
     , extractXYZ
     , extractY
     , fromCoordinates
+    , fromHullSliceAsZYList
     , getBreadth
     , getDepth
     , getDraught
