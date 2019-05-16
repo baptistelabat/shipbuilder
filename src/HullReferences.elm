@@ -105,7 +105,10 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
                     ]
                 , div
                     [ class "hull-custom-icon" ]
-                    [ FASolid.asterisk [] ]
+                    [ text "unsaved"
+                    , FASolid.asterisk []
+                    , text "changes"
+                    ]
                 ]
 
           else
