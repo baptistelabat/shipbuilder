@@ -695,13 +695,237 @@ suite =
                         |> centroidAbscissa
                         |> Expect.within CustomFuzzers.epsRelative (zmin + (2 * breadth / 3))
             ]
-        , describe "HullSliceUtilities"
-            [ test "denormalizeHullSlice" <|
+        , describe "HullSliceAsZYList test"
+            [ describe "Can transform Slice in HullSliceAsZYList"
+                [ test "Transformation keep the same x" <|
+                    \_ ->
+                        Expect.equal (Just 0)
+                            (List.head TestData.anthineas.slices
+                                |> Maybe.map toHullSliceAsZYList
+                                |> Maybe.map .x
+                            )
+                , test "Transformation keep the same y" <|
+                    \_ ->
+                        let
+                            y2Test =
+                                [ 0.964899527258786
+                                , 0.9648943694688346
+                                , 0.9629765202249831
+                                , 0.9592250480632435
+                                , 0.955473575901504
+                                , 0.9502377948034448
+                                , 0.9394176761317832
+                                , 0.9282437133662546
+                                , 0.9102579602794127
+                                , 0.742320749879794
+                                ]
+                        in
+                        List.head TestData.anthineas.slices
+                            |> Maybe.map toHullSliceAsZYList
+                            |> Maybe.map .zylist
+                            |> Maybe.map (List.map Tuple.second)
+                            |> Maybe.withDefault []
+                            |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
+                            |> expectAll
+                , test "Transformation compute z" <|
+                    \_ ->
+                        let
+                            y2Test =
+                                [ 0.31587930659489755
+                                , 0.33965215675068555
+                                , 0.36342500690647356
+                                , 0.3871978570622616
+                                , 0.4109707072180496
+                                , 0.43474355737383763
+                                , 0.45851640752962564
+                                , 0.48228925768541364
+                                , 0.5060621078412016
+                                , 0.5298349579969897
+                                ]
+                        in
+                        List.head TestData.anthineas.slices
+                            |> Maybe.map toHullSliceAsZYList
+                            |> Maybe.map .zylist
+                            |> Maybe.map (List.map Tuple.first)
+                            |> Maybe.withDefault []
+                            |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
+                            |> expectAll
+                ]
+            ]
+        , describe "Coordinates test"
+            [ test "Can extract X position of each point of a slice" <|
                 \_ ->
-                    compareHs
-                        { x = 0, zmin = -4.8, zmax = -0.6, y = [ 2, 1, 0 ] }
-                        (denormalizeHullSlice hs_param hs0)
-            , test "areaTrapezoid" <|
+                    let
+                        x2Test =
+                            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                    in
+                    List.head TestData.anthineas.slices
+                        |> Maybe.map toHullSliceAsZYList
+                        |> Maybe.map extractXYZ
+                        |> Maybe.map (List.map .x)
+                        |> Maybe.withDefault []
+                        |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) x2Test
+                        |> expectAll
+            , test "Can extract Y position of each point of a slice" <|
+                \_ ->
+                    let
+                        y2Test =
+                            [ 0.964899527258786
+                            , 0.9648943694688346
+                            , 0.9629765202249831
+                            , 0.9592250480632435
+                            , 0.955473575901504
+                            , 0.9502377948034448
+                            , 0.9394176761317832
+                            , 0.9282437133662546
+                            , 0.9102579602794127
+                            , 0.742320749879794
+                            ]
+                    in
+                    List.head TestData.anthineas.slices
+                        |> Maybe.map toHullSliceAsZYList
+                        |> Maybe.map extractXYZ
+                        |> Maybe.map (List.map .y)
+                        |> Maybe.withDefault []
+                        |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
+                        |> expectAll
+            , test "Can extract Z position of each point of a slice" <|
+                \_ ->
+                    let
+                        z2Test =
+                            [ 0.31587930659489755
+                            , 0.33965215675068555
+                            , 0.36342500690647356
+                            , 0.3871978570622616
+                            , 0.4109707072180496
+                            , 0.43474355737383763
+                            , 0.45851640752962564
+                            , 0.48228925768541364
+                            , 0.5060621078412016
+                            , 0.5298349579969897
+                            ]
+                    in
+                    List.head TestData.anthineas.slices
+                        |> Maybe.map toHullSliceAsZYList
+                        |> Maybe.map extractXYZ
+                        |> Maybe.map (List.map .z)
+                        |> Maybe.withDefault []
+                        |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) z2Test
+                        |> expectAll
+            ]
+        , describe "HullSlices normalization/denormalization"
+            [ describe "denormalization"
+                [ test "denormalizeHullSlice" <|
+                    \_ ->
+                        compareHs
+                            { x = 0, zmin = -4.8, zmax = -0.6, y = [ 2, 1, 0 ] }
+                            (denormalizeHullSlice hs_param hs0)
+                , test "denormalizedSlicesT3" <|
+                    \_ ->
+                        denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
+                            [ { x = 0, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
+                            , { x = 0.25, y = [ 1, 1 ], zmax = 0.75, zmin = 0 }
+                            , { x = 0.5, y = [ 1, 1 ], zmax = 1, zmin = 0 }
+                            , { x = 0.75, y = [ 1, 1 ], zmax = 0.75, zmin = 0 }
+                            , { x = 1, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
+                            ]
+                            |> Expect.equal
+                                [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                                , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                                , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
+                                , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
+                                , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
+                                ]
+                , test "denormalizedSlicesT1" <|
+                    \_ ->
+                        denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
+                            [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
+                            , { x = 1, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
+                            ]
+                            |> Expect.equal
+                                [ { x = 0, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
+                                , { x = 100, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
+                                ]
+                , test "denormalizedSlicesT4" <|
+                    \_ ->
+                        denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
+                            [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 0.8, zmin = 0.4 }
+                            ]
+                            |> Expect.equal
+                                [ { x = 0, y = [ 5, 5, 0 ], zmax = -2, zmin = -6 }
+                                ]
+                ]
+            , describe "normalization"
+                [ test "normalizedSlices" <|
+                    \_ ->
+                        normalizeSlicesPosition
+                            [ { x = 0.01, y = [], zmax = 0, zmin = 0 }
+                            , { x = 5, y = [], zmax = 0, zmin = 0 }
+                            , { x = 9.8, y = [], zmax = 0, zmin = 0 }
+                            ]
+                            |> Expect.equal
+                                [ { x = 0, y = [], zmax = 0, zmin = 0 }
+                                , { x = 5 / (9.8 - 0.01), y = [], zmax = 0, zmin = 0 }
+                                , { x = 1, y = [], zmax = 0, zmin = 0 }
+                                ]
+                ]
+            ]
+        , describe "HullSlices custom properties"
+            [ test "Should store original slice positions" <|
+                \_ ->
+                    TestData.anthineas.originalSlicePositions
+                        |> Expect.equal
+                            (List.map .x TestData.anthineas.slices)
+            , test "Apply custom properties to hullSlices" <|
+                \_ ->
+                    (HullSlices.applyCustomPropertiesToHullSlices <| TestData.cubeCustomized)
+                        |> Expect.equal
+                            { emptyHullSlices
+                                | length = StringValueInput.floatInput 1 400
+                                , breadth = StringValueInput.floatInput 1 30
+                                , depth = StringValueInput.floatInput 1 20
+                                , xmin = -1
+                                , zmin = 3
+                                , slices =
+                                    [ { x = 0
+                                      , zmin = 0
+                                      , zmax = 1
+                                      , y = [ 1, 1, 1, 1 ]
+                                      }
+                                    , { x = 0.6
+                                      , zmin = 0
+                                      , zmax = 1
+                                      , y = [ 1, 1, 1, 1 ]
+                                      }
+                                    , { x = 1
+                                      , zmin = 0
+                                      , zmax = 1
+                                      , y = [ 1, 1, 1, 1 ]
+                                      }
+                                    ]
+                                , originalSlicePositions = [ 0, 0.6, 1 ]
+                                , draught = StringValueInput.floatInput 1 1.5
+                                , custom =
+                                    { length = Nothing
+                                    , breadth = Nothing
+                                    , depth = Nothing
+                                    , draught = Nothing
+                                    , hullslicesPositions = Nothing
+                                    }
+                            }
+            , test "Can know if a hull isn't customized" <|
+                \_ ->
+                    TestData.anthineas
+                        |> isHullCustomized
+                        |> Expect.false "Expected hull to not be customized"
+            , test "Can know if a hull is customized" <|
+                \_ ->
+                    HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
+                        |> isHullCustomized
+                        |> Expect.true "Expected hull to be customized"
+            ]
+        , describe "HullSliceUtilities"
+            [ test "areaTrapezoid" <|
                 \_ ->
                     areaTrapezoid ( 0, 0 ) ( 1, 1 )
                         |> Expect.within epsAbsolute 0.5
@@ -735,57 +959,6 @@ suite =
             \_ ->
                 { a = 3, b = 2 }
                     |> Expect.equal { a = 3, b = 2 }
-
-        -- , test "zyaForSlice" <|
-        --     \_ ->
-        --         HullSliceUtilities.zyaForSlice { x = 25.0, zylist = [ ( -3.0, 5.0 ), ( -2.5, 5.0 ) ] }
-        --             |> Expect.equal { x = 25.0, kz = -0.5, ky = 0.0, area = 2.5 }
-        , test "denormalizedSlicesT3" <|
-            \_ ->
-                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
-                    [ { x = 0, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
-                    , { x = 0.25, y = [ 1, 1 ], zmax = 0.75, zmin = 0 }
-                    , { x = 0.5, y = [ 1, 1 ], zmax = 1, zmin = 0 }
-                    , { x = 0.75, y = [ 1, 1 ], zmax = 0.75, zmin = 0 }
-                    , { x = 1, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
-                    ]
-                    |> Expect.equal
-                        [ { x = 0, y = [ 5, 5 ], zmax = -5, zmin = -10 }
-                        , { x = 25, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
-                        , { x = 50, y = [ 5, 5 ], zmax = 0, zmin = -10 }
-                        , { x = 75, y = [ 5, 5 ], zmax = -2.5, zmin = -10 }
-                        , { x = 100, y = [ 5, 5 ], zmax = -5, zmin = -10 }
-                        ]
-        , test "denormalizedSlicesT1" <|
-            \_ ->
-                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
-                    [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
-                    , { x = 1, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
-                    ]
-                    |> Expect.equal
-                        [ { x = 0, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
-                        , { x = 100, y = [ 5, 5, 0 ], zmax = 0, zmin = -10 }
-                        ]
-        , test "denormalizedSlicesT4" <|
-            \_ ->
-                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
-                    [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 0.8, zmin = 0.4 }
-                    ]
-                    |> Expect.equal
-                        [ { x = 0, y = [ 5, 5, 0 ], zmax = -2, zmin = -6 }
-                        ]
-        , test "normalizedSlices" <|
-            \_ ->
-                normalizeSlicesPosition
-                    [ { x = 0.01, y = [], zmax = 0, zmin = 0 }
-                    , { x = 5, y = [], zmax = 0, zmin = 0 }
-                    , { x = 9.8, y = [], zmax = 0, zmin = 0 }
-                    ]
-                    |> Expect.equal
-                        [ { x = 0, y = [], zmax = 0, zmin = 0 }
-                        , { x = 5 / (9.8 - 0.01), y = [], zmax = 0, zmin = 0 }
-                        , { x = 1, y = [], zmax = 0, zmin = 0 }
-                        ]
         , test "intersectBelowSlicesZY" <|
             \_ ->
                 let
@@ -818,170 +991,4 @@ suite =
                 in
                 calculateCentroid centroidAreaForEachImmersedSlice
                     |> Expect.within epsAbsolute 48000
-        , test "Should store original slice positions" <|
-            \_ ->
-                TestData.anthineas.originalSlicePositions
-                    |> Expect.equal
-                        (List.map .x TestData.anthineas.slices)
-        , test "Apply custom properties to hullSlices" <|
-            \_ ->
-                (HullSlices.applyCustomPropertiesToHullSlices <| TestData.cubeCustomized)
-                    |> Expect.equal
-                        { emptyHullSlices
-                            | length = StringValueInput.floatInput 1 400
-                            , breadth = StringValueInput.floatInput 1 30
-                            , depth = StringValueInput.floatInput 1 20
-                            , xmin = -1
-                            , zmin = 3
-                            , slices =
-                                [ { x = 0
-                                  , zmin = 0
-                                  , zmax = 1
-                                  , y = [ 1, 1, 1, 1 ]
-                                  }
-                                , { x = 0.6
-                                  , zmin = 0
-                                  , zmax = 1
-                                  , y = [ 1, 1, 1, 1 ]
-                                  }
-                                , { x = 1
-                                  , zmin = 0
-                                  , zmax = 1
-                                  , y = [ 1, 1, 1, 1 ]
-                                  }
-                                ]
-                            , originalSlicePositions = [ 0, 0.6, 1 ]
-                            , draught = StringValueInput.floatInput 1 1.5
-                            , custom =
-                                { length = Nothing
-                                , breadth = Nothing
-                                , depth = Nothing
-                                , draught = Nothing
-                                , hullslicesPositions = Nothing
-                                }
-                        }
-        , test "Can know if a hull isn't customized" <|
-            \_ ->
-                TestData.anthineas
-                    |> isHullCustomized
-                    |> Expect.false "Expected hull to not be customized"
-        , test "Can know if a hull is customized" <|
-            \_ ->
-                HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
-                    |> isHullCustomized
-                    |> Expect.true "Expected hull to be customized"
-        , describe "Can transform Slice in HullSliceAsZYList"
-            [ test "Transformation keep the same x" <|
-                \_ ->
-                    Expect.equal (Just 0)
-                        (List.head TestData.anthineas.slices
-                            |> Maybe.map toHullSliceAsZYList
-                            |> Maybe.map .x
-                        )
-            , test "Transformation keep the same y" <|
-                \_ ->
-                    let
-                        y2Test =
-                            [ 0.964899527258786
-                            , 0.9648943694688346
-                            , 0.9629765202249831
-                            , 0.9592250480632435
-                            , 0.955473575901504
-                            , 0.9502377948034448
-                            , 0.9394176761317832
-                            , 0.9282437133662546
-                            , 0.9102579602794127
-                            , 0.742320749879794
-                            ]
-                    in
-                    List.head TestData.anthineas.slices
-                        |> Maybe.map toHullSliceAsZYList
-                        |> Maybe.map .zylist
-                        |> Maybe.map (List.map Tuple.second)
-                        |> Maybe.withDefault []
-                        |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
-                        |> expectAll
-            , test "Transformation compute z" <|
-                \_ ->
-                    let
-                        y2Test =
-                            [ 0.31587930659489755
-                            , 0.33965215675068555
-                            , 0.36342500690647356
-                            , 0.3871978570622616
-                            , 0.4109707072180496
-                            , 0.43474355737383763
-                            , 0.45851640752962564
-                            , 0.48228925768541364
-                            , 0.5060621078412016
-                            , 0.5298349579969897
-                            ]
-                    in
-                    List.head TestData.anthineas.slices
-                        |> Maybe.map toHullSliceAsZYList
-                        |> Maybe.map .zylist
-                        |> Maybe.map (List.map Tuple.first)
-                        |> Maybe.withDefault []
-                        |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
-                        |> expectAll
-            ]
-        , test "Can extract X position of each point of a slice" <|
-            \_ ->
-                let
-                    x2Test =
-                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-                in
-                List.head TestData.anthineas.slices
-                    |> Maybe.map toHullSliceAsZYList
-                    |> Maybe.map extractXYZ
-                    |> Maybe.map (List.map .x)
-                    |> Maybe.withDefault []
-                    |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) x2Test
-                    |> expectAll
-        , test "Can extract Y position of each point of a slice" <|
-            \_ ->
-                let
-                    y2Test =
-                        [ 0.964899527258786
-                        , 0.9648943694688346
-                        , 0.9629765202249831
-                        , 0.9592250480632435
-                        , 0.955473575901504
-                        , 0.9502377948034448
-                        , 0.9394176761317832
-                        , 0.9282437133662546
-                        , 0.9102579602794127
-                        , 0.742320749879794
-                        ]
-                in
-                List.head TestData.anthineas.slices
-                    |> Maybe.map toHullSliceAsZYList
-                    |> Maybe.map extractXYZ
-                    |> Maybe.map (List.map .y)
-                    |> Maybe.withDefault []
-                    |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
-                    |> expectAll
-        , test "Can extract Z position of each point of a slice" <|
-            \_ ->
-                let
-                    z2Test =
-                        [ 0.31587930659489755
-                        , 0.33965215675068555
-                        , 0.36342500690647356
-                        , 0.3871978570622616
-                        , 0.4109707072180496
-                        , 0.43474355737383763
-                        , 0.45851640752962564
-                        , 0.48228925768541364
-                        , 0.5060621078412016
-                        , 0.5298349579969897
-                        ]
-                in
-                List.head TestData.anthineas.slices
-                    |> Maybe.map toHullSliceAsZYList
-                    |> Maybe.map extractXYZ
-                    |> Maybe.map (List.map .z)
-                    |> Maybe.withDefault []
-                    |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) z2Test
-                    |> expectAll
         ]
