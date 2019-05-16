@@ -14,6 +14,7 @@ module HullSlices exposing
     , calculateSliceArea
     , centroidAbscissa
     , clip
+    , coordinatesToHullSliceAsZYList
     , denormalizeHullSlice
     , denormalizeHullSlices
     , emptyHullSlices

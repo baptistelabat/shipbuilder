@@ -801,6 +801,31 @@ suite =
                         |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) z2Test
                         |> expectAll
             ]
+        , test "Can construct HullSliceAsZYList with coordinates" <|
+            \_ ->
+                HullSlices.coordinatesToHullSliceAsZYList
+                    [ { x = 0.25, y = 1, z = 0 }
+                    , { x = 0.25, y = 0.9, z = 0.26666666666666666 }
+                    , { x = 0.25, y = 0.8, z = 0.5333333333333333 }
+                    , { x = 0.25, y = 0.5, z = 0.8 }
+                    ]
+                    |> Expect.equal
+                        (List.drop 1 TestData.simpleHull.slices
+                            |> List.head
+                            |> Maybe.map toHullSliceAsZYList
+                        )
+        , test "Can construct slice with coordinates" <|
+            \_ ->
+                HullSlices.fromCoordinates
+                    [ { x = 0.25, y = 1, z = 0 }
+                    , { x = 0.25, y = 0.9, z = 0.26666666666666666 }
+                    , { x = 0.25, y = 0.8, z = 0.5333333333333333 }
+                    , { x = 0.25, y = 0.5, z = 0.8 }
+                    ]
+                    |> Expect.equal
+                        (List.drop 1 TestData.simpleHull.slices
+                            |> List.take 1
+                        )
         , describe "HullSlices normalization/denormalization"
             [ describe "denormalization"
                 [ test "denormalizeHullSlice" <|
