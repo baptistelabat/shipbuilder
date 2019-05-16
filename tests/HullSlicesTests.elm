@@ -826,7 +826,7 @@ suite =
                         (List.drop 1 TestData.simpleHull.slices
                             |> List.take 1
                         )
-        , describe "HullSlices normalization/denormalization"
+        , describe "HullSlices denormalization/normalization"
             [ describe "denormalization"
                 [ test "denormalizeHullSlice" <|
                     \_ ->
@@ -867,6 +867,27 @@ suite =
                             |> Expect.equal
                                 [ { x = 0, y = [ 5, 5, 0 ], zmax = -2, zmin = -6 }
                                 ]
+                , test "get dimension parameters from list of slices" <|
+                    \_ ->
+                        HullSlices.getParamFromDenormalizedSlices
+                            [ { x = 0
+                              , zmin = 0
+                              , zmax = 0
+                              , y = [ 0, 0, 0, 0 ]
+                              }
+                            , { x = 50
+                              , zmin = 0
+                              , zmax = 10
+                              , y = [ 10, 8, 6, 0 ]
+                              }
+                            , { x = 100
+                              , zmin = 0
+                              , zmax = 0
+                              , y = [ 0, 0, 0, 0 ]
+                              }
+                            ]
+                            |> Expect.equal
+                                (Just { length = 100, breadth = 20, depth = 10, xmin = 0, zmin = 0 })
                 ]
             , describe "normalization"
                 [ test "normalizedSlices" <|
