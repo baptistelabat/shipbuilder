@@ -651,14 +651,14 @@ applyCustomPropertiesToHullSlices hullSlices =
     , xmin = hullSlices.xmin
     , zmin = hullSlices.zmin
     , slices = setLongitudinalPositionOfEachSlice hullSlices
-    , originalSlicePositions = []
-    , draught = Maybe.withDefault hullSlices.draught hullSlices.custom.draught
+    , originalSlicePositions = List.map .x <| setLongitudinalPositionOfEachSlice hullSlices
+    , draught = getDraught hullSlices
     , custom =
-        { length = Just <| StringValueInput.emptyFloat 1
-        , breadth = Just <| StringValueInput.emptyFloat 1
-        , depth = Just <| StringValueInput.emptyFloat 1
-        , draught = Just <| StringValueInput.emptyFloat 1
-        , hullslicesPositions = Just []
+        { length = Nothing
+        , breadth = Nothing
+        , depth = Nothing
+        , draught = Nothing
+        , hullslicesPositions = Nothing
         }
     }
 
