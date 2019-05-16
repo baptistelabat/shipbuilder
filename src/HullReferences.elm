@@ -16,25 +16,26 @@ type alias HullReferencesMsgs msg =
     , openLibraryMsg : msg
     , renameHullMsg : String -> String -> msg
     , removeHullMsg : String -> msg
+    , saveAsNewMsg : String -> msg
     }
 
 
-viewHullStudioPanel : List String -> List String -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullStudioPanel hullRefs hullHashs selectedHull hullReferencesMsgs =
+viewHullStudioPanel : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullStudioPanel hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
     div
         [ class "panel hull-panel"
         ]
         [ h2 [ class "hull-panel-title" ]
             [ text "Hull Studio"
-            , div [ class "hull-actions" ]
-                [ importHullSlices hullReferencesMsgs.openLibraryMsg ]
+            , div [ class "hull-studio-actions" ]
+                [ viewHullImporter hullReferencesMsgs.openLibraryMsg ]
             ]
-        , viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs
+        , viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs
         ]
 
 
-importHullSlices : msg -> Html msg
-importHullSlices openLibraryMsg =
+viewHullImporter : msg -> Html msg
+viewHullImporter openLibraryMsg =
     div
         [ class "import-item"
         , title "Import hull library from file"
@@ -54,8 +55,8 @@ importHullSlices openLibraryMsg =
         ]
 
 
-viewHullReferences : List String -> List String -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs =
+viewHullReferences : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
     let
         isAHullSelected : Bool
         isAHullSelected =
@@ -63,11 +64,20 @@ viewHullReferences hullRefs hullHashs selectedHull hullReferencesMsgs =
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
-            :: List.map2 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs
+            :: List.map3 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs isHullsCustomized
 
 
-viewHullReference : Maybe String -> HullReferencesMsgs msg -> String -> String -> Html msg
-viewHullReference selectedHull hullReferencesMsgs ref hash =
+viewHullReference : Maybe String -> HullReferencesMsgs msg -> String -> String -> Bool -> Html msg
+viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
+    let
+        hullWrapperClass : String
+        hullWrapperClass =
+            if isHullCustomized then
+                "hull-info-wrapper hull-info-wrapper__simple"
+
+            else
+                "hull-info-wrapper hull-info-wrapper__double"
+    in
     li
         (if selectedHull == Just ref then
             [ class "hull-reference hull-reference__selected" ]
@@ -77,10 +87,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash =
             , onClick <| hullReferencesMsgs.selectHullMsg ref
             ]
         )
-        [ div
-            []
-            []
-        , div [ class "hull-info-wrapper" ]
+        [ div [ class hullWrapperClass ]
             [ input
                 [ class "hull-label"
                 , id ref
@@ -90,13 +97,36 @@ viewHullReference selectedHull hullReferencesMsgs ref hash =
                 []
             , p [ class "hull-hash" ] [ text hash ]
             ]
-        , div
-            [ class "hull-action delete-hull"
-            , onClick <| hullReferencesMsgs.removeHullMsg ref
-            , title "Delete this hull from library"
-            ]
-            [ FASolid.trash [] ]
+        , if isHullCustomized then
+            div [ class "hull-actions hull-actions__simple" ]
+                [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
+                , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
+                ]
+
+          else
+            div [ class "hull-actions hull-actions__double" ]
+                [ viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg ]
         ]
+
+
+viewRemoveHullAction : String -> (String -> msg) -> Html msg
+viewRemoveHullAction hullReference removeHullMsg =
+    div
+        [ class "hull-action delete-hull"
+        , onClick <| removeHullMsg hullReference
+        , title "Delete hull from library"
+        ]
+        [ FASolid.trash [] ]
+
+
+viewSaveAsNewHullAction : String -> (String -> msg) -> Html msg
+viewSaveAsNewHullAction hullReference saveAsNewMsg =
+    div
+        [ class "hull-action save-hull"
+        , onClick <| saveAsNewMsg hullReference
+        , title "Save as a new"
+        ]
+        [ FASolid.save [] ]
 
 
 viewUnselectHullReference : Bool -> msg -> Html msg

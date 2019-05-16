@@ -55,7 +55,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences
 import HullSliceModifiers
-import HullSlices exposing (HullSlices, hullSlicesToBuildInJs)
+import HullSlices exposing (HullSlices, applyCustomPropertiesToHullSlices, isHullCustomized)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -688,7 +688,7 @@ encodeRestoreSaveCmd model =
                             Encode.string ""
 
                         Just hullSlices ->
-                            EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices
+                            EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices
     in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
@@ -709,6 +709,38 @@ encodeToggleBlocksVisibilityCmd blocks visible =
         ]
 
 
+renameKey : Model -> String -> String
+renameKey model key =
+    let
+        findSingleKey : String -> String
+        findSingleKey originalKey =
+            if not <| Dict.member originalKey model.slices then
+                originalKey
+
+            else
+                findSingleKey (originalKey ++ " - bis")
+    in
+    findSingleKey key
+
+
+insertIfUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices -> Dict String HullSlices
+insertIfUnique key value dict =
+    let
+        listSHAInDict : List String
+        listSHAInDict =
+            List.map EncodersDecoders.getHashImageForSlices <| Dict.values dict
+
+        valueSHA : String
+        valueSHA =
+            EncodersDecoders.getHashImageForSlices value
+    in
+    if List.member valueSHA listSHAInDict then
+        identity
+
+    else
+        Dict.insert key value
+
+
 importHullsLibraryiInModel : Model -> SaveFile -> Model
 importHullsLibraryiInModel model saveFile =
     let
@@ -716,40 +748,9 @@ importHullsLibraryiInModel model saveFile =
         importedHullsLibrary =
             Dict.map (\_ val -> HullSliceModifiers.resetSlicesToOriginals val) saveFile.hulls
 
-        renameKey : String -> String
-        renameKey key =
-            let
-                findSingleKey : String -> String
-                findSingleKey originalKey =
-                    case Dict.member originalKey model.slices of
-                        False ->
-                            originalKey
-
-                        True ->
-                            findSingleKey (originalKey ++ " - bis")
-            in
-            findSingleKey key
-
-        insertIfUnique : String -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
-        insertIfUnique key value =
-            let
-                listSHAInDict : List String
-                listSHAInDict =
-                    List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices
-
-                valueSHA : String
-                valueSHA =
-                    EncodersDecoders.getHashImageForSlices value
-            in
-            if List.member valueSHA listSHAInDict then
-                identity
-
-            else
-                Dict.insert key value
-
         insertBothWithoutColision : String -> HullSlices -> HullSlices -> Dict String HullSlices -> Dict String HullSlices
         insertBothWithoutColision key a b =
-            Dict.insert key a << insertIfUnique (renameKey key) b
+            Dict.insert key a << insertIfUnique (renameKey model key) b model.slices
 
         updatedSlices : Dict ShipName HullSlices.HullSlices
         updatedSlices =
@@ -760,8 +761,8 @@ importHullsLibraryiInModel model saveFile =
                 ifHullInModelAndInSavedFile =
                     insertBothWithoutColision
 
-                ifHullOnlyInSavedFile =
-                    insertIfUnique
+                ifHullOnlyInSavedFile key value =
+                    insertIfUnique key value model.slices
             in
             Dict.merge
                 ifHullOnlyInModel
@@ -1932,6 +1933,7 @@ type NoJsMsg
     | NoOp
     | RenameBlock Block String
     | RenameHull String String
+    | SaveAsNewHull String
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetCurrentDate Time.Posix
@@ -2189,6 +2191,30 @@ updateNoJs msg model =
                             model
             in
             ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus refToFocus) ] )
+
+        SaveAsNewHull hullReference ->
+            let
+                newLabel : String
+                newLabel =
+                    renameKey model hullReference
+
+                updatedModel : Model
+                updatedModel =
+                    case Dict.get hullReference model.slices of
+                        Just hullSlicesForRef ->
+                            if not <| Dict.member newLabel model.slices then
+                                { model
+                                    | slices = model.slices |> insertIfUnique newLabel (applyCustomPropertiesToHullSlices hullSlicesForRef) model.slices
+                                    , selectedHullReference = Just newLabel
+                                }
+
+                            else
+                                model
+
+                        Nothing ->
+                            model
+            in
+            ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus newLabel) ] )
 
         ToggleAccordion isOpen accordionId ->
             let
@@ -2536,12 +2562,7 @@ updateModelToJs msg model =
             { model | selectedHullReference = Just hullReference }
 
         RemoveHull hullReference ->
-            let
-                updatedSlices : Dict ShipName HullSlices
-                updatedSlices =
-                    Dict.remove hullReference model.slices
-            in
-            { model | selectedHullReference = Nothing, slices = updatedSlices }
+            { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
 
         UnselectHullReference ->
             { model | selectedHullReference = Nothing }
@@ -2887,7 +2908,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -2898,7 +2919,7 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| hullSlicesToBuildInJs hullSlices }
+                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
 
         ResetSlice hullReference ->
             case Dict.get hullReference model.slices of
@@ -3410,6 +3431,7 @@ hullReferencesMsgs =
     , openLibraryMsg = ToJs <| OpenHullsLibrary
     , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
     , removeHullMsg = ToJs << RemoveHull
+    , saveAsNewMsg = NoJs << SaveAsNewHull
     }
 
 
@@ -3418,6 +3440,7 @@ viewHullStudioPanel model =
     HullReferences.viewHullStudioPanel
         (Dict.keys model.slices)
         (List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices)
+        (List.map HullSlices.isHullCustomized <| Dict.values model.slices)
         model.selectedHullReference
         hullReferencesMsgs
 

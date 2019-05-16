@@ -4,6 +4,7 @@ module TestData exposing
     , blockB
     , blockC
     , cube
+    , cubeCustomized
     , flags
     , hullSliceJson
     , hullSliceJsonCustomized
@@ -74,11 +75,24 @@ cube =
             ]
         , draught = StringValueInput.floatInput 1 2
         , custom =
-            { length = Just (StringValueInput.floatInput 1 200)
-            , breadth = Just (StringValueInput.floatInput 1 20)
-            , depth = Just (StringValueInput.floatInput 1 10)
-            , draught = Just (StringValueInput.floatInput 1 2)
-            , hullslicesPositions = Just [ 0, 0.5, 1 ]
+            { length = Nothing
+            , breadth = Nothing
+            , depth = Nothing
+            , draught = Nothing
+            , hullslicesPositions = Nothing
+            }
+    }
+
+
+cubeCustomized : HullSlices.HullSlices
+cubeCustomized =
+    { cube
+        | custom =
+            { length = Just (StringValueInput.floatInput 1 400)
+            , breadth = Just (StringValueInput.floatInput 1 30)
+            , depth = Just (StringValueInput.floatInput 1 20)
+            , draught = Just (StringValueInput.floatInput 1 1.5)
+            , hullslicesPositions = Just [ 0, 0.6, 1 ]
             }
     }
 
@@ -110,11 +124,11 @@ toblerone breadth depth draught =
             ]
         , draught = StringValueInput.floatInput 1 draught
         , custom =
-            { length = Just (StringValueInput.floatInput 1 200)
-            , breadth = Just (StringValueInput.floatInput 1 breadth)
-            , depth = Just (StringValueInput.floatInput 1 depth)
-            , draught = Just (StringValueInput.floatInput 1 draught)
-            , hullslicesPositions = Just [ 0, 0.5, 1 ]
+            { length = Nothing
+            , breadth = Nothing
+            , depth = Nothing
+            , draught = Nothing
+            , hullslicesPositions = Nothing
             }
     }
 
