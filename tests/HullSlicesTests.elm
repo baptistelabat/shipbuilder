@@ -927,6 +927,19 @@ suite =
                                 , { x = 1, zmin = 0, zmax = 0, y = [ 0.5, 0.5, 0.5, 0.5 ] }
                                 ]
                 ]
+            , describe "Normalization reversibility"
+                [ test "Normalize and then denormalize a slice keep identity " <|
+                    \_ ->
+                        let
+                            param =
+                                { length = 100, breadth = 20, depth = 10, xmin = 0, zmin = 0 }
+                        in
+                        { x = 50, zmin = 0, zmax = 5, y = [ 10, 8, 6, 0 ] }
+                            |> HullSlices.normalizeHullSlice param
+                            |> HullSlices.denormalizeHullSlice param
+                            |> Expect.equal
+                                { x = 50, zmin = 0, zmax = 5, y = [ 10, 8, 6, 0 ] }
+                ]
             ]
         , describe "HullSlices custom properties"
             [ test "Should store original slice positions" <|
