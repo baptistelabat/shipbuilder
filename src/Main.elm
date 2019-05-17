@@ -3408,7 +3408,7 @@ viewPanel model =
             viewSpaceReservationPanel spaceReservationView model
 
         Hull hullView ->
-            viewHullLibraryPanel model
+            viewHullPanel hullView model
 
         Partitioning partitioningView ->
             viewPartitioning partitioningView model
@@ -3438,6 +3438,7 @@ hullReferencesMsgs =
     , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
     , removeHullMsg = ToJs << RemoveHull
     , saveAsNewMsg = NoJs << SaveAsNewHull
+    , changeViewMsg = ToJs <| SwitchViewMode <| Hull <| HullDetails
     }
 
 

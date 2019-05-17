@@ -17,6 +17,7 @@ type alias HullReferencesMsgs msg =
     , renameHullMsg : String -> String -> msg
     , removeHullMsg : String -> msg
     , saveAsNewMsg : String -> msg
+    , changeViewMsg : msg
     }
 
 
@@ -102,7 +103,7 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
                 [ div [ class "hull-actions hull-actions__custom" ]
                     [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
                     , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
-                    , viewFocusHullAction ref
+                    , viewFocusHullAction ref hullReferencesMsgs.changeViewMsg
                     ]
                 , div
                     [ class "hull-custom-icon" ]
@@ -115,17 +116,16 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
           else
             div [ class "hull-actions hull-actions__uncustom" ]
                 [ viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
-                , viewFocusHullAction ref
+                , viewFocusHullAction ref hullReferencesMsgs.changeViewMsg
                 ]
         ]
 
 
-viewFocusHullAction : String -> Html msg
-viewFocusHullAction ref =
+viewFocusHullAction : String -> msg -> Html msg
+viewFocusHullAction ref changeViewMsg =
     div
         [ class "hull-action focus-hull"
-
-        --, onClick <| ToJs <| SwitchViewMode <| SpaceReservation <| DetailedBlock block.uuid
+        , onClick <| changeViewMsg
         , title "Focus hull"
         ]
         [ FASolid.arrowRight []
