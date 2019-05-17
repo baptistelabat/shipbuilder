@@ -23,6 +23,7 @@ port module Main exposing
     , asYInPosition
     , asZInPosition
     , encodeInitThreeCommand
+    , formatClipboardData
     , init
     , initBlock
     , initCmd

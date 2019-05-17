@@ -139,6 +139,7 @@ suite =
         , testRenameHullInLibrary
         , testSaveAsNewHullInLibrary
         , testReadFromClipboard
+        , testPasteFromClipboard
         ]
 
 
@@ -1391,6 +1392,87 @@ testReadFromClipboard =
                         |> .uiState
                         |> .waitToPasteClipBoard
                     )
+        ]
+
+
+testPasteFromClipboard =
+    describe "Test recovery of data in the clipboard" <|
+        [ describe "Section import" <|
+            let
+                coordinates =
+                    [ { x = 0, y = 0, z = 0 }
+                    , { x = 0, y = 0, z = 0 }
+                    , { x = 0, y = 0, z = 0 }
+                    , { x = 10, y = 8, z = 0 }
+                    , { x = 10, y = 5, z = 0 }
+                    , { x = 10, y = 0, z = 5 }
+                    , { x = 20, y = 10, z = 0 }
+                    , { x = 20, y = 5, z = 0 }
+                    , { x = 20, y = 0, z = 10 }
+                    , { x = 30, y = 8, z = 0 }
+                    , { x = 30, y = 5, z = 0 }
+                    , { x = 30, y = 0, z = 5 }
+                    , { x = 40, y = 0, z = 0 }
+                    , { x = 40, y = 0, z = 0 }
+                    , { x = 40, y = 0, z = 0 }
+                    ]
+
+                modelWithSelectedhull =
+                    setModel [ ToJs <| SelectHullReference "anthineas" ]
+            in
+            [ test "Can format coordinates when pasting" <|
+                \_ ->
+                    Expect.equal (formatClipboardData "1\t2\t3\n4\t5\t6\n7\t8\t9\n") <|
+                        Just [ { x = 1, y = 2, z = 3 }, { x = 4, y = 5, z = 6 }, { x = 7, y = 8, z = 9 } ]
+            , test "Importing coordinates update dimension parameters of selected hull" <|
+                \_ ->
+                    { length = 40, breadth = 20, depth = 10, xmin = 0, zmin = 0 }
+                        |> Just
+                        |> Expect.equal
+                            (updateModel [ FromJs <| PasteClipBoard coordinates ] modelWithSelectedhull
+                                |> .slices
+                                |> Dict.get "anthineas"
+                                |> Maybe.map
+                                    (\s ->
+                                        { length = s.length.value
+                                        , breadth = s.breadth.value
+                                        , depth = s.depth.value
+                                        , xmin = s.xmin
+                                        , zmin = s.zmin
+                                        }
+                                    )
+                            )
+            , test "Importing coordinates update slices of selected hull" <|
+                \_ ->
+                    [ { x = 0, y = [ 0.5, 0.5, 0.5 ], zmax = 0, zmin = 0 }
+                    , { x = 0.25, y = [ 0.9, 0.75, 0.5 ], zmax = 0.5, zmin = 0 }
+                    , { x = 0.5, y = [ 1, 0.75, 0.5 ], zmax = 1, zmin = 0 }
+                    , { x = 0.75, y = [ 0.9, 0.75, 0.5 ], zmax = 0.5, zmin = 0 }
+                    , { x = 1, y = [ 0.5, 0.5, 0.5 ], zmax = 0, zmin = 0 }
+                    ]
+                        |> Just
+                        |> Expect.equal
+                            (updateModel [ FromJs <| PasteClipBoard coordinates ] modelWithSelectedhull
+                                |> .slices
+                                |> Dict.get "anthineas"
+                                |> Maybe.map .slices
+                            )
+            , test "Importing coordinates reset custom values of selected hull" <|
+                \_ ->
+                    { length = Nothing
+                    , breadth = Nothing
+                    , depth = Nothing
+                    , draught = Nothing
+                    , hullslicesPositions = Nothing
+                    }
+                        |> Just
+                        |> Expect.equal
+                            (updateModel [ FromJs <| PasteClipBoard coordinates ] modelWithSelectedhull
+                                |> .slices
+                                |> Dict.get "mpov"
+                                |> Maybe.map .custom
+                            )
+            ]
         ]
 
 
