@@ -3441,6 +3441,16 @@ hullReferencesMsgs =
     }
 
 
+viewHullPanel : HullView -> Model -> Html Msg
+viewHullPanel hullview model =
+    case hullview of
+        HullLibrary ->
+            viewHullLibraryPanel model
+
+        HullDetails ->
+            viewModeller model
+
+
 viewHullLibraryPanel : Model -> Html Msg
 viewHullLibraryPanel model =
     HullReferences.viewHullLibraryPanel
