@@ -124,7 +124,7 @@ updateModel msgs modelToUpdate =
 suite =
     describe "UI" <|
         [ viewModeTests
-        , hullStudioTests
+        , hullLibraryTests
         , partitionsTests
         , blockList
         , blockDetails
@@ -144,7 +144,7 @@ viewModeTests =
         , test "Hull panel is displayed when switching mode" <|
             \_ ->
                 setView
-                    [ ToJs <| SwitchViewMode <| HullStudio ]
+                    [ ToJs <| SwitchViewMode <| HullLibrary ]
                     |> Query.fromHtml
                     |> Query.find [ Selector.class "panel" ]
                     |> Query.has [ Selector.class "hull-panel" ]
@@ -189,14 +189,14 @@ viewModeTests =
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.classes [ "tab-item", "active" ] ]
                     |> Query.count (Expect.equal 1)
-        , test "The first tab-item triggers HullStudio" <|
+        , test "The first tab-item triggers HullLibrary" <|
             \_ ->
                 initialView
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.class "tab-item" ]
                     |> Query.index 0
                     |> Event.simulate Event.click
-                    |> Event.expect (ToJs <| SwitchViewMode HullStudio)
+                    |> Event.expect (ToJs <| SwitchViewMode HullLibrary)
         , test "The second tab-item triggers Partitioning" <|
             \_ ->
                 initialView
@@ -232,8 +232,8 @@ viewModeTests =
         ]
 
 
-hullStudioTests =
-    describe "HullStudio" <|
+hullLibraryTests =
+    describe "HullLibrary" <|
         [ test "None selected by default" <|
             \_ ->
                 initialView

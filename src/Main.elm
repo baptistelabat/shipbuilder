@@ -1506,7 +1506,7 @@ initModel flag =
 
         viewMode : ViewMode
         viewMode =
-            HullStudio
+            HullLibrary
     in
     { build = flag.buildSHA
     , currentDate = Time.millisToPosix 0
@@ -1571,7 +1571,7 @@ initCmd model =
 
 type ViewMode
     = SpaceReservation SpaceReservationView
-    | HullStudio
+    | HullLibrary
     | Partitioning PartitioningView
     | KpiStudio
     | Modeller
@@ -1606,8 +1606,8 @@ encodeViewMode viewMode =
             SpaceReservation _ ->
                 "block"
 
-            HullStudio ->
-                "hull"
+            HullLibrary ->
+                "library"
 
             Partitioning _ ->
                 "partition"
@@ -3135,7 +3135,7 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Hull", icon = FASolid.ship [], viewMode = HullStudio }
+    [ { title = "Library", icon = FASolid.ship [], viewMode = HullLibrary }
     , { title = "Partitions", icon = FASolid.bars [], viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone [], viewMode = SpaceReservation WholeList }
     , { title = "KPIs", icon = FASolid.tachometerAlt [], viewMode = KpiStudio }
@@ -3333,9 +3333,9 @@ viewModesMatch left right =
                 _ ->
                     False
 
-        HullStudio ->
+        HullLibrary ->
             case right of
-                HullStudio ->
+                HullLibrary ->
                     True
 
                 _ ->
@@ -3401,8 +3401,8 @@ viewPanel model =
         SpaceReservation spaceReservationView ->
             viewSpaceReservationPanel spaceReservationView model
 
-        HullStudio ->
-            viewHullStudioPanel model
+        HullLibrary ->
+            viewHullLibraryPanel model
 
         Partitioning partitioningView ->
             viewPartitioning partitioningView model
@@ -3435,9 +3435,9 @@ hullReferencesMsgs =
     }
 
 
-viewHullStudioPanel : Model -> Html Msg
-viewHullStudioPanel model =
-    HullReferences.viewHullStudioPanel
+viewHullLibraryPanel : Model -> Html Msg
+viewHullLibraryPanel model =
+    HullReferences.viewHullLibraryPanel
         (Dict.keys model.slices)
         (List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices)
         (List.map HullSlices.isHullCustomized <| Dict.values model.slices)

@@ -1,6 +1,6 @@
 module HullReferences exposing
     ( HullReferencesMsgs
-    , viewHullStudioPanel
+    , viewHullLibraryPanel
     )
 
 import FontAwesome.Solid as FASolid
@@ -20,14 +20,14 @@ type alias HullReferencesMsgs msg =
     }
 
 
-viewHullStudioPanel : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullStudioPanel hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
+viewHullLibraryPanel : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullLibraryPanel hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
     div
         [ class "panel hull-panel"
         ]
         [ h2 [ class "hull-panel-title" ]
-            [ text "Hull Studio"
-            , div [ class "hull-studio-actions" ]
+            [ text "Hull Library"
+            , div [ class "hull-library-actions" ]
                 [ viewHullImporter hullReferencesMsgs.openLibraryMsg ]
             ]
         , viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs
@@ -73,10 +73,10 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
         hullWrapperClass : String
         hullWrapperClass =
             if isHullCustomized then
-                "hull-info-wrapper hull-info-wrapper__simple"
+                "hull-info-wrapper hull-info-wrapper__custom"
 
             else
-                "hull-info-wrapper hull-info-wrapper__double"
+                "hull-info-wrapper hull-info-wrapper__uncustom"
     in
     li
         (if selectedHull == Just ref then
@@ -98,13 +98,21 @@ viewHullReference selectedHull hullReferencesMsgs ref hash isHullCustomized =
             , p [ class "hull-hash" ] [ text hash ]
             ]
         , if isHullCustomized then
-            div [ class "hull-actions hull-actions__simple" ]
-                [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
-                , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
+            div []
+                [ div [ class "hull-actions hull-actions__custom" ]
+                    [ viewSaveAsNewHullAction ref hullReferencesMsgs.saveAsNewMsg
+                    , viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg
+                    ]
+                , div
+                    [ class "hull-custom-icon" ]
+                    [ text "unsaved"
+                    , FASolid.asterisk []
+                    , text "changes"
+                    ]
                 ]
 
           else
-            div [ class "hull-actions hull-actions__double" ]
+            div [ class "hull-actions hull-actions__uncustom" ]
                 [ viewRemoveHullAction ref hullReferencesMsgs.removeHullMsg ]
         ]
 
