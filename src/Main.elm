@@ -494,7 +494,7 @@ keyupToMsg keyCode =
             NoJs NoOp
 
 
-formatClipboardData : String -> Encode.Value
+formatClipboardData : String -> Maybe (List XYZ)
 formatClipboardData data =
     let
         listCoordinate : List (List Float)
@@ -509,24 +509,18 @@ formatClipboardData data =
         controlFormat =
             List.all ((==) 3) <| List.map List.length listCoordinate
 
-        encodeCoordinate : List Float -> Encode.Value
-        encodeCoordinate coordinate =
-            Encode.object
-                [ ( "x", Encode.float <| Maybe.withDefault 0 <| List.head coordinate )
-                , ( "y", Encode.float <| Maybe.withDefault 0 <| List.head <| List.drop 1 coordinate )
-                , ( "z", Encode.float <| Maybe.withDefault 0 <| List.head <| List.drop 2 coordinate )
-                ]
-
-        encodeCoordinates : Encode.Value
-        encodeCoordinates =
-            if controlFormat then
-                Encode.list encodeCoordinate listCoordinate
-
-            else
-                Encode.null
+        constructCoordinate : List Float -> XYZ
+        constructCoordinate coordinateList =
+            { x = Maybe.withDefault 0 <| List.head coordinateList
+            , y = Maybe.withDefault 0 <| List.head <| List.drop 1 coordinateList
+            , z = Maybe.withDefault 0 <| List.head <| List.drop 2 coordinateList
+            }
     in
-    Encode.object
-        [ ( "coordinates", encodeCoordinates ) ]
+    if controlFormat then
+        Just <| List.map constructCoordinate listCoordinate
+
+    else
+        Nothing
 
 
 jsMsgToMsg : JsData -> Msg
@@ -575,12 +569,12 @@ jsMsgToMsg js =
         "paste-clipboard" ->
             case Decode.decodeValue Decode.string js.data of
                 Ok dataString ->
-                    case Decode.decodeValue (Decode.field "coordinates" coordinatesXYZDecoder) <| formatClipboardData dataString of
-                        Ok coordinates ->
+                    case formatClipboardData dataString of
+                        Just coordinates ->
                             FromJs <| PasteClipBoard coordinates
 
-                        Err message ->
-                            FromJs <| JSError <| Decode.errorToString message
+                        Nothing ->
+                            FromJs <| JSError <| "Clipboard data have incorrect format"
 
                 Err message ->
                     FromJs <| JSError <| Decode.errorToString message

@@ -869,7 +869,7 @@ suite =
                                 ]
                 , test "Get dimension parameters from list of slices" <|
                     \_ ->
-                        HullSlices.getParamFromDenormalizedSlices
+                        HullSlices.getSpaceParametersFromHullSlices
                             [ { x = 0
                               , zmin = 0
                               , zmax = 0
