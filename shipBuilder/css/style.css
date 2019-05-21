@@ -364,13 +364,18 @@ li.hull-reference .hull-info-wrapper {
     cursor: pointer;
 }
 
-li.hull-reference .hull-info-wrapper__custom {
+li.hull-reference .hull-info-wrapper__custom  {
     width: calc(100% - 60px);
     position: relative;
 }
 
+li.hull-reference:hover .hull-info-wrapper__custom  {
+    width: calc(100% - 90px);
+    position: relative;
+}
+
 li.hull-reference:hover .hull-info-wrapper__uncustom  {
-    width: calc(100% - 30px);
+    width: calc(100% - 65px);
     position: relative;
 }
 
@@ -436,40 +441,65 @@ li.hull-reference .hull-custom-icon svg {
     margin-left: 5px;
 }
 
+li.hull-reference .hull-customized {
+    display: flex;
+
+}
+
 li.hull-reference .hull-actions {
     display: none;
-}
-
-li.hull-reference .hull-actions__custom {
-    width: 50px;
-}
-
-li.hull-reference .hull-actions__uncustom {
-    width: 25px;
+    align-items: center;
 }
 
 li.hull-reference:hover .hull-actions {
     display: flex;
 }
 
-li.hull-reference .hull-actions .hull-action {
+li.hull-reference .hull-actions__custom {
+    width: 75px;
+
+}
+
+li.hull-reference .hull-actions__uncustom {
+    width: 50px;
+
+}
+
+li.hull-reference .hull-action {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 4px;
     cursor: pointer;
 }
 
-.hull-panel .delete-hull svg
+.hull-panel .focus-hull
 {
+    border-left: 1px solid var(--contrast-color);
     height: 16px;
 }
 
-.hull-panel .save-hull svg
+.hull-panel .focus-hull svg
 {
     height: 16px;
-    margin-right: 8px;
+    color: var(--primary-color);
+    margin-left: 10px;
 }
+
+.hull-panel .focus-hull:hover svg
+{
+    color: var(--on-primary-color__accent);
+}
+
+.hull-panel .delete-hull svg, .hull-panel .save-hull svg
+{
+    margin-right: 12px;
+    height: 16px;
+    color: var(--on-secondary-color__accent);
+}
+
+.hull-panel .delete-hull:hover svg, .hull-panel .save-hull:hover svg
+{
+    color: var(--on-secondary-color__muted);
+}
+
 
 /* BLOCK */
 
@@ -852,6 +882,29 @@ p.text-muted {
     margin: -12px;
     padding: 12px;
     position: relative;
+}
+
+.modeller-name {
+    display: flex;
+    position: relative;
+}
+
+.modeller-panel-title .focus-back {
+    color: var(--primary-color);
+    padding: 3px;
+    margin-right: 5px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.modeller-panel-title .focus-back:hover {
+    color: var(--primary-color__accent);
+}
+
+.modeller-panel-title .focus-back svg {
+    height: 16px;
 }
 
 .modeller-actions {

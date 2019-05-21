@@ -9,12 +9,11 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
         self.driver.find_element_by_xpath(
             ".//p[contains(text(),'Library')]").click()
 
-    def click_on_modeller(self):
-        self.driver.find_element_by_xpath(
-            ".//p[contains(text(),'Modeller')]").click()
-
     def click_on_hull(self, hull_name):
         self.driver.find_element_by_id(hull_name).click()
+
+    def click_on_focus_hull(self):
+        self.driver.find_element_by_class_name("focus-hull").click()
 
     def get_block_coefficient(self):
         return self.driver.find_element_by_xpath(
@@ -49,7 +48,7 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
     def test_block_coefficient_changes_with_draught(self):
         self.click_on_hull_library()
         self.click_on_hull('MPOV')
-        self.click_on_modeller()
+        self.click_on_focus_hull()
         self.assertEqual("0.16", self.get_block_coefficient())
         self.driver.find_element_by_id("draught").send_keys(Keys.UP)
         self.driver.find_element_by_id("draught").send_keys(Keys.UP)
@@ -58,7 +57,7 @@ class ShipBuilderIntegrationTests(unittest.TestCase):
     def test_126_calcul_du_kb(self):
         self.click_on_hull_library()
         self.click_on_hull('MPOV')
-        self.click_on_modeller()
+        self.click_on_focus_hull()
         self.assertEqual("150", self.get_block_displacement())
         self.assertEqual("1", self.get_block_kb())
         self.assertEqual("6.1", self.get_block_km())

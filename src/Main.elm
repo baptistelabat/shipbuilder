@@ -4,6 +4,7 @@ port module Main exposing
     , Blocks
     , Dimension(..)
     , FromJsMsg(..)
+    , HullView(..)
     , JsData
     , Model
     , Msg(..)
@@ -1506,7 +1507,7 @@ initModel flag =
 
         viewMode : ViewMode
         viewMode =
-            HullLibrary
+            Hull HullLibrary
     in
     { build = flag.buildSHA
     , currentDate = Time.millisToPosix 0
@@ -1571,10 +1572,14 @@ initCmd model =
 
 type ViewMode
     = SpaceReservation SpaceReservationView
-    | HullLibrary
+    | Hull HullView
     | Partitioning PartitioningView
     | KpiStudio
-    | Modeller
+
+
+type HullView
+    = HullLibrary
+    | HullDetails
 
 
 type SpaceReservationView
@@ -1606,7 +1611,7 @@ encodeViewMode viewMode =
             SpaceReservation _ ->
                 "block"
 
-            HullLibrary ->
+            Hull _ ->
                 "library"
 
             Partitioning _ ->
@@ -1614,9 +1619,6 @@ encodeViewMode viewMode =
 
             KpiStudio ->
                 "kpi"
-
-            Modeller ->
-                "modeller"
 
 
 encodeColor : Color -> Encode.Value
@@ -3135,11 +3137,10 @@ type alias Tabs =
 
 tabItems : Tabs
 tabItems =
-    [ { title = "Library", icon = FASolid.ship [], viewMode = HullLibrary }
+    [ { title = "Library", icon = FASolid.ship [], viewMode = Hull HullLibrary }
     , { title = "Partitions", icon = FASolid.bars [], viewMode = Partitioning PropertiesEdition }
     , { title = "Blocks", icon = FARegular.clone [], viewMode = SpaceReservation WholeList }
     , { title = "KPIs", icon = FASolid.tachometerAlt [], viewMode = KpiStudio }
-    , { title = "Modeller", icon = FASolid.clone [], viewMode = Modeller }
     ]
 
 
@@ -3333,9 +3334,9 @@ viewModesMatch left right =
                 _ ->
                     False
 
-        HullLibrary ->
+        Hull _ ->
             case right of
-                HullLibrary ->
+                Hull _ ->
                     True
 
                 _ ->
@@ -3352,14 +3353,6 @@ viewModesMatch left right =
         KpiStudio ->
             case right of
                 KpiStudio ->
-                    True
-
-                _ ->
-                    False
-
-        Modeller ->
-            case right of
-                Modeller ->
                     True
 
                 _ ->
@@ -3401,17 +3394,14 @@ viewPanel model =
         SpaceReservation spaceReservationView ->
             viewSpaceReservationPanel spaceReservationView model
 
-        HullLibrary ->
-            viewHullLibraryPanel model
+        Hull hullView ->
+            viewHullPanel hullView model
 
         Partitioning partitioningView ->
             viewPartitioning partitioningView model
 
         KpiStudio ->
             viewKpiStudio model
-
-        Modeller ->
-            viewModeller model
 
 
 viewSpaceReservationPanel : SpaceReservationView -> Model -> Html Msg
@@ -3432,7 +3422,18 @@ hullReferencesMsgs =
     , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
     , removeHullMsg = ToJs << RemoveHull
     , saveAsNewMsg = NoJs << SaveAsNewHull
+    , changeViewMsg = ToJs <| SwitchViewMode <| Hull <| HullDetails
     }
+
+
+viewHullPanel : HullView -> Model -> Html Msg
+viewHullPanel hullview model =
+    case hullview of
+        HullLibrary ->
+            viewHullLibraryPanel model
+
+        HullDetails ->
+            viewModeller model
 
 
 viewHullLibraryPanel : Model -> Html Msg
@@ -3541,12 +3542,24 @@ viewModeller model =
         [ class "panel modeller-panel" ]
         (h2
             [ class "modeller-panel-title" ]
-            [ text modellerName
+            [ div [ class "modeller-name" ]
+                [ viewBackToHullList
+                , text modellerName
+                ]
             , div [ class "modeller-actions" ]
                 [ resetHullSlices model ]
             ]
             :: (model.slices |> Dict.toList |> List.filterMap viewSlices)
         )
+
+
+viewBackToHullList : Html Msg
+viewBackToHullList =
+    div
+        [ class "focus-back"
+        , onClick <| ToJs <| SwitchViewMode <| Hull HullLibrary
+        ]
+        [ FASolid.arrowLeft [] ]
 
 
 resetHullSlices : Model -> Html Msg
