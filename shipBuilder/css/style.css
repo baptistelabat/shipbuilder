@@ -884,6 +884,28 @@ p.text-muted {
     position: relative;
 }
 
+.modeller-name {
+    display: flex;
+    position: relative;
+}
+
+.modeller-panel-title .focus-back {
+    color: var(--primary-color);
+    padding: 3px;
+    margin-right: 5px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.modeller-panel-title .focus-back:hover {
+    color: var(--primary-color__accent);
+}
+
+.modeller-panel-title .focus-back svg {
+    height: 16px;
+}
+
 .modeller-actions {
     display: flex;
     height: 0px;

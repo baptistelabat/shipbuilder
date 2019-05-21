@@ -3542,12 +3542,24 @@ viewModeller model =
         [ class "panel modeller-panel" ]
         (h2
             [ class "modeller-panel-title" ]
-            [ text modellerName
+            [ div [ class "modeller-name" ]
+                [ viewBackToHullList
+                , text modellerName
+                ]
             , div [ class "modeller-actions" ]
                 [ resetHullSlices model ]
             ]
             :: (model.slices |> Dict.toList |> List.filterMap viewSlices)
         )
+
+
+viewBackToHullList : Html Msg
+viewBackToHullList =
+    div
+        [ class "focus-back"
+        , onClick <| ToJs <| SwitchViewMode <| Hull HullLibrary
+        ]
+        [ FASolid.arrowLeft [] ]
 
 
 resetHullSlices : Model -> Html Msg
