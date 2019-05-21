@@ -896,6 +896,7 @@ p.text-muted {
     height: 100%;
     display: flex;
     align-items: center;
+    cursor: pointer;
 }
 
 .modeller-panel-title .focus-back:hover {
