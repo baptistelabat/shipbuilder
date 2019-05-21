@@ -364,6 +364,11 @@ li.hull-reference .hull-info-wrapper {
     cursor: pointer;
 }
 
+li.hull-reference .hull-info-wrapper__custom  {
+    width: calc(100% - 60px);
+    position: relative;
+}
+
 li.hull-reference:hover .hull-info-wrapper__custom  {
     width: calc(100% - 90px);
     position: relative;
