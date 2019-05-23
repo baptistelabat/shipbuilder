@@ -61,8 +61,8 @@ modellerView =
         ]
 
 
-modellerViewWithSectionExpand : Html Msg
-modellerViewWithSectionExpand =
+modellerViewWithSlicesDetailsExpanded : Html Msg
+modellerViewWithSlicesDetailsExpanded =
     setView
         [ ToJs <| SelectHullReference "anthineas"
         , ToJs <| SwitchViewMode <| Hull HullDetails
@@ -1187,12 +1187,12 @@ modellerTests =
                     |> Event.expect (ToJs <| ToggleSlicesDetails True "anthineas")
         , test "Slices selector is present" <|
             \_ ->
-                modellerViewWithSectionExpand
+                modellerViewWithSlicesDetailsExpanded
                     |> Query.fromHtml
                     |> Query.has [ Selector.attribute <| Attributes.id "slice-number" ]
         , test "Slices selector is triggers SelectSlice" <|
             \_ ->
-                modellerViewWithSectionExpand
+                modellerViewWithSlicesDetailsExpanded
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.id "slice-number" ]
                     |> Query.first
