@@ -1,11 +1,11 @@
 module HullSlices exposing
-    ( Coordinate
-    , CustomHullProperties
+    ( CustomHullProperties
     , HullSlice
     , HullSliceAsAreaXYList
     , HullSliceAsZYList
     , HullSliceCentroidAndArea
     , HullSlices
+    , XYZ
     , applyCustomPropertiesToHullSlices
     , area
     , areaTrapezoid
@@ -90,7 +90,7 @@ type alias HullSliceCentroidAndArea =
     }
 
 
-type alias Coordinate =
+type alias XYZ =
     { x : Float
     , y : Float
     , z : Float
@@ -518,10 +518,10 @@ extractY hs =
         |> List.map Tuple.second
 
 
-extractXYZ : HullSliceAsZYList -> List Coordinate
+extractXYZ : HullSliceAsZYList -> List XYZ
 extractXYZ hs =
     let
-        extract : ( Float, Float ) -> Coordinate
+        extract : ( Float, Float ) -> XYZ
         extract zy =
             { x = hs.x, y = Tuple.second zy, z = Tuple.first zy }
     in

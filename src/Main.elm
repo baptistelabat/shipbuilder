@@ -3791,7 +3791,7 @@ viewHullSliceList hullslices sliceSelected =
                     )
 
 
-viewHullSliceCoordinate : HullSlices.Coordinate -> Html Msg
+viewHullSliceCoordinate : HullSlices.XYZ -> Html Msg
 viewHullSliceCoordinate xyz =
     li
         [ class "sections-item input-group" ]
