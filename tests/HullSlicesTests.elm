@@ -132,6 +132,15 @@ compareHs left right =
         right
 
 
+expectAll : List Expectation -> Expectation
+expectAll expectationList =
+    if List.all (\e -> e == Expect.pass) expectationList then
+        Expect.pass
+
+    else
+        Expect.fail "At least one expectation failed"
+
+
 suite : Test
 suite =
     describe "Hull slices"
@@ -887,14 +896,17 @@ suite =
                         (Maybe.map toHullSliceAsZYList <| List.head TestData.anthineas.slices)
         , test "Can extract X position of each point of a slice" <|
             \_ ->
-                Just
-                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-                    |> Expect.equal
-                        (List.head TestData.anthineas.slices
-                            |> Maybe.map toHullSliceAsZYList
-                            |> Maybe.map extractXYZ
-                            |> Maybe.map (List.map .x)
-                        )
+                let
+                    expectWithin f1 f2 =
+                        Expect.within epsAbsolute f1 f2
+                in
+                List.head TestData.anthineas.slices
+                    |> Maybe.map toHullSliceAsZYList
+                    |> Maybe.map extractXYZ
+                    |> Maybe.map (List.map .x)
+                    |> Maybe.withDefault []
+                    |> List.map2 expectWithin [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                    |> expectAll
         , test "Can extract Y position of each point of a slice" <|
             \_ ->
                 Just
