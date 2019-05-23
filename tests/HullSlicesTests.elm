@@ -885,20 +885,54 @@ suite =
                     }
                     |> Expect.equal
                         (Maybe.map toHullSliceAsZYList <| List.head TestData.anthineas.slices)
-        , test "Can extract XYZ position of each point of a slice" <|
+        , test "Can extract X position of each point of a slice" <|
             \_ ->
                 Just
-                    [ { x = 0, y = 0.964899527258786, z = 0.31587930659489755 }
-                    , { x = 0, y = 0.9648943694688346, z = 0.33965215675068555 }
-                    , { x = 0, y = 0.9629765202249831, z = 0.36342500690647356 }
-                    , { x = 0, y = 0.9592250480632435, z = 0.3871978570622616 }
-                    , { x = 0, y = 0.955473575901504, z = 0.4109707072180496 }
-                    , { x = 0, y = 0.9502377948034448, z = 0.43474355737383763 }
-                    , { x = 0, y = 0.9394176761317832, z = 0.45851640752962564 }
-                    , { x = 0, y = 0.9282437133662546, z = 0.48228925768541364 }
-                    , { x = 0, y = 0.9102579602794127, z = 0.5060621078412016 }
-                    , { x = 0, y = 0.742320749879794, z = 0.5298349579969897 }
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                    |> Expect.equal
+                        (List.head TestData.anthineas.slices
+                            |> Maybe.map toHullSliceAsZYList
+                            |> Maybe.map extractXYZ
+                            |> Maybe.map (List.map .x)
+                        )
+        , test "Can extract Y position of each point of a slice" <|
+            \_ ->
+                Just
+                    [ 0.964899527258786
+                    , 0.9648943694688346
+                    , 0.9629765202249831
+                    , 0.9592250480632435
+                    , 0.955473575901504
+                    , 0.9502377948034448
+                    , 0.9394176761317832
+                    , 0.9282437133662546
+                    , 0.9102579602794127
+                    , 0.742320749879794
                     ]
                     |> Expect.equal
-                        (Maybe.map extractXYZ <| Maybe.map toHullSliceAsZYList <| List.head TestData.anthineas.slices)
+                        (List.head TestData.anthineas.slices
+                            |> Maybe.map toHullSliceAsZYList
+                            |> Maybe.map extractXYZ
+                            |> Maybe.map (List.map .y)
+                        )
+        , test "Can extract Z position of each point of a slice" <|
+            \_ ->
+                Just
+                    [ 0.31587930659489755
+                    , 0.33965215675068555
+                    , 0.36342500690647356
+                    , 0.3871978570622616
+                    , 0.4109707072180496
+                    , 0.43474355737383763
+                    , 0.45851640752962564
+                    , 0.48228925768541364
+                    , 0.5060621078412016
+                    , 0.5298349579969897
+                    ]
+                    |> Expect.equal
+                        (List.head TestData.anthineas.slices
+                            |> Maybe.map toHullSliceAsZYList
+                            |> Maybe.map extractXYZ
+                            |> Maybe.map (List.map .z)
+                        )
         ]
