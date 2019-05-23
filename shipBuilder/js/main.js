@@ -633,49 +633,55 @@ let deleteHighlightedSlice = function () {
     oldHighlights.forEach(oldHighlight => removeFromScene(oldHighlight));
 }
 
+let buildSliceGeometry = function (slice, depth, breadth, length, xmin, zmin) {
+    //space parameters
+    var H = depth;
+    var B = breadth;
+    var L = length;
+    var ymin = (-breadth / 2);
+
+    //add margin between highlight and hull
+    const margin = 0.005;
+
+    //slice parameters
+    var x = slice['x'];
+    var ny = slice['y'].length / 2;
+    var zmin_slice = slice['zmin'] - margin;
+    var zmax_slice = slice['zmax'] + margin;
+    var dz = (zmax_slice - zmin_slice) / (ny-1);
+
+    //complete slice by symmetry
+    var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
+    var ys = slice['y'];
+
+    var geometry = new THREE.Geometry();
+
+    //add vertices to geometry
+    for (var i = 0 ; i < ny ; i++)
+    {
+        var y = ys[i];
+        var z = zmin_slice + dz*i;
+        geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin+margin*B,z*H+zmin ));
+    }
+    for (var i = 0 ; i < ny ; i++)
+    {
+        var y = ys[i+ny];
+        var z = zmax_slice - dz*i;
+        geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin-margin*B,z*H+zmin ));
+    }
+
+    // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
+    const shipVertices = geometry.vertices;
+    geometry.vertices = shipVertices.map(vertex => {
+        return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
+    });
+
+    return geometry;
+}
+
 let displayHighlightedSlice = function (slice, depth, breadth, length, xmin, zmin) {
-  //space parameters
-  var H = depth;
-  var B = breadth;
-  var L = length;
-  var ymin = (-breadth / 2);
 
-  //add margin between highlight and hull
-  const margin = 0.005;
-
-  //slice parameters
-  var x = slice['x'];
-  var ny = slice['y'].length / 2;
-  var zmin_slice = slice['zmin'] - margin;
-  var zmax_slice = slice['zmax'] + margin;
-  var dz = (zmax_slice - zmin_slice) / (ny-1);
-
-  //complete slice by symmetry
-  var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
-  var ys = slice['y'];
-
-  var geometry = new THREE.Geometry();
-
-  //add vertices to geometry
-  for (var i = 0 ; i < ny ; i++)
-  {
-      var y = ys[i];
-      var z = zmin_slice + dz*i;
-      geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin+margin*B,z*H+zmin ));
-  }
-  for (var i = 0 ; i < ny ; i++)
-  {
-      var y = ys[i+ny];
-      var z = zmax_slice - dz*i;
-      geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin-margin*B,z*H+zmin ));
-  }
-
-  // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
-  const shipVertices = geometry.vertices;
-  geometry.vertices = shipVertices.map(vertex => {
-      return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
-  });
-
+  var geometry = buildSliceGeometry(slice, depth, breadth, length, xmin, zmin);
   const colorRed = new THREE.Color(1, 0.5, 0.5); // red
   const material = new THREE.LineBasicMaterial({ color: colorRed, linewidth: 1, side: THREE.DoubleSide });
 
