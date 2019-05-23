@@ -841,6 +841,7 @@ type alias UiState =
     { accordions : Dict String Bool
     , blockContextualMenu : Maybe String
     , selectedSlice : StringValueInput.IntInput
+    , showSelectedSlice : Bool
     }
 
 
@@ -1526,6 +1527,7 @@ initModel flag =
         { accordions = Dict.empty
         , blockContextualMenu = Nothing
         , selectedSlice = StringValueInput.fromInt "section-selector" 1
+        , showSelectedSlice = False
         }
     , tags = []
     , customProperties = []
@@ -2596,7 +2598,10 @@ updateModelToJs msg model =
 
                 newUiState : UiState
                 newUiState =
-                    { uiState | accordions = Dict.insert "hull-sections" isOpen uiState.accordions }
+                    { uiState
+                        | accordions = Dict.insert "hull-sections" isOpen uiState.accordions
+                        , showSelectedSlice = isOpen
+                    }
             in
             { model | uiState = newUiState }
 
