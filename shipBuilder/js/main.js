@@ -504,7 +504,7 @@ let addVerticesForSlice = function ( json, slice, ny, geometry ) {
     }
 }
 
-let addFacesForSlices = function ( nx, ny, geometry) {
+let addFacesForSlices = function ( nx, ny, geometry ) {
     for (let i = 0; i < nx -1 ; i++){
         for(let j=0; j<ny -1 ; j++)
         {
@@ -533,21 +533,7 @@ let addFacesForSlices = function ( nx, ny, geometry) {
     }
 }
 
-let buildHullGeometry = function ( json ) {
-    var geometry = new THREE.Geometry();
-
-    var slices = json['slices'];
-    var nx = slices.length;
-    var ny = slices[0]['y'].length;
-    var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
-    slices = slices.map(function(slice){slice['y'] = make_symmetric(slice['y']); return slice;});
-
-    slices.forEach(function (slice)
-        { addVerticesForSlice(json, slice, ny, geometry) } );
-
-    addFacesForSlices(nx, ny, geometry);
-
-    // BEGIN close the mesh
+let closeMeshForHull = function (nx, ny, geometry ) {
     var i=0;
     for(let j=0; j<ny -1 ; j++)
     {
@@ -583,10 +569,24 @@ let buildHullGeometry = function ( json ) {
       geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
       geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
     }
-    // END close the mesh
+}
 
+let buildHullGeometry = function ( json ) {
+    var geometry = new THREE.Geometry();
 
-    //compute Normals
+    var slices = json['slices'];
+    var nx = slices.length;
+    var ny = slices[0]['y'].length;
+    var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
+    slices = slices.map(function(slice){slice['y'] = make_symmetric(slice['y']); return slice;});
+
+    slices.forEach(function (slice)
+        { addVerticesForSlice(json, slice, ny, geometry) } );
+
+    addFacesForSlices(nx, ny, geometry);
+
+    closeMeshForHull(nx, ny, geometry);
+
     geometry.computeVertexNormals();
     geometry.computeFaceNormals();
     return geometry;
