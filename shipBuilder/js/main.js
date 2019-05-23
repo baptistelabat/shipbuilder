@@ -436,7 +436,7 @@ let deleteWaterline = function () {
     oldWaterLines.forEach(oldWaterLine => removeFromScene(oldWaterLine));
 }
 
-let makeWaterLine = function (zPosition) {
+let displayWaterLine = function (zPosition) {
     // delete old water line
     deleteWaterline ();
 
@@ -616,10 +616,8 @@ let loadHull = function (json) {
         hull.sbType = "hull";
         scene.add(hull);
 
-        //dispaly water line
         var zWaterLine = (hullSlices.depth + hullSlices.zmin) - hullSlices.draught;
-        makeWaterLine(zWaterLine);
-
+        displayWaterLine(zWaterLine);
 
         deleteHighlightedSlice();
 
