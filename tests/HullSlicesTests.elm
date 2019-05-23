@@ -133,12 +133,8 @@ compareHs left right =
 
 
 expectAll : List Expectation -> Expectation
-expectAll expectationList =
-    if List.all (\e -> e == Expect.pass) expectationList then
-        Expect.pass
-
-    else
-        Expect.fail "At least one expectation failed"
+expectAll expectations =
+    Expect.all (List.map (\expectation -> \_ -> expectation) expectations) ()
 
 
 suite : Test
