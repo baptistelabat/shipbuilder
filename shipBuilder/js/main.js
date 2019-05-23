@@ -634,15 +634,14 @@ let deleteHighlightedSlice = function () {
 }
 
 let buildSliceGeometry = function (slice, depth, breadth, length, xmin, zmin) {
-    //add margin between highlight and hull
-    const margin = 0.005;
+    const highlightMarginWithHull = 0.005;
 
     var ymin = (-breadth / 2);
 
     var x = slice['x'];
     var ny = slice['y'].length / 2;
-    var zmin_slice = slice['zmin'] - margin;
-    var zmax_slice = slice['zmax'] + margin;
+    var zmin_slice = slice['zmin'] - highlightMarginWithHull;
+    var zmax_slice = slice['zmax'] + highlightMarginWithHull;
     var dz = (zmax_slice - zmin_slice) / (ny-1);
 
     var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
@@ -654,13 +653,13 @@ let buildSliceGeometry = function (slice, depth, breadth, length, xmin, zmin) {
     {
         var y = ys[i];
         var z = zmin_slice + dz*i;
-        geometry.vertices.push(new THREE.Vector3( x * length + xmin, y * breadth + ymin + margin * breadth, z * depth + zmin ));
+        geometry.vertices.push(new THREE.Vector3( x * length + xmin, y * breadth + ymin + highlightMarginWithHull * breadth, z * depth + zmin ));
     }
     for (var i = 0 ; i < ny ; i++)
     {
         var y = ys[i+ny];
         var z = zmax_slice - dz*i;
-        geometry.vertices.push(new THREE.Vector3( x * length + xmin, y * breadth + ymin - margin * breadth, z * depth +zmin ));
+        geometry.vertices.push(new THREE.Vector3( x * length + xmin, y * breadth + ymin - highlightMarginWithHull * breadth, z * depth +zmin ));
     }
 
     // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
