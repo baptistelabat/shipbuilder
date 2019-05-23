@@ -139,8 +139,8 @@ let switchMode = function (newMode) {
     if (newMode !== mode) {
         mode = newMode;
 
-        resetSelection();
-        
+        resetBlockSelection();
+
         const sbObjects = scene.children.filter(child => child.sbType);
         sbObjects.forEach(object => {
             setObjectOpacityForCurrentMode(object);
@@ -222,7 +222,7 @@ let resetScene = function (views, scene) {
             view.control.detach();
         }
     })
-    resetSelection();
+    resetBlockSelection();
     const sbObjectsToDelete = scene.children.filter(child => child.sbType);
     sbObjectsToDelete.forEach(toDelete => removeFromScene(toDelete));
 }
@@ -953,7 +953,7 @@ let canChangeInMode = function (object, mode) {
 let selectBlock = function (block) {
     if (isBlock(block)) {
         // selection (not multiple) of a block : the result is a single block selected, even if a multiple selection existed before
-        resetSelection();
+        resetBlockSelection();
         addToSelection(block);
 
         // attach the gizmo to the block, to allow moving/scaling it
@@ -1007,7 +1007,7 @@ let removeFromSelection = function (object) {
 }
 
 
-let resetSelection = function () {
+let resetBlockSelection = function () {
     if (selection.length) {
         // reset the highlight on all the blocks in the selection
         selection.forEach(uuid => {
@@ -1606,7 +1606,7 @@ let onClick = function (event) {
             }
             break;
         case 2: // middle/wheel click
-            resetSelection();
+            resetBlockSelection();
             sendToElm("unselect", null);
             break;
         default: // right click
