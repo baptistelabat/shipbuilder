@@ -1529,7 +1529,7 @@ initModel flag =
     , uiState =
         { accordions = Dict.empty
         , blockContextualMenu = Nothing
-        , selectedSlice = StringValueInput.fromInt "section number" 1
+        , selectedSlice = StringValueInput.fromInt "slice number" 1
         , showSelectedSlice = False
         }
     , tags = []
@@ -1912,7 +1912,7 @@ type ToJsMsg
     | SelectBlock Block
     | SelectHullReference String
     | SelectSlice String Int String
-    | ToggleSections Bool String
+    | ToggleSlicesDetails Bool String
     | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
@@ -2593,7 +2593,7 @@ updateModelToJs msg model =
                         False ->
                             { model | uiState = updateUiState int }
 
-        ToggleSections isOpen _ ->
+        ToggleSlicesDetails isOpen _ ->
             let
                 uiState : UiState
                 uiState =
@@ -2602,7 +2602,7 @@ updateModelToJs msg model =
                 newUiState : UiState
                 newUiState =
                     { uiState
-                        | accordions = Dict.insert "hull-sections" isOpen uiState.accordions
+                        | accordions = Dict.insert "hull-slices-details" isOpen uiState.accordions
                         , selectedSlice = StringValueInput.asIntIn uiState.selectedSlice 1
                         , showSelectedSlice = isOpen
                     }
@@ -2668,7 +2668,7 @@ updateModelToJs msg model =
                 newUiState : UiState
                 newUiState =
                     { uiState
-                        | accordions = Dict.insert "hull-sections" False uiState.accordions
+                        | accordions = Dict.insert "hull-slices-details" False uiState.accordions
                         , showSelectedSlice = False
                     }
             in
@@ -2992,7 +2992,7 @@ msg2json model action =
                                     model.uiState.showSelectedSlice
                         }
 
-        ToggleSections isOpen hullReference ->
+        ToggleSlicesDetails isOpen hullReference ->
             case Dict.get hullReference model.slices of
                 Nothing ->
                     Nothing
@@ -3612,7 +3612,7 @@ viewModeller model =
                         , (StringValueInput.view <| HullSlices.getDepth slices) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
                         , (StringValueInput.view <| HullSlices.getDraught slices) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
-                        , viewHullSections model.uiState hullReference slices
+                        , viewHullSlicesDetails model.uiState hullReference slices
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
@@ -3705,17 +3705,17 @@ resetHullSlices model =
         ]
 
 
-viewHullSections : UiState -> String -> HullSlices -> Html Msg
-viewHullSections uiState hullReference hullslices =
+viewHullSlicesDetails : UiState -> String -> HullSlices -> Html Msg
+viewHullSlicesDetails uiState hullReference hullslices =
     div
         [ class "section-details" ]
     <|
-        if isAccordionOpened uiState "hull-sections" then
+        if isAccordionOpened uiState "hull-slices-details" then
             [ p
                 [ class "section-details-title"
-                , onClick <| ToJs <| ToggleSections False hullReference
+                , onClick <| ToJs <| ToggleSlicesDetails False hullReference
                 ]
-                [ text "Section details"
+                [ text "Slices details"
                 , FASolid.angleDown []
                 ]
             , viewHullSliceSelector uiState.selectedSlice hullReference <| List.length hullslices.slices
@@ -3725,9 +3725,9 @@ viewHullSections uiState hullReference hullslices =
         else
             [ p
                 [ class "section-details-title"
-                , onClick <| ToJs <| ToggleSections True hullReference
+                , onClick <| ToJs <| ToggleSlicesDetails True hullReference
                 ]
-                [ text "Section details"
+                [ text "Slices details"
                 , FASolid.angleRight []
                 ]
             ]

@@ -66,7 +66,7 @@ modellerViewWithSectionExpand =
     setView
         [ ToJs <| SelectHullReference "anthineas"
         , ToJs <| SwitchViewMode <| Hull HullDetails
-        , ToJs <| ToggleSections True "anthineas"
+        , ToJs <| ToggleSlicesDetails True "anthineas"
         ]
 
 
@@ -1177,24 +1177,24 @@ modellerTests =
                 modellerView
                     |> Query.fromHtml
                     |> Query.has [ Selector.attribute <| Attributes.class "section-details-title" ]
-        , test "Section details is triggers ToggleSections" <|
+        , test "Section details is triggers ToggleSlicesDetails" <|
             \_ ->
                 modellerView
                     |> Query.fromHtml
                     |> Query.findAll [ Selector.class "section-details-title" ]
                     |> Query.first
                     |> Event.simulate Event.click
-                    |> Event.expect (ToJs <| ToggleSections True "anthineas")
+                    |> Event.expect (ToJs <| ToggleSlicesDetails True "anthineas")
         , test "Section selector is present" <|
             \_ ->
                 modellerViewWithSectionExpand
                     |> Query.fromHtml
-                    |> Query.has [ Selector.attribute <| Attributes.id "section-number" ]
+                    |> Query.has [ Selector.attribute <| Attributes.id "slice-number" ]
         , test "Section selector is triggers SelectSlice" <|
             \_ ->
                 modellerViewWithSectionExpand
                     |> Query.fromHtml
-                    |> Query.findAll [ Selector.id "section-number" ]
+                    |> Query.findAll [ Selector.id "slice-number" ]
                     |> Query.first
                     |> Event.simulate (Event.input "5")
                     |> Event.expect (ToJs <| SelectSlice "anthineas" 10 "5")

@@ -1341,19 +1341,19 @@ testSlicesDetails =
             \_ ->
                 Expect.equal
                     (Just True)
-                    (updateModel [ ToJs <| ToggleSections True "anthineas" ] initialModel
+                    (updateModel [ ToJs <| ToggleSlicesDetails True "anthineas" ] initialModel
                         |> .uiState
                         |> .accordions
-                        |> Dict.get "hull-sections"
+                        |> Dict.get "hull-slices-details"
                     )
         , test "Can toggle close slices details" <|
             \_ ->
                 Expect.equal
                     (Just True)
-                    (updateModel [ ToJs <| ToggleSections False "anthineas" ] initialModel
+                    (updateModel [ ToJs <| ToggleSlicesDetails False "anthineas" ] initialModel
                         |> .uiState
                         |> .accordions
-                        |> Dict.get "hull-sections"
+                        |> Dict.get "hull-slices-details"
                     )
         , test "Can select a slice" <|
             \_ ->
