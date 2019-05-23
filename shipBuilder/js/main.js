@@ -439,7 +439,7 @@ let deleteWaterline = function () {
 let displayWaterLine = function (zPosition) {
     deleteWaterline ();
 
-    const color = new THREE.Color(0.5, 0.5, 1);
+    const blue = new THREE.Color(0.5, 0.5, 1);
 
     const size = 500;
     const geometry = new THREE.Geometry();
@@ -448,14 +448,14 @@ let displayWaterLine = function (zPosition) {
     geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, 0, coordinatesTransform));
     geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, 0, coordinatesTransform));
     geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, 0, coordinatesTransform));
-    var material = new THREE.LineBasicMaterial({ color: color, linewidth: 2, side: THREE.DoubleSide });
+    var material = new THREE.LineBasicMaterial({ color: blue, linewidth: 2, side: THREE.DoubleSide });
 
     var waterLine = new THREE.LineLoop(geometry, material);
 
     waterLine.position.copy(toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform));
 
     waterLine.sbType = "modeller";
-    waterLine.baseColor = color;
+    waterLine.baseColor = blue;
     waterLine.modellerType = "waterLine";
 
     setObjectOpacityForCurrentMode(waterLine);
