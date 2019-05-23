@@ -1335,9 +1335,9 @@ testSaveAsNewHullInLibrary =
         ]
 
 
-testSections =
-    describe "Test functions on hull sections" <|
-        [ test "Can toggle open sections" <|
+testSlicesDetails =
+    describe "Test functions on slices details" <|
+        [ test "Can toggle open slices details" <|
             \_ ->
                 Expect.equal
                     (Just True)
@@ -1346,7 +1346,7 @@ testSections =
                         |> .accordions
                         |> Dict.get "hull-sections"
                     )
-        , test "Can toggle close sections" <|
+        , test "Can toggle close slices details" <|
             \_ ->
                 Expect.equal
                     (Just True)
