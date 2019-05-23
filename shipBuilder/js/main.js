@@ -481,42 +481,40 @@ let unloadHull = function () {
     deleteWaterline();
 }
 
-let buildHullGeometry = function ( json ) {
-    var H = json.depth;
-    var B = json.breadth;
-    var L = json.length;
-    var xmin = json['xmin'];
+let addVerticesForSlice = function ( json, slice, ny, geometry ) {
     var ymin = (-json.breadth / 2);
-    var zmin = json['zmin'];
-    var slices = json['slices'];
 
+    var x = slice['x'];
+    var ys = slice['y'];
+    var zmin_slice = slice['zmin'];
+    var zmax_slice = slice['zmax'];
+    var dz = (zmax_slice - zmin_slice) / (ny-1);
+
+    for (var i = 0 ; i < ny ; i++)
+    {
+        var y = ys[i];
+        var z = zmin_slice + dz*i;
+        geometry.vertices.push(new THREE.Vector3( x * json.length + json.xmin, y * json.breadth + ymin, z * json.depth + json.zmin ));
+    }
+    for (var i = 0 ; i < ny ; i++)
+    {
+        var y = ys[i+ny];
+        var z = zmax_slice - dz*i;
+        geometry.vertices.push(new THREE.Vector3( x * json.length + json.xmin, y * json.breadth + ymin, z * json.depth + json.zmin ));
+    }
+}
+
+let buildHullGeometry = function ( json ) {
     var geometry = new THREE.Geometry();
 
+    var slices = json['slices'];
     var nx = slices.length;
     var ny = slices[0]['y'].length;
     var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
     slices = slices.map(function(slice){slice['y'] = make_symmetric(slice['y']); return slice;});
 
     slices.forEach(function (slice)
-    {
-        var x = slice['x'];
-        var ys = slice['y'];
-        var zmin_slice = slice['zmin'];
-        var zmax_slice = slice['zmax'];
-        var dz = (zmax_slice - zmin_slice) / (ny-1);
-        for (var i = 0 ; i < ny ; i++)
-        {
-            var y = ys[i];
-            var z = zmin_slice + dz*i;
-            geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin,z*H+zmin ));
-        }
-        for (var i = 0 ; i < ny ; i++)
-        {
-            var y = ys[i+ny];
-            var z = zmax_slice - dz*i;
-            geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin,z*H+zmin ));
-        }
-    });
+        { addVerticesForSlice( json, slice, ny, geometry) } );
 
     for (let i = 0; i < nx -1 ; i++){
         for(let j=0; j<ny -1 ; j++)
