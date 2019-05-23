@@ -2656,21 +2656,19 @@ updateModelToJs msg model =
                 |> asPartitionsInModel model
 
         SwitchViewMode newViewMode ->
-            case newViewMode == Hull HullDetails of
-                True ->
-                    let
-                        uiState : UiState
-                        uiState =
-                            model.uiState
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
 
-                        newUiState : UiState
-                        newUiState =
-                            { uiState | accordions = Dict.insert "hull-sections" False uiState.accordions }
-                    in
-                    { model | viewMode = newViewMode, uiState = newUiState }
-
-                False ->
-                    { model | viewMode = newViewMode }
+                newUiState : UiState
+                newUiState =
+                    { uiState
+                        | accordions = Dict.insert "hull-sections" False uiState.accordions
+                        , showSelectedSlice = False
+                    }
+            in
+            { model | viewMode = newViewMode, uiState = newUiState }
 
         ToggleBlocksVisibility blocks isVisible ->
             let
