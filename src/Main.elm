@@ -3708,11 +3708,11 @@ resetHullSlices model =
 viewHullSlicesDetails : UiState -> String -> HullSlices -> Html Msg
 viewHullSlicesDetails uiState hullReference hullslices =
     div
-        [ class "section-details" ]
+        [ class "slices-details" ]
     <|
         if isAccordionOpened uiState "hull-slices-details" then
             [ p
-                [ class "section-details-title"
+                [ class "slices-details-title"
                 , onClick <| ToJs <| ToggleSlicesDetails False hullReference
                 ]
                 [ text "Slices details"
@@ -3724,7 +3724,7 @@ viewHullSlicesDetails uiState hullReference hullslices =
 
         else
             [ p
-                [ class "section-details-title"
+                [ class "slices-details-title"
                 , onClick <| ToJs <| ToggleSlicesDetails True hullReference
                 ]
                 [ text "Slices details"
@@ -3736,7 +3736,7 @@ viewHullSlicesDetails uiState hullReference hullslices =
 viewHullSliceSelector : StringValueInput.IntInput -> String -> Int -> Html Msg
 viewHullSliceSelector sliceSelector hullReference maxSelector =
     div
-        [ class "section-selector" ]
+        [ class "slices-selector" ]
         [ StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector ]
 
 
@@ -3759,10 +3759,10 @@ viewHullSliceList hullslices sliceSelected =
             Html.text ""
 
         Just slice ->
-            ul [ class "sections-list" ] <|
+            ul [ class "slices-list" ] <|
                 List.append
                     [ li
-                        [ class "sections-item-title input-group" ]
+                        [ class "slices-item-title input-group" ]
                         [ input
                             [ type_ "text"
                             , disabled True
@@ -3794,7 +3794,7 @@ viewHullSliceList hullslices sliceSelected =
 viewHullSliceCoordinate : HullSlices.XYZ -> Html Msg
 viewHullSliceCoordinate xyz =
     li
-        [ class "sections-item input-group" ]
+        [ class "slices-item input-group" ]
         [ input
             [ type_ "text"
             , disabled True

@@ -1172,25 +1172,25 @@ modellerTests =
                     |> Query.findAll [ Selector.id "buttonReset" ]
                     |> Query.first
                     |> Query.has [ Selector.attribute <| Attributes.hidden True ]
-        , test "Section details is present" <|
+        , test "Slices details is present" <|
             \_ ->
                 modellerView
                     |> Query.fromHtml
-                    |> Query.has [ Selector.attribute <| Attributes.class "section-details-title" ]
-        , test "Section details is triggers ToggleSlicesDetails" <|
+                    |> Query.has [ Selector.attribute <| Attributes.class "slices-details-title" ]
+        , test "Slices details is triggers ToggleSlicesDetails" <|
             \_ ->
                 modellerView
                     |> Query.fromHtml
-                    |> Query.findAll [ Selector.class "section-details-title" ]
+                    |> Query.findAll [ Selector.class "slices-details-title" ]
                     |> Query.first
                     |> Event.simulate Event.click
                     |> Event.expect (ToJs <| ToggleSlicesDetails True "anthineas")
-        , test "Section selector is present" <|
+        , test "Slices selector is present" <|
             \_ ->
                 modellerViewWithSectionExpand
                     |> Query.fromHtml
                     |> Query.has [ Selector.attribute <| Attributes.id "slice-number" ]
-        , test "Section selector is triggers SelectSlice" <|
+        , test "Slices selector is triggers SelectSlice" <|
             \_ ->
                 modellerViewWithSectionExpand
                     |> Query.fromHtml
