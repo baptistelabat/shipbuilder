@@ -437,34 +437,29 @@ let deleteWaterline = function () {
 }
 
 let displayWaterLine = function (zPosition) {
-    // delete old water line
     deleteWaterline ();
 
-    const color = new THREE.Color(0.5, 0.5, 1); // green
+    const color = new THREE.Color(0.5, 0.5, 1);
 
     const size = 500;
     const geometry = new THREE.Geometry();
 
-    // create a 4 points that compose a square centered in 0,0,0
     geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, 0, coordinatesTransform));
     geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, 0, coordinatesTransform));
     geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, 0, coordinatesTransform));
     geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, 0, coordinatesTransform));
     var material = new THREE.LineBasicMaterial({ color: color, linewidth: 2, side: THREE.DoubleSide });
 
-    // create a line from the previous 4 points
     var waterLine = new THREE.LineLoop(geometry, material);
-    // set the position of the deck on the Z axis
+
     waterLine.position.copy(toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform));
 
-    // used to include or exclude partitions when filtering objects in the scene
     waterLine.sbType = "modeller";
     waterLine.baseColor = color;
-    //waterLine.visible = showingPartitions;
-    // used to separate water line from decks and bulkheads
     waterLine.modellerType = "waterLine";
-    // used to retrieve the deck by its index in Elm (from 0 to N)
+
     setObjectOpacityForCurrentMode(waterLine);
+
     scene.add(waterLine);
 }
 
