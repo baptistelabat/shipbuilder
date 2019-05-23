@@ -135,6 +135,8 @@ let sendToElm = function (tag, data) {
 }
 
 let switchMode = function (newMode) {
+    //delete highlight
+    deleteHighlight();
     if (newMode !== mode) { // only when the mode changes
         resetSelection();
         mode = newMode;
