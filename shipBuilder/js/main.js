@@ -135,13 +135,12 @@ let sendToElm = function (tag, data) {
 }
 
 let switchMode = function (newMode) {
-    //delete highlight
     deleteHighlight();
-    if (newMode !== mode) { // only when the mode changes
-        resetSelection();
+    if (newMode !== mode) {
         mode = newMode;
 
-        // sets opacity = 1 to objects active in the given mode, sets it to 0.2 otherwise
+        resetSelection();
+        
         const sbObjects = scene.children.filter(child => child.sbType);
         sbObjects.forEach(object => {
             setObjectOpacityForCurrentMode(object);
