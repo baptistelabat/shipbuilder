@@ -2967,8 +2967,10 @@ msg2json model action =
                     Just
                         { tag = "load-hull"
                         , data =
-                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value False <|
-                                applyCustomPropertiesToHullSlices hullSlices
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
                         }
 
         SelectSlice hullReference _ _ ->
@@ -2980,8 +2982,10 @@ msg2json model action =
                     Just
                         { tag = "load-hull"
                         , data =
-                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value True <|
-                                applyCustomPropertiesToHullSlices hullSlices
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
                         }
 
         ToggleSections isOpen hullReference ->
@@ -2993,8 +2997,10 @@ msg2json model action =
                     Just
                         { tag = "load-hull"
                         , data =
-                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value isOpen <|
-                                applyCustomPropertiesToHullSlices hullSlices
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
                         }
 
         RemoveHull hullReference ->
@@ -3009,8 +3015,10 @@ msg2json model action =
                     Just
                         { tag = "load-hull"
                         , data =
-                            EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value True <|
-                                applyCustomPropertiesToHullSlices hullSlices
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
                         }
 
         ResetSlice hullReference ->
@@ -3021,7 +3029,11 @@ msg2json model action =
                 Just hullSlices ->
                     Just
                         { tag = "load-hull"
-                        , data = EncodersDecoders.encoderWithSelectedSlice model.uiState.selectedSlice.value True hullSlices
+                        , data =
+                            EncodersDecoders.encoderWithSelectedSlice
+                                model.uiState.selectedSlice.value
+                                model.uiState.showSelectedSlice
+                                hullSlices
                         }
 
         UnselectHullReference ->
