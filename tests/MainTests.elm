@@ -1339,21 +1339,21 @@ testSections =
     describe "Test functions on hull sections" <|
         [ test "Can toggle open sections" <|
             \_ ->
-                Expect.equal True
+                Expect.equal
+                    (Just True)
                     (updateModel [ ToJs <| ToggleSections True "anthineas" ] initialModel
                         |> .uiState
                         |> .accordions
                         |> Dict.get "hull-sections"
-                        |> Maybe.withDefault False
                     )
         , test "Can toggle close sections" <|
             \_ ->
-                Expect.equal False
+                Expect.equal
+                    (Just True)
                     (updateModel [ ToJs <| ToggleSections False "anthineas" ] initialModel
                         |> .uiState
                         |> .accordions
                         |> Dict.get "hull-sections"
-                        |> Maybe.withDefault True
                     )
         , test "Can select a slice" <|
             \_ ->
