@@ -436,6 +436,15 @@ let deleteWaterline = function () {
     oldWaterLines.forEach(oldWaterLine => removeFromScene(oldWaterLine));
 }
 
+let addSquareVertices = function (geometry, size) {
+  geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, 0, coordinatesTransform));
+  geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, 0, coordinatesTransform));
+  geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, 0, coordinatesTransform));
+  geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, 0, coordinatesTransform));
+
+  return geometry;
+}
+
 let displayWaterLine = function (zPosition) {
     deleteWaterline ();
 
@@ -443,14 +452,11 @@ let displayWaterLine = function (zPosition) {
 
     const size = 500;
     const geometry = new THREE.Geometry();
+    var geometryWithVertices = addSquareVertices(geometry, size);
 
-    geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, 0, coordinatesTransform));
-    geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, 0, coordinatesTransform));
-    geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, 0, coordinatesTransform));
-    geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, 0, coordinatesTransform));
     var material = new THREE.LineBasicMaterial({ color: blue, linewidth: 2, side: THREE.DoubleSide });
 
-    var waterLine = new THREE.LineLoop(geometry, material);
+    var waterLine = new THREE.LineLoop(geometryWithVertices, material);
 
     waterLine.position.copy(toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform));
 
