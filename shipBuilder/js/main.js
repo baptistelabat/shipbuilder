@@ -605,23 +605,12 @@ let loadHull = function (json) {
 
         const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
 
-        // saveSTL in debug
-        // const hull1 = new THREE.Mesh(geometry, material);
-        // saveSTL(hull1, "Test");
-
         // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
         geometry.vertices = shipVertices.map(vertex => {
             return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
         });
 
         const hull = new THREE.Mesh(geometry, material);
-
-
-        // var vnh = new THREE.VertexNormalsHelper( hull, 1, 0xff0000 );
-        // scene.add( vnh );
-
-        // var axh = new THREE.AxesHelper ( 5.0 );
-        // scene.add( axh );
 
         hull.baseColor = hullColor;
         hull.sbType = "hull";
