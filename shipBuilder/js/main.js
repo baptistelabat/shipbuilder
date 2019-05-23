@@ -84,7 +84,7 @@ app.ports.toJs.subscribe(function (message) {
             unloadHull();
             break;
         case "highlight-slice":
-            highlightSlice(data);
+            displayHighlightedSlice(data);
             break;
         case "hide-highlight":
             deleteHighlightedSlice();
@@ -616,10 +616,9 @@ let loadHull = function (json) {
 
         deleteHighlightedSlice();
 
-        //display highlighted slice
         if (json.showSelectedSlice) {
           var highlightedSlice = hullSlices.slices[json.selectedSlice-1];
-          highlightSlice (highlightedSlice, hullSlices.depth, hullSlices.breadth, hullSlices.length, hullSlices.xmin, hullSlices.zmin)
+          displayHighlightedSlice (highlightedSlice, hullSlices.depth, hullSlices.breadth, hullSlices.length, hullSlices.xmin, hullSlices.zmin)
         }
 
 }
@@ -634,7 +633,7 @@ let deleteHighlightedSlice = function () {
     oldHighlights.forEach(oldHighlight => removeFromScene(oldHighlight));
 }
 
-let highlightSlice = function (slice, depth, breadth, length, xmin, zmin) {
+let displayHighlightedSlice = function (slice, depth, breadth, length, xmin, zmin) {
   //space parameters
   var H = depth;
   var B = breadth;
