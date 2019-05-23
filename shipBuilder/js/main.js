@@ -87,7 +87,7 @@ app.ports.toJs.subscribe(function (message) {
             highlightSlice(data);
             break;
         case "hide-highlight":
-            deleteHighlight();
+            deleteHighlightedSlice();
             break;
         case "make-bulkheads":
             makeBulkheads(data);
@@ -135,7 +135,7 @@ let sendToElm = function (tag, data) {
 }
 
 let switchMode = function (newMode) {
-    deleteHighlight();
+    deleteHighlightedSlice();
     if (newMode !== mode) {
         mode = newMode;
 
@@ -620,8 +620,8 @@ let loadHull = function (json) {
         var zWaterLine = (hullSlices.depth + hullSlices.zmin) - hullSlices.draught;
         makeWaterLine(zWaterLine);
 
-        //Delete previous highlights
-        deleteHighlight();
+
+        deleteHighlightedSlice();
 
         //display highlighted slice
         if (json.showSelectedSlice) {
@@ -631,7 +631,7 @@ let loadHull = function (json) {
 
 }
 
-let deleteHighlight = function () {
+let deleteHighlightedSlice = function () {
     const oldHighlights = scene.children.filter(child =>
         child.sbType
         && child.sbType === "modeller"
