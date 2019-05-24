@@ -2,7 +2,7 @@ FROM node:9.3-alpine
 
 WORKDIR /app
 COPY shipbuilder-package.json /app/package.json
-RUN npm install
+RUN npm config set strict-ssl false && npm install
 
 COPY babel-entrypoint.sh /usr/local/bin/
 RUN ln -s usr/local/bin/babel-entrypoint.sh / # backwards compat
