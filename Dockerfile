@@ -1,4 +1,4 @@
-FROM node:8.2.1-slim
+FROM node:8.16.0-jessie-slim
 
 # To install sysconfcpus (otherwise elm make takes forever on Docker), as per https://github.com/elm-lang/elm-compiler/issues/1473#issuecomment-245704142
 
