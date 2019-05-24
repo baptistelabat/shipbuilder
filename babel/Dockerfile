@@ -1,7 +1,7 @@
 FROM node:9.3-alpine
 
 WORKDIR /app
-COPY package.json /app
+COPY shipbuilder-package.json /app/package.json
 RUN npm install
 
 COPY babel-entrypoint.sh /usr/local/bin/
