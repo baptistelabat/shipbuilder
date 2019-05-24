@@ -59,7 +59,7 @@ shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html
 
 babel:
 	cd babel && make && cd ..
-	docker run -t --rm -v $(shell pwd):/work -w /work -u $(shell id -u):$(shell id -g) babel
+	docker run -t --rm -v $(shell pwd):/work -w /work -u $(shell id -u):$(shell id -g) babel:ShipBuilder
 	mv shipBuilder/js/main.babel.js shipBuilder/js/main.js
 	mv shipBuilder/js/lib/TransformControls.babel.js shipBuilder/js/lib/TransformControls.js
 	cp buildHull/*.json shipBuilder/assets
