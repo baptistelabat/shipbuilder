@@ -12,15 +12,15 @@ shipBuilder/js/hull.js: rebuildHull/src/hull.js
 	cd rebuildHull && make
 	cp rebuildHull/js/hull.js shipBuilder/js/
 
-shipBuilder/js/elm.js: src/*.elm src/Dict/*.elm src/Interpolate/*.elm
+shipBuilder/js/elm.js: src/*.elm src/Dict/*.elm src/Interpolate/*.elm Dockerfile
 	rm -rf elm-stuff/generated-code || true
-	docker build -t elm .
-	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm make src/Main.elm --output shipBuilder/js/elm.js
+	docker build -t elm:0.19 .
+	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm:0.19 make src/Main.elm --output shipBuilder/js/elm.js
 	sed -i "1i// (c) Naval Group / Sirehna 2019. All rights reserved" shipBuilder/js/elm.js
 
-test: shipBuilder/js/elm.js tests/*.elm
-	docker build -t elm .
-	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work --entrypoint elm-test elm --skip-install --verbose
+test: shipBuilder/js/elm.js tests/*.elm Dockerfile
+	docker build -t elm:0.19 .
+	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work --entrypoint elm-test elm:0.19 --skip-install --verbose
 
 shipBuilder/index-not-optimized.html: shipBuilder/index.template.json.html
 	@sed 's/GIT_SHA/$(VERSION)/g' shipBuilder/index.template.json.html > shipBuilder/index-not-optimized.html
@@ -59,7 +59,7 @@ shipBuilder/js/elm.min.js: shipBuilder/js/elm.js shipBuilder/index.html
 
 babel:
 	cd babel && make && cd ..
-	docker run -t --rm -v $(shell pwd):/work -w /work -u $(shell id -u):$(shell id -g) babel
+	docker run -t --rm -v $(shell pwd):/work -w /work -u $(shell id -u):$(shell id -g) babel:ShipBuilder
 	mv shipBuilder/js/main.babel.js shipBuilder/js/main.js
 	mv shipBuilder/js/lib/TransformControls.babel.js shipBuilder/js/lib/TransformControls.js
 	cp buildHull/*.json shipBuilder/assets

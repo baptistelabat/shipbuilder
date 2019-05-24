@@ -61,6 +61,15 @@ modellerView =
         ]
 
 
+modellerViewWithSlicesDetailsExpanded : Html Msg
+modellerViewWithSlicesDetailsExpanded =
+    setView
+        [ ToJs <| SelectHullReference "anthineas"
+        , ToJs <| SwitchViewMode <| Hull HullDetails
+        , ToJs <| ToggleSlicesDetails True "anthineas"
+        ]
+
+
 downArrow : KeyEvent -> ( String, Encode.Value )
 downArrow =
     keyDown 40
@@ -1163,4 +1172,30 @@ modellerTests =
                     |> Query.findAll [ Selector.id "buttonReset" ]
                     |> Query.first
                     |> Query.has [ Selector.attribute <| Attributes.hidden True ]
+        , test "Slices details field is present" <|
+            \_ ->
+                modellerView
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.attribute <| Attributes.class "slices-details-title" ]
+        , test "Clicking on slices details title triggers ToggleSlicesDetails" <|
+            \_ ->
+                modellerView
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.class "slices-details-title" ]
+                    |> Query.first
+                    |> Event.simulate Event.click
+                    |> Event.expect (ToJs <| ToggleSlicesDetails True "anthineas")
+        , test "DOM should contain a node with id 'slice-number'" <|
+            \_ ->
+                modellerViewWithSlicesDetailsExpanded
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.attribute <| Attributes.id "slice-number" ]
+        , test "Entering a number in slice number input selects the corresponding slice" <|
+            \_ ->
+                modellerViewWithSlicesDetailsExpanded
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "slice-number" ]
+                    |> Query.first
+                    |> Event.simulate (Event.input "5")
+                    |> Event.expect (ToJs <| SelectSlice "anthineas" 10 "5")
         ]

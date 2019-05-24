@@ -83,6 +83,12 @@ app.ports.toJs.subscribe(function (message) {
         case "unload-hull": // remove the hull model in the scene
             unloadHull();
             break;
+        case "highlight-slice":
+            displayHighlightedSlice(data);
+            break;
+        case "hide-highlight":
+            deleteHighlightedSlice();
+            break;
         case "make-bulkheads":
             makeBulkheads(data);
             break;
@@ -129,11 +135,12 @@ let sendToElm = function (tag, data) {
 }
 
 let switchMode = function (newMode) {
-    if (newMode !== mode) { // only when the mode changes
-        resetSelection();
+    deleteHighlightedSlice();
+    if (newMode !== mode) {
         mode = newMode;
 
-        // sets opacity = 1 to objects active in the given mode, sets it to 0.2 otherwise
+        resetBlockSelection();
+
         const sbObjects = scene.children.filter(child => child.sbType);
         sbObjects.forEach(object => {
             setObjectOpacityForCurrentMode(object);
@@ -215,7 +222,7 @@ let resetScene = function (views, scene) {
             view.control.detach();
         }
     })
-    resetSelection();
+    resetBlockSelection();
     const sbObjectsToDelete = scene.children.filter(child => child.sbType);
     sbObjectsToDelete.forEach(toDelete => removeFromScene(toDelete));
 }
@@ -429,35 +436,36 @@ let deleteWaterline = function () {
     oldWaterLines.forEach(oldWaterLine => removeFromScene(oldWaterLine));
 }
 
-let makeWaterLine = function (zPosition) {
-    // delete old water line
+let addSquareVertices = function (geometry, size) {
+  geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, 0, coordinatesTransform));
+  geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, 0, coordinatesTransform));
+  geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, 0, coordinatesTransform));
+  geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, 0, coordinatesTransform));
+
+  return geometry;
+}
+
+let displayWaterLine = function (zPosition) {
     deleteWaterline ();
 
-    const color = new THREE.Color(0.5, 0.5, 1); // green
+    const blue = new THREE.Color(0.5, 0.5, 1);
 
     const size = 500;
     const geometry = new THREE.Geometry();
+    var geometryWithVertices = addSquareVertices(geometry, size);
 
-    // create a 4 points that compose a square centered in 0,0,0
-    geometry.vertices.push(toThreeJsCoordinates(-size / 2, -size / 2, 0, coordinatesTransform));
-    geometry.vertices.push(toThreeJsCoordinates(-size / 2, size / 2, 0, coordinatesTransform));
-    geometry.vertices.push(toThreeJsCoordinates(size / 2, size / 2, 0, coordinatesTransform));
-    geometry.vertices.push(toThreeJsCoordinates(size / 2, -size / 2, 0, coordinatesTransform));
-    var material = new THREE.LineBasicMaterial({ color: color, linewidth: 2, side: THREE.DoubleSide });
+    var material = new THREE.LineBasicMaterial({ color: blue, linewidth: 2, side: THREE.DoubleSide });
 
-    // create a line from the previous 4 points
-    var waterLine = new THREE.LineLoop(geometry, material);
-    // set the position of the deck on the Z axis
+    var waterLine = new THREE.LineLoop(geometryWithVertices, material);
+
     waterLine.position.copy(toThreeJsCoordinates(0, 0, zPosition, coordinatesTransform));
 
-    // used to include or exclude partitions when filtering objects in the scene
     waterLine.sbType = "modeller";
-    waterLine.baseColor = color;
-    //waterLine.visible = showingPartitions;
-    // used to separate water line from decks and bulkheads
+    waterLine.baseColor = blue;
     waterLine.modellerType = "waterLine";
-    // used to retrieve the deck by its index in Elm (from 0 to N)
+
     setObjectOpacityForCurrentMode(waterLine);
+
     scene.add(waterLine);
 }
 
@@ -473,43 +481,30 @@ let unloadHull = function () {
     deleteWaterline();
 }
 
-let buildHullGeometry = function ( json ) {
-    var H = json.depth;
-    var B = json.breadth;
-    var L = json.length;
-    var xmin = json['xmin'];
+let addVerticesForSlice = function ( json, slice, ny, geometry ) {
     var ymin = (-json.breadth / 2);
-    var zmin = json['zmin'];
-    var slices = json['slices'];
 
-    var geometry = new THREE.Geometry();
+    var x = slice['x'];
+    var ys = slice['y'];
+    var zmin_slice = slice['zmin'];
+    var zmax_slice = slice['zmax'];
+    var dz = (zmax_slice - zmin_slice) / (ny-1);
 
-    var nx = slices.length;
-    var ny = slices[0]['y'].length;
-    var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
-    slices = slices.map(function(slice){slice['y'] = make_symmetric(slice['y']); return slice;});
-
-    slices.forEach(function (slice)
+    for (var i = 0 ; i < ny ; i++)
     {
-        var x = slice['x'];
-        var ys = slice['y'];
-        var zmin_slice = slice['zmin'];
-        var zmax_slice = slice['zmax'];
-        var dz = (zmax_slice - zmin_slice) / (ny-1);
-        for (var i = 0 ; i < ny ; i++)
-        {
-            var y = ys[i];
-            var z = zmin_slice + dz*i;
-            geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin,z*H+zmin ));
-        }
-        for (var i = 0 ; i < ny ; i++)
-        {
-            var y = ys[i+ny];
-            var z = zmax_slice - dz*i;
-            geometry.vertices.push(new THREE.Vector3( x*L+xmin,y*B+ymin,z*H+zmin ));
-        }
-    });
+        var y = ys[i];
+        var z = zmin_slice + dz*i;
+        geometry.vertices.push(new THREE.Vector3( x * json.length + json.xmin, y * json.breadth + ymin, z * json.depth + json.zmin ));
+    }
+    for (var i = 0 ; i < ny ; i++)
+    {
+        var y = ys[i+ny];
+        var z = zmax_slice - dz*i;
+        geometry.vertices.push(new THREE.Vector3( x * json.length + json.xmin, y * json.breadth + ymin, z * json.depth + json.zmin ));
+    }
+}
 
+let addFacesForSlices = function ( nx, ny, geometry ) {
     for (let i = 0; i < nx -1 ; i++){
         for(let j=0; j<ny -1 ; j++)
         {
@@ -536,8 +531,9 @@ let buildHullGeometry = function ( json ) {
             geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
         }
     }
+}
 
-    // BEGIN close the mesh
+let closeMeshForHull = function (nx, ny, geometry ) {
     var i=0;
     for(let j=0; j<ny -1 ; j++)
     {
@@ -573,10 +569,24 @@ let buildHullGeometry = function ( json ) {
       geometry.faces.push( new THREE.Face3( k1, k2, k3 ) );
       geometry.faces.push( new THREE.Face3( k2, k4, k3 ) );
     }
-    // END close the mesh
+}
 
+let buildHullGeometry = function ( json ) {
+    var geometry = new THREE.Geometry();
 
-    //compute Normals
+    var slices = json['slices'];
+    var nx = slices.length;
+    var ny = slices[0]['y'].length;
+    var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
+    slices = slices.map(function(slice){slice['y'] = make_symmetric(slice['y']); return slice;});
+
+    slices.forEach(function (slice)
+        { addVerticesForSlice(json, slice, ny, geometry) } );
+
+    addFacesForSlices(nx, ny, geometry);
+
+    closeMeshForHull(nx, ny, geometry);
+
     geometry.computeVertexNormals();
     geometry.computeFaceNormals();
     return geometry;
@@ -586,19 +596,17 @@ let loadHull = function (json) {
         // there can only be one hull in the scene so remove the current one, if any
         unloadHull();
 
+        var hullSlices = json['hullSlices'];
+
         const hullColor = new THREE.Color(3/255, 146/255, 255/255); // light blue
         // the STL loader returns a bufferGeometry. We can't read its vertices and faces
         // we need to convert it to an "actual" geometry to access these
-        const geometry = buildHullGeometry(json);
+        const geometry = buildHullGeometry(hullSlices);
         const volume = calcVolume(geometry);
 
         const shipVertices = geometry.vertices;
 
         const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
-
-        // saveSTL in debug
-        // const hull1 = new THREE.Mesh(geometry, material);
-        // saveSTL(hull1, "Test");
 
         // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
         geometry.vertices = shipVertices.map(vertex => {
@@ -607,19 +615,81 @@ let loadHull = function (json) {
 
         const hull = new THREE.Mesh(geometry, material);
 
-
-        // var vnh = new THREE.VertexNormalsHelper( hull, 1, 0xff0000 );
-        // scene.add( vnh );
-
-        // var axh = new THREE.AxesHelper ( 5.0 );
-        // scene.add( axh );
-
         hull.baseColor = hullColor;
         hull.sbType = "hull";
         scene.add(hull);
 
-        var zWaterLine = (json.depth + json.zmin) - json.draught;
-        makeWaterLine(zWaterLine);
+        var zWaterLine = (hullSlices.depth + hullSlices.zmin) - hullSlices.draught;
+        displayWaterLine(zWaterLine);
+
+        deleteHighlightedSlice();
+
+        if (json.showSelectedSlice) {
+          var highlightedSlice = hullSlices.slices[json.selectedSlice-1];
+          displayHighlightedSlice (highlightedSlice, hullSlices.depth, hullSlices.breadth, hullSlices.length, hullSlices.xmin, hullSlices.zmin)
+        }
+
+}
+
+let deleteHighlightedSlice = function () {
+    const oldHighlights = scene.children.filter(child =>
+        child.sbType
+        && child.sbType === "modeller"
+        && child.modellerType
+        && child.modellerType === "highlightSlice"
+    );
+    oldHighlights.forEach(oldHighlight => removeFromScene(oldHighlight));
+}
+
+let buildSliceGeometry = function (slice, depth, breadth, length, xmin, zmin) {
+    const highlightMarginWithHull = 0.005;
+
+    var ymin = (-breadth / 2);
+
+    var x = slice['x'];
+    var ny = slice['y'].length / 2;
+    var zmin_slice = slice['zmin'] - highlightMarginWithHull;
+    var zmax_slice = slice['zmax'] + highlightMarginWithHull;
+    var dz = (zmax_slice - zmin_slice) / (ny-1);
+
+    var make_symmetric = function(y) {var y1 = y.slice(); var y2 = y.reverse().map(function(y){return 1-y;}) ;return y1.concat(y2);};
+    var ys = slice['y'];
+
+    var geometry = new THREE.Geometry();
+
+    for (var i = 0 ; i < ny ; i++)
+    {
+        var y = ys[i];
+        var z = zmin_slice + dz*i;
+        geometry.vertices.push(new THREE.Vector3( x * length + xmin, y * breadth + ymin + highlightMarginWithHull * breadth, z * depth + zmin ));
+    }
+    for (var i = 0 ; i < ny ; i++)
+    {
+        var y = ys[i+ny];
+        var z = zmax_slice - dz*i;
+        geometry.vertices.push(new THREE.Vector3( x * length + xmin, y * breadth + ymin - highlightMarginWithHull * breadth, z * depth +zmin ));
+    }
+
+    // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
+    const shipVertices = geometry.vertices;
+    geometry.vertices = shipVertices.map(vertex => {
+        return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
+    });
+
+    return geometry;
+}
+
+let displayHighlightedSlice = function (slice, depth, breadth, length, xmin, zmin) {
+
+  var geometry = buildSliceGeometry(slice, depth, breadth, length, xmin, zmin);
+  const colorRed = new THREE.Color(1, 0.5, 0.5); // red
+  const material = new THREE.LineBasicMaterial({ color: colorRed, linewidth: 1, side: THREE.DoubleSide });
+
+  const sliceToConstruct = new THREE.LineLoop(geometry, material);
+  sliceToConstruct.sbType = "modeller";
+  sliceToConstruct.modellerType = "highlightSlice";
+
+  scene.add(sliceToConstruct);
 }
 
 let hullVolume = function (json) {
@@ -870,7 +940,7 @@ let canChangeInMode = function (object, mode) {
 let selectBlock = function (block) {
     if (isBlock(block)) {
         // selection (not multiple) of a block : the result is a single block selected, even if a multiple selection existed before
-        resetSelection();
+        resetBlockSelection();
         addToSelection(block);
 
         // attach the gizmo to the block, to allow moving/scaling it
@@ -924,7 +994,7 @@ let removeFromSelection = function (object) {
 }
 
 
-let resetSelection = function () {
+let resetBlockSelection = function () {
     if (selection.length) {
         // reset the highlight on all the blocks in the selection
         selection.forEach(uuid => {
@@ -1523,7 +1593,7 @@ let onClick = function (event) {
             }
             break;
         case 2: // middle/wheel click
-            resetSelection();
+            resetBlockSelection();
             sendToElm("unselect", null);
             break;
         default: // right click

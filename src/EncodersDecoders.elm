@@ -4,9 +4,11 @@ module EncodersDecoders exposing
     , dictEncoder
     , encodeSubModel
     , encoder
+    , encoderWithSelectedSlice
     , exportHullSlicesAsAreaXYList
     , getHashImageForSlices
     , hullSliceAsAreaXYListEncoder
+    , hullSliceEncoder
     , normalizeSlicesPosition
     )
 
@@ -242,6 +244,15 @@ encoder hullSlices =
         , ( "zmin", Encode.float hullSlices.zmin )
         , ( "slices", Encode.list hullSliceEncoder hullSlices.slices )
         , ( "custom", encodeCustomProperties hullSlices )
+        ]
+
+
+encoderWithSelectedSlice : Int -> Bool -> HullSlices -> Encode.Value
+encoderWithSelectedSlice selectedSlice showSelectedSlice hullSlices =
+    Encode.object
+        [ ( "hullSlices", encoder hullSlices )
+        , ( "selectedSlice", Encode.int selectedSlice )
+        , ( "showSelectedSlice", Encode.bool showSelectedSlice )
         ]
 
 

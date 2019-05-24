@@ -18,9 +18,11 @@ import HullSlices
         , denormalizeHullSlice
         , denormalizeHullSlices
         , emptyHullSlices
+        , extractXYZ
         , integrate
         , isHullCustomized
         , scale
+        , toHullSliceAsZYList
         , trapezoidCentroid
         , volume
         , zGTrapezoid
@@ -128,6 +130,11 @@ compareHs left right =
         , compareList .y left
         ]
         right
+
+
+expectAll : List Expectation -> Expectation
+expectAll expectations =
+    Expect.all (List.map (\expectation -> \_ -> expectation) expectations) ()
 
 
 suite : Test
@@ -864,4 +871,118 @@ suite =
                 HullSliceModifiers.setLengthOverAll "10" TestData.anthineas
                     |> isHullCustomized
                     |> Expect.true "Expected hull to be customized"
+        , describe "Can transform Slice in HullSliceAsZYList"
+            [ test "Transformation keep the same x" <|
+                \_ ->
+                    Expect.equal (Just 0)
+                        (List.head TestData.anthineas.slices
+                            |> Maybe.map toHullSliceAsZYList
+                            |> Maybe.map .x
+                        )
+            , test "Transformation keep the same y" <|
+                \_ ->
+                    let
+                        y2Test =
+                            [ 0.964899527258786
+                            , 0.9648943694688346
+                            , 0.9629765202249831
+                            , 0.9592250480632435
+                            , 0.955473575901504
+                            , 0.9502377948034448
+                            , 0.9394176761317832
+                            , 0.9282437133662546
+                            , 0.9102579602794127
+                            , 0.742320749879794
+                            ]
+                    in
+                    List.head TestData.anthineas.slices
+                        |> Maybe.map toHullSliceAsZYList
+                        |> Maybe.map .zylist
+                        |> Maybe.map (List.map Tuple.second)
+                        |> Maybe.withDefault []
+                        |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
+                        |> expectAll
+            , test "Transformation compute z" <|
+                \_ ->
+                    let
+                        y2Test =
+                            [ 0.31587930659489755
+                            , 0.33965215675068555
+                            , 0.36342500690647356
+                            , 0.3871978570622616
+                            , 0.4109707072180496
+                            , 0.43474355737383763
+                            , 0.45851640752962564
+                            , 0.48228925768541364
+                            , 0.5060621078412016
+                            , 0.5298349579969897
+                            ]
+                    in
+                    List.head TestData.anthineas.slices
+                        |> Maybe.map toHullSliceAsZYList
+                        |> Maybe.map .zylist
+                        |> Maybe.map (List.map Tuple.first)
+                        |> Maybe.withDefault []
+                        |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
+                        |> expectAll
+            ]
+        , test "Can extract X position of each point of a slice" <|
+            \_ ->
+                let
+                    x2Test =
+                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                in
+                List.head TestData.anthineas.slices
+                    |> Maybe.map toHullSliceAsZYList
+                    |> Maybe.map extractXYZ
+                    |> Maybe.map (List.map .x)
+                    |> Maybe.withDefault []
+                    |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) x2Test
+                    |> expectAll
+        , test "Can extract Y position of each point of a slice" <|
+            \_ ->
+                let
+                    y2Test =
+                        [ 0.964899527258786
+                        , 0.9648943694688346
+                        , 0.9629765202249831
+                        , 0.9592250480632435
+                        , 0.955473575901504
+                        , 0.9502377948034448
+                        , 0.9394176761317832
+                        , 0.9282437133662546
+                        , 0.9102579602794127
+                        , 0.742320749879794
+                        ]
+                in
+                List.head TestData.anthineas.slices
+                    |> Maybe.map toHullSliceAsZYList
+                    |> Maybe.map extractXYZ
+                    |> Maybe.map (List.map .y)
+                    |> Maybe.withDefault []
+                    |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) y2Test
+                    |> expectAll
+        , test "Can extract Z position of each point of a slice" <|
+            \_ ->
+                let
+                    z2Test =
+                        [ 0.31587930659489755
+                        , 0.33965215675068555
+                        , 0.36342500690647356
+                        , 0.3871978570622616
+                        , 0.4109707072180496
+                        , 0.43474355737383763
+                        , 0.45851640752962564
+                        , 0.48228925768541364
+                        , 0.5060621078412016
+                        , 0.5298349579969897
+                        ]
+                in
+                List.head TestData.anthineas.slices
+                    |> Maybe.map toHullSliceAsZYList
+                    |> Maybe.map extractXYZ
+                    |> Maybe.map (List.map .z)
+                    |> Maybe.withDefault []
+                    |> List.map2 (\f1 f2 -> Expect.within epsAbsolute f1 f2) z2Test
+                    |> expectAll
         ]

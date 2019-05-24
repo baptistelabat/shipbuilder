@@ -608,7 +608,7 @@ intersectBelow z0 hullSlices =
             { x = hs.x, zylist = lst }
 
         lhsXY =
-            List.map toXY_ filterHS
+            List.map HullSlices.toHullSliceAsZYList filterHS
 
         getInterpolateValuesAndSubList : List ( Float, Float ) -> List ( Float, Float )
         getInterpolateValuesAndSubList list =

@@ -1395,9 +1395,61 @@ a.download-kpis svg {
 .disclaimer {
   font-size: 0.8em;
   color: red;
+  padding-top: 20px;
+  border-top: 1px solid var(--secondary-color__contrast);
 }
 
 .area-curve-plot {
   color: grey;
+}
 
+.slices-details {
+    border-top: 1px solid var(--secondary-color__contrast);
+    margin-top : 25px;
+    margin-bottom: 25px;
+}
+
+.slices-details-title {
+    font-size: 1em;
+    margin-bottom:  15px;
+    margin-left: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.slices-details-title svg {
+    height: 22px;
+}
+
+.slices-selector input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+.slices-selector input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; /* Chrome */
+    margin: 0;
+}
+
+.slices-list {
+    padding: 0;
+    list-style: none;
+}
+
+.slices-item, .slices-item-title {
+    margin-top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slices-item input, .slices-item-title input {
+    width: 60px;
+    text-align: right;
+}
+
+.slices-item input:disabled {
+    background: var(--secondary-color__accent);
+    box-shadow: 0 0 5px -3px var(--shadow-color);
 }

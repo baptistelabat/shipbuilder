@@ -1,4 +1,4 @@
 .PHONY: all
 
 all:
-	docker build -t babel .
+	docker build -t babel:ShipBuilder .

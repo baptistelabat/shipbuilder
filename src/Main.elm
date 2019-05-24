@@ -56,7 +56,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences
 import HullSliceModifiers
-import HullSlices exposing (HullSlices, applyCustomPropertiesToHullSlices, isHullCustomized)
+import HullSlices exposing (HullSlice, HullSlices, applyCustomPropertiesToHullSlices, isHullCustomized)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -689,7 +689,10 @@ encodeRestoreSaveCmd model =
                             Encode.string ""
 
                         Just hullSlices ->
-                            EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
     in
     Encode.object
         [ ( "viewMode", encodeViewMode model.viewMode )
@@ -840,6 +843,8 @@ decodeTag =
 type alias UiState =
     { accordions : Dict String Bool
     , blockContextualMenu : Maybe String
+    , selectedSlice : StringValueInput.IntInput
+    , showSelectedSlice : Bool
     }
 
 
@@ -1524,6 +1529,8 @@ initModel flag =
     , uiState =
         { accordions = Dict.empty
         , blockContextualMenu = Nothing
+        , selectedSlice = StringValueInput.fromInt "slice number" 1
+        , showSelectedSlice = False
         }
     , tags = []
     , customProperties = []
@@ -1904,6 +1911,8 @@ type ToJsMsg
     | RemoveBlocks (List Block)
     | SelectBlock Block
     | SelectHullReference String
+    | SelectSlice String Int String
+    | ToggleSlicesDetails Bool String
     | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
@@ -2563,6 +2572,43 @@ updateModelToJs msg model =
         SelectHullReference hullReference ->
             { model | selectedHullReference = Just hullReference }
 
+        SelectSlice hullReference maxSelector inputValue ->
+            let
+                olduiState =
+                    model.uiState
+
+                updateUiState : Int -> UiState
+                updateUiState newValue =
+                    { olduiState | selectedSlice = StringValueInput.asIntIn olduiState.selectedSlice newValue }
+            in
+            case String.toInt inputValue of
+                Nothing ->
+                    model
+
+                Just int ->
+                    case int == 0 || int > maxSelector of
+                        True ->
+                            model
+
+                        False ->
+                            { model | uiState = updateUiState int }
+
+        ToggleSlicesDetails isOpen _ ->
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState
+                        | accordions = Dict.insert "hull-slices-details" isOpen uiState.accordions
+                        , selectedSlice = StringValueInput.asIntIn uiState.selectedSlice 1
+                        , showSelectedSlice = isOpen
+                    }
+            in
+            { model | uiState = newUiState }
+
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
 
@@ -2614,7 +2660,19 @@ updateModelToJs msg model =
                 |> asPartitionsInModel model
 
         SwitchViewMode newViewMode ->
-            { model | viewMode = newViewMode }
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState
+                        | accordions = Dict.insert "hull-slices-details" False uiState.accordions
+                        , showSelectedSlice = False
+                    }
+            in
+            { model | viewMode = newViewMode, uiState = newUiState }
 
         ToggleBlocksVisibility blocks isVisible ->
             let
@@ -2910,7 +2968,44 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
+                        }
+
+        SelectSlice hullReference _ _ ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
+                        }
+
+        ToggleSlicesDetails isOpen hullReference ->
+            case Dict.get hullReference model.slices of
+                Nothing ->
+                    Nothing
+
+                Just hullSlices ->
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
+                        }
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -2921,7 +3016,14 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder <| applyCustomPropertiesToHullSlices hullSlices }
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            applyCustomPropertiesToHullSlices hullSlices
+                                |> EncodersDecoders.encoderWithSelectedSlice
+                                    model.uiState.selectedSlice.value
+                                    model.uiState.showSelectedSlice
+                        }
 
         ResetSlice hullReference ->
             case Dict.get hullReference model.slices of
@@ -2929,7 +3031,14 @@ msg2json model action =
                     Nothing
 
                 Just hullSlices ->
-                    Just { tag = "load-hull", data = EncodersDecoders.encoder hullSlices }
+                    Just
+                        { tag = "load-hull"
+                        , data =
+                            EncodersDecoders.encoderWithSelectedSlice
+                                model.uiState.selectedSlice.value
+                                model.uiState.showSelectedSlice
+                                hullSlices
+                        }
 
         UnselectHullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3503,6 +3612,7 @@ viewModeller model =
                         , (StringValueInput.view <| HullSlices.getDepth slices) <| ToJs << ModifySlice HullSliceModifiers.setDepth hullReference
                         , (StringValueInput.view <| HullSlices.getDraught slices) <| ToJs << ModifySlice HullSliceModifiers.setDraught hullReference
                         , (StringValueInput.view <| getPrismaticCoefficient hullSlicesMetrics) <| ToJs << ModifySlice HullSliceModifiers.setPrismaticCoefficient hullReference
+                        , viewHullSlicesDetails model.uiState hullReference slices
                         , div [ id "hydrocalc" ]
                             [ div [ id "disclaimer", class "disclaimer" ] [ text "Hull models are approximate", Html.br [] [], text "The values below are given for information only" ]
                             , Html.br [] []
@@ -3592,6 +3702,117 @@ resetHullSlices model =
             , title "Reset parameters to origin"
             ]
             [ text "Reset" ]
+        ]
+
+
+viewHullSlicesDetails : UiState -> String -> HullSlices -> Html Msg
+viewHullSlicesDetails uiState hullReference hullslices =
+    div
+        [ class "slices-details" ]
+    <|
+        if isAccordionOpened uiState "hull-slices-details" then
+            [ p
+                [ class "slices-details-title"
+                , onClick <| ToJs <| ToggleSlicesDetails False hullReference
+                ]
+                [ text "Slices details"
+                , FASolid.angleDown []
+                ]
+            , viewHullSliceSelector uiState.selectedSlice hullReference <| List.length hullslices.slices
+            , viewHullSliceList hullslices uiState.selectedSlice.value
+            ]
+
+        else
+            [ p
+                [ class "slices-details-title"
+                , onClick <| ToJs <| ToggleSlicesDetails True hullReference
+                ]
+                [ text "Slices details"
+                , FASolid.angleRight []
+                ]
+            ]
+
+
+viewHullSliceSelector : StringValueInput.IntInput -> String -> Int -> Html Msg
+viewHullSliceSelector sliceSelector hullReference maxSelector =
+    div
+        [ class "slices-selector" ]
+        [ StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector ]
+
+
+viewHullSliceList : HullSlices -> Int -> Html Msg
+viewHullSliceList hullslices sliceSelected =
+    let
+        slices =
+            HullSlices.setLongitudinalPositionOfEachSlice hullslices
+
+        metrics =
+            { length = .value <| HullSlices.getLength hullslices
+            , breadth = .value <| HullSlices.getBreadth hullslices
+            , depth = .value <| HullSlices.getDepth hullslices
+            , xmin = hullslices.xmin
+            , zmin = hullslices.zmin
+            }
+    in
+    case List.head <| List.drop (sliceSelected - 1) slices of
+        Nothing ->
+            Html.text ""
+
+        Just slice ->
+            ul [ class "slices-list" ] <|
+                List.append
+                    [ li
+                        [ class "slices-item-title input-group" ]
+                        [ input
+                            [ type_ "text"
+                            , disabled True
+                            , value "x"
+                            ]
+                            []
+                        , input
+                            [ type_ "text"
+                            , disabled True
+                            , value "y"
+                            ]
+                            []
+                        , input
+                            [ type_ "text"
+                            , disabled True
+                            , value "z"
+                            ]
+                            []
+                        ]
+                    ]
+                    (slice
+                        |> HullSlices.denormalizeHullSlice metrics
+                        |> HullSlices.toHullSliceAsZYList
+                        |> HullSlices.extractXYZ
+                        |> List.map viewHullSliceCoordinate
+                    )
+
+
+viewHullSliceCoordinate : HullSlices.XYZ -> Html Msg
+viewHullSliceCoordinate xyz =
+    li
+        [ class "slices-item input-group" ]
+        [ input
+            [ type_ "text"
+            , disabled True
+            , value <| String.fromFloat <| StringValueInput.round_n 2 xyz.x
+            ]
+            []
+        , input
+            [ type_ "text"
+            , disabled True
+            , value <| String.fromFloat <| StringValueInput.round_n 2 xyz.y
+            ]
+            []
+        , input
+            [ type_ "text"
+            , disabled True
+            , value <| String.fromFloat <| negate <| StringValueInput.round_n 2 xyz.z
+            ]
+            []
         ]
 
 

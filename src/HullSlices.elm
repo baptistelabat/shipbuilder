@@ -5,6 +5,7 @@ module HullSlices exposing
     , HullSliceAsZYList
     , HullSliceCentroidAndArea
     , HullSlices
+    , XYZ
     , applyCustomPropertiesToHullSlices
     , area
     , areaTrapezoid
@@ -16,6 +17,7 @@ module HullSlices exposing
     , denormalizeHullSlice
     , denormalizeHullSlices
     , emptyHullSlices
+    , extractXYZ
     , extractY
     , getBreadth
     , getDepth
@@ -26,6 +28,7 @@ module HullSlices exposing
     , isHullCustomized
     , scale
     , setLongitudinalPositionOfEachSlice
+    , toHullSliceAsZYList
     , trapezoidCentroid
     , volume
     , zGTrapezoid
@@ -84,6 +87,13 @@ type alias HullSliceCentroidAndArea =
     { x : Float
     , centroid : Float
     , area : Float
+    }
+
+
+type alias XYZ =
+    { x : Float
+    , y : Float
+    , z : Float
     }
 
 
@@ -472,11 +482,50 @@ getInertialMoment o =
     inertialMoment
 
 
+toHullSliceAsZYList : HullSlice -> HullSliceAsZYList
+toHullSliceAsZYList hs =
+    let
+        zmax =
+            hs.zmax
+
+        zmin =
+            hs.zmin
+
+        y =
+            hs.y
+
+        dz : Float
+        dz =
+            (zmax - zmin) / (toFloat <| max 1 <| List.length y - 1)
+
+        acc : ( Int, Float ) -> ( Float, Float )
+        acc ( idx, y_ ) =
+            ( zmin + toFloat idx * dz, y_ )
+
+        lst =
+            y
+                |> Array.fromList
+                |> Array.toIndexedList
+                |> List.map acc
+    in
+    { x = hs.x, zylist = lst }
+
+
 extractY : HullSliceAsZYList -> List Float
-extractY hsXY =
-    hsXY
+extractY hs =
+    hs
         |> .zylist
         |> List.map Tuple.second
+
+
+extractXYZ : HullSliceAsZYList -> List XYZ
+extractXYZ hs =
+    let
+        extract : ( Float, Float ) -> XYZ
+        extract zy =
+            { x = hs.x, y = Tuple.second zy, z = Tuple.first zy }
+    in
+    List.map extract hs.zylist
 
 
 blockVolume : { xmin : Float, xmax : Float, hullSlices : List HullSliceAsZYList } -> Float
