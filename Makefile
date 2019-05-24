@@ -12,13 +12,13 @@ shipBuilder/js/hull.js: rebuildHull/src/hull.js
 	cd rebuildHull && make
 	cp rebuildHull/js/hull.js shipBuilder/js/
 
-shipBuilder/js/elm.js: src/*.elm src/Dict/*.elm src/Interpolate/*.elm
+shipBuilder/js/elm.js: src/*.elm src/Dict/*.elm src/Interpolate/*.elm Dockerfile
 	rm -rf elm-stuff/generated-code || true
 	docker build -t elm .
 	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work elm make src/Main.elm --output shipBuilder/js/elm.js
 	sed -i "1i// (c) Naval Group / Sirehna 2019. All rights reserved" shipBuilder/js/elm.js
 
-test: shipBuilder/js/elm.js tests/*.elm
+test: shipBuilder/js/elm.js tests/*.elm Dockerfile
 	docker build -t elm .
 	docker run -t --rm --name elm -v `pwd`:/work -u $(shell id -u):$(shell id -g) -w /work --entrypoint elm-test elm --skip-install --verbose
 
