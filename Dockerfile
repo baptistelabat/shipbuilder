@@ -3,6 +3,8 @@ FROM node:8.16.0-jessie-slim
 # To install sysconfcpus (otherwise elm make takes forever on Docker), as per https://github.com/elm-lang/elm-compiler/issues/1473#issuecomment-245704142
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    apt-transport-https \
+ && apt-get install -y --no-install-recommends \
     git gcc binutils libc6-dev autoconf automake perl file \
     && apt-get install -y make \
     && git clone https://github.com/obmarg/libsysconfcpus.git \
