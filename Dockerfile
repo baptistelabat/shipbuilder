@@ -18,7 +18,7 @@ ENV ELM_HOME /work
 
 # Otherwise you get Error extracting linux-x64.tar.gz - Error: EACCES: permission denied, mkdir '/usr/local/lib/node_modules/elm/Elm-Platform'
 # Need that exact version of elm-test otherwise it hangs indefinitely on Docker (as per https://github.com/rtfeldman/node-test-runner/issues/219#issuecomment-345037285)
-RUN npm config set unsafe-perm=true && npm install -g elm@0.19.0-bugfix2 elm-test@0.19.0-rev3 elm-format@0.8.1
+RUN npm config set unsafe-perm=true && npm install -g elm@0.19.0-no-deps elm-test@0.19.0-rev6 elm-format@0.8.1
 
 #node --stack-size=65500 node_modules/.bin/elm-test
 ENTRYPOINT ["elm"]
