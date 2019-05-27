@@ -9,6 +9,7 @@ module EncodersDecoders exposing
     , getHashImageForSlices
     , hullSliceAsAreaXYListEncoder
     , hullSliceEncoder
+    , hullSlicesDecoder
     , normalizeSlicesPosition
     )
 
@@ -44,6 +45,11 @@ hullSliceDecoder =
         |> Pipeline.required "zmin" Decode.float
         |> Pipeline.required "zmax" Decode.float
         |> Pipeline.required "y" (Decode.list Decode.float)
+
+
+hullSlicesDecoder : Decode.Decoder (List HullSlice)
+hullSlicesDecoder =
+    Decode.list hullSliceDecoder
 
 
 decodeCustomHullProperties : Decode.Decoder CustomHullProperties
@@ -163,7 +169,7 @@ decoder =
         |> Pipeline.required "breadth" (Decode.map (StringValueInput.fromNumber "m" "Breadth" 1) Decode.float)
         |> Pipeline.required "depth" (Decode.map (StringValueInput.fromNumber "m" "Depth" 1) Decode.float)
         |> Pipeline.optional "draught" (Decode.map (Just << StringValueInput.fromNumber "m" "Draught" 1) Decode.float) Nothing
-        |> Pipeline.required "slices" (Decode.list hullSliceDecoder)
+        |> Pipeline.required "slices" hullSlicesDecoder
         |> Pipeline.optional "custom" (Decode.map Just decodeCustomHullProperties) Nothing
         |> Decode.andThen helper
 
