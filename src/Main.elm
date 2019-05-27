@@ -1922,6 +1922,7 @@ type ToJsMsg
     | ChangeBlockColor Block Color
     | OpenSaveFile
     | OpenHullsLibrary
+    | ReadClipboard
     | RemoveBlock Block
     | RemoveBlocks (List Block)
     | SelectBlock Block
@@ -2540,6 +2541,9 @@ updateModelToJs msg model =
         OpenHullsLibrary ->
             model
 
+        ReadClipboard ->
+            model
+
         ChangeBlockColor block newColor ->
             case getBlockByUUID block.uuid model.blocks of
                 Just _ ->
@@ -2955,6 +2959,9 @@ msg2json model action =
 
         OpenHullsLibrary ->
             Just { tag = "read-json-file-import", data = Encode.string "import-hull-library" }
+
+        ReadClipboard ->
+            Just { tag = "read-clipboard", data = Encode.null }
 
         RemoveBlock block ->
             Just { tag = "remove-block", data = encodeBlock block }
@@ -3758,6 +3765,7 @@ viewHullSliceSelector sliceSelector hullReference maxSelector =
                 [ class "as-button slices-import"
                 , id "slices-import"
                 , title "Paste list of sections from clipboard"
+                , onClick <| ToJs <| ReadClipboard
                 ]
                 [ FASolid.externalLinkAlt [] ]
             ]

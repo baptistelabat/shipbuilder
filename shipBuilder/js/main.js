@@ -71,6 +71,9 @@ app.ports.toJs.subscribe(function (message) {
         case "read-json-file-import": // used to read a save file
             readFile("import-data", data);
             break;
+        case "read-clipboard": // used to read a save file
+            readClipboard("paste-clipboard", data);
+            break;
         case "restore-save":
             restoreSave(data);
             break;
@@ -190,6 +193,10 @@ let readFile = function (cmd, inputId) {
 
     // Connect our FileReader with the file that was selected in our `input` node.
     reader.readAsText(file);
+}
+
+let readClipboard = function (cmd, inputId) {
+    sendToElm(cmd, "");
 }
 
 let restoreSave = function (savedData) {
