@@ -101,7 +101,6 @@ hs_param =
     , breadth = 4
     , depth = 6
     , xmin = 0
-    , ymin = -2.0
     , zmin = -6.0
     }
 
@@ -743,7 +742,7 @@ suite =
         --             |> Expect.equal { x = 25.0, kz = -0.5, ky = 0.0, area = 2.5 }
         , test "denormalizedSlicesT3" <|
             \_ ->
-                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
                     [ { x = 0, y = [ 1, 1 ], zmax = 0.5, zmin = 0 }
                     , { x = 0.25, y = [ 1, 1 ], zmax = 0.75, zmin = 0 }
                     , { x = 0.5, y = [ 1, 1 ], zmax = 1, zmin = 0 }
@@ -759,7 +758,7 @@ suite =
                         ]
         , test "denormalizedSlicesT1" <|
             \_ ->
-                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
                     [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
                     , { x = 1, y = [ 1, 1, 0.5 ], zmax = 1, zmin = 0 }
                     ]
@@ -769,7 +768,7 @@ suite =
                         ]
         , test "denormalizedSlicesT4" <|
             \_ ->
-                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, ymin = -5, zmin = -10 }
+                denormalizeHullSlices { breadth = 10, depth = 10, length = 100, xmin = 0, zmin = -10 }
                     [ { x = 0, y = [ 1, 1, 0.5 ], zmax = 0.8, zmin = 0.4 }
                     ]
                     |> Expect.equal

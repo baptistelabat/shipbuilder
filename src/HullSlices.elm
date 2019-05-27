@@ -119,6 +119,15 @@ getDraught hullSlices =
     Maybe.withDefault hullSlices.draught hullSlices.custom.draught
 
 
+type alias SpaceParameters =
+    { length : Float
+    , breadth : Float
+    , depth : Float
+    , xmin : Float
+    , zmin : Float
+    }
+
+
 emptyHullSlices : HullSlices
 emptyHullSlices =
     { length = StringValueInput.emptyFloat 1
@@ -694,7 +703,7 @@ calculateCentroid lo =
             0
 
 
-getSpaceParametersFromHullSlices : List HullSlice -> Maybe { length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float }
+getSpaceParametersFromHullSlices : List HullSlice -> Maybe SpaceParameters
 getSpaceParametersFromHullSlices hullSliceList =
     let
         maybeXmin =
@@ -745,7 +754,7 @@ normalizeHullSlices hullSliceList =
             Nothing
 
 
-normalizeHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float } -> HullSlice -> HullSlice
+normalizeHullSlice : SpaceParameters -> HullSlice -> HullSlice
 normalizeHullSlice param hs =
     let
         normalizedY : Float -> Float -> Float
@@ -774,12 +783,12 @@ normalizeHullSlice param hs =
     res
 
 
-denormalizeHullSlices : { a | length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float } -> List HullSlice -> List HullSlice
+denormalizeHullSlices : SpaceParameters -> List HullSlice -> List HullSlice
 denormalizeHullSlices param l =
     List.map (denormalizeHullSlice param) l
 
 
-denormalizeHullSlice : { a | length : Float, breadth : Float, depth : Float, xmin : Float, zmin : Float } -> HullSlice -> HullSlice
+denormalizeHullSlice : SpaceParameters -> HullSlice -> HullSlice
 denormalizeHullSlice param hs =
     -- y denormalisé dans intervalle [0,breadth/2]
     let
