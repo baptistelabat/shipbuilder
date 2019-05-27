@@ -3735,9 +3735,18 @@ viewHullSlicesDetails uiState hullReference hullslices =
 
 viewHullSliceSelector : StringValueInput.IntInput -> String -> Int -> Html Msg
 viewHullSliceSelector sliceSelector hullReference maxSelector =
-    div
-        [ class "slices-selector" ]
-        [ StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector ]
+    div [] <|
+        [ div
+            [ class "slices-actions" ]
+            [ StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector
+            , p
+                [ class "as-button slices-import"
+                , id "slices-import"
+                , title "Paste list of sections from clipboard"
+                ]
+                [ FASolid.externalLinkAlt [] ]
+            ]
+        ]
 
 
 viewHullSliceList : HullSlices -> Int -> Html Msg

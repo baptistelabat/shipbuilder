@@ -860,6 +860,27 @@ button:active {
     transform: scale(0.98);
 }
 
+.as-button {
+    background: var(--primary-color);
+    color: var(--on-primary-color);
+    width: 100%;
+    border: 0;
+    border-radius: 4px;
+    padding: 6px;
+    box-shadow: 0 4px 8px -6px var(--shadow-color);
+}
+
+.as-button:hover {
+    background: var(--primary-color__contrast);
+    color: var(--on-primary-color__contrast);
+}
+
+.as-button:active {
+    background: var(--primary-color__accent);
+    color: var(--on-primary-color__accent);
+    box-shadow: 0 2px 8px -6px var(--shadow-color);
+}
+
 p.text-muted {
     margin: 0;
     font-size: 0.9em;
@@ -1411,7 +1432,6 @@ a.download-kpis svg {
 
 .slices-details-title {
     font-size: 1em;
-    margin-bottom:  15px;
     margin-left: 5px;
     display: flex;
     align-items: center;
@@ -1452,4 +1472,26 @@ a.download-kpis svg {
 .slices-item input:disabled {
     background: var(--secondary-color__accent);
     box-shadow: 0 0 5px -3px var(--shadow-color);
+}
+
+.slices-actions {
+    display: flex;
+    align-items: center;
+    margin-top: -15px;
+    margin-bottom: -15px;
+}
+
+.slices-import {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 32px;
+    margin-top: 36px;
+    margin-left: 10px;
+}
+
+.slices-import svg{
+    width: 15px;
+    height: 15px;
+    margin-left : 4px;
 }
