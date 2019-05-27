@@ -2431,14 +2431,18 @@ updateFromJs jsmsg model =
                         updateUiState isWaiting =
                             { olduiState | waitToPasteClipBoard = isWaiting }
 
+                        updateSlices : HullSlices -> List HullSlice
+                        updateSlices hullslices =
+                            coordinates
+                                |> HullSlices.fromCoordinates
+                                |> HullSlices.normalizeHullSlices
+                                |> Maybe.withDefault hullslices.slices
+
                         updateHullslices : HullSlices -> HullSlices
                         updateHullslices hullslices =
                             { hullslices
-                                | slices =
-                                    coordinates
-                                        |> HullSlices.fromCoordinates
-                                        |> HullSlices.normalizeHullSlices
-                                        |> Maybe.withDefault hullslices.slices
+                                | slices = updateSlices hullslices
+                                , originalSlicePositions = List.map .x <| updateSlices hullslices
                             }
 
                         updatedModel : Model
