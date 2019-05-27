@@ -195,8 +195,26 @@ let readFile = function (cmd, inputId) {
     reader.readAsText(file);
 }
 
+function handlePaste (e) {
+    var clipboardData, pastedData;
+
+    // Stop data actually being pasted into div
+    e.stopPropagation();
+    e.preventDefault();
+
+    clipboardData = e.clipboardData || window.clipboardData;
+    pastedData = clipboardData.getData('Text');
+
+    document.activeElement.blur()
+
+    var dataToElm = '{ "type" : "sections", "slices" : '+ pastedData +' }';
+    sendToElm("paste-clipboard", JSON.parse(dataToElm));
+}
+
 let readClipboard = function (cmd, inputId) {
-    sendToElm(cmd, "");
+    var pasteTarget = document.getElementById("sections-clipboard-receiver");
+    pasteTarget.focus();
+    pasteTarget.addEventListener('paste', handlePaste);
 }
 
 let restoreSave = function (savedData) {
