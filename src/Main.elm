@@ -539,6 +539,14 @@ jsMsgToMsg js =
                 Err message ->
                     FromJs <| JSError <| Decode.errorToString message
 
+        "paste-clipboard" ->
+            case Decode.decodeValue (decodeClipboardType |> Decode.andThen decodeClipboard) js.data of
+                Ok clipboardData ->
+                    FromJs <| PasteClipBoard clipboardData
+
+                Err message ->
+                    FromJs <| JSError <| Decode.errorToString message
+
         "new-block" ->
             case Decode.decodeValue decodeBlock js.data of
                 Ok block ->
@@ -615,6 +623,7 @@ type FromJsMsg
     | NewBlock Block
     | RestoreSave SaveFile
     | ImportHullsLibrary SaveFile
+    | PasteClipBoard (List HullSlice)
     | SynchronizePosition String Position
     | SynchronizePositions (Dict String SyncPosition)
     | SynchronizeSize String Size
@@ -2388,6 +2397,29 @@ updateFromJs jsmsg model =
                     importHullsLibraryiInModel model saveFile
             in
             ( newModel, Cmd.none )
+
+        PasteClipBoard updatedSlices ->
+            let
+                updateHullslices : Maybe HullSlices.HullSlices -> Maybe HullSlices.HullSlices
+                updateHullslices maybeHullslices =
+                    case maybeHullslices of
+                        Just hullslices ->
+                            Just { hullslices | slices = updatedSlices }
+
+                        Nothing ->
+                            Just
+                                HullSlices.emptyHullSlices
+
+                updateHullDict : String -> Dict ShipName HullSlices.HullSlices
+                updateHullDict hullRef =
+                    Dict.update hullRef updateHullslices model.slices
+            in
+            case model.selectedHullReference of
+                Just hullRef ->
+                    ( { model | slices = updateHullDict hullRef }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         Select uuid ->
             let
