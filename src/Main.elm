@@ -192,6 +192,21 @@ decodeVersion =
     Decode.field "version" Decode.int
 
 
+decodeClipboard : String -> Decode.Decoder (List HullSlice)
+decodeClipboard typeCB =
+    case typeCB of
+        "sections" ->
+            Decode.field "slices" EncodersDecoders.hullSlicesDecoder
+
+        _ ->
+            Decode.fail <| "Unknown type " ++ typeCB
+
+
+decodeClipboardType : Decode.Decoder String
+decodeClipboardType =
+    Decode.field "type" Decode.string
+
+
 decodeCustomProperties : Decode.Decoder (List CustomProperty)
 decodeCustomProperties =
     Decode.list decodeCustomProperty
