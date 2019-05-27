@@ -138,6 +138,7 @@ suite =
         , testImportHullSlicesLibrary
         , testRenameHullInLibrary
         , testSaveAsNewHullInLibrary
+        , testReadFromClipboard
         ]
 
 
@@ -1370,6 +1371,25 @@ testSlicesDetails =
                         |> .uiState
                         |> .selectedSlice
                         |> .value
+                    )
+        ]
+
+
+testReadFromClipboard =
+    describe "Test updating of model when reading clipboard" <|
+        [ test "Clicking 'slice import' button update UI State" <|
+            \_ ->
+                Expect.equal True
+                    (updateModel [ ToJs <| ReadClipboard ] initialModel
+                        |> .uiState
+                        |> .waitToPasteClipBoard
+                    )
+        , test "Clicking 'close slice import' button update UI State" <|
+            \_ ->
+                Expect.equal False
+                    (updateModel [ NoJs <| CancelReadClipboard ] initialModel
+                        |> .uiState
+                        |> .waitToPasteClipBoard
                     )
         ]
 
