@@ -751,7 +751,7 @@ normalizeHullSlice param hs =
 
         normalizedZ : Float -> Float -> Float -> Float
         normalizedZ zmin depth z =
-            z / depth - zmin
+            z / depth - zmin / depth
 
         x =
             hs.x / param.length - param.xmin
