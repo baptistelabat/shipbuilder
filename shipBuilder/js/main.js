@@ -706,7 +706,7 @@ let buildSliceGeometry = function (slice, depth, breadth, length, xmin, zmin) {
 let displayHighlightedSlice = function (slice, depth, breadth, length, xmin, zmin) {
 
   var geometry = buildSliceGeometry(slice, depth, breadth, length, xmin, zmin);
-  const colorRed = new THREE.Color("hsl(11, 80%, 60%)"); // red
+  const colorRed = new THREE.Color("hsl(11, 80%, 60%)");
   const material = new THREE.LineBasicMaterial({ color: colorRed, linewidth: 1, side: THREE.DoubleSide });
 
   const sliceToConstruct = new THREE.LineLoop(geometry, material);
