@@ -43,6 +43,7 @@ module HullSlices exposing
     )
 
 import Array
+import List.Extra
 import StringValueInput
 
 
@@ -520,31 +521,19 @@ coordinatesToHullSliceAsZYList coordinates =
 
 
 fromCoordinates : List XYZ -> List HullSlice
-fromCoordinates coordinates =
+fromCoordinates xyzs =
     let
-        nextX : Float -> Maybe Float
-        nextX xPos =
-            if (List.filter (\x -> x > xPos) <| List.map .x coordinates) /= [] then
-                List.minimum <| List.filter (\x -> x > xPos) <| List.map .x coordinates
-
-            else
-                Nothing
-
-        splitByX : Maybe Float -> List (List XYZ) -> List (List XYZ)
-        splitByX maybeX list =
-            case maybeX of
-                Nothing ->
-                    list
-
-                Just xPos ->
-                    List.filter (\c -> c.x == xPos) coordinates
-                        :: list
-                        |> splitByX (nextX xPos)
+        xyzsToHullSliceAsZYList : ( XYZ, List XYZ ) -> HullSlice
+        xyzsToHullSliceAsZYList ( head, tail ) =
+            fromHullSliceAsZYList
+                { x = head.x
+                , zylist = List.map (\c -> Tuple.pair c.z c.y) (head :: tail)
+                }
     in
-    splitByX (List.minimum <| List.map .x coordinates) []
-        |> List.reverse
-        |> List.filterMap coordinatesToHullSliceAsZYList
-        |> List.map fromHullSliceAsZYList
+    xyzs
+        |> List.sortBy .x
+        |> List.Extra.groupWhile (\a b -> a.x == b.x)
+        |> List.map xyzsToHullSliceAsZYList
 
 
 toHullSliceAsZYList : HullSlice -> HullSliceAsZYList
