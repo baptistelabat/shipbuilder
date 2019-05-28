@@ -1378,14 +1378,14 @@ testSlicesDetails =
 
 testReadFromClipboard =
     describe "Test updating of model when reading clipboard" <|
-        [ test "Clicking 'slice import' button update UI State" <|
+        [ test "Clicking 'slice import' button updates UI State" <|
             \_ ->
                 Expect.equal True
                     (updateModel [ ToJs <| ReadClipboard ] initialModel
                         |> .uiState
                         |> .waitToPasteClipBoard
                     )
-        , test "Clicking 'close slice import' button update UI State" <|
+        , test "Clicking 'close slice import' button updates UI State" <|
             \_ ->
                 Expect.equal False
                     (updateModel [ NoJs <| CancelReadClipboard ] initialModel
@@ -1424,7 +1424,7 @@ testPasteFromClipboard =
                 \_ ->
                     Expect.equal (formatClipboardData "1\t2\t3\n4\t5\t6\n7\t8\t9\n") <|
                         Just [ { x = 1, y = 2, z = 3 }, { x = 4, y = 5, z = 6 }, { x = 7, y = 8, z = 9 } ]
-            , test "Importing coordinates update dimension parameters of selected hull" <|
+            , test "Importing coordinates updates dimension parameters of selected hull" <|
                 \_ ->
                     { length = 40, breadth = 20, depth = 10, xmin = 0, zmin = 0 }
                         |> Just
@@ -1442,7 +1442,7 @@ testPasteFromClipboard =
                                         }
                                     )
                             )
-            , test "Importing coordinates update slices of selected hull" <|
+            , test "Importing coordinates updates slices of selected hull" <|
                 \_ ->
                     [ { x = 0, y = [ 0.5, 0.5, 0.5 ], zmax = 0, zmin = 0 }
                     , { x = 0.25, y = [ 0.9, 0.75, 0.5 ], zmax = 0.5, zmin = 0 }
@@ -1457,7 +1457,7 @@ testPasteFromClipboard =
                                 |> Dict.get "anthineas"
                                 |> Maybe.map .slices
                             )
-            , test "Importing coordinates reset custom values of selected hull" <|
+            , test "Importing coordinates resets custom values of selected hull" <|
                 \_ ->
                     { length = Nothing
                     , breadth = Nothing
