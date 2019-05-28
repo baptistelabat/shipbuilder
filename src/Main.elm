@@ -514,7 +514,7 @@ formatClipboardData data =
         constructCoordinate coordinateList =
             { x = Maybe.withDefault 0 <| List.head coordinateList
             , y = Maybe.withDefault 0 <| List.head <| List.drop 1 coordinateList
-            , z = Maybe.withDefault 0 <| List.head <| List.drop 2 coordinateList
+            , z = Maybe.withDefault 0 <| Maybe.map negate <| List.head <| List.drop 2 coordinateList
             }
     in
     if controlFormat then

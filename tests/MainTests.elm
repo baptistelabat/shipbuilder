@@ -1423,7 +1423,7 @@ testPasteFromClipboard =
             [ test "Can format coordinates when pasting" <|
                 \_ ->
                     Expect.equal (formatClipboardData "1\t2\t3\n4\t5\t6\n7\t8\t9\n") <|
-                        Just [ { x = 1, y = 2, z = 3 }, { x = 4, y = 5, z = 6 }, { x = 7, y = 8, z = 9 } ]
+                        Just [ { x = 1, y = 2, z = -3 }, { x = 4, y = 5, z = -6 }, { x = 7, y = 8, z = -9 } ]
             , test "Importing coordinates updates dimension parameters of selected hull" <|
                 \_ ->
                     { length = 40, breadth = 20, depth = 10, xmin = 0, zmin = 0 }
