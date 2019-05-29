@@ -622,24 +622,23 @@ let loadHull = function (json) {
 
         var hullSlices = json['hullSlices'];
 
-        const hullColor = new THREE.Color(3/255, 146/255, 255/255); // light blue
         // the STL loader returns a bufferGeometry. We can't read its vertices and faces
         // we need to convert it to an "actual" geometry to access these
         const geometry = buildHullGeometry(hullSlices);
         const volume = calcVolume(geometry);
 
-        const shipVertices = geometry.vertices;
-
-        const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
+        const blue = new THREE.Color(3/255, 146/255, 255/255);
+        const material = new THREE.MeshLambertMaterial({color: blue, side: THREE.DoubleSide});
 
         // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
+        const shipVertices = geometry.vertices;
         geometry.vertices = shipVertices.map(vertex => {
             return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
         });
 
         const hull = new THREE.Mesh(geometry, material);
 
-        hull.baseColor = hullColor;
+        hull.baseColor = blue;
         hull.sbType = "hull";
         scene.add(hull);
 
