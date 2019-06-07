@@ -23,6 +23,7 @@ port module Main exposing
     , asYInPosition
     , asZInPosition
     , encodeInitThreeCommand
+    , formatClipboardData
     , init
     , initBlock
     , initCmd
@@ -56,7 +57,7 @@ import Html.Attributes exposing (accept, attribute, class, disabled, download, f
 import Html.Events exposing (on, onBlur, onClick, onInput, onMouseLeave)
 import HullReferences
 import HullSliceModifiers
-import HullSlices exposing (HullSlice, HullSlices, applyCustomPropertiesToHullSlices, isHullCustomized)
+import HullSlices exposing (HullSlice, HullSlices, XYZ, applyCustomPropertiesToHullSlices, isHullCustomized)
 import HullSlicesMetrics
     exposing
         ( HullSlicesMetrics
@@ -459,6 +460,19 @@ keyDecoder =
     Decode.field "key" Decode.string
 
 
+coordinatesXYZDecoder : Decode.Decoder (List XYZ)
+coordinatesXYZDecoder =
+    Decode.list coordinateXYZDecoder
+
+
+coordinateXYZDecoder : Decode.Decoder XYZ
+coordinateXYZDecoder =
+    Decode.succeed XYZ
+        |> Pipeline.required "x" Decode.float
+        |> Pipeline.required "y" Decode.float
+        |> Pipeline.required "z" Decode.float
+
+
 keydownToMsg : String -> Msg
 keydownToMsg keyCode =
     case keyCode of
@@ -479,6 +493,35 @@ keyupToMsg keyCode =
 
         _ ->
             NoJs NoOp
+
+
+formatClipboardData : String -> Maybe (List XYZ)
+formatClipboardData data =
+    let
+        listCoordinate : List (List Float)
+        listCoordinate =
+            data
+                |> String.split "\n"
+                |> List.map (String.split "\t")
+                |> List.map (List.filterMap String.toFloat)
+                |> List.filter (not << List.isEmpty)
+
+        controlFormat : Bool
+        controlFormat =
+            List.all ((==) 3) <| List.map List.length listCoordinate
+
+        constructCoordinate : List Float -> XYZ
+        constructCoordinate coordinateList =
+            { x = Maybe.withDefault 0 <| List.head coordinateList
+            , y = Maybe.withDefault 0 <| List.head <| List.drop 1 coordinateList
+            , z = Maybe.withDefault 0 <| Maybe.map negate <| List.head <| List.drop 2 coordinateList
+            }
+    in
+    if controlFormat then
+        Just <| List.map constructCoordinate listCoordinate
+
+    else
+        Nothing
 
 
 jsMsgToMsg : JsData -> Msg
@@ -520,6 +563,19 @@ jsMsgToMsg js =
             case Decode.decodeValue (decodeVersion |> Decode.andThen decodeSaveFile) js.data of
                 Ok fileContents ->
                     FromJs <| ImportHullsLibrary fileContents
+
+                Err message ->
+                    FromJs <| JSError <| Decode.errorToString message
+
+        "paste-clipboard" ->
+            case Decode.decodeValue Decode.string js.data of
+                Ok dataString ->
+                    case formatClipboardData dataString of
+                        Just coordinates ->
+                            FromJs <| PasteClipBoard coordinates
+
+                        Nothing ->
+                            FromJs <| JSError <| "Clipboard data have incorrect format"
 
                 Err message ->
                     FromJs <| JSError <| Decode.errorToString message
@@ -600,6 +656,7 @@ type FromJsMsg
     | NewBlock Block
     | RestoreSave SaveFile
     | ImportHullsLibrary SaveFile
+    | PasteClipBoard (List XYZ)
     | SynchronizePosition String Position
     | SynchronizePositions (Dict String SyncPosition)
     | SynchronizeSize String Size
@@ -845,6 +902,7 @@ type alias UiState =
     , blockContextualMenu : Maybe String
     , selectedSlice : StringValueInput.IntInput
     , showSelectedSlice : Bool
+    , waitToPasteClipBoard : Bool
     }
 
 
@@ -1529,8 +1587,9 @@ initModel flag =
     , uiState =
         { accordions = Dict.empty
         , blockContextualMenu = Nothing
-        , selectedSlice = StringValueInput.fromInt "slice number" 1
+        , selectedSlice = StringValueInput.fromInt "slice no." 1
         , showSelectedSlice = False
+        , waitToPasteClipBoard = False
         }
     , tags = []
     , customProperties = []
@@ -1907,6 +1966,7 @@ type ToJsMsg
     | ChangeBlockColor Block Color
     | OpenSaveFile
     | OpenHullsLibrary
+    | ReadClipboard
     | RemoveBlock Block
     | RemoveBlocks (List Block)
     | SelectBlock Block
@@ -1945,6 +2005,7 @@ type NoJsMsg
     | RenameBlock Block String
     | RenameHull String String
     | SaveAsNewHull String
+    | CancelReadClipboard
     | SetBlockContextualMenu String
     | UnsetBlockContextualMenu
     | SetCurrentDate Time.Posix
@@ -2227,6 +2288,17 @@ updateNoJs msg model =
             in
             ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus newLabel) ] )
 
+        CancelReadClipboard ->
+            let
+                olduiState =
+                    model.uiState
+
+                updateUiState : Bool -> UiState
+                updateUiState isWaiting =
+                    { olduiState | waitToPasteClipBoard = isWaiting }
+            in
+            ( { model | uiState = updateUiState False }, Cmd.none )
+
         ToggleAccordion isOpen accordionId ->
             let
                 uiState : UiState
@@ -2372,6 +2444,64 @@ updateFromJs jsmsg model =
                     importHullsLibraryiInModel model saveFile
             in
             ( newModel, Cmd.none )
+
+        PasteClipBoard coordinates ->
+            case model.selectedHullReference of
+                Just hullRef ->
+                    let
+                        olduiState =
+                            model.uiState
+
+                        updateUiState : Bool -> UiState
+                        updateUiState isWaiting =
+                            { olduiState | waitToPasteClipBoard = isWaiting }
+
+                        updateHullslices : HullSlices -> HullSlices
+                        updateHullslices hullslices =
+                            let
+                                denormalizedSlices =
+                                    HullSlices.fromCoordinates coordinates
+                            in
+                            case HullSlices.getSpaceParametersFromHullSlices denormalizedSlices of
+                                Just param ->
+                                    let
+                                        normalizedSlices =
+                                            HullSlices.normalizeHullSlices denormalizedSlices param
+                                    in
+                                    { hullslices
+                                        | length = StringValueInput.asFloatIn hullslices.length param.length
+                                        , breadth = StringValueInput.asFloatIn hullslices.breadth param.breadth
+                                        , depth = StringValueInput.asFloatIn hullslices.depth param.depth
+                                        , xmin = param.xmin
+                                        , zmin = param.zmin
+                                        , slices = normalizedSlices
+                                        , originalSlicePositions = List.map .x normalizedSlices
+                                    }
+                                        |> HullSliceModifiers.resetSlicesToOriginals
+
+                                Nothing ->
+                                    hullslices
+
+                        updatedModel : Model
+                        updatedModel =
+                            { model
+                                | slices = Dict.update hullRef (Maybe.map <| updateHullslices) model.slices
+                                , uiState = updateUiState False
+                            }
+
+                        loadhullCmd : Cmd msg
+                        loadhullCmd =
+                            case loadHullJsData updatedModel hullRef of
+                                Just jsData ->
+                                    toJs jsData
+
+                                Nothing ->
+                                    Cmd.none
+                    in
+                    ( updatedModel, loadhullCmd )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         Select uuid ->
             let
@@ -2524,6 +2654,17 @@ updateModelToJs msg model =
 
         OpenHullsLibrary ->
             model
+
+        ReadClipboard ->
+            let
+                olduiState =
+                    model.uiState
+
+                updateUiState : Bool -> UiState
+                updateUiState isWaiting =
+                    { olduiState | waitToPasteClipBoard = isWaiting }
+            in
+            { model | uiState = updateUiState True }
 
         ChangeBlockColor block newColor ->
             case getBlockByUUID block.uuid model.blocks of
@@ -2864,6 +3005,23 @@ sendCmdToJs model msg =
             Cmd.none
 
 
+loadHullJsData : Model -> String -> Maybe JsData
+loadHullJsData model hullReference =
+    case Dict.get hullReference model.slices of
+        Nothing ->
+            Nothing
+
+        Just hullSlices ->
+            Just
+                { tag = "load-hull"
+                , data =
+                    applyCustomPropertiesToHullSlices hullSlices
+                        |> EncodersDecoders.encoderWithSelectedSlice
+                            model.uiState.selectedSlice.value
+                            model.uiState.showSelectedSlice
+                }
+
+
 msg2json : Model -> ToJsMsg -> Maybe JsData
 msg2json model action =
     case action of
@@ -2941,6 +3099,9 @@ msg2json model action =
         OpenHullsLibrary ->
             Just { tag = "read-json-file-import", data = Encode.string "import-hull-library" }
 
+        ReadClipboard ->
+            Just { tag = "read-clipboard", data = Encode.null }
+
         RemoveBlock block ->
             Just { tag = "remove-block", data = encodeBlock block }
 
@@ -2963,67 +3124,19 @@ msg2json model action =
                     { tag = "add-block-to-selection", data = encodeBlock block }
 
         SelectHullReference hullReference ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just
-                        { tag = "load-hull"
-                        , data =
-                            applyCustomPropertiesToHullSlices hullSlices
-                                |> EncodersDecoders.encoderWithSelectedSlice
-                                    model.uiState.selectedSlice.value
-                                    model.uiState.showSelectedSlice
-                        }
+            loadHullJsData model hullReference
 
         SelectSlice hullReference _ _ ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just
-                        { tag = "load-hull"
-                        , data =
-                            applyCustomPropertiesToHullSlices hullSlices
-                                |> EncodersDecoders.encoderWithSelectedSlice
-                                    model.uiState.selectedSlice.value
-                                    model.uiState.showSelectedSlice
-                        }
+            loadHullJsData model hullReference
 
         ToggleSlicesDetails isOpen hullReference ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just
-                        { tag = "load-hull"
-                        , data =
-                            applyCustomPropertiesToHullSlices hullSlices
-                                |> EncodersDecoders.encoderWithSelectedSlice
-                                    model.uiState.selectedSlice.value
-                                    model.uiState.showSelectedSlice
-                        }
+            loadHullJsData model hullReference
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
 
         ModifySlice _ hullReference _ ->
-            case Dict.get hullReference model.slices of
-                Nothing ->
-                    Nothing
-
-                Just hullSlices ->
-                    Just
-                        { tag = "load-hull"
-                        , data =
-                            applyCustomPropertiesToHullSlices hullSlices
-                                |> EncodersDecoders.encoderWithSelectedSlice
-                                    model.uiState.selectedSlice.value
-                                    model.uiState.showSelectedSlice
-                        }
+            loadHullJsData model hullReference
 
         ResetSlice hullReference ->
             case Dict.get hullReference model.slices of
@@ -3718,7 +3831,7 @@ viewHullSlicesDetails uiState hullReference hullslices =
                 [ text "Slices details"
                 , FASolid.angleDown []
                 ]
-            , viewHullSliceSelector uiState.selectedSlice hullReference <| List.length hullslices.slices
+            , viewHullSliceSelector uiState hullReference <| List.length hullslices.slices
             , viewHullSliceList hullslices uiState.selectedSlice.value
             ]
 
@@ -3733,11 +3846,60 @@ viewHullSlicesDetails uiState hullReference hullslices =
             ]
 
 
-viewHullSliceSelector : StringValueInput.IntInput -> String -> Int -> Html Msg
-viewHullSliceSelector sliceSelector hullReference maxSelector =
+viewHullSliceSelector : UiState -> String -> Int -> Html Msg
+viewHullSliceSelector uiState hullReference maxSelector =
+    div [] <|
+        [ div
+            [ class "slices-selector" ]
+            [ StringValueInput.viewIntInput uiState.selectedSlice <| ToJs << SelectSlice hullReference maxSelector
+            , viewHullSliceImportButton uiState
+            , viewHiddenInputToPasteClipboard
+            ]
+        ]
+
+
+viewHullSliceImportButton : UiState -> Html Msg
+viewHullSliceImportButton uiState =
+    if uiState.waitToPasteClipBoard then
+        div
+            [ class "slices-import-active"
+            , id "slices-import-active"
+            ]
+            [ div
+                [ class "slices-import-message" ]
+                [ text "press ctrl+v to import" ]
+            , div
+                [ class "as-button slices-import-close"
+                , id "slices-import-close"
+                , title "Cancel the import"
+                , onClick <| NoJs <| CancelReadClipboard
+                ]
+                [ FASolid.times [] ]
+            ]
+
+    else
+        div
+            [ class "as-button slices-import"
+            , id "slices-import"
+            , title "Paste list of slices from clipboard"
+            , onClick <| ToJs <| ReadClipboard
+            ]
+            [ FASolid.externalLinkAlt [] ]
+
+
+viewHiddenInputToPasteClipboard : Html Msg
+viewHiddenInputToPasteClipboard =
     div
-        [ class "slices-selector" ]
-        [ StringValueInput.viewIntInput sliceSelector <| ToJs << SelectSlice hullReference maxSelector ]
+        [ class "slices-clipboard-receiver" ]
+        [ label [] []
+        , input
+            [ type_ "text"
+            , id "slices-clipboard-receiver"
+            , value ""
+            , onBlur <| NoJs <| CancelReadClipboard
+            ]
+            []
+        ]
 
 
 viewHullSliceList : HullSlices -> Int -> Html Msg

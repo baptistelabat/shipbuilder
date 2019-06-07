@@ -16,6 +16,11 @@
     --on-secondary-color__accent: hsl(222, 20%, 20%);
     --on-secondary-color__muted: hsl(222, 20%, 60%);
 
+    --tertiary-color: hsl(11, 80%, 60%);
+    --tertiary-color__accent: hsl(11, 80%, 50%);
+
+    --on-tertiary-color: white;
+
     --contrast-color: hsl(222, 20%, 20%);
     --on-contrast-color: white;
 
@@ -860,6 +865,27 @@ button:active {
     transform: scale(0.98);
 }
 
+.as-button {
+    background: var(--primary-color);
+    color: var(--on-primary-color);
+    width: 100%;
+    border: 0;
+    border-radius: 4px;
+    padding: 6px;
+    box-shadow: 0 4px 8px -6px var(--shadow-color);
+}
+
+.as-button:hover {
+    background: var(--primary-color__contrast);
+    color: var(--on-primary-color__contrast);
+}
+
+.as-button:active {
+    background: var(--primary-color__accent);
+    color: var(--on-primary-color__accent);
+    box-shadow: 0 2px 8px -6px var(--shadow-color);
+}
+
 p.text-muted {
     margin: 0;
     font-size: 0.9em;
@@ -1394,7 +1420,7 @@ a.download-kpis svg {
 
 .disclaimer {
   font-size: 0.8em;
-  color: red;
+  color: var(--tertiary-color);
   padding-top: 20px;
   border-top: 1px solid var(--secondary-color__contrast);
 }
@@ -1411,7 +1437,6 @@ a.download-kpis svg {
 
 .slices-details-title {
     font-size: 1em;
-    margin-bottom:  15px;
     margin-left: 5px;
     display: flex;
     align-items: center;
@@ -1423,7 +1448,14 @@ a.download-kpis svg {
     height: 22px;
 }
 
-.slices-selector input[type="number"] {
+.slices-selector {
+    display: flex;
+    align-items: center;
+    margin-top : -15px;
+    margin-bottom : -10px;
+}
+
+.section-selector input[type="number"] {
     -moz-appearance: textfield; /* Firefox */
 }
 
@@ -1452,4 +1484,61 @@ a.download-kpis svg {
 .slices-item input:disabled {
     background: var(--secondary-color__accent);
     box-shadow: 0 0 5px -3px var(--shadow-color);
+}
+
+.slices-import, .slices-import-active  {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    margin-left: 10px;
+}
+
+.slices-import  {
+    width: 40px;
+    height: 32px;
+}
+
+.slices-import-close  {
+    width: 35px;
+    height: 32px;
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+}
+
+.slices-import-close:hover  {
+    background: var(--tertiary-color__accent);
+}
+
+.slices-import-close:active  {
+    background: var(--tertiary-color__accent);
+}
+
+.slices-import svg, .slices-import-close svg {
+    width: 15px;
+    height: 15px;
+    margin-left : 4px;
+}
+
+.slices-import-message, .slices-import-close {
+    display: flex;
+    align-items: center;
+    background: var(--tertiary-color);
+    color: var(--on-tertiary-color);
+}
+
+.slices-import-message {
+    width: 80px;
+    height: 32px;
+    font-size: 0.7em;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-right: 1px;
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+
+}
+
+.slices-clipboard-receiver {
+    width: 0px;
+    overflow: hidden;
 }

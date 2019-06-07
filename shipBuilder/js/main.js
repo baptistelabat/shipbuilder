@@ -71,6 +71,9 @@ app.ports.toJs.subscribe(function (message) {
         case "read-json-file-import": // used to read a save file
             readFile("import-data", data);
             break;
+        case "read-clipboard": // used to read a save file
+            readClipboard("paste-clipboard", data);
+            break;
         case "restore-save":
             restoreSave(data);
             break;
@@ -190,6 +193,27 @@ let readFile = function (cmd, inputId) {
 
     // Connect our FileReader with the file that was selected in our `input` node.
     reader.readAsText(file);
+}
+
+function handlePaste (e) {
+    var clipboardData, pastedData;
+
+    // Stop data actually being pasted into div
+    e.stopPropagation();
+    e.preventDefault();
+
+    clipboardData = e.clipboardData || window.clipboardData;
+    pastedData = clipboardData.getData('Text');
+
+    document.activeElement.blur()
+
+    sendToElm("paste-clipboard", pastedData);
+}
+
+let readClipboard = function (cmd, inputId) {
+    var pasteTarget = document.getElementById("slices-clipboard-receiver");
+    pasteTarget.focus();
+    pasteTarget.addEventListener('paste', handlePaste);
 }
 
 let restoreSave = function (savedData) {
@@ -682,7 +706,7 @@ let buildSliceGeometry = function (slice, depth, breadth, length, xmin, zmin) {
 let displayHighlightedSlice = function (slice, depth, breadth, length, xmin, zmin) {
 
   var geometry = buildSliceGeometry(slice, depth, breadth, length, xmin, zmin);
-  const colorRed = new THREE.Color(1, 0.5, 0.5); // red
+  const colorRed = new THREE.Color("hsl(11, 80%, 60%)");
   const material = new THREE.LineBasicMaterial({ color: colorRed, linewidth: 1, side: THREE.DoubleSide });
 
   const sliceToConstruct = new THREE.LineLoop(geometry, material);

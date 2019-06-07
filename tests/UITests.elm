@@ -70,6 +70,16 @@ modellerViewWithSlicesDetailsExpanded =
         ]
 
 
+modellerReadyToReadClipboard : Html Msg
+modellerReadyToReadClipboard =
+    setView
+        [ ToJs <| SelectHullReference "anthineas"
+        , ToJs <| SwitchViewMode <| Hull HullDetails
+        , ToJs <| ToggleSlicesDetails True "anthineas"
+        , ToJs <| ReadClipboard
+        ]
+
+
 downArrow : KeyEvent -> ( String, Encode.Value )
 downArrow =
     keyDown 40
@@ -1189,13 +1199,44 @@ modellerTests =
             \_ ->
                 modellerViewWithSlicesDetailsExpanded
                     |> Query.fromHtml
-                    |> Query.has [ Selector.attribute <| Attributes.id "slice-number" ]
+                    |> Query.has [ Selector.attribute <| Attributes.id "slice-no" ]
         , test "Entering a number in slice number input selects the corresponding slice" <|
             \_ ->
                 modellerViewWithSlicesDetailsExpanded
                     |> Query.fromHtml
-                    |> Query.findAll [ Selector.id "slice-number" ]
+                    |> Query.findAll [ Selector.id "slice-no" ]
                     |> Query.first
                     |> Event.simulate (Event.input "5")
                     |> Event.expect (ToJs <| SelectSlice "anthineas" 10 "5")
+        , test "Button 'slice import' is present" <|
+            \_ ->
+                modellerViewWithSlicesDetailsExpanded
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.attribute <| Attributes.id "slices-import" ]
+        , test "Button 'slice import' triggers ReadClipboard" <|
+            \_ ->
+                modellerViewWithSlicesDetailsExpanded
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "slices-import" ]
+                    |> Query.first
+                    |> Event.simulate Event.click
+                    |> Event.expect (ToJs <| ReadClipboard)
+        , test "Button 'slice import' display a message prompting to paste clipboard" <|
+            \_ ->
+                modellerReadyToReadClipboard
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.attribute <| Attributes.class "slices-import-message" ]
+        , test "Button 'slice import' display a button 'cancel slices import" <|
+            \_ ->
+                modellerReadyToReadClipboard
+                    |> Query.fromHtml
+                    |> Query.has [ Selector.attribute <| Attributes.id "slices-import-close" ]
+        , test "Button 'cancel slice import' triggers CancelReadClipboard" <|
+            \_ ->
+                modellerReadyToReadClipboard
+                    |> Query.fromHtml
+                    |> Query.findAll [ Selector.id "slices-import-close" ]
+                    |> Query.first
+                    |> Event.simulate Event.click
+                    |> Event.expect (NoJs <| CancelReadClipboard)
         ]
