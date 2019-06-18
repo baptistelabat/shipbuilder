@@ -903,7 +903,7 @@ type alias UiState =
     , selectedSlice : StringValueInput.IntInput
     , showSelectedSlice : Bool
     , waitToPasteClipBoard : Bool
-    , newHullInputValue : Maybe String
+    , newHullName : Maybe String
     }
 
 
@@ -1591,7 +1591,7 @@ initModel flag =
         , selectedSlice = StringValueInput.fromInt "slice no." 1
         , showSelectedSlice = False
         , waitToPasteClipBoard = False
-        , newHullInputValue = Nothing
+        , newHullName = Nothing
         }
     , tags = []
     , customProperties = []
@@ -2276,7 +2276,7 @@ updateNoJs msg model =
 
                 newUiState : UiState
                 newUiState =
-                    { uiState | newHullInputValue = Just name }
+                    { uiState | newHullName = Just name }
             in
             ( { model | uiState = newUiState }, Cmd.none )
 
@@ -2770,7 +2770,7 @@ updateModelToJs msg model =
             let
                 maybeHullReference : Maybe String
                 maybeHullReference =
-                    model.uiState.newHullInputValue
+                    model.uiState.newHullName
 
                 updatedSlices : String -> Dict ShipName HullSlices
                 updatedSlices hullReference =
@@ -3166,7 +3166,7 @@ msg2json model action =
             loadHullJsData model hullReference
 
         CreateHull ->
-            case model.uiState.newHullInputValue of
+            case model.uiState.newHullName of
                 Nothing ->
                     Nothing
 
