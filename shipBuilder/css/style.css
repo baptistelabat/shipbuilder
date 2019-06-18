@@ -470,6 +470,11 @@ li.hull-reference:hover .hull-actions {
     display: flex;
 }
 
+li.hull-reference .hull-actions__add {
+    width: 35px;
+
+}
+
 li.hull-reference .hull-actions__custom {
     width: 75px;
 
@@ -495,6 +500,10 @@ li.hull-reference .hull-action {
 {
     height: 16px;
     color: var(--primary-color);
+}
+
+.hull-panel .focus-hull svg, .hull-panel .create-hull svg
+{
     margin-left: 10px;
 }
 
@@ -503,14 +512,18 @@ li.hull-reference .hull-action {
     color: var(--on-primary-color__accent);
 }
 
-.hull-panel .delete-hull svg, .hull-panel .save-hull svg
+.hull-panel .delete-hull svg, .hull-panel .save-hull svg, .hull-panel .create-hull svg
 {
-    margin-right: 12px;
     height: 16px;
     color: var(--on-secondary-color__accent);
 }
 
-.hull-panel .delete-hull:hover svg, .hull-panel .save-hull:hover svg
+.hull-panel .delete-hull svg, .hull-panel .save-hull svg
+{
+    margin-right: 12px;
+}
+
+.hull-panel .delete-hull:hover svg, .hull-panel .save-hull:hover svg, .hull-panel .create-hull:hover svg
 {
     color: var(--on-secondary-color__muted);
 }

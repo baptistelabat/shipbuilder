@@ -187,4 +187,16 @@ viewNewHullReference =
                 []
             , p [ class "hull-path" ] [ text "Add a new hull" ]
             ]
+        , div [ class "hull-actions hull-actions__add" ]
+            [ viewCreateHullAction
+            ]
         ]
+
+
+viewCreateHullAction : Html msg
+viewCreateHullAction =
+    div
+        [ class "hull-action create-hull"
+        , title "create a new hull"
+        ]
+        [ FASolid.save [] ]
