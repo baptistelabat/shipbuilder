@@ -359,6 +359,10 @@ li.hull-reference-none {
     border-color: var(--secondary-color__contrast);
 }
 
+li.hull-reference-add {
+    border-color: var(--secondary-color__contrast);
+}
+
 li.hull-reference__selected {
     border-left-width: 6px;
     border-left-style: solid;
@@ -373,6 +377,12 @@ li.hull-reference .hull-info-wrapper__custom  {
     width: calc(100% - 60px);
     position: relative;
 }
+
+li.hull-reference:hover .hull-info-wrapper__add  {
+    width: calc(100% - 40px);
+    position: relative;
+}
+
 
 li.hull-reference:hover .hull-info-wrapper__custom  {
     width: calc(100% - 90px);
@@ -401,7 +411,7 @@ li.hull-reference p {
     margin: 4px 0;
 }
 
-li.hull-reference p.hull-label {
+li.hull-reference p.hull-label, li.hull-reference p.hull-label-add {
     font-size: 1.1em;
 }
 
@@ -421,7 +431,7 @@ li.hull-reference p.hull-hash {
     text-overflow: ellipsis;
 }
 
-input.hull-label {
+input.hull-label, input.hull-label-add {
     width: 100%;
     border: none;
     border-bottom: 1px solid var(--secondary-color__contrast);

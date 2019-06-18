@@ -65,6 +65,7 @@ viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferen
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
+            :: viewNewHullReference
             :: List.map3 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs isHullsCustomized
 
 
@@ -166,5 +167,24 @@ viewUnselectHullReference isAHullSelected unselectHullMsg =
         [ div [ class "hull-info-wrapper" ]
             [ p [ class "hull-label" ] [ text "None" ]
             , p [ class "hull-path" ] [ text "No hull is displayed or used in computations" ]
+            ]
+        ]
+
+
+viewNewHullReference : Html msg
+viewNewHullReference =
+    li [ class "hull-reference hull-reference-add" ]
+        [ div
+            []
+            []
+        , div [ class "hull-info-wrapper hull-info-wrapper__add" ]
+            [ input
+                [ class "hull-label-add"
+                , type_ "text"
+                , placeholder "New Hull"
+                , value ""
+                ]
+                []
+            , p [ class "hull-path" ] [ text "Add a new hull" ]
             ]
         ]
