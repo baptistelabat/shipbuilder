@@ -2006,6 +2006,7 @@ type NoJsMsg
     | NoOp
     | RenameBlock Block String
     | RenameHull String String
+    | SaveNewHullName String
     | SaveAsNewHull String
     | CancelReadClipboard
     | SetBlockContextualMenu String
@@ -2265,6 +2266,18 @@ updateNoJs msg model =
                             model
             in
             ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus refToFocus) ] )
+
+        SaveNewHullName name ->
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState | newHullInputValue = Just name }
+            in
+            ( { model | uiState = newUiState }, Cmd.none )
 
         SaveAsNewHull hullReference ->
             let
