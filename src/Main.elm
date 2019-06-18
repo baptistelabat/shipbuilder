@@ -903,6 +903,7 @@ type alias UiState =
     , selectedSlice : StringValueInput.IntInput
     , showSelectedSlice : Bool
     , waitToPasteClipBoard : Bool
+    , newHullInputValue : Maybe String
     }
 
 
@@ -1590,6 +1591,7 @@ initModel flag =
         , selectedSlice = StringValueInput.fromInt "slice no." 1
         , showSelectedSlice = False
         , waitToPasteClipBoard = False
+        , newHullInputValue = Nothing
         }
     , tags = []
     , customProperties = []
