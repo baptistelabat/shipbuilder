@@ -1975,6 +1975,7 @@ type ToJsMsg
     | SelectHullReference String
     | SelectSlice String Int String
     | ToggleSlicesDetails Bool String
+    | CreateHull
     | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
@@ -2765,6 +2766,23 @@ updateModelToJs msg model =
             in
             { model | uiState = newUiState }
 
+        CreateHull ->
+            let
+                maybeHullReference : Maybe String
+                maybeHullReference =
+                    model.uiState.newHullInputValue
+
+                updatedSlices : String -> Dict ShipName HullSlices
+                updatedSlices hullReference =
+                    Dict.insert hullReference HullSlices.emptyHullSlices model.slices
+            in
+            case maybeHullReference of
+                Nothing ->
+                    model
+
+                Just hullReference ->
+                    { model | selectedHullReference = Just hullReference, slices = updatedSlices hullReference }
+
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
 
@@ -3146,6 +3164,26 @@ msg2json model action =
 
         ToggleSlicesDetails isOpen hullReference ->
             loadHullJsData model hullReference
+
+        CreateHull ->
+            case model.uiState.newHullInputValue of
+                Nothing ->
+                    Nothing
+
+                Just hullRef ->
+                    case Dict.get hullRef model.slices of
+                        Nothing ->
+                            Nothing
+
+                        Just hullSlices ->
+                            Just
+                                { tag = "load-hull"
+                                , data =
+                                    applyCustomPropertiesToHullSlices hullSlices
+                                        |> EncodersDecoders.encoderWithSelectedSlice
+                                            model.uiState.selectedSlice.value
+                                            model.uiState.showSelectedSlice
+                                }
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
