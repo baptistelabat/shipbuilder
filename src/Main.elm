@@ -3200,7 +3200,7 @@ msg2json model action =
             Just { tag = "switch-mode", data = encodeViewMode newViewMode }
 
         TogglePartitions ->
-            Just { tag = "showing-partitions", data = Encode.bool <| not model.partitions.showing }
+            Just { tag = "showing-partitions", data = Encode.bool <| model.partitions.showing }
 
         ToggleBlocksVisibility blocks isVisible ->
             Just { tag = "blocks-visibility", data = encodeToggleBlocksVisibilityCmd blocks isVisible }
