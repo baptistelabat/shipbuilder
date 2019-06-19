@@ -1537,7 +1537,7 @@ testCreateNewHull =
                     )
         , test "Cannot create a hull if it is not unique" <|
             \_ ->
-                Expect.equal False
+                Expect.false "Expected newHullTest not to be a member of modelWithEmptyHullSlices"
                     (updateModel [ ToJs <| CreateHull ] modelWithEmptyHullSlices
                         |> .slices
                         |> Dict.keys
