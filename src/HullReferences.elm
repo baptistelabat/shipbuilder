@@ -15,6 +15,7 @@ type alias HullReferencesMsgs msg =
     , unselectHullMsg : msg
     , openLibraryMsg : msg
     , renameHullMsg : String -> String -> msg
+    , saveNewHullNameMsg : String -> msg
     , removeHullMsg : String -> msg
     , saveAsNewMsg : String -> msg
     , changeViewMsg : msg
@@ -65,7 +66,7 @@ viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull newHullName
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
-            :: viewNewHullReference newHullName
+            :: viewNewHullReference newHullName hullReferencesMsgs.saveNewHullNameMsg
             :: List.map3 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs isHullsCustomized
 
 
@@ -171,8 +172,8 @@ viewUnselectHullReference isAHullSelected unselectHullMsg =
         ]
 
 
-viewNewHullReference : Maybe String -> Html msg
-viewNewHullReference newHullName =
+viewNewHullReference : Maybe String -> (String -> msg) -> Html msg
+viewNewHullReference newHullName saveNewHullNameMsg =
     li [ class "hull-reference hull-reference-add" ]
         [ div
             []
@@ -183,6 +184,7 @@ viewNewHullReference newHullName =
                 , type_ "text"
                 , placeholder "New Hull"
                 , value <| Maybe.withDefault "" newHullName
+                , onInput saveNewHullNameMsg
                 ]
                 []
             , p [ class "hull-path" ] [ text "Add a new hull" ]

@@ -3695,6 +3695,7 @@ hullReferencesMsgs =
     , unselectHullMsg = ToJs <| UnselectHullReference
     , openLibraryMsg = ToJs <| OpenHullsLibrary
     , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
+    , saveNewHullNameMsg = NoJs << SaveNewHullName
     , removeHullMsg = ToJs << RemoveHull
     , saveAsNewMsg = NoJs << SaveAsNewHull
     , changeViewMsg = ToJs <| SwitchViewMode <| Hull <| HullDetails
