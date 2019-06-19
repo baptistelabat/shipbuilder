@@ -2792,16 +2792,15 @@ updateModelToJs msg model =
                     model
 
                 Just hullReference ->
-                    case Dict.member hullReference model.slices of
-                        True ->
-                            model
+                    if Dict.member hullReference model.slices then
+                        model
 
-                        False ->
-                            { model
-                                | selectedHullReference = Just hullReference
-                                , slices = updatedSlices hullReference
-                                , uiState = newUiState
-                            }
+                    else
+                        { model
+                            | selectedHullReference = Just hullReference
+                            , slices = updatedSlices hullReference
+                            , uiState = newUiState
+                        }
 
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
