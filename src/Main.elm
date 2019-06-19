@@ -3185,24 +3185,19 @@ msg2json model action =
             loadHullJsData model hullReference
 
         CreateHull ->
-            case model.selectedHullReference of
-                Nothing ->
-                    Nothing
-
-                Just hullRef ->
-                    case Dict.get hullRef model.slices of
-                        Nothing ->
-                            Nothing
-
-                        Just hullSlices ->
-                            Just
-                                { tag = "load-hull"
-                                , data =
-                                    applyCustomPropertiesToHullSlices hullSlices
-                                        |> EncodersDecoders.encoderWithSelectedSlice
-                                            model.uiState.selectedSlice.value
-                                            model.uiState.showSelectedSlice
-                                }
+            model.selectedHullReference
+                |> Maybe.andThen (\hullRef -> Dict.get hullRef model.slices)
+                |> Maybe.andThen
+                    (\hullSlices ->
+                        Just
+                            { tag = "load-hull"
+                            , data =
+                                applyCustomPropertiesToHullSlices hullSlices
+                                    |> EncodersDecoders.encoderWithSelectedSlice
+                                        model.uiState.selectedSlice.value
+                                        model.uiState.showSelectedSlice
+                            }
+                    )
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
