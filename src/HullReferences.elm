@@ -16,6 +16,7 @@ type alias HullReferencesMsgs msg =
     , openLibraryMsg : msg
     , renameHullMsg : String -> String -> msg
     , saveNewHullNameMsg : String -> msg
+    , createHullMsg : msg
     , removeHullMsg : String -> msg
     , saveAsNewMsg : String -> msg
     , changeViewMsg : msg
@@ -66,7 +67,7 @@ viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull newHullName
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
-            :: viewNewHullReference newHullName hullReferencesMsgs.saveNewHullNameMsg
+            :: viewNewHullReference newHullName hullReferencesMsgs.saveNewHullNameMsg hullReferencesMsgs.createHullMsg
             :: List.map3 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs isHullsCustomized
 
 
@@ -172,8 +173,8 @@ viewUnselectHullReference isAHullSelected unselectHullMsg =
         ]
 
 
-viewNewHullReference : Maybe String -> (String -> msg) -> Html msg
-viewNewHullReference newHullName saveNewHullNameMsg =
+viewNewHullReference : Maybe String -> (String -> msg) -> msg -> Html msg
+viewNewHullReference newHullName saveNewHullNameMsg createHullMsg =
     li [ class "hull-reference hull-reference-add" ]
         [ div
             []
@@ -190,15 +191,15 @@ viewNewHullReference newHullName saveNewHullNameMsg =
             , p [ class "hull-path" ] [ text "Add a new hull" ]
             ]
         , div [ class "hull-actions hull-actions__add" ]
-            [ viewCreateHullAction
-            ]
+            [ viewCreateHullAction createHullMsg ]
         ]
 
 
-viewCreateHullAction : Html msg
-viewCreateHullAction =
+viewCreateHullAction : msg -> Html msg
+viewCreateHullAction createHullMsg =
     div
         [ class "hull-action create-hull"
-        , title "create a new hull"
+        , onClick <| createHullMsg
+        , title "Create a new empty hull"
         ]
         [ FASolid.save [] ]
