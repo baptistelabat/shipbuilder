@@ -1522,7 +1522,7 @@ testCreateNewHull =
                     )
         , test "Can create a new hull" <|
             \_ ->
-                Expect.equal True
+                Expect.true "Expected newHullTest to be in modelWithSavedNewHullName"
                     (updateModel [ ToJs <| CreateHull ] modelWithSavedNewHullName
                         |> .slices
                         |> Dict.keys
