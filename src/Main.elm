@@ -3718,6 +3718,7 @@ viewHullLibraryPanel model =
         (List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices)
         (List.map HullSlices.isHullCustomized <| Dict.values model.slices)
         model.selectedHullReference
+        model.uiState.newHullName
         hullReferencesMsgs
 
 

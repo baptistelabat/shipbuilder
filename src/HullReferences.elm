@@ -21,8 +21,8 @@ type alias HullReferencesMsgs msg =
     }
 
 
-viewHullLibraryPanel : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullLibraryPanel hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
+viewHullLibraryPanel : List String -> List String -> List Bool -> Maybe String -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullLibraryPanel hullRefs hullHashs isHullsCustomized selectedHull newHullName hullReferencesMsgs =
     div
         [ class "panel hull-panel"
         ]
@@ -31,7 +31,7 @@ viewHullLibraryPanel hullRefs hullHashs isHullsCustomized selectedHull hullRefer
             , div [ class "hull-library-actions" ]
                 [ viewHullImporter hullReferencesMsgs.openLibraryMsg ]
             ]
-        , viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs
+        , viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull newHullName hullReferencesMsgs
         ]
 
 
@@ -56,8 +56,8 @@ viewHullImporter openLibraryMsg =
         ]
 
 
-viewHullReferences : List String -> List String -> List Bool -> Maybe String -> HullReferencesMsgs msg -> Html msg
-viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferencesMsgs =
+viewHullReferences : List String -> List String -> List Bool -> Maybe String -> Maybe String -> HullReferencesMsgs msg -> Html msg
+viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull newHullName hullReferencesMsgs =
     let
         isAHullSelected : Bool
         isAHullSelected =
@@ -65,7 +65,7 @@ viewHullReferences hullRefs hullHashs isHullsCustomized selectedHull hullReferen
     in
     ul [ class "hull-references" ] <|
         viewUnselectHullReference isAHullSelected hullReferencesMsgs.unselectHullMsg
-            :: viewNewHullReference
+            :: viewNewHullReference newHullName
             :: List.map3 (viewHullReference selectedHull hullReferencesMsgs) hullRefs hullHashs isHullsCustomized
 
 
@@ -171,8 +171,8 @@ viewUnselectHullReference isAHullSelected unselectHullMsg =
         ]
 
 
-viewNewHullReference : Html msg
-viewNewHullReference =
+viewNewHullReference : Maybe String -> Html msg
+viewNewHullReference newHullName =
     li [ class "hull-reference hull-reference-add" ]
         [ div
             []
@@ -182,7 +182,7 @@ viewNewHullReference =
                 [ class "hull-label-add"
                 , type_ "text"
                 , placeholder "New Hull"
-                , value ""
+                , value <| Maybe.withDefault "" newHullName
                 ]
                 []
             , p [ class "hull-path" ] [ text "Add a new hull" ]
