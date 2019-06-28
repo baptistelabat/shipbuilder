@@ -14,6 +14,7 @@ port module Main exposing
     , SaveFile
     , SpaceReservationView(..)
     , ToJsMsg(..)
+    , UiState
     , ViewMode(..)
     , addBlockTo
     , asHeightInSize
@@ -903,6 +904,7 @@ type alias UiState =
     , selectedSlice : StringValueInput.IntInput
     , showSelectedSlice : Bool
     , waitToPasteClipBoard : Bool
+    , newHullName : Maybe String
     }
 
 
@@ -1590,6 +1592,7 @@ initModel flag =
         , selectedSlice = StringValueInput.fromInt "slice no." 1
         , showSelectedSlice = False
         , waitToPasteClipBoard = False
+        , newHullName = Nothing
         }
     , tags = []
     , customProperties = []
@@ -1973,6 +1976,7 @@ type ToJsMsg
     | SelectHullReference String
     | SelectSlice String Int String
     | ToggleSlicesDetails Bool String
+    | CreateHull
     | RemoveHull String
     | SetSpacingException PartitionType Int String
     | ModifySlice (String -> HullSlices -> HullSlices) String String
@@ -2004,6 +2008,7 @@ type NoJsMsg
     | NoOp
     | RenameBlock Block String
     | RenameHull String String
+    | SaveNewHullName String
     | SaveAsNewHull String
     | CancelReadClipboard
     | SetBlockContextualMenu String
@@ -2263,6 +2268,18 @@ updateNoJs msg model =
                             model
             in
             ( updatedModel, Cmd.batch [ Task.attempt (\_ -> NoJs NoOp) (Browser.Dom.focus refToFocus) ] )
+
+        SaveNewHullName name ->
+            let
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState | newHullName = Just name }
+            in
+            ( { model | uiState = newUiState }, Cmd.none )
 
         SaveAsNewHull hullReference ->
             let
@@ -2750,6 +2767,41 @@ updateModelToJs msg model =
             in
             { model | uiState = newUiState }
 
+        CreateHull ->
+            let
+                maybeHullReference : Maybe String
+                maybeHullReference =
+                    model.uiState.newHullName
+
+                updatedSlices : String -> Dict ShipName HullSlices
+                updatedSlices hullReference =
+                    model.slices |> insertIfUnique hullReference HullSlices.emptyHullSlices model.slices
+
+                uiState : UiState
+                uiState =
+                    model.uiState
+
+                newUiState : UiState
+                newUiState =
+                    { uiState
+                        | newHullName = Nothing
+                    }
+            in
+            case maybeHullReference of
+                Nothing ->
+                    model
+
+                Just hullReference ->
+                    if Dict.member hullReference model.slices then
+                        model
+
+                    else
+                        { model
+                            | selectedHullReference = Just hullReference
+                            , slices = updatedSlices hullReference
+                            , uiState = newUiState
+                        }
+
         RemoveHull hullReference ->
             { model | selectedHullReference = Nothing, slices = Dict.remove hullReference model.slices }
 
@@ -3131,6 +3183,21 @@ msg2json model action =
 
         ToggleSlicesDetails isOpen hullReference ->
             loadHullJsData model hullReference
+
+        CreateHull ->
+            model.selectedHullReference
+                |> Maybe.andThen (\hullRef -> Dict.get hullRef model.slices)
+                |> Maybe.andThen
+                    (\hullSlices ->
+                        Just
+                            { tag = "load-hull"
+                            , data =
+                                applyCustomPropertiesToHullSlices hullSlices
+                                    |> EncodersDecoders.encoderWithSelectedSlice
+                                        model.uiState.selectedSlice.value
+                                        model.uiState.showSelectedSlice
+                            }
+                    )
 
         RemoveHull hullReference ->
             Just { tag = "unload-hull", data = Encode.null }
@@ -3642,6 +3709,8 @@ hullReferencesMsgs =
     , unselectHullMsg = ToJs <| UnselectHullReference
     , openLibraryMsg = ToJs <| OpenHullsLibrary
     , renameHullMsg = \s1 s2 -> NoJs <| RenameHull s1 s2
+    , saveNewHullNameMsg = NoJs << SaveNewHullName
+    , createHullMsg = ToJs <| CreateHull
     , removeHullMsg = ToJs << RemoveHull
     , saveAsNewMsg = NoJs << SaveAsNewHull
     , changeViewMsg = ToJs <| SwitchViewMode <| Hull <| HullDetails
@@ -3665,6 +3734,7 @@ viewHullLibraryPanel model =
         (List.map EncodersDecoders.getHashImageForSlices <| Dict.values model.slices)
         (List.map HullSlices.isHullCustomized <| Dict.values model.slices)
         model.selectedHullReference
+        model.uiState.newHullName
         hullReferencesMsgs
 
 
@@ -3831,7 +3901,7 @@ viewHullSlicesDetails uiState hullReference hullslices =
                 [ text "Slices details"
                 , FASolid.angleDown []
                 ]
-            , viewHullSliceSelector uiState hullReference <| List.length hullslices.slices
+            , viewHullSliceSelector uiState hullReference hullslices.slices
             , viewHullSliceList hullslices uiState.selectedSlice.value
             ]
 
@@ -3846,12 +3916,30 @@ viewHullSlicesDetails uiState hullReference hullslices =
             ]
 
 
-viewHullSliceSelector : UiState -> String -> Int -> Html Msg
-viewHullSliceSelector uiState hullReference maxSelector =
+viewHullSliceSelector : UiState -> String -> List HullSlice -> Html Msg
+viewHullSliceSelector uiState hullReference slices =
+    let
+        sliceSelector =
+            case List.isEmpty slices of
+                True ->
+                    div
+                        [ class "input-group slices-message" ]
+                        [ label [] [ text "slice no." ]
+                        , input
+                            [ type_ "text"
+                            , disabled True
+                            , value "No slices"
+                            ]
+                            []
+                        ]
+
+                False ->
+                    StringValueInput.viewIntInput uiState.selectedSlice <| ToJs << SelectSlice hullReference (List.length slices)
+    in
     div [] <|
         [ div
             [ class "slices-selector" ]
-            [ StringValueInput.viewIntInput uiState.selectedSlice <| ToJs << SelectSlice hullReference maxSelector
+            [ sliceSelector
             , viewHullSliceImportButton uiState
             , viewHiddenInputToPasteClipboard
             ]

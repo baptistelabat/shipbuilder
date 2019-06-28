@@ -622,37 +622,37 @@ let loadHull = function (json) {
 
         var hullSlices = json['hullSlices'];
 
-        const hullColor = new THREE.Color(3/255, 146/255, 255/255); // light blue
-        // the STL loader returns a bufferGeometry. We can't read its vertices and faces
-        // we need to convert it to an "actual" geometry to access these
-        const geometry = buildHullGeometry(hullSlices);
-        const volume = calcVolume(geometry);
+        if (hullSlices.slices.length > 0) {
+            // the STL loader returns a bufferGeometry. We can't read its vertices and faces
+            // we need to convert it to an "actual" geometry to access these
+            const geometry = buildHullGeometry(hullSlices);
+            const volume = calcVolume(geometry);
 
-        const shipVertices = geometry.vertices;
+            const blue = new THREE.Color(3/255, 146/255, 255/255);
+            const material = new THREE.MeshLambertMaterial({color: blue, side: THREE.DoubleSide});
 
-        const material = new THREE.MeshLambertMaterial({color: hullColor, side: THREE.DoubleSide});
+            // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
+            const shipVertices = geometry.vertices;
+            geometry.vertices = shipVertices.map(vertex => {
+                return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
+            });
 
-        // convert the coordinate system to Threejs' one, otherwise the hull would be rotated
-        geometry.vertices = shipVertices.map(vertex => {
-            return toThreeJsCoordinates(vertex.x, vertex.y, vertex.z, coordinatesTransform);
-        });
+            const hull = new THREE.Mesh(geometry, material);
 
-        const hull = new THREE.Mesh(geometry, material);
+            hull.baseColor = blue;
+            hull.sbType = "hull";
+            scene.add(hull);
 
-        hull.baseColor = hullColor;
-        hull.sbType = "hull";
-        scene.add(hull);
+            var zWaterLine = (hullSlices.depth + hullSlices.zmin) - hullSlices.draught;
+            displayWaterLine(zWaterLine);
 
-        var zWaterLine = (hullSlices.depth + hullSlices.zmin) - hullSlices.draught;
-        displayWaterLine(zWaterLine);
+            deleteHighlightedSlice();
 
-        deleteHighlightedSlice();
-
-        if (json.showSelectedSlice) {
-          var highlightedSlice = hullSlices.slices[json.selectedSlice-1];
-          displayHighlightedSlice (highlightedSlice, hullSlices.depth, hullSlices.breadth, hullSlices.length, hullSlices.xmin, hullSlices.zmin)
+            if (json.showSelectedSlice) {
+              var highlightedSlice = hullSlices.slices[json.selectedSlice-1];
+              displayHighlightedSlice (highlightedSlice, hullSlices.depth, hullSlices.breadth, hullSlices.length, hullSlices.xmin, hullSlices.zmin)
+            }
         }
-
 }
 
 let deleteHighlightedSlice = function () {

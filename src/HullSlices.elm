@@ -135,14 +135,14 @@ type alias SpaceParameters =
 
 emptyHullSlices : HullSlices
 emptyHullSlices =
-    { length = StringValueInput.emptyFloat 1
-    , breadth = StringValueInput.emptyFloat 1
-    , depth = StringValueInput.emptyFloat 1
+    { length = StringValueInput.fromNumber "m" "Length over all" 1 0
+    , breadth = StringValueInput.fromNumber "m" "Breadth" 1 0
+    , depth = StringValueInput.fromNumber "m" "Depth" 1 0
     , xmin = 0
     , zmin = 0
     , slices = []
     , originalSlicePositions = []
-    , draught = StringValueInput.emptyFloat 1
+    , draught = StringValueInput.fromNumber "m" "Draught" 1 0
     , custom =
         { length = Nothing
         , breadth = Nothing
