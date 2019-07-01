@@ -1,44 +1,28 @@
-.PHONY: all clean
+.PHONY: all clean docker-build
 
 all: MPOV.json ROPAX.json OSV.json OPV.json
 
-
-anthineas.json: ../buildHull/Stl/anthineas.stl mesh2json.py
-	cp ../buildHull/Stl/anthineas.stl .
+docker-build:
 	docker build -t stl2json .
-	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f anthineas.stl -o anthineas.json -v --nx 10 --ny 10 -d y- --offset 0.1
-	rm anthineas.stl
 
-OPV.json: ../buildHull/Stl/OPV2.stl mesh2json.py
-	cp ../buildHull/Stl/OPV2.stl .
-	docker build -t stl2json .
-	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f OPV2.stl -o OPV.json -v --nx 10 --ny 10 -d y- --offset 0.1
-	rm OPV2.stl
+anthineas.json: docker-build Stl/anthineas.stl mesh2json.py
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f Stl/anthineas.stl -o anthineas.json -v --nx 10 --ny 10 -d y- --offset 0.1
 
-KCS.json: ../buildHull/Stl/KCS.stl mesh2json.py
-	cp ../buildHull/Stl/KCS.stl .
-	docker build -t stl2json .
-	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f KCS.stl -o KCS.json -v --nx 10 --ny 10 -d y- --offset 0.1
-	rm KCS.stl
+OPV.json: docker-build Stl/OPV2.stl mesh2json.py
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f Stl/OPV2.stl -o OPV.json -v --nx 10 --ny 10 -d y- --offset 0.1
 
-DTMB_5415.json: ../buildHull/Stl/DTMB_5415.stl mesh2json.py
-	cp ../buildHull/Stl/DTMB_5415.stl .
-	docker build -t stl2json .
-	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f DTMB_5415.stl -o DTMB_5415.json -v --nx 10 --ny 10 -d y- --offset 0.1
-	rm DTMB_5415.stl
+KCS.json: docker-build Stl/KCS.stl mesh2json.py
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f Stl/KCS.stl -o KCS.json -v --nx 10 --ny 10 -d y- --offset 0.1
 
-# ROPAX_retouche1.stl is ROPAX_retouche1.stl with z down
-ROPAX.json: ../buildHull/Stl/ROPAX_retouche1.stl mesh2json.py
-	cp ../buildHull/Stl/ROPAX_retouche1.stl .
-	docker build -t stl2json .
-	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f ROPAX_retouche1.stl -o ROPAX.json -v --nx 10 --ny 10 -d y- --offset 0.1
-	rm ROPAX_retouche1.stl
+DTMB_5415.json: docker-build Stl/DTMB_5415.stl mesh2json.py
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f Stl/DTMB_5415.stl -o DTMB_5415.json -v --nx 10 --ny 10 -d y- --offset 0.1
 
-OSV.json: ../buildHull/Stl/OSV1.stl mesh2json.py
-	cp ../buildHull/Stl/OSV1.stl .
-	docker build -t stl2json .
-	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f OSV1.stl -o OSV.json -v --nx 10 --ny 10 -d y- --offset 0.1
-	rm OSV1.stl
+# ROPAX_retouche1.stl is ROPAX.stl with z down
+ROPAX.json: docker-build Stl/ROPAX_retouche1.stl mesh2json.py
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f Stl/ROPAX_retouche1.stl -o ROPAX.json -v --nx 10 --ny 10 -d y- --offset 0.1
+
+OSV.json: docker-build Stl/OSV1.stl mesh2json.py
+	docker run --rm -t -v $(shell pwd):/app -w /app -u $(shell id -u):$(shell id -g) stl2json -f Stl/OSV1.stl -o OSV.json -v --nx 10 --ny 10 -d y- --offset 0.1
 
 clean:
 	rm *.json
