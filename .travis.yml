@@ -37,13 +37,20 @@ before_deploy:
 
 # https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 deploy:
-  provider: pages
+- provider: pages
   skip-cleanup: true
   local-dir: shipBuilder
   github-token: $GITHUB_TOKEN
   keep-history: true
   on:
     branch: master
+- provider: releases
+  api_key:
+    secure: "OYxY0ynjjL+fOlZ21BQ+i+ujlVJo+VRo7pWm6N00Dxpzv8WG4617eg4DXaWcFzcTG8WTG7eBJhyZahwz2zGIV54T/kS+fp7QtyQ9BsoQfCNEZf+ko5q7PfabFFtUQ5UEFCaXYf/48IHlFdErgU1E6WBhH07FX3sT4e7V/93Lp4+JmK5nSdyYgEwniCZggkgt5lGVseq+PVst/vALTFlLZp6u1nDcYKdbJvFcwuPJVBRz3JpHAJz3+BkdEWqwMp2nnyafRdQqQ8J9vMbWK4+veF4BdueI0ag3X/gTeqUVHzX8tBA/OdPipZcWVYkDQLIPgxhBZ7xsx/vc0VcZ+ME+eQ4jic2qW0d4Lw6zwsT+Prn/eZUzrpAe4R//7VItuYTvILUE/wPFtsvPHfVc+hTG7kStonGf4C/umQH86Oy+BDAKWcMq1Utku7HJ27NMPq5FD0DKTFylPfN98mDBas/m367vBN8U0gzANu658I6LWCnnjZ9+ik20r7X8kawU0spFvGWjZNl1IDdZth7YS+B+k1fgJAbuwiCAFpYSKty74FOUTJur+8P9Al5CbU4nwmGCrYS3wKlxgW9URRlbDZzMtCi8x76e8f7/PIzJl5ghg043FD8QoqbrtyYnP3UtKmjsbWMVZUSkBp2GvrsZ6laC6vryOhFIX850MPNYt2AhDlw="
+  skip_cleanup: true
+  file_glob: true
+  file:
+  - shipBuilder/*
 
 notifications:
 email: true
