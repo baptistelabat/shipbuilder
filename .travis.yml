@@ -1,0 +1,50 @@
+sudo: required
+
+env:
+  global:
+    secure: "GoFBFmxto2GULv/RWpnE7Sd7Yc66WmoX+mW76zuz1CvJ9aWsZHSRmxI9pytZxb6/sNmrlsmy30kL9hTsri44T5aacqp8F4jGZSROjdZCjiwtlOflMssDh6git3qnaMDxpvqyCDNMtVUB5YtyG4n2MVzyzxZaZ3xwTtoP1XjTtu6O6ZEgb/iGMH0aSfBf7X0R0tfxmbb0Yg6Un6EOpqg3IcXVqJnSJT//l0kzJ3IdzAEXStbmsxK4ZAq2RerIWqb4KLjB6BnDXIcFPi4dR/73P0Eauw3i2DeEgDvpOW19ZDOwBNECk2DlUrrZ0CR8hQYgzCYTG+3y18+8qRtANPRrM1ffhHuNnmiKQ9Enw3mcYzu8uFPqwRmtsufnaQnsXGyNYeCs8RiPOFjJEldTZgzAbw5TZR9Xxp8ZIQ2hxcoFXrws/MtIRbnQ3U4GzHNHwHJzLat2v9YwylViXFzNaoWR/xw2aIvBryAw8vjNBNC1pZkjTjFiMtnNvUx0m2PA1rPCWY39+xtCXMqO+Yk/ipQTOrmd9r7kSqnF9WSVErO9XaFDT8siTsAb7Ms0K6qVnPqA54VsYs+O42kg0Rmw/x+4Wcqxq4KaIbREr4VZNnjCejJK5DiBtQXcZK7C88MnCFmFJcg9KDusqQKjMGwY/P3qgOpXfiSqF9SgJzy37hCQyCY="
+
+services:
+- docker
+
+before_install:
+- echo "Before install"
+
+before_script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+
+script:
+    - make
+    - cd babel && make && cd ..
+    - cd buildHull && make && cd ..
+    - cd rebuildHull && make && cd ..
+    - make babel
+    - make selenium
+
+after_success:
+- |
+    echo "SUCCESS!"
+    echo "TRAVIS_BRANCH  $TRAVIS_BRANCH"
+    echo "TRAVIS_TAG     $TRAVIS_TAG"
+
+# travis setup releases
+# https://docs.travis-ci.com/user/deployment
+# https://docs.travis-ci.com/user/deployment#conditional-releases-with-on
+
+before_deploy:
+- ls -altr shipBuilder/ || true;
+
+# https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
+deploy:
+  provider: pages
+  skip-cleanup: true
+  local-dir: shipBuilder
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  on:
+    branch: master
+
+notifications:
+email: true
+
