@@ -72,6 +72,7 @@ import HullSlicesMetrics
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
 import Json.Encode as Encode
+import Logos
 import SIRColorPicker
 import StringValueInput
 import Task
@@ -3449,13 +3450,13 @@ viewHeader model =
             [ class "header-left" ]
             -- groups img and title together for flexbox
             [ img
-                [ src "assets/NAVAL_GROUP_Logotype_blanc_sur_bleu.png" ]
+                [ Logos.navalGroup ]
                 []
             , img
-                [ src "assets/SIREHNA_R.png" ]
+                [ Logos.sirehna ]
                 []
             , img
-                [ src "assets/HOLISHIP_LOGO_Transparent_background.png" ]
+                [ Logos.holiship ]
                 []
             , h1
                 []

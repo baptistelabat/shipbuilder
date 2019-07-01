@@ -13,6 +13,7 @@ script:
 - cd buildHull && make && cd ..
 - cd rebuildHull && make && cd ..
 - make babel
+- make inline
 - make selenium
 after_success:
 - |
@@ -32,9 +33,8 @@ deploy:
 - provider: releases
   api_key:
     secure: a45wU3j4m0vHfF3x2Pq2S66y2upQQNB+eBZT2uvfic+yt3YcdMT3wN9WuA94JSJ684SJwJqg9023PimW117hI3lL8DVvpVIthU8v1n/594GpJBjWDoFoYE9xfn4rLNRMMlu2iv4uXak6fHJBOiFFlJVJY2jcJfokLU2tzwjfpzxVU3ULLGEr5KVDeo6azFsjE9KucaMbjjTmdmUo3WOvS89NEGSRkFCFq0VWYGSfJndx8DRN7kNanOAilwssrFpjOJDQQgHLTvWdZaiHoYcLY6d6phfQ9I80VZTh0wwC59X4Y06MrFW5+xb9qkc1bfKl56wY8qQJg+PeQUHdaOf98pQPtp9HJLJKEKBSA5JJ1jyQaRAoKw7m4byPsWXFBwqwZjbt5079P4sIlsKyrbwz3xnvA+bIsQ9tbjOZc7q3yfTlyWor2j1w7M3gnI8n85XlK2FRbVzHHVGKBVn5uoQHmU1eIfdnsYS+z/4Zdayv0A6y1tW8C6r2aZuoPGrR53PWcL8PzMOGffVG2BRFhW574EnTIVMmDqFsy/4+LoW6p9tcdT43km3a8WC77IlMbztb2GNAzMJdOoStUwLyUyZDleYM2AnZTvf61/zIB3ocAyB8N/RXH80jpn8qKPeX+px++o1YtP7eSZKQdX53LigP47cXq5X1DijnS7dWI9EgU9I=
-  file: shipBuilder/*
+  file: shipBuilder/index.html
   skip_cleanup: true
-  file_glob: true
   on:
     repo: sirehna/shipbuilder
     branch: master

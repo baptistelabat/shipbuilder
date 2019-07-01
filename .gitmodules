@@ -1,0 +1,3 @@
+[submodule "inliner"]
+	path = inliner
+	url = ../../sirehna/inliner
