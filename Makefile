@@ -26,7 +26,7 @@ shipBuilder/index-not-optimized.html: shipBuilder/index.template.json.html
 	@sed 's/GIT_SHA/$(VERSION)/g' shipBuilder/index.template.json.html > shipBuilder/index-not-optimized.html
 	@echo "Added GIT SHA to index-not-optimized.html"
 
-shipBuilder/index.template.json.html: shipBuilder/index.template.html buildHull/Stl/ROPAX_retouche1.stl  buildHull/Stl/OSV1.stl buildHull/Stl/OPV.stl
+shipBuilder/index.template.json.html: shipBuilder/index.template.html buildHull/Stl/ROPAX_retouche1.stl  buildHull/Stl/OSV1.stl buildHull/Stl/OPV2.stl
 	cd buildHull && make
 	cp buildHull/*.json shipBuilder
 	cd shipBuilder && docker run -t --rm -u $(shell id -u):$(shell id -g) -v $(shell pwd)/shipBuilder:/work -w /work python:3.6 python add_json_to_html.py
