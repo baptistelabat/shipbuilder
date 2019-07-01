@@ -1,41 +1,26 @@
 sudo: required
-
 env:
   global:
-    secure: "eBqiHShY2QDAbd5dTCyzE2JYsIuDLGAwM6I/EckdtfcKaEDV/UQ86pIS+o/u0y3t/SWDZAzSgebBUURvQUYSweovaCP5WbUH9vRJZ05c3ow783m83QmS9pup/2GZygGiIHMXTEjA80h0q3vAEjSxQwmfX0nrInCuccaZEas+DYfWBLyUIZ5Ukpf94PxDh6qfiPoRGJGix1Rnn8w6Gbb65L4sRTzYes+zNLFq+K0jXheCXLk7xJS69T9oW26tHn2sDZjyannpsQFuskEvpuSGMHrqQJU8j8pikpTeT7sAEbUKlm0qmJEevXkaHxAXqAh30XpNBtsf9yVUd/h1LR51pv2YOUgDtj3wU92wX/sSSHoZ0OBQsKDcXG3Ui6SseL1Kj91Uv2QTsKeVZWpIhxCSFL9DhB++bFsgZ1d0SIQCa4UOlLY1f+1k77hn+YLWYZuN7VjIAoUwtREP8WrZZWZgyw9zcyl6SAfhAY3kVaZY+78KESh4BLZFr3P0qVa6v9pJWfSIn/gEf8SudebWT3Vh1GvvnYvvn+5GxathTTKvtEw6kWL66YsdKaIrD5Ac8VNjk336B5y6QdZMEXHup9z2zsSAL5xHzCZVTkKP+xBfvz84T9OqfX/rI/YyLYOr9ND8hJyG/z2//sdPW2rm6sdkG40g1P06NXjoWeLBzlKVP6I="
-
+    secure: eBqiHShY2QDAbd5dTCyzE2JYsIuDLGAwM6I/EckdtfcKaEDV/UQ86pIS+o/u0y3t/SWDZAzSgebBUURvQUYSweovaCP5WbUH9vRJZ05c3ow783m83QmS9pup/2GZygGiIHMXTEjA80h0q3vAEjSxQwmfX0nrInCuccaZEas+DYfWBLyUIZ5Ukpf94PxDh6qfiPoRGJGix1Rnn8w6Gbb65L4sRTzYes+zNLFq+K0jXheCXLk7xJS69T9oW26tHn2sDZjyannpsQFuskEvpuSGMHrqQJU8j8pikpTeT7sAEbUKlm0qmJEevXkaHxAXqAh30XpNBtsf9yVUd/h1LR51pv2YOUgDtj3wU92wX/sSSHoZ0OBQsKDcXG3Ui6SseL1Kj91Uv2QTsKeVZWpIhxCSFL9DhB++bFsgZ1d0SIQCa4UOlLY1f+1k77hn+YLWYZuN7VjIAoUwtREP8WrZZWZgyw9zcyl6SAfhAY3kVaZY+78KESh4BLZFr3P0qVa6v9pJWfSIn/gEf8SudebWT3Vh1GvvnYvvn+5GxathTTKvtEw6kWL66YsdKaIrD5Ac8VNjk336B5y6QdZMEXHup9z2zsSAL5xHzCZVTkKP+xBfvz84T9OqfX/rI/YyLYOr9ND8hJyG/z2//sdPW2rm6sdkG40g1P06NXjoWeLBzlKVP6I=
 services:
 - docker
-
-before_install:
-- echo "Before install"
-
 before_script:
-    - git submodule sync --recursive
-    - git submodule update --init --recursive
-
+- git submodule sync --recursive
+- git submodule update --init --recursive
 script:
-    - make
-    - cd babel && make && cd ..
-    - cd buildHull && make && cd ..
-    - cd rebuildHull && make && cd ..
-    - make babel
-    - make selenium
-
+- make
+- cd babel && make && cd ..
+- cd buildHull && make && cd ..
+- cd rebuildHull && make && cd ..
+- make babel
+- make selenium
 after_success:
 - |
-    echo "SUCCESS!"
-    echo "TRAVIS_BRANCH  $TRAVIS_BRANCH"
-    echo "TRAVIS_TAG     $TRAVIS_TAG"
-
-# travis setup releases
-# https://docs.travis-ci.com/user/deployment
-# https://docs.travis-ci.com/user/deployment#conditional-releases-with-on
-
-before_deploy:
-- ls -altr shipBuilder/ || true;
-
-# https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
+  echo "SUCCESS!"
+  echo "TRAVIS_BRANCH  $TRAVIS_BRANCH"
+  echo "TRAVIS_TAG     $TRAVIS_TAG"
+notifications: 
+email: true
 deploy:
 - provider: pages
   skip-cleanup: true
@@ -46,12 +31,10 @@ deploy:
     branch: master
 - provider: releases
   api_key:
-    secure: "OYxY0ynjjL+fOlZ21BQ+i+ujlVJo+VRo7pWm6N00Dxpzv8WG4617eg4DXaWcFzcTG8WTG7eBJhyZahwz2zGIV54T/kS+fp7QtyQ9BsoQfCNEZf+ko5q7PfabFFtUQ5UEFCaXYf/48IHlFdErgU1E6WBhH07FX3sT4e7V/93Lp4+JmK5nSdyYgEwniCZggkgt5lGVseq+PVst/vALTFlLZp6u1nDcYKdbJvFcwuPJVBRz3JpHAJz3+BkdEWqwMp2nnyafRdQqQ8J9vMbWK4+veF4BdueI0ag3X/gTeqUVHzX8tBA/OdPipZcWVYkDQLIPgxhBZ7xsx/vc0VcZ+ME+eQ4jic2qW0d4Lw6zwsT+Prn/eZUzrpAe4R//7VItuYTvILUE/wPFtsvPHfVc+hTG7kStonGf4C/umQH86Oy+BDAKWcMq1Utku7HJ27NMPq5FD0DKTFylPfN98mDBas/m367vBN8U0gzANu658I6LWCnnjZ9+ik20r7X8kawU0spFvGWjZNl1IDdZth7YS+B+k1fgJAbuwiCAFpYSKty74FOUTJur+8P9Al5CbU4nwmGCrYS3wKlxgW9URRlbDZzMtCi8x76e8f7/PIzJl5ghg043FD8QoqbrtyYnP3UtKmjsbWMVZUSkBp2GvrsZ6laC6vryOhFIX850MPNYt2AhDlw="
+    secure: a45wU3j4m0vHfF3x2Pq2S66y2upQQNB+eBZT2uvfic+yt3YcdMT3wN9WuA94JSJ684SJwJqg9023PimW117hI3lL8DVvpVIthU8v1n/594GpJBjWDoFoYE9xfn4rLNRMMlu2iv4uXak6fHJBOiFFlJVJY2jcJfokLU2tzwjfpzxVU3ULLGEr5KVDeo6azFsjE9KucaMbjjTmdmUo3WOvS89NEGSRkFCFq0VWYGSfJndx8DRN7kNanOAilwssrFpjOJDQQgHLTvWdZaiHoYcLY6d6phfQ9I80VZTh0wwC59X4Y06MrFW5+xb9qkc1bfKl56wY8qQJg+PeQUHdaOf98pQPtp9HJLJKEKBSA5JJ1jyQaRAoKw7m4byPsWXFBwqwZjbt5079P4sIlsKyrbwz3xnvA+bIsQ9tbjOZc7q3yfTlyWor2j1w7M3gnI8n85XlK2FRbVzHHVGKBVn5uoQHmU1eIfdnsYS+z/4Zdayv0A6y1tW8C6r2aZuoPGrR53PWcL8PzMOGffVG2BRFhW574EnTIVMmDqFsy/4+LoW6p9tcdT43km3a8WC77IlMbztb2GNAzMJdOoStUwLyUyZDleYM2AnZTvf61/zIB3ocAyB8N/RXH80jpn8qKPeX+px++o1YtP7eSZKQdX53LigP47cXq5X1DijnS7dWI9EgU9I=
+  file: shipBuilder/*
   skip_cleanup: true
   file_glob: true
-  file:
-  - shipBuilder/*
-
-notifications:
-email: true
-
+  on:
+    repo: sirehna/shipbuilder
+    branch: master
