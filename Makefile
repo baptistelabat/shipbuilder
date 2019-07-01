@@ -1,4 +1,5 @@
 .PHONY: all build build-optimized clean artifacts test selenium babel elm-analyse
+INLINER_VERSION=1.13.1
 
 VERSION := $(if $(shell git tag -l --points-at HEAD),$(shell git tag -l --points-at HEAD),$(shell git rev-parse --short=8 HEAD))
 
@@ -67,6 +68,11 @@ babel:
 selenium: shipBuilder/index.html shipBuilder/js/elm.min.js
 	cd selenium && make
 	docker run -t -v $(shell pwd)/shipBuilder:/work -w /work python-selenium-firefox:firefox38
+
+inline: shipBuilder/js/elm.min.js
+	cd inliner && make $(INLINER_VERSION) && cd ..
+	docker run -t --rm -v $(shell pwd):/work -w /work -u $(shell id -u):$(shell id -g) inliner:$(INLINER_VERSION) -m shipBuilder/index.html > shipBuilder/index.inlined.html
+	mv shipBuilder/index.inlined.html shipBuilder/index.html
 
 FILENAME := ../shipBuilderForTest_$(shell date +_%Y%m%d_%Hh%M).tar.gz
 BINARIES = shipBuilder/js/* shipBuilder/css/*.css shipBuilder/assets/* shipBuilder/index-not-optimized.html shipBuilder/*.json
