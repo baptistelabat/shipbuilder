@@ -1,5 +1,6 @@
 # ShipBuilder
 
+[![Build Status](https://travis-ci.org/sirehna/shipbuilder.svg?branch=master)](https://travis-ci.org/sirehna/shipbuilder)
 [![License](https://img.shields.io/badge/License-EPL%202.0-blue.svg)](https://opensource.org/licenses/EPL-2.0)
 
 (c) 2018-2019, [SIREHNA](http://www.sirehna.com/) & [Naval Group](https://www.naval-group.com/en/)
