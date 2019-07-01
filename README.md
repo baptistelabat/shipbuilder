@@ -1,5 +1,9 @@
 # ShipBuilder
 
+[![License](https://img.shields.io/badge/License-EPL%202.0-blue.svg)](https://opensource.org/licenses/EPL-2.0)
+
+(c) 2018-2019, [SIREHNA](http://www.sirehna.com/) & [Naval Group](https://www.naval-group.com/en/)
+
 ## Description
 
 _ShipBuilder_ est un outil léger qui tourne exclusivement sur un navigateur web.
