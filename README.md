@@ -12,8 +12,7 @@ _ShipBuilder_ est un outil léger qui tourne exclusivement sur un navigateur web
 ## Utilisation
 
 La dernière version de la page est disponible ici : [https://sirehna.github.io/shipbuilder/](https://sirehna.github.io/shipbuilder/).
-Pour une version offline, télécharger les artefacts ici : [https://gitlab.sirehna.com/projets/ShipBuilder2/-/jobs/artifacts/master/download?job=babel](https://gitlab.sirehna.com/projets/ShipBuilder2/-/jobs/artifacts/master/download?job=babel).
-Ensuite, ouvrir le fichier `shipBuilder/index.html` dans le navigateur (double-cliquer dessus dans l'explorateur de fichier, par exemple).
+Pour une version offline, télécharger les artefacts ici : [https://github.com/sirehna/shipbuilder/releases/latest/download/index.html](https://github.com/sirehna/shipbuilder/releases/latest/download/index.html).
 
 ## Note sur la librairie TransformControls.js
 
